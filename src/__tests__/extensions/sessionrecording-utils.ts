@@ -7,11 +7,12 @@ import {
     FULL_SNAPSHOT_EVENT_TYPE,
 } from '../../extensions/sessionrecording-utils'
 import { largeString, threeMBAudioURI, threeMBImageURI } from './test_data/sessionrecording-utils-test-data'
+import { eventWithTime } from '@rrweb/types'
 
 describe(`SessionRecording utility functions`, () => {
     describe(`filterLargeDataURLs`, () => {
         it(`should not touch an object under 5mb`, () => {
-            var data = {
+            const data: eventWithTime = {
                 attributes: [
                     {
                         node: {
@@ -21,7 +22,7 @@ describe(`SessionRecording utility functions`, () => {
                         },
                     },
                 ],
-            }
+            } as unknown as eventWithTime
             expect(ensureMaxMessageSize(data)).toEqual({
                 event: data,
                 size: 3548406,
@@ -29,7 +30,7 @@ describe(`SessionRecording utility functions`, () => {
         })
 
         it(`should replace image data urls if the object is over 5mb`, () => {
-            var data = {
+            const data = {
                 attributes: [
                     {
                         node: {
@@ -50,7 +51,7 @@ describe(`SessionRecording utility functions`, () => {
                         },
                     },
                 ],
-            }
+            } as unknown as eventWithTime
 
             expect(ensureMaxMessageSize(data)).toEqual({
                 event: {
@@ -80,7 +81,7 @@ describe(`SessionRecording utility functions`, () => {
         })
 
         it(`should remove non-image data urls if the object is over 5mb`, () => {
-            var data = {
+            const data = {
                 attributes: [
                     {
                         node: {
@@ -97,7 +98,7 @@ describe(`SessionRecording utility functions`, () => {
                         },
                     },
                 ],
-            }
+            } as unknown as eventWithTime
 
             expect(ensureMaxMessageSize(data)).toEqual({
                 event: {
@@ -125,20 +126,20 @@ describe(`SessionRecording utility functions`, () => {
 
     describe(`truncateLargeConsoleLogs`, () => {
         it(`should handle null data objects`, () => {
-            expect(truncateLargeConsoleLogs(null)).toBe(null)
+            expect(truncateLargeConsoleLogs(null as unknown as eventWithTime)).toBe(null)
         })
 
         it(`should not touch non plugin objects`, () => {
             expect(
                 truncateLargeConsoleLogs({
-                    type: FULL_SNAPSHOT_EVENT_TYPE, // not plugin
+                    type: FULL_SNAPSHOT_EVENT_TYPE,
                     data: {
                         plugin: CONSOLE_LOG_PLUGIN_NAME,
                         payload: {
                             payload: largeString,
                         },
                     },
-                })
+                } as unknown as eventWithTime)
             ).toEqual({
                 type: FULL_SNAPSHOT_EVENT_TYPE,
                 data: {
@@ -160,7 +161,7 @@ describe(`SessionRecording utility functions`, () => {
                             payload: largeString,
                         },
                     },
-                })
+                } as eventWithTime)
             ).toEqual({
                 type: PLUGIN_EVENT_TYPE,
                 data: {
@@ -182,7 +183,7 @@ describe(`SessionRecording utility functions`, () => {
                             payload: ['a', largeString],
                         },
                     },
-                })
+                } as eventWithTime)
             ).toEqual({
                 type: PLUGIN_EVENT_TYPE,
                 data: {
@@ -204,7 +205,7 @@ describe(`SessionRecording utility functions`, () => {
                             payload: Array(100).fill('a'),
                         },
                     },
-                })
+                } as eventWithTime)
             ).toEqual({
                 type: PLUGIN_EVENT_TYPE,
                 data: {
@@ -226,7 +227,7 @@ describe(`SessionRecording utility functions`, () => {
                             payload: [undefined, null],
                         },
                     },
-                })
+                } as eventWithTime)
             ).toEqual({
                 type: PLUGIN_EVENT_TYPE,
                 data: {
