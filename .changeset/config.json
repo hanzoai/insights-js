@@ -1,0 +1,12 @@
+{
+    "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
+    "changelog": ["@posthog-tooling/changelog", { "repo": "PostHog/posthog-js" }],
+    "commit": false,
+    "fixed": [["posthog-js", "@posthog/types"]],
+    "linked": [],
+    "access": "restricted",
+    "baseBranch": "main",
+    "updateInternalDependencies": "patch",
+    "bumpVersionsWithWorkspaceProtocolOnly": true,
+    "ignore": []
+}

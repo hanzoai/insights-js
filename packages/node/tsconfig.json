@@ -1,0 +1,17 @@
+{
+  "extends": "@posthog-tooling/tsconfig-base",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true,
+    "lib": ["ES2023"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["./src/**/*", "rslib.config.ts"]
+}

@@ -1,0 +1,33 @@
+version: 2
+updates:
+    - package-ecosystem: 'npm'
+      commit-message:
+          prefix: 'chore(llma)'
+      labels:
+          - dependencies
+          - release
+      directory: '/'
+      schedule:
+          interval: 'daily'
+          time: '10:00'
+          timezone: 'UTC'
+      groups:
+          ai-providers:
+              patterns:
+                  - '@anthropic-ai/sdk'
+                  - '@google/genai'
+                  - 'openai'
+                  - '@ai-sdk/provider'
+                  - '@langchain/core'
+                  - 'langchain'
+      allow:
+          - dependency-name: '@anthropic-ai/sdk'
+          - dependency-name: '@google/genai'
+          - dependency-name: 'openai'
+          - dependency-name: '@ai-sdk/provider'
+          - dependency-name: '@langchain/core'
+          - dependency-name: 'langchain'
+      ignore:
+          - dependency-name: '*'
+            update-types: ['version-update:semver-major']
+      open-pull-requests-limit: 1
