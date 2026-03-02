@@ -1,35 +1,26 @@
-<p align="center">
-  <img alt="posthoglogo" src="https://user-images.githubusercontent.com/65415371/205059737-c8a4f836-4889-4654-902e-f302b187b6a0.png">
-</p>
-<p align="center">
-  <img alt="GitHub contributors" src="https://img.shields.io/github/contributors/posthog/posthog"/>
-  <a href='http://makeapullrequest.com'><img alt='PRs Welcome' src='https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields'/></a>
-  <img alt="GitHub commit activity" src="https://img.shields.io/github/commit-activity/m/posthog/posthog-js"/>
-  <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/posthog/posthog-js"/>
-</p>
+# Hanzo Insights JS
 
-# Posthog JS
-
-This is a monorepo containing multiple packages to integrate with Posthog using JavaScript!
+This is a monorepo containing multiple packages to integrate with Hanzo Insights using JavaScript.
 
 ## Documentation
 
-- [Posthog JS Documentation](https://posthog.com/docs/libraries/js)
+- [Hanzo Insights Documentation](https://hanzo.ai/docs/insights)
 
 ## Packages
 
-- [posthog-js](./packages/browser/README.md)
-- [posthog-js-lite](./packages/web/README.md)
-- [posthog-node](./packages/node/README.md)
-- [posthog-react-native](./packages/react-native/README.md)
-- [@posthog/react](./packages/react/README.md)
-- [@posthog/ai](./packages/ai/README.md)
-- [@posthog/convex](./packages/convex/README.md)
-- [@posthog/nextjs-config](./packages/nextjs-config/README.md)
-- [@posthog/nuxt](./packages/nuxt/README.md)
-- [@posthog/rollup-plugin](./packages/rollup-plugin/README.md)
-- [@posthog/types](./packages/types/README.md)
-- [@posthog/webpack-plugin](./packages/webpack-plugin/README.md)
+- [@hanzo/insights](./packages/browser/README.md)
+- [@hanzo/insights-lite](./packages/web/README.md)
+- [@hanzo/insights-node](./packages/node/README.md)
+- [@hanzo/insights-react-native](./packages/react-native/README.md)
+- [@hanzo/insights-react](./packages/react/README.md)
+- [@hanzo/insights-ai](./packages/ai/README.md)
+- [@hanzo/insights-convex](./packages/convex/README.md)
+- [@hanzo/insights-nextjs](./packages/nextjs-config/README.md)
+- [@hanzo/insights-nuxt](./packages/nuxt/README.md)
+- [@hanzo/insights-rollup-plugin](./packages/rollup-plugin/README.md)
+- [@hanzo/insights-types](./packages/types/README.md)
+- [@hanzo/insights-core](./packages/core/README.md)
+- [@hanzo/insights-webpack-plugin](./packages/webpack-plugin/README.md)
 
 ## Contributing
 
