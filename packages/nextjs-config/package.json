@@ -52,8 +52,8 @@
     "nextjs"
   ],
   "devDependencies": {
-    "@posthog-tooling/rollup-utils": "workspace:*",
-    "@posthog-tooling/tsconfig-base": "workspace:*",
+    "@hanzo/insights-tooling-rollup-utils": "workspace:*",
+    "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "@types/node": "^22.15.23",
     "@types/semver": "^7.7.0",

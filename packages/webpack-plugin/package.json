@@ -27,7 +27,7 @@
     "webpack": "^5"
   },
   "devDependencies": {
-    "@posthog-tooling/tsconfig-base": "workspace:*",
+    "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "jest": "catalog:",
     "webpack": "^5"
