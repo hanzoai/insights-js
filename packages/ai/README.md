@@ -1,20 +1,20 @@
-# PostHog Node AI
+# Hanzo Insights AI
 
-TypeScript SDK for LLM observability with PostHog.
+TypeScript SDK for LLM observability with Hanzo Insights.
 
 [SEE FULL DOCS](https://posthog.com/docs/ai-engineering/observability)
 
 ## Installation
 
 ```bash
-npm install @posthog/ai
+npm install @hanzo/insights-ai
 ```
 
 ## Direct Provider Usage
 
 ```typescript
-import { OpenAI } from '@posthog/ai'
-import { PostHog } from 'posthog-node'
+import { OpenAI } from '@hanzo/insights-ai'
+import { PostHog } from '@hanzo/insights-node'
 
 const phClient = new PostHog('<YOUR_PROJECT_API_KEY>', { host: 'https://us.i.posthog.com' })
 
@@ -45,10 +45,10 @@ Use this when working with Vercel AI SDK telemetry. `@posthog/ai` exposes an OTE
 
 ```typescript
 import { NodeSDK } from '@opentelemetry/sdk-node'
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
-import { PostHogSpanProcessor } from '@posthog/ai/otel'
+import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
 
 const phClient = new PostHog('<YOUR_PROJECT_API_KEY>', { host: 'https://us.i.posthog.com' })
 

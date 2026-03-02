@@ -2,7 +2,7 @@
     "private": true,
     "packageManager": "pnpm@10.23.0",
     "scripts": {
-        "build-rollup": "pnpm --filter=posthog-js build-rollup",
+        "build-rollup": "pnpm --filter=@hanzo/insights build-rollup",
         "clean": "turbo clean",
         "clean:dep": "rm -rf node_modules && pnpm -r exec rm -rf node_modules",
         "lint": "turbo lint",
@@ -18,7 +18,7 @@
         "package": "export PACKAGE_DEST=$(pwd)/target && turbo package",
         "package:watch": "export PACKAGE_DEST=$(pwd)/target && turbo watch package",
         "bump": "pnpm changeset version",
-        "generate-references": "pnpm turbo --filter=posthog-js --filter=posthog-node --filter=posthog-react-native generate-references"
+        "generate-references": "pnpm turbo --filter=@hanzo/insights --filter=@hanzo/insights-node --filter=@hanzo/insights-react-native generate-references"
     },
     "pnpm": {
         "patchedDependencies": {

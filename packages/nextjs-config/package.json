@@ -1,7 +1,7 @@
 {
-  "name": "@posthog/nextjs-config",
+  "name": "@hanzo/insights-nextjs",
   "version": "1.8.19",
-  "description": "NextJS configuration helper for Posthog 🦔",
+  "description": "NextJS configuration helper for Posthog \ud83e\udd94",
   "repository": {
     "type": "git",
     "url": "https://github.com/PostHog/posthog-js.git",
@@ -44,7 +44,7 @@
   "dependencies": {
     "@posthog/cli": "catalog:",
     "semver": "^7.7.2",
-    "@posthog/core": "workspace:*",
+    "@hanzo/insights-core": "workspace:*",
     "@posthog/webpack-plugin": "workspace:*"
   },
   "keywords": [
