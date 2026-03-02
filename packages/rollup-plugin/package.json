@@ -31,7 +31,7 @@
     "rollup": ">= 4.0.0"
   },
   "devDependencies": {
-    "@posthog-tooling/tsconfig-base": "workspace:*",
+    "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "@types/jest": "catalog:",
     "jest": "catalog:",

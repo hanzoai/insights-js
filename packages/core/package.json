@@ -57,7 +57,7 @@
     }
   },
   "devDependencies": {
-    "@posthog-tooling/tsconfig-base": "workspace:*",
+    "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "@types/cross-spawn": "^6.0.6",
     "@types/jest": "catalog:",
