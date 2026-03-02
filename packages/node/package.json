@@ -1,5 +1,5 @@
 {
-  "name": "posthog-node",
+  "name": "@hanzo/insights-node",
   "version": "5.26.2",
   "description": "PostHog Node.js integration",
   "repository": {
@@ -37,7 +37,7 @@
   "module": "dist/entrypoints/index.node.mjs",
   "types": "dist/entrypoints/index.node.d.ts",
   "dependencies": {
-    "@posthog/core": "workspace:*"
+    "@hanzo/insights-core": "workspace:*"
   },
   "devDependencies": {
     "@posthog-tooling/tsconfig-base": "workspace:*",

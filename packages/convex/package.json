@@ -1,5 +1,5 @@
 {
-  "name": "@posthog/convex",
+  "name": "@hanzo/insights-convex",
   "description": "Send analytics events to PostHog from your Convex backend.",
   "repository": {
     "type": "git",
@@ -60,8 +60,8 @@
   "types": "./dist/client/index.d.ts",
   "module": "./dist/client/index.js",
   "dependencies": {
-    "@posthog/core": "workspace:*",
-    "posthog-node": "workspace:*"
+    "@hanzo/insights-core": "workspace:*",
+    "@hanzo/insights-node": "workspace:*"
   },
   "devDependencies": {
     "@convex-dev/eslint-plugin": "^1.1.1",

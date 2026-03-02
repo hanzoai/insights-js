@@ -15,3 +15,9 @@ export { wrapVercelLanguageModel as withTracing }
 export { PostHogSpanProcessor, createPostHogSpanProcessor, captureSpan }
 export { LangChainCallbackHandler }
 export { Prompts }
+
+// @hanzo/insights-ai aliases
+export { PostHogOpenAI as InsightsOpenAI }
+export { PostHogAzureOpenAI as InsightsAzureOpenAI }
+export { PostHogAnthropic as InsightsAnthropic }
+export { PostHogGoogleGenAI as InsightsGoogleGenAI }
