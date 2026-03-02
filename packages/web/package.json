@@ -1,5 +1,5 @@
 {
-  "name": "posthog-js-lite",
+  "name": "@hanzo/insights-lite",
   "version": "4.5.3",
   "license": "MIT",
   "repository": {
@@ -26,7 +26,7 @@
     "src"
   ],
   "dependencies": {
-    "@posthog/core": "workspace:*"
+    "@hanzo/insights-core": "workspace:*"
   },
   "devDependencies": {
     "@babel/preset-env": "catalog:",

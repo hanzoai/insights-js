@@ -1,7 +1,7 @@
 {
-  "name": "@posthog/nuxt",
+  "name": "@hanzo/insights-nuxt",
   "version": "1.5.72",
-  "description": "Nuxt module for Posthog 🦔",
+  "description": "Nuxt module for Posthog \ud83e\udd94",
   "repository": {
     "type": "git",
     "url": "https://github.com/PostHog/posthog-js.git",
@@ -31,9 +31,9 @@
   "dependencies": {
     "@posthog/cli": "catalog:",
     "@nuxt/kit": ">=3.7.0",
-    "posthog-node": "workspace:*",
-    "@posthog/core": "workspace:*",
-    "posthog-js": "workspace:*"
+    "@hanzo/insights-node": "workspace:*",
+    "@hanzo/insights-core": "workspace:*",
+    "@hanzo/insights": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

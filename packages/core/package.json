@@ -1,5 +1,5 @@
 {
-  "name": "@posthog/core",
+  "name": "@hanzo/insights-core",
   "version": "1.23.2",
   "license": "MIT",
   "main": "dist/index.js",

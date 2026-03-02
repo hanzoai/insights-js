@@ -1,9 +1,9 @@
-# PostHog Browser JS Library
+# Hanzo Insights Browser JS Library
 
-[![npm package](https://img.shields.io/npm/v/posthog-js?style=flat-square)](https://www.npmjs.com/package/posthog-js)
+[![npm package](https://img.shields.io/npm/v/@hanzo/insights?style=flat-square)](https://www.npmjs.com/package/@hanzo/insights)
 [![MIT License](https://img.shields.io/badge/License-MIT-red.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-For information on using this library in your app, [see PostHog Docs](https://posthog.com/docs/libraries/js).
+For information on using this library in your app, see the [Hanzo Insights Docs](https://hanzo.ai/docs/insights).
 This README is intended for developing the library itself.
 
 ## Dependencies
@@ -73,7 +73,7 @@ You can use the create react app setup in `packages/browser/playground/nextjs` t
 
 ## Developing together with another project
 
-Install pnpm to link a local version of `posthog-js` in another JS project: `npm install -g pnpm`
+Install pnpm to link a local version of `@hanzo/insights` in another JS project: `npm install -g pnpm`
 
 ### Run this to link the local version
 
@@ -82,14 +82,12 @@ We have 2 options for linking this project to your local version: via [pnpm link
 #### local paths (preferred)
 
 - run `pnpm build` and `pnpm package` in the root of this repo to generate a tarball of this project.
-- run `pnpm -r update posthog-js@file:[ABSOLUTE_PATH_TO_POSTHOG_JS_REPO]/target/posthog-js.tgz` in the root of the repo that you want to link to (e.g. the posthog main repo).
+- run `pnpm -r update @hanzo/insights@file:[ABSOLUTE_PATH_TO_REPO]/target/@hanzo-insights.tgz` in the root of the repo you want to link to.
 - run `pnpm install` in that same repo
-- run `cd frontend && pnpm run copy-scripts` if the repo that you want to link to is the posthog main repo.
 
-Then, once this link has been created, any time you need to make a change to `posthog-js`, you can run `pnpm build && pnpm package` from the `posthog-js` root and the changes will appear in the other repo.
+Then, once this link has been created, any time you need to make a change to `@hanzo/insights`, run `pnpm build && pnpm package` from the root and the changes will appear in the other repo.
 
 #### `pnpm link`
 
-- In the `posthog-js` directory: `pnpm link --global`
-- (for `posthog` this means: `pnpm link --global posthog-js && pnpm i && pnpm copy-scripts`)
-- You can then remove the link by, e.g., running `pnpm link --global posthog-js` from within `posthog`
+- In the `insights-js` directory: `pnpm link --global`
+- You can then remove the link by running `pnpm link --global @hanzo/insights` from within the target repo

@@ -29,3 +29,6 @@ export class PostHog extends PostHogBackendClient {
     return new PostHogContext()
   }
 }
+
+export { PostHog as Insights }
+export type { PostHogOptions as InsightsOptions } from '../types'
