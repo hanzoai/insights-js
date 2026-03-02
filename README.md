@@ -1,27 +1,48 @@
 # Hanzo Insights JS
 
-This is a monorepo containing multiple packages to integrate with Hanzo Insights using JavaScript.
+Hanzo Insights JS SDK — fork of [posthog-js](https://github.com/PostHog/posthog-js).
 
-## Documentation
-
-- [Hanzo Insights Documentation](https://hanzo.ai/docs/insights)
+Provides analytics, feature flags, session replay, and A/B testing for web and Node.js applications connected to [Hanzo Insights](https://insights.hanzo.ai).
 
 ## Packages
 
-- [@hanzo/insights](./packages/browser/README.md)
-- [@hanzo/insights-lite](./packages/web/README.md)
-- [@hanzo/insights-node](./packages/node/README.md)
-- [@hanzo/insights-react-native](./packages/react-native/README.md)
-- [@hanzo/insights-react](./packages/react/README.md)
-- [@hanzo/insights-ai](./packages/ai/README.md)
-- [@hanzo/insights-convex](./packages/convex/README.md)
-- [@hanzo/insights-nextjs](./packages/nextjs-config/README.md)
-- [@hanzo/insights-nuxt](./packages/nuxt/README.md)
-- [@hanzo/insights-rollup-plugin](./packages/rollup-plugin/README.md)
-- [@hanzo/insights-types](./packages/types/README.md)
-- [@hanzo/insights-core](./packages/core/README.md)
-- [@hanzo/insights-webpack-plugin](./packages/webpack-plugin/README.md)
+| Package | Description |
+|---------|-------------|
+| [`@hanzo/insights`](packages/browser) | Browser SDK (analytics, session replay, feature flags) |
+| [`@hanzo/insights-node`](packages/node) | Node.js SDK |
+| [`@hanzo/insights-react`](packages/react) | React hooks (`useInsights`, `InsightsProvider`) |
+| [`@hanzo/insights-react-native`](packages/react-native) | React Native SDK |
+| [`@hanzo/insights-ai`](packages/ai) | AI/LLM observability |
+| [`@hanzo/insights-core`](packages/core) | Core shared logic |
+| [`@hanzo/insights-types`](packages/types) | TypeScript types |
+| [`@hanzo/insights-lite`](packages/web) | Lightweight browser SDK |
+| [`@hanzo/insights-nuxt`](packages/nuxt) | Nuxt.js module |
+| [`@hanzo/insights-nextjs`](packages/nextjs-config) | Next.js configuration helper |
+| [`@hanzo/insights-rollup-plugin`](packages/rollup-plugin) | Rollup plugin |
+| [`@hanzo/insights-webpack-plugin`](packages/webpack-plugin) | Webpack plugin |
+| [`@hanzo/insights-convex`](packages/convex) | Convex backend analytics |
 
-## Contributing
+## Quick Start
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md)
+```ts
+import { Insights } from '@hanzo/insights'
+
+const insights = new Insights('YOUR_API_KEY', {
+  api_host: 'https://insights.hanzo.ai'
+})
+
+insights.capture('user_signed_up', { plan: 'pro' })
+```
+
+## Upstream
+
+This is a branded fork of [PostHog/posthog-js](https://github.com/PostHog/posthog-js).
+The `Insights` class is an alias for `PostHog` — all PostHog APIs work unchanged.
+
+To sync upstream changes:
+
+```bash
+git remote add upstream https://github.com/PostHog/posthog-js.git
+git fetch upstream
+git merge upstream/main
+```

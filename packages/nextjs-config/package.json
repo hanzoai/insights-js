@@ -45,7 +45,7 @@
     "@posthog/cli": "catalog:",
     "semver": "^7.7.2",
     "@hanzo/insights-core": "workspace:*",
-    "@posthog/webpack-plugin": "workspace:*"
+    "@hanzo/insights-webpack-plugin": "workspace:*"
   },
   "keywords": [
     "posthog",
