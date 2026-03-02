@@ -1,5 +1,5 @@
 {
-  "name": "@posthog/webpack-plugin",
+  "name": "@hanzo/insights-webpack-plugin",
   "version": "1.2.25",
   "description": "Webpack plugin for Posthog \ud83e\udd94",
   "repository": {
