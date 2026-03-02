@@ -40,7 +40,7 @@
     "@hanzo/insights-core": "workspace:*"
   },
   "devDependencies": {
-    "@posthog-tooling/tsconfig-base": "workspace:*",
+    "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "@types/express": "^5.0.5",
     "@types/jest": "catalog:",

@@ -1,5 +1,5 @@
 {
-    "name": "@posthog-tooling/changelog",
+    "name": "@hanzo/insights-tooling-changelog",
     "main": "./dist/index.js",
     "type": "module",
     "scripts": {
