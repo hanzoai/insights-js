@@ -21,12 +21,12 @@ import { AutocaptureConfig, EventName, Properties, RemoteConfig } from './types'
 import { PostHog } from './posthog-core'
 import { AUTOCAPTURE_DISABLED_SERVER_SIDE } from './constants'
 
-import { isBoolean, isFunction, isNull, isObject } from '@posthog/core'
+import { isBoolean, isFunction, isNull, isObject } from '@hanzo/insights-core'
 import { createLogger } from './utils/logger'
 import { document, window } from './utils/globals'
 import { convertToURL } from './utils/request-utils'
 import { isDocumentFragment, isElementNode, isTag, isTextNode } from './utils/element-utils'
-import { includes } from '@posthog/core'
+import { includes } from '@hanzo/insights-core'
 
 const COPY_AUTOCAPTURE_EVENT = '$copy_autocapture'
 

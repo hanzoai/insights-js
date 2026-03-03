@@ -1,10 +1,10 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { PostHogAzureOpenAI } from '../src/openai/azure'
 import openaiModule from 'openai'
 
 let mockAzureEmbeddingResponse: any = {}
 
-jest.mock('posthog-node', () => {
+jest.mock('@hanzo/insights-node', () => {
   return {
     PostHog: jest.fn().mockImplementation(() => {
       return {

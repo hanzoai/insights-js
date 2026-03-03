@@ -1,5 +1,5 @@
 import { sendSurveyEvent } from '../src/surveys/components/Surveys'
-import { Survey, SurveyQuestion } from '@posthog/core'
+import { Survey, SurveyQuestion } from '@hanzo/insights-core'
 
 describe('sendSurveyEvent', () => {
   let mockPostHog: any

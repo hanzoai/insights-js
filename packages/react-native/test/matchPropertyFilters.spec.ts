@@ -1,5 +1,5 @@
 import { matchPropertyFilters, PropertyFilters } from '../src/surveys/surveys-utils'
-import { SurveyMatchType } from '@posthog/core'
+import { SurveyMatchType } from '@hanzo/insights-core'
 
 describe('matchPropertyFilters', () => {
   describe('when no property filters are defined', () => {

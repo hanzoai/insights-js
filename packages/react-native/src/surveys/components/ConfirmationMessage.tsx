@@ -7,7 +7,7 @@ import {
   shouldRenderDescription,
   SurveyAppearanceTheme,
 } from '../surveys-utils'
-import { SurveyQuestionDescriptionContentType } from '@posthog/core'
+import { SurveyQuestionDescriptionContentType } from '@hanzo/insights-core'
 import { BottomSection } from './BottomSection'
 
 export function ConfirmationMessage({

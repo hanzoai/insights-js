@@ -5,7 +5,7 @@ import type {
   PostHogFetchOptions,
   PostHogFetchResponse,
   PostHogFlagsAndPayloadsResponse,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import { ContextData, ContextOptions } from './extensions/context/types'
 
 import type { FlagDefinitionCacheProvider } from './extensions/feature-flags/cache'
@@ -144,7 +144,7 @@ export type PostHogOptions = Omit<PostHogCoreOptions, 'before_send'> & {
    *
    * @example
    * ```typescript
-   * import { FlagDefinitionCacheProvider } from 'posthog-node/experimental'
+   * import { FlagDefinitionCacheProvider } from '@hanzo/insights-node/experimental'
    *
    * class RedisCacheProvider implements FlagDefinitionCacheProvider {
    *   // ... implementation

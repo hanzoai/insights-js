@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import PostHogOpenAI from '../src/openai'
 import openaiModule from 'openai'
 import type { ChatCompletion, ChatCompletionChunk } from 'openai/resources/chat/completions'
@@ -16,7 +16,7 @@ let mockOpenAiParsedResponse: ParsedResponse<any> = {} as ParsedResponse<any>
 let mockOpenAiEmbeddingResponse: any = {}
 let mockStreamChunks: ChatCompletionChunk[] = []
 
-jest.mock('posthog-node', () => {
+jest.mock('@hanzo/insights-node', () => {
   return {
     PostHog: jest.fn().mockImplementation(() => {
       return {

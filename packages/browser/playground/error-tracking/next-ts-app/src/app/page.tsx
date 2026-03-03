@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import posthog from 'posthog-js'
+import posthog from '@hanzo/insights'
 
 export default function Home() {
     return (

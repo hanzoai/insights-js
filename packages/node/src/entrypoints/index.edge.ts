@@ -2,7 +2,7 @@ export * from '../exports'
 
 import ErrorTracking from '../extensions/error-tracking'
 import { PostHogBackendClient } from '../client'
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 
 ErrorTracking.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuilder(
   [

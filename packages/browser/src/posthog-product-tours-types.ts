@@ -1,7 +1,7 @@
 import { PropertyMatchType } from './types'
 import { SurveyActionType, SurveyEventWithFilters } from './posthog-surveys-types'
 import type { InferredSelector } from './extensions/product-tours/element-inference'
-import { SurveyPosition } from '@posthog/core'
+import { SurveyPosition } from '@hanzo/insights-core'
 import { Z_INDEX_TOURS } from './constants'
 
 export interface JSONContent {

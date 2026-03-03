@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './app.tsx'
-import { posthog } from 'posthog-js'
+import { posthog } from '@hanzo/insights'
 
 posthog.init(import.meta.env.VITE_POSTHOG_KEY || '', {
     api_host: import.meta.env.VITE_POSTHOG_HOST || 'http://localhost:8010',

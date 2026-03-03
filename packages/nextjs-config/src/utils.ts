@@ -1,8 +1,8 @@
 import nextPackage from 'next/package.json' with { type: 'json' }
 import semver from 'semver'
 
-import { spawnLocal } from '@posthog/core/process'
-import { ResolvedPluginConfig } from '@posthog/webpack-plugin'
+import { spawnLocal } from '@hanzo/insights-core/process'
+import { ResolvedPluginConfig } from '@hanzo/insights-webpack-plugin'
 
 export function getNextJsVersion(): string {
   return nextPackage.version

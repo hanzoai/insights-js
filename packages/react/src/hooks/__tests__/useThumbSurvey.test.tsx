@@ -2,7 +2,7 @@ import * as React from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { PostHogProvider, PostHog } from '../../context'
 import { useThumbSurvey } from '../useThumbSurvey'
-import { SurveyEventName, SurveyEventProperties } from 'posthog-js'
+import { SurveyEventName, SurveyEventProperties } from '@hanzo/insights'
 import { isUndefined } from '../../utils/type-utils'
 
 jest.useFakeTimers()

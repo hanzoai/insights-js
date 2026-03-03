@@ -1,7 +1,7 @@
-import { Logger, createLogger } from '@posthog/core'
+import { Logger, createLogger } from '@hanzo/insights-core'
 import { PluginConfig, resolveConfig, ResolvedPluginConfig } from './config'
 import webpack from 'webpack'
-import { spawnLocal } from '@posthog/core/process'
+import { spawnLocal } from '@hanzo/insights-core/process'
 import path from 'path'
 
 export * from './config'

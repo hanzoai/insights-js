@@ -12,7 +12,7 @@ import {
   PostHogFlagsAndPayloadsResponse,
   PostHogFlagsResponse,
   PostHogPersistedProperty,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import {
   EventMessage,
   FeatureFlagError,
@@ -35,9 +35,9 @@ import {
   InconclusiveMatchError,
 } from './extensions/feature-flags/feature-flags'
 import ErrorTracking from './extensions/error-tracking'
-import { safeSetTimeout, PostHogEventProperties } from '@posthog/core'
+import { safeSetTimeout, PostHogEventProperties } from '@hanzo/insights-core'
 import { PostHogMemoryStorage } from './storage-memory'
-import { uuidv7 } from '@posthog/core'
+import { uuidv7 } from '@hanzo/insights-core'
 import { ContextData, ContextOptions, IPostHogContext } from './extensions/context/types'
 
 // Standard local evaluation rate limit is 600 per minute (10 per second),

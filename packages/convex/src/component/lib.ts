@@ -1,5 +1,5 @@
-import type { FeatureFlagValue, JsonType } from '@posthog/core'
-import { PostHog } from 'posthog-node/edge'
+import type { FeatureFlagValue, JsonType } from '@hanzo/insights-core'
+import { PostHog } from '@hanzo/insights-node/edge'
 import { action } from './_generated/server.js'
 import { v } from 'convex/values'
 

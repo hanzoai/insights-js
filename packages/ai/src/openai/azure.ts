@@ -1,5 +1,5 @@
 import OpenAIOrignal, { AzureOpenAI } from 'openai'
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import {
   AIEvent,
   formatResponseOpenAI,

@@ -29,7 +29,7 @@ import type { ExceptionAutoCaptureConfig } from './posthog-config'
  *
  * @example
  * ```typescript
- * import type { PostHog } from '@posthog/types'
+ * import type { PostHog } from '@hanzo/insights-types'
  *
  * declare global {
  *     interface Window {

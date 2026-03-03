@@ -1,5 +1,5 @@
 import { CaptureResult } from '../../types'
-import { isNull } from '@posthog/core'
+import { isNull } from '@hanzo/insights-core'
 import { sampleByDistinctId, sampleByEvent, sampleBySessionId } from '../../customizations/before-send'
 
 beforeAll(() => {

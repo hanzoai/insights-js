@@ -1,7 +1,7 @@
 import { Breaker, PostHogConfig, Properties } from '../types'
 import { nativeForEach, nativeIndexOf } from './globals'
 import { logger } from './logger'
-import { isFormData, isNull, isNullish, isNumber, isString, hasOwnProperty, isArray } from '@posthog/core'
+import { isFormData, isNull, isNullish, isNumber, isString, hasOwnProperty, isArray } from '@hanzo/insights-core'
 
 const breaker: Breaker = {}
 

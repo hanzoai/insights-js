@@ -17,7 +17,7 @@ import {
     getLengthFromRules,
     getRequirementsHint,
     SurveyValidationType,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import {
     dissatisfiedEmoji,
     neutralEmoji,

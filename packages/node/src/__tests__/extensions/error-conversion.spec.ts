@@ -1,4 +1,4 @@
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { createModulerModifier } from '@/extensions/error-tracking/modifiers/module.node'
 import { addSourceContext } from '@/extensions/error-tracking/modifiers/context-lines.node'
 

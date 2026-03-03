@@ -1,4 +1,4 @@
-import { isNullish } from '@posthog/core'
+import { isNullish } from '@hanzo/insights-core'
 
 export function extractHref(elementsChain: string): string {
     const match = elementsChain.match(/(?::|")href="(.*?)"/)

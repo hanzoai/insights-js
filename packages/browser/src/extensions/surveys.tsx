@@ -27,7 +27,7 @@ import {
     isSurveyRunning,
     SURVEY_LOGGER as logger,
 } from '../utils/survey-utils'
-import { isArray, isNull, isUndefined } from '@posthog/core'
+import { isArray, isNull, isUndefined } from '@hanzo/insights-core'
 import { Properties } from '../types'
 import { SURVEYS } from '../constants'
 import { uuidv7 } from '../uuidv7'

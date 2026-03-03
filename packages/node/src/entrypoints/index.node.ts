@@ -5,7 +5,7 @@ import { addSourceContext } from '../extensions/error-tracking/modifiers/context
 import ErrorTracking from '../extensions/error-tracking'
 
 import { PostHogBackendClient } from '../client'
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { PostHogContext } from '../extensions/context/context'
 
 ErrorTracking.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuilder(

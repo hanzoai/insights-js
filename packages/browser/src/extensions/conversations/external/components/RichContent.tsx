@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h, Fragment } from 'preact'
 import { useMemo } from 'preact/hooks'
-import { isUndefined, isNumber, isArray } from '@posthog/core'
+import { isUndefined, isNumber, isArray } from '@hanzo/insights-core'
 import { TipTapDoc, TipTapNode, TipTapMark } from '../../../../posthog-conversations-types'
 
 interface RichContentProps {

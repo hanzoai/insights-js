@@ -1,4 +1,4 @@
-import { SurveyType } from '@posthog/core'
+import { SurveyType } from '@hanzo/insights-core'
 import { expect, test } from '../utils/posthog-playwright-test-base'
 import { start } from '../utils/setup'
 

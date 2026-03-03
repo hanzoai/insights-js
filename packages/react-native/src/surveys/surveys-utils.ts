@@ -11,7 +11,7 @@ import {
   SurveyQuestionDescriptionContentType,
   SurveyMatchType,
   SurveySchedule,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 
 // Extended operator type to include numeric operators not in core SurveyMatchType
 export type PropertyOperator = SurveyMatchType | 'gt' | 'lt'

@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 import React from 'react'
 import { renderHook, act } from '@testing-library/react'
-import { FeatureFlagResult } from '@posthog/core'
+import { FeatureFlagResult } from '@hanzo/insights-core'
 import { PostHogContext } from '../src/PostHogContext'
 import { useFeatureFlagResult } from '../src/hooks/useFeatureFlagResult'
 import type { PostHog } from '../src/posthog-rn'

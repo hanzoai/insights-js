@@ -21,7 +21,7 @@ import {
     setSurveySeenOnLocalStorage,
     SURVEY_IN_PROGRESS_PREFIX,
 } from '../../utils/survey-utils'
-import { isArray, isNullish } from '@posthog/core'
+import { isArray, isNullish } from '@hanzo/insights-core'
 
 import { propertyComparisons } from '../../utils/property-utils'
 import { Properties, PropertyMatchType } from '../../types'

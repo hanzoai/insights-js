@@ -1,4 +1,4 @@
-import type { Logger } from '@posthog/core'
+import type { Logger } from '@hanzo/insights-core'
 
 jest.mock('../../utils/logger', () => {
     const mockLogger: Logger = {
@@ -18,7 +18,7 @@ jest.mock('../../utils/logger', () => {
     }
 })
 
-import { isFunction } from '@posthog/core'
+import { isFunction } from '@hanzo/insights-core'
 import { logger } from '../../utils/logger'
 
 export const clearLoggerMocks = () => {

@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { captureSpan } from './capture'
 import type { Context, Span } from '@opentelemetry/api'
 import type { ReadableSpan, SpanProcessor } from '@opentelemetry/sdk-trace-base'

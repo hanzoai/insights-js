@@ -1,6 +1,6 @@
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 
-import posthog from 'posthog-js'
+import posthog from '@hanzo/insights'
 import type { PostHogClientConfig, PostHogCommon } from '../module'
 
 export default defineNuxtPlugin({

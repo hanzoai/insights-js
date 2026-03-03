@@ -1,6 +1,6 @@
 import { getActiveMatchingSurveys } from '../src/surveys/getActiveMatchingSurveys'
-import { Survey, SurveyMatchType, SurveySchedule, SurveyType } from '@posthog/core'
-import { FeatureFlagValue } from '@posthog/core'
+import { Survey, SurveyMatchType, SurveySchedule, SurveyType } from '@hanzo/insights-core'
+import { FeatureFlagValue } from '@hanzo/insights-core'
 
 // Mock the native-deps module
 jest.mock('../src/native-deps', () => ({

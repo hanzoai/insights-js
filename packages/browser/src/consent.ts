@@ -3,7 +3,7 @@ import { find } from './utils'
 import { assignableWindow, navigator } from './utils/globals'
 import { cookieStore, localStore } from './storage'
 import { PersistentStore } from './types'
-import { isNoLike, isYesLike } from '@posthog/core'
+import { isNoLike, isYesLike } from '@hanzo/insights-core'
 
 const OPT_OUT_PREFIX = '__ph_opt_in_out_'
 

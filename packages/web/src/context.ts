@@ -1,4 +1,4 @@
-import { currentTimestamp } from '@posthog/core'
+import { currentTimestamp } from '@hanzo/insights-core'
 import { version } from './version'
 
 export function getContext(window: Window | undefined): any {

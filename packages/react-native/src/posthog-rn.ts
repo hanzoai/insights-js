@@ -15,7 +15,7 @@ import {
   logFlushError,
   maybeAdd,
   FeatureFlagValue,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import { PostHogRNStorage, PostHogRNSyncMemoryStorage } from './storage'
 import { version } from './version'
 import { buildOptimisticAsyncStorage, getAppProperties } from './native-deps'

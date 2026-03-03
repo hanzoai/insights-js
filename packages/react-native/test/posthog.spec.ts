@@ -2,7 +2,7 @@ import { PostHog, PostHogCustomStorage, PostHogPersistedProperty } from '../src'
 import { Linking, AppState, AppStateStatus } from 'react-native'
 import { waitForExpect } from './test-utils'
 import { PostHogRNStorage } from '../src/storage'
-import { FeatureFlagError } from '@posthog/core'
+import { FeatureFlagError } from '@hanzo/insights-core'
 
 Linking.getInitialURL = jest.fn(() => Promise.resolve(null))
 AppState.addEventListener = jest.fn()

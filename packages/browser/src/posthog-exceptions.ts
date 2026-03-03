@@ -3,7 +3,7 @@ import { PostHog } from './posthog-core'
 import { CaptureResult, ErrorTrackingSuppressionRule, Properties, RemoteConfig } from './types'
 import { createLogger } from './utils/logger'
 import { propertyComparisons } from './utils/property-utils'
-import { isString, isArray, ErrorTracking, isNullish } from '@posthog/core'
+import { isString, isArray, ErrorTracking, isNullish } from '@hanzo/insights-core'
 
 const logger = createLogger('[Error tracking]')
 

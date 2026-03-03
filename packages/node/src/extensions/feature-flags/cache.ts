@@ -30,7 +30,7 @@ export interface FlagDefinitionCacheData {
  *
  * @example
  * ```typescript
- * import { FlagDefinitionCacheProvider } from 'posthog-node/experimental'
+ * import { FlagDefinitionCacheProvider } from '@hanzo/insights-node/experimental'
  *
  * class RedisFlagCache implements FlagDefinitionCacheProvider {
  *   constructor(private redis: Redis, private teamKey: string) { }

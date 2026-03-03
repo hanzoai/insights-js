@@ -10,7 +10,7 @@ import {
     USER_STATE,
 } from './constants'
 
-import { isNull, isUndefined } from '@posthog/core'
+import { isNull, isUndefined } from '@hanzo/insights-core'
 import { logger } from './utils/logger'
 import { window, document } from './utils/globals'
 import { uuidv7 } from './uuidv7'
