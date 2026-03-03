@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import type { PostHog } from 'posthog-node'
+import type { PostHog } from '@hanzo/insights-node'
 import type { CachedPrompt, GetPromptOptions, PromptApiResponse, PromptVariables, PromptsDirectOptions } from './types'
 
 const DEFAULT_CACHE_TTL_SECONDS = 300 // 5 minutes

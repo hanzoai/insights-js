@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useMemo, type RefCallback, useEffect } from 'react'
 import { usePostHog } from './usePostHog'
-import { DisplaySurveyType, SurveyEventName, SurveyEventProperties, SurveyPosition } from 'posthog-js'
+import { DisplaySurveyType, SurveyEventName, SurveyEventProperties, SurveyPosition } from '@hanzo/insights'
 
 export interface UseThumbSurveyOptions {
     /** ID of the target PostHog survey */

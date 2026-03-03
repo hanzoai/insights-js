@@ -1,4 +1,4 @@
-import posthogJs, { BootstrapConfig } from 'posthog-js'
+import posthogJs, { BootstrapConfig } from '@hanzo/insights'
 import { createContext } from 'react'
 
 export type PostHog = typeof posthogJs

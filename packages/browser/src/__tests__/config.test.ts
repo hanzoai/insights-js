@@ -1,6 +1,6 @@
 import { PostHog } from '../posthog-core'
 import type { PostHogConfig } from '../types'
-import { isFunction } from '@posthog/core'
+import { isFunction } from '@hanzo/insights-core'
 
 describe('config', () => {
     describe('compatibilityDate', () => {

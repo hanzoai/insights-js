@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import posthogJs, { PostHogConfig } from 'posthog-js'
+import posthogJs, { PostHogConfig } from '@hanzo/insights'
 
 import React, { useEffect, useMemo, useRef } from 'react'
 import { PostHog, PostHogContext } from './PostHogContext'

@@ -1,7 +1,7 @@
 import Config from '../config'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 import { assignableWindow, window } from './globals'
-import type { Logger } from '@posthog/core'
+import type { Logger } from '@hanzo/insights-core'
 
 type CreateLoggerOptions = {
     debugEnabled?: boolean

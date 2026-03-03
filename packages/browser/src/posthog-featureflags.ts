@@ -29,7 +29,7 @@ import {
     FLAG_CALL_REPORTED,
 } from './constants'
 
-import { isUndefined, isArray, isNull } from '@posthog/core'
+import { isUndefined, isArray, isNull } from '@hanzo/insights-core'
 import { createLogger } from './utils/logger'
 import { getTimezone } from './utils/event-utils'
 

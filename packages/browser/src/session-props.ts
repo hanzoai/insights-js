@@ -14,7 +14,7 @@ import type { PostHogPersistence } from './posthog-persistence'
 import { CLIENT_SESSION_PROPS } from './constants'
 import type { PostHog } from './posthog-core'
 import { each, stripEmptyProperties } from './utils'
-import { stripLeadingDollar } from '@posthog/core'
+import { stripLeadingDollar } from '@hanzo/insights-core'
 
 interface LegacySessionSourceProps {
     initialPathName: string

@@ -11,7 +11,7 @@
 // polyfill for IE11
 import { window } from './utils/globals'
 
-import { isNumber, isUndefined } from '@posthog/core'
+import { isNumber, isUndefined } from '@hanzo/insights-core'
 
 if (!Math.trunc) {
     Math.trunc = function (v) {

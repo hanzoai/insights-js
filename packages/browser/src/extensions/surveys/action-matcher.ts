@@ -2,7 +2,7 @@ import { PostHog } from '../../posthog-core'
 import { ActionStepType, PropertyFilters, SurveyActionType, SurveyElement } from '../../posthog-surveys-types'
 import { SimpleEventEmitter } from '../../utils/simple-event-emitter'
 import { CaptureResult, PropertyMatchType } from '../../types'
-import { isArray, isUndefined } from '@posthog/core'
+import { isArray, isUndefined } from '@hanzo/insights-core'
 import { matchPropertyFilters } from '../../utils/property-utils'
 import { extractTexts, extractHref, matchString, matchTexts } from '../../utils/elements-chain-utils'
 

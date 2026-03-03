@@ -9,7 +9,7 @@ import {
   maybeAdd,
   SurveyQuestionBranchingType,
   isUndefined,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import { LinkQuestion, MultipleChoiceQuestion, OpenTextQuestion, RatingQuestion } from './QuestionTypes'
 import { PostHog } from '../../posthog-rn'
 import { usePostHog } from '../../hooks/usePostHog'

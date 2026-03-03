@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useOverridablePostHog } from './utils'
-import { JsonType, FeatureFlagValue } from '@posthog/core'
+import { JsonType, FeatureFlagValue } from '@hanzo/insights-core'
 import { PostHog } from '../posthog-rn'
 
 export function useFeatureFlag(flag: string, client?: PostHog): FeatureFlagValue | undefined {

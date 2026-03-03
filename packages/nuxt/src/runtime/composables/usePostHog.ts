@@ -1,5 +1,5 @@
 import { useNuxtApp } from '#app'
-import type posthog from 'posthog-js'
+import type posthog from '@hanzo/insights'
 
 /**
  * Get the PostHog client instance

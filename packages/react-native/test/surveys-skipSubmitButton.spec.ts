@@ -1,4 +1,4 @@
-import { SurveyQuestionType, RatingSurveyQuestion, MultipleSurveyQuestion } from '@posthog/core'
+import { SurveyQuestionType, RatingSurveyQuestion, MultipleSurveyQuestion } from '@hanzo/insights-core'
 
 describe('surveys - skipSubmitButton', () => {
   describe('RatingQuestion', () => {

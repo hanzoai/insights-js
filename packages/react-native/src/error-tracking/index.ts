@@ -1,5 +1,5 @@
 import type { PostHog } from '../posthog-rn'
-import { JsonType, Logger, PostHogEventProperties, ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { JsonType, Logger, PostHogEventProperties, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { trackConsole, trackUncaughtExceptions, trackUnhandledRejections } from './utils'
 import { getRemoteConfigBool, isHermes } from '../utils'
 

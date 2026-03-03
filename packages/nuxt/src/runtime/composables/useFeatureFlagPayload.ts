@@ -1,6 +1,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { usePostHog } from './usePostHog'
-import type { JsonType } from 'posthog-js'
+import type { JsonType } from '@hanzo/insights'
 
 /**
  * Get the payload of a feature flag

@@ -20,10 +20,10 @@ import { PostHog } from '../posthog-core'
 import { createLogger } from '../utils/logger'
 
 import { USER_STATE } from '../constants'
-import { isFunction } from '@posthog/core'
+import { isFunction } from '@hanzo/insights-core'
 import { uuidv7 } from '../uuidv7'
 
-import type { SegmentUser, SegmentAnalytics, SegmentContext, SegmentPlugin } from '@posthog/types'
+import type { SegmentUser, SegmentAnalytics, SegmentContext, SegmentPlugin } from '@hanzo/insights-types'
 
 // Re-export for backwards compatibility
 export type { SegmentUser, SegmentAnalytics, SegmentContext, SegmentPlugin }

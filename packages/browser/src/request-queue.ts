@@ -1,7 +1,7 @@
 import { QueuedRequestWithOptions, RequestQueueConfig } from './types'
 import { each } from './utils'
 
-import { isArray, isUndefined, clampToRange } from '@posthog/core'
+import { isArray, isUndefined, clampToRange } from '@hanzo/insights-core'
 import { logger } from './utils/logger'
 
 export const DEFAULT_FLUSH_INTERVAL_MS = 3000

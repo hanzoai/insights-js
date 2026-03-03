@@ -1,4 +1,4 @@
-import { detectDeviceType } from '@posthog/core'
+import { detectDeviceType } from '@hanzo/insights-core'
 import { userAgent } from '../../utils/globals'
 import { propertyComparisons } from '../../utils/property-utils'
 import { PropertyMatchType } from '../../types'

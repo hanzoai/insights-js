@@ -6,7 +6,7 @@ import { ConfirmationMessage } from './ConfirmationMessage'
 import { Questions } from './Surveys'
 
 import { SurveyAppearanceTheme } from '../surveys-utils'
-import { Survey, SurveyQuestionDescriptionContentType } from '@posthog/core'
+import { Survey, SurveyQuestionDescriptionContentType } from '@hanzo/insights-core'
 import { useOptionalSafeAreaInsets } from '../../optional/OptionalReactNativeSafeArea'
 
 export type SurveyModalProps = {

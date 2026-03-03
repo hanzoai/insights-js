@@ -2,7 +2,7 @@ import ErrorTracking from '@/extensions/error-tracking'
 import { PostHog } from '@/entrypoints/index.node'
 import { addUncaughtExceptionListener, addUnhandledRejectionListener } from '@/extensions/error-tracking/autocapture'
 import { Worker } from 'worker_threads'
-import type { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import type { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 
 describe('exception autocapture', () => {
   function checkException(

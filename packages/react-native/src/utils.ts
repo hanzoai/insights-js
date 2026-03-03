@@ -1,7 +1,7 @@
 import { Platform } from 'react-native'
 
 // Re-export remote config utilities from core
-export { getRemoteConfigBool, getRemoteConfigNumber, isValidSampleRate } from '@posthog/core'
+export { getRemoteConfigBool, getRemoteConfigNumber, isValidSampleRate } from '@hanzo/insights-core'
 
 type ReactNativeGlobal = {
   HermesInternal?: {
