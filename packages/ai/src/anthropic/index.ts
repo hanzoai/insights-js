@@ -1,5 +1,5 @@
 import AnthropicOriginal, { APIPromise } from '@anthropic-ai/sdk'
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import {
   formatResponseAnthropic,
   mergeSystemPrompt,

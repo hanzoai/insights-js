@@ -31,7 +31,7 @@ import { createLogger } from '../../utils/logger'
 import { document as _document, window as _window } from '../../utils/globals'
 import { localStore, sessionStore } from '../../storage'
 import { addEventListener } from '../../utils'
-import { isNull, isUndefined, SurveyMatchType } from '@posthog/core'
+import { isNull, isUndefined, SurveyMatchType } from '@hanzo/insights-core'
 import { propertyComparisons } from '../../utils/property-utils'
 import {
     TOUR_SHOWN_KEY_PREFIX,

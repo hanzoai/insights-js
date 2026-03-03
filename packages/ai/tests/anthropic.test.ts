@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import PostHogAnthropic from '../src/anthropic'
 import AnthropicOriginal from '@anthropic-ai/sdk'
 import { version } from '../package.json'
@@ -64,7 +64,7 @@ interface MockAsyncIterator<T> {
   [Symbol.asyncIterator](): AsyncIterator<T>
 }
 
-jest.mock('posthog-node', () => {
+jest.mock('@hanzo/insights-node', () => {
   return {
     PostHog: jest.fn().mockImplementation(() => {
       return {

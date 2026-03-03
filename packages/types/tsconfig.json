@@ -1,5 +1,5 @@
 {
-    "extends": "@posthog-tooling/tsconfig-base",
+    "extends": "@hanzo/insights-tooling-tsconfig-base",
     "compilerOptions": {
         "outDir": "./dist",
         "rootDir": "./src",

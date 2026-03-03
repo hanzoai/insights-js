@@ -1,9 +1,9 @@
-import { PostHog } from 'posthog-node'
-import { uuidv7 } from '@posthog/core/vendor/uuidv7'
+import { PostHog } from '@hanzo/insights-node'
+import { uuidv7 } from '@hanzo/insights-core/vendor/uuidv7'
 import { defineNitroPlugin } from 'nitropack/runtime'
 import { useRuntimeConfig } from '#imports'
 import type { PostHogCommon, PostHogServerConfig } from '../module'
-import type { JsonType } from '@posthog/core'
+import type { JsonType } from '@hanzo/insights-core'
 
 export default defineNitroPlugin((nitroApp) => {
   const runtimeConfig = useRuntimeConfig()

@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { captureSpan, createPostHogSpanProcessor, PostHogSpanProcessor, PostHogSpanMapper } from '../src/otel'
 import * as captureModule from '../src/otel/capture'
 import { flushPromises } from './test-utils'
@@ -9,7 +9,7 @@ const mockSpanContext = (traceId: string) => ({
   traceFlags: 1,
 })
 
-jest.mock('posthog-node', () => {
+jest.mock('@hanzo/insights-node', () => {
   return {
     PostHog: jest.fn().mockImplementation(() => {
       return {

@@ -1,6 +1,6 @@
 import { FeatureFlagCondition, FlagProperty, FlagPropertyValue, PostHogFeatureFlag, PropertyGroup } from '../../types'
-import type { FeatureFlagValue, JsonType, PostHogFetchOptions, PostHogFetchResponse } from '@posthog/core'
-import { safeSetTimeout } from '@posthog/core'
+import type { FeatureFlagValue, JsonType, PostHogFetchOptions, PostHogFetchResponse } from '@hanzo/insights-core'
+import { safeSetTimeout } from '@hanzo/insights-core'
 import { hashSHA1 } from './crypto'
 import { FlagDefinitionCacheProvider, FlagDefinitionCacheData } from './cache'
 

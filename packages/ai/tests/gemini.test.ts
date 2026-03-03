@@ -1,11 +1,11 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import PostHogGemini from '../src/gemini'
 import { version } from '../package.json'
 
 let mockGeminiResponse: any = {}
 let mockGeminiStreamResponse: any = {}
 
-jest.mock('posthog-node', () => {
+jest.mock('@hanzo/insights-node', () => {
   return {
     PostHog: jest.fn().mockImplementation(() => {
       return {

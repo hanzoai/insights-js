@@ -1,7 +1,7 @@
 // Portions of this file are derived from getsentry/sentry-javascript by Software, Inc. dba Sentry
 // Licensed under the MIT License
 
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { createReadStream } from 'node:fs'
 import { createInterface } from 'node:readline'
 

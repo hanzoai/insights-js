@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { render, act } from '@testing-library/react'
 import { PostHogProvider, PostHog } from '..'
-import posthogJs from 'posthog-js'
+import posthogJs from '@hanzo/insights'
 
 // Mock posthog-js
-jest.mock('posthog-js', () => ({
+jest.mock('@hanzo/insights', () => ({
     __esModule: true,
     default: {
         init: jest.fn(),

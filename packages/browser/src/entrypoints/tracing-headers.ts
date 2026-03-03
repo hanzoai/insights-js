@@ -2,7 +2,7 @@ import { SessionIdManager } from '../sessionid'
 import { patch } from '../extensions/replay/rrweb-plugins/patch'
 import { assignableWindow, window } from '../utils/globals'
 import { COOKIELESS_SENTINEL_VALUE } from '../constants'
-import { isArray } from '@posthog/core'
+import { isArray } from '@hanzo/insights-core'
 
 const addTracingHeaders = (
     hostnames: string[],

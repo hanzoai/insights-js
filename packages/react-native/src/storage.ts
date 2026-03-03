@@ -1,4 +1,4 @@
-import { isPromise } from '@posthog/core'
+import { isPromise } from '@hanzo/insights-core'
 import { PostHogCustomStorage } from './types'
 
 const POSTHOG_STORAGE_KEY = '.posthog-rn.json'

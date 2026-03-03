@@ -1,6 +1,6 @@
 /* eslint-disable compat/compat */
 
-import { isNull, ErrorTracking } from '@posthog/core'
+import { isNull, ErrorTracking } from '@hanzo/insights-core'
 import { expect } from '@jest/globals'
 import { buildErrorPropertiesBuilder } from '../../../posthog-exceptions'
 

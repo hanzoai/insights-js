@@ -1,7 +1,7 @@
 import { PostHog } from '../posthog-core'
 import { assignableWindow } from '../utils/globals'
 import { createLogger } from '../utils/logger'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 
 const logger = createLogger('[TracingHeaders]')
 

@@ -6,7 +6,7 @@ import {
     getTimezoneOffset,
 } from '../../utils/event-utils'
 import * as globals from '../../utils/globals'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 
 describe(`event-utils`, () => {
     describe('properties', () => {

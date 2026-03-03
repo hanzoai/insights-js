@@ -6,7 +6,7 @@ import {
   GenerateContentResponseUsageMetadata,
 } from '@google/genai'
 import type { GoogleGenAIOptions } from '@google/genai'
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import {
   MonitoringParams,
   sendEventToPosthog,

@@ -1,5 +1,5 @@
 import { Toolbar } from '../../extensions/toolbar'
-import { isString, isUndefined } from '@posthog/core'
+import { isString, isUndefined } from '@hanzo/insights-core'
 import { PostHog } from '../../posthog-core'
 import { ToolbarParams } from '../../types'
 import { assignableWindow, window } from '../../utils/globals'

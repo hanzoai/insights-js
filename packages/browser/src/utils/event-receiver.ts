@@ -3,7 +3,7 @@ import { ActionMatcher } from '../extensions/surveys/action-matcher'
 import { PostHog } from '../posthog-core'
 import { CaptureResult } from '../types'
 import { matchPropertyFilters } from './property-utils'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 import { createLogger } from './logger'
 
 /**

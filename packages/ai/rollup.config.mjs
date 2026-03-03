@@ -1,4 +1,4 @@
-import { external, babel, resolve, commonjs, json, dts, plugins } from '@posthog-tooling/rollup-utils'
+import { external, babel, resolve, commonjs, json, dts, plugins } from '@hanzo/insights-tooling-rollup-utils'
 import packageJson from './package.json' with { type: 'json' }
 
 const configs = []

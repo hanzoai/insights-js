@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { sendEventToPosthog, sendEventWithErrorToPosthog } from '../utils'
 import { defaultSpanMappers } from './mappers'
 import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'

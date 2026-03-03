@@ -7,7 +7,7 @@ import { window } from './utils/globals'
 
 import { createLogger } from './utils/logger'
 
-import { isArray, isUndefined, clampToRange, isPositiveNumber } from '@posthog/core'
+import { isArray, isUndefined, clampToRange, isPositiveNumber } from '@hanzo/insights-core'
 import { PostHog } from './posthog-core'
 import { addEventListener } from './utils'
 import { SimpleEventEmitter } from './utils/simple-event-emitter'

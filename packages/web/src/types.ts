@@ -1,4 +1,4 @@
-import type { PostHogCoreOptions } from '@posthog/core'
+import type { PostHogCoreOptions } from '@hanzo/insights-core'
 
 export type PostHogOptions = {
   autocapture?: boolean

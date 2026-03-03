@@ -1,6 +1,6 @@
 import ErrorTracking from './error-tracking'
 import { PostHogBackendClient } from '../client'
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import type { Request, Response } from 'express'
 
 type ExpressMiddleware = (req: Request, res: Response, next: () => void) => void

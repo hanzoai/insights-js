@@ -9,7 +9,7 @@ import { OptionalReactNativeDeviceInfo } from './optional/OptionalReactNativeDev
 import { PostHogCustomAppProperties, PostHogCustomStorage } from './types'
 import { OptionalReactNativeLocalize } from './optional/OptionalReactNativeLocalize'
 import { OptionalExpoFileSystemLegacy } from './optional/OptionalExpoFileSystemLegacy'
-import { detectDeviceType } from '@posthog/core'
+import { detectDeviceType } from '@hanzo/insights-core'
 
 const getDeviceType = (): string => {
   let deviceType = 'Mobile'

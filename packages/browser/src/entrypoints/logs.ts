@@ -5,7 +5,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources'
 
 import { assignableWindow } from '../utils/globals'
 import { PostHog } from '../posthog-core'
-import { isNull, isObject } from '@posthog/core'
+import { isNull, isObject } from '@hanzo/insights-core'
 
 const setupOpenTelemetry = (posthog: PostHog) => {
     let attributes: Record<string, string> = {
