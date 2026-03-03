@@ -1,6 +1,6 @@
 'use client'
 
-import posthogJs, { PostHog } from 'posthog-js'
+import posthogJs, { PostHog } from '@hanzo/insights'
 import { PostHogErrorBoundary } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
 

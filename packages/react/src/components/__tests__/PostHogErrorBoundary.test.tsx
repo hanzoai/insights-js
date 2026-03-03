@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { render } from '@testing-library/react'
 import { __POSTHOG_ERROR_MESSAGES, PostHogErrorBoundary } from '../PostHogErrorBoundary'
-import posthog from 'posthog-js'
+import posthog from '@hanzo/insights'
 
 describe('PostHogErrorBoundary component', () => {
     mockFunction(console, 'error')

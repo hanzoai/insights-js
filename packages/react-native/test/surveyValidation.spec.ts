@@ -1,4 +1,4 @@
-import { getValidationError, SurveyValidationType } from '@posthog/core'
+import { getValidationError, SurveyValidationType } from '@hanzo/insights-core'
 
 describe('Survey Validation in React Native', () => {
   describe('trim fix for required fields', () => {

@@ -17,7 +17,7 @@ import { localStore } from '../../storage'
 import { LAST_SEEN_TOUR_DATE_KEY_PREFIX } from './constants'
 
 import productTourStyles from './product-tour.css'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 import { hasPeriodPassed } from '../utils/matcher-utils'
 
 const logger = createLogger('[Product Tours]')

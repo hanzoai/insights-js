@@ -1,5 +1,5 @@
 import { getNextSurveyStep } from '../src/surveys/surveys-utils'
-import { Survey, SurveyQuestionBranchingType, SurveyQuestionType, SurveyType } from '@posthog/core'
+import { Survey, SurveyQuestionBranchingType, SurveyQuestionType, SurveyType } from '@hanzo/insights-core'
 
 describe('getNextSurveyStep', () => {
   const createBasicSurvey = (questions: any[]): Survey => ({

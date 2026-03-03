@@ -1,5 +1,5 @@
 import type { Plugin, OutputOptions, OutputAsset, OutputChunk } from 'rollup'
-import { spawnLocal, resolveBinaryPath, LogLevel } from '@posthog/core/process'
+import { spawnLocal, resolveBinaryPath, LogLevel } from '@hanzo/insights-core/process'
 import path from 'node:path'
 import fs from 'node:fs/promises'
 

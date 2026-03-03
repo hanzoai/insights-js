@@ -11,7 +11,7 @@ import { RemoteConfigLoader } from '../../remote-config'
 import { Properties, RemoteConfig, SessionRecordingPersistedConfig, SessionStartReason } from '../../types'
 import { type eventWithTime } from './types/rrweb-types'
 
-import { isNullish, isNumber, isUndefined, isValidSampleRate } from '@posthog/core'
+import { isNullish, isNumber, isUndefined, isValidSampleRate } from '@hanzo/insights-core'
 import { createLogger } from '../../utils/logger'
 import {
     assignableWindow,

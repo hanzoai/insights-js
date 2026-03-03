@@ -13,7 +13,7 @@ import { expect } from '@jest/globals'
 
 import { _base64Encode } from '../utils/encode-utils'
 import { getPersonPropertiesHash, propertyComparisons } from '../utils/property-utils'
-import { detectDeviceType } from '@posthog/core'
+import { detectDeviceType } from '@hanzo/insights-core'
 import { getEventProperties } from '../utils/event-utils'
 
 function userAgentFor(botString: string) {

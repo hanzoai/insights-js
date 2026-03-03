@@ -1,8 +1,8 @@
 import { defineNuxtModule, addPlugin, createResolver, addServerPlugin, addImportsDir } from '@nuxt/kit'
-import type { PostHogConfig } from 'posthog-js'
-import type { PostHogOptions } from 'posthog-node'
+import type { PostHogConfig } from '@hanzo/insights'
+import type { PostHogOptions } from '@hanzo/insights-node'
 import type {} from 'nuxt/app'
-import { resolveBinaryPath, spawnLocal } from '@posthog/core/process'
+import { resolveBinaryPath, spawnLocal } from '@hanzo/insights-core/process'
 import { fileURLToPath } from 'node:url'
 import { dirname } from 'node:path'
 

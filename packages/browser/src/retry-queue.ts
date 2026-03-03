@@ -1,6 +1,6 @@
 import { RetriableRequestWithOptions } from './types'
 
-import { isPositiveNumber, isUndefined } from '@posthog/core'
+import { isPositiveNumber, isUndefined } from '@hanzo/insights-core'
 import { logger } from './utils/logger'
 import { window } from './utils/globals'
 import { PostHog } from './posthog-core'

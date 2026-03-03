@@ -45,7 +45,7 @@ import {
     isObject,
     isString,
     isUndefined,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import {
     SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION,
     SESSION_RECORDING_FIRST_FULL_SNAPSHOT_TIMESTAMP,

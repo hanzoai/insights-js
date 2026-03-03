@@ -14,7 +14,7 @@ import { PostHog } from '../posthog-core'
 import { window } from '../utils/globals'
 import { createPosthogInstance } from './helpers/posthog-instance'
 import { uuidv7 } from '../uuidv7'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 
 // JS DOM doesn't have ClipboardEvent, so we need to mock it
 // see https://github.com/jsdom/jsdom/issues/1568

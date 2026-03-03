@@ -1,7 +1,7 @@
 import uaParserDeviceTestCases from './device.test.json'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 import uaParserOSTestCases from './os-test.json'
-import { detectBrowser, detectBrowserVersion, detectDeviceType, detectOS } from '@posthog/core'
+import { detectBrowser, detectBrowserVersion, detectDeviceType, detectOS } from '@hanzo/insights-core'
 
 describe('user-agent-utils', () => {
     describe('user agent', () => {

@@ -1,4 +1,4 @@
-import { SurveyPosition } from '@posthog/core'
+import { SurveyPosition } from '@hanzo/insights-core'
 import { expect, test } from '../utils/posthog-playwright-test-base'
 import {
     createTour,

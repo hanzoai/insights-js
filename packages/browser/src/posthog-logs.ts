@@ -1,6 +1,6 @@
 import { PostHog } from './posthog-core'
 import { RemoteConfig } from './types'
-import { isNullish } from '@posthog/core'
+import { isNullish } from '@hanzo/insights-core'
 import { assignableWindow } from './utils/globals'
 import { createLogger } from './utils/logger'
 

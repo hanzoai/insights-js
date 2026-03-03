@@ -1,10 +1,10 @@
 import { addUncaughtExceptionListener, addUnhandledRejectionListener } from './autocapture'
 import { PostHogBackendClient } from '@/client'
-import { isObject, uuidv7 } from '@posthog/core'
+import { isObject, uuidv7 } from '@hanzo/insights-core'
 import { EventMessage, PostHogOptions } from '@/types'
-import type { Logger } from '@posthog/core'
-import { BucketedRateLimiter } from '@posthog/core'
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import type { Logger } from '@hanzo/insights-core'
+import { BucketedRateLimiter } from '@hanzo/insights-core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 
 const SHUTDOWN_TIMEOUT = 2000
 

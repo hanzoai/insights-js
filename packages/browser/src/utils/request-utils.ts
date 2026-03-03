@@ -1,6 +1,6 @@
 import { each } from './'
 
-import { isArray, isFile, isUndefined } from '@posthog/core'
+import { isArray, isFile, isUndefined } from '@hanzo/insights-core'
 import { logger } from './logger'
 import { document } from './globals'
 

@@ -1,12 +1,12 @@
 import { version } from './version'
 
-import { PostHogCore, getFetch } from '@posthog/core'
+import { PostHogCore, getFetch } from '@hanzo/insights-core'
 import type {
   PostHogEventProperties,
   PostHogFetchOptions,
   PostHogFetchResponse,
   PostHogPersistedProperty,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 
 import { getContext } from './context'
 import { PostHogStorage, getStorage } from './storage'

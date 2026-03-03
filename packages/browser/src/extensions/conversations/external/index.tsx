@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { render, h } from 'preact'
-import { isNumber } from '@posthog/core'
+import { isNumber } from '@hanzo/insights-core'
 import {
     ConversationsRemoteConfig,
     ConversationsWidgetState,

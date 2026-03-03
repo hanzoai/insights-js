@@ -1,5 +1,5 @@
 import { BeforeSendFn, CaptureResult, KnownEventName } from '../types'
-import { includes, clampToRange } from '@posthog/core'
+import { includes, clampToRange } from '@hanzo/insights-core'
 import { appendArray, sampleOnProperty, updateThreshold } from '../extensions/sampling'
 import { logger } from '../utils/logger'
 

@@ -5,7 +5,7 @@
  */
 
 import type { Properties, PropertyMatchType } from './types'
-import type { SurveyAppearance as CoreSurveyAppearance, SurveyValidationRule } from '@posthog/core'
+import type { SurveyAppearance as CoreSurveyAppearance, SurveyValidationRule } from '@hanzo/insights-core'
 
 export enum SurveyEventType {
     Activation = 'events',
@@ -174,7 +174,7 @@ export interface SurveyElement {
 }
 
 // Re-export from @posthog/types to avoid duplication
-export type { SurveyRenderReason } from '@posthog/types'
+export type { SurveyRenderReason } from '@hanzo/insights-types'
 
 export enum SurveySchedule {
     Once = 'once',

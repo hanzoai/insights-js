@@ -1,6 +1,6 @@
 // Re-export shared bot detection logic from @posthog/core
-import { isBlockedUA as isBlockedUACore } from '@posthog/core'
-export { DEFAULT_BLOCKED_UA_STRS, isBlockedUA } from '@posthog/core'
+import { isBlockedUA as isBlockedUACore } from '@hanzo/insights-core'
+export { DEFAULT_BLOCKED_UA_STRS, isBlockedUA } from '@hanzo/insights-core'
 
 // There's more in the type, but this is all we use. It's currently experimental, see
 // https://developer.mozilla.org/en-US/docs/Web/API/Navigator/userAgentData

@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { withPrivacyMode, getModelParams, toContentString } from '../utils'
 import { BaseCallbackHandler } from '@langchain/core/callbacks/base'
 import { version } from '../../package.json'

@@ -1,7 +1,7 @@
 import { Survey, SurveyQuestion, SurveyQuestionBranchingType, SurveyQuestionType } from '../posthog-surveys-types'
 import { getSurveyResponseKey } from '../extensions/surveys/surveys-extension-utils'
 import { logger } from './logger'
-import { isUndefined } from '@posthog/core'
+import { isUndefined } from '@hanzo/insights-core'
 import { getNextSurveyStep } from './survey-branching'
 
 /**

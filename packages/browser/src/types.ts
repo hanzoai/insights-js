@@ -25,10 +25,10 @@ type Extension<T> = new (...args: any[]) => T
 // ============================================================================
 
 // Common types
-export type { Property, Properties, JsonType, JsonRecord } from '@posthog/types'
+export type { Property, Properties, JsonType, JsonRecord } from '@hanzo/insights-types'
 
 // Capture types
-export type { KnownEventName, EventName, CaptureResult, CaptureOptions, BeforeSendFn } from '@posthog/types'
+export type { KnownEventName, EventName, CaptureResult, CaptureOptions, BeforeSendFn } from '@hanzo/insights-types'
 
 // Feature flag types
 export type {
@@ -47,10 +47,10 @@ export type {
     FeatureFlagPayloadOverrides,
     FeatureFlagOverrideOptions,
     OverrideFeatureFlagsOptions,
-} from '@posthog/types'
+} from '@hanzo/insights-types'
 
 // Request types
-export type { Headers, RequestResponse, RequestCallback } from '@posthog/types'
+export type { Headers, RequestResponse, RequestCallback } from '@hanzo/insights-types'
 
 // Session recording types
 export type {
@@ -60,7 +60,7 @@ export type {
     CapturedNetworkRequest,
     SessionIdChangedCallback,
     SeverityLevel,
-} from '@posthog/types'
+} from '@hanzo/insights-types'
 
 // Config types
 export type {
@@ -82,13 +82,13 @@ export type {
     SlimDOMOptions,
     SessionRecordingOptions,
     RequestQueueConfig,
-} from '@posthog/types'
+} from '@hanzo/insights-types'
 
 // Toolbar types
-export type { ToolbarUserIntent, ToolbarSource, ToolbarVersion, ToolbarParams } from '@posthog/types'
+export type { ToolbarUserIntent, ToolbarSource, ToolbarVersion, ToolbarParams } from '@hanzo/insights-types'
 
 // Re-export KnownUnsafeEditableEvent from @posthog/core for backwards compatibility
-export type { KnownUnsafeEditableEvent } from '@posthog/core'
+export type { KnownUnsafeEditableEvent } from '@hanzo/insights-core'
 
 // ============================================================================
 // Browser-specific types that depend on local imports
@@ -110,7 +110,7 @@ import type {
     PostHogConfig as BasePostHogConfig,
     PostHog as BasePostHogInterface,
     RequestResponse,
-} from '@posthog/types'
+} from '@hanzo/insights-types'
 
 /* Small override from the base class to make it more specific to the browser/src/posthog-core.ts file
  * This guarantees we'll be able to use `PostHogConfig` as implemented in the browser/src/posthog-core.ts file

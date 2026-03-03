@@ -20,7 +20,7 @@ import {
     SURVEY_IN_PROGRESS_PREFIX,
     SURVEY_SEEN_PREFIX,
 } from './utils/survey-utils'
-import { isNullish, isUndefined, isArray } from '@posthog/core'
+import { isNullish, isUndefined, isArray } from '@hanzo/insights-core'
 
 export class PostHogSurveys {
     // this is set to undefined until the remote config is loaded

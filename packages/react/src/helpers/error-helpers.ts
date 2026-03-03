@@ -1,6 +1,6 @@
 import type { ErrorInfo } from 'react'
 import { PostHog } from '../context'
-import { CaptureResult } from 'posthog-js'
+import { CaptureResult } from '@hanzo/insights'
 
 export const setupReactErrorHandler = (
     client: PostHog,

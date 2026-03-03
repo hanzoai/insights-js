@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next'
-import { PosthogWebpackPlugin, PluginConfig, resolveConfig, ResolvedPluginConfig } from '@posthog/webpack-plugin'
+import { PosthogWebpackPlugin, PluginConfig, resolveConfig, ResolvedPluginConfig } from '@hanzo/insights-webpack-plugin'
 import { hasCompilerHook, isTurbopackEnabled, processSourceMaps } from './utils'
 
 type NextFuncConfig = (phase: string, { defaultConfig }: { defaultConfig: NextConfig }) => NextConfig

@@ -1,5 +1,5 @@
 // src/posthog.js
-import posthog from 'posthog-js'
+import posthog from '@hanzo/insights'
 
 posthog.init(process.env.POSTHOG_PROJECT_API_KEY, {
     api_host: process.env.POSTHOG_API_HOST,

@@ -1,4 +1,4 @@
-import { resolveBinaryPath } from '@posthog/core/process'
+import { resolveBinaryPath } from '@hanzo/insights-core/process'
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent'
 

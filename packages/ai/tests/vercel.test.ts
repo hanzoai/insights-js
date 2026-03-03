@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { withTracing } from '../src/index'
 import type {
   LanguageModelV2,
@@ -12,7 +12,7 @@ import { flushPromises } from './test-utils'
 import { version } from '../package.json'
 
 // Mock PostHog
-jest.mock('posthog-node', () => {
+jest.mock('@hanzo/insights-node', () => {
   return {
     PostHog: jest.fn().mockImplementation(() => {
       return {

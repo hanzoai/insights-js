@@ -1,4 +1,4 @@
-import { resolve, typescript, commonjs, dts } from '@posthog-tooling/rollup-utils'
+import { resolve, typescript, commonjs, dts } from '@hanzo/insights-tooling-rollup-utils'
 import copy from 'rollup-plugin-copy'
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx']
@@ -21,7 +21,7 @@ const plugins = [
  * Configuration for the ESM build
  */
 const buildEsm = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: [
         // Split modules so they can be tree-shaken
         'src/index.ts',
@@ -38,7 +38,7 @@ const buildEsm = {
  * Configuration for the UMD build
  */
 const buildUmd = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: './src/index.ts',
     output: {
         file: 'dist/umd/index.js',
@@ -48,14 +48,14 @@ const buildUmd = {
         esModule: false,
         globals: {
             react: 'React',
-            'posthog-js': 'posthog',
+            '@hanzo/insights': 'posthog',
         },
     },
     plugins,
 }
 
 const buildTypes = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: './src/index.ts',
     output: {
         file: 'dist/types/index.d.ts',
@@ -65,7 +65,7 @@ const buildTypes = {
 }
 
 const buildSurveysEsm = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: 'src/surveys/index.ts',
     output: {
         file: 'dist/esm/surveys/index.js',
@@ -76,7 +76,7 @@ const buildSurveysEsm = {
 }
 
 const buildSurveysUmd = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: 'src/surveys/index.ts',
     output: {
         file: 'dist/umd/surveys/index.js',
@@ -86,14 +86,14 @@ const buildSurveysUmd = {
         esModule: false,
         globals: {
             react: 'React',
-            'posthog-js': 'posthog',
+            '@hanzo/insights': 'posthog',
         },
     },
     plugins,
 }
 
 const buildSurveysTypes = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: 'src/surveys/index.ts',
     output: {
         file: 'dist/types/surveys/index.d.ts',

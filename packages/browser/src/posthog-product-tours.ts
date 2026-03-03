@@ -3,7 +3,7 @@ import { ProductTour, ProductTourCallback } from './posthog-product-tours-types'
 import { PRODUCT_TOURS_ENABLED_SERVER_SIDE } from './constants'
 import { RemoteConfig } from './types'
 import { createLogger } from './utils/logger'
-import { isArray, isNullish } from '@posthog/core'
+import { isArray, isNullish } from '@hanzo/insights-core'
 import { assignableWindow } from './utils/globals'
 
 const logger = createLogger('[Product Tours]')

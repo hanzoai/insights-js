@@ -1,6 +1,6 @@
 import { querySelectorAllDeep } from 'query-selector-shadow-dom'
 import { window as _window } from '../../utils/globals'
-import { createLogger, isArray, isUndefined } from '@posthog/core'
+import { createLogger, isArray, isUndefined } from '@hanzo/insights-core'
 
 const window = _window as Window & typeof globalThis
 const logger = createLogger('[Element Inference]')

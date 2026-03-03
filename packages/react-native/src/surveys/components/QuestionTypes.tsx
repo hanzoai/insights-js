@@ -28,7 +28,7 @@ import {
   getLengthFromRules,
   getRequirementsHint,
   SurveyValidationType,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 import { BottomSection } from './BottomSection'
 import { QuestionHeader } from './QuestionHeader'
 

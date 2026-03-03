@@ -13,7 +13,7 @@ import {
 import { RemoteConfig } from '../../types'
 import { assignableWindow, LazyLoadedConversationsInterface } from '../../utils/globals'
 import { createLogger } from '../../utils/logger'
-import { isNullish, isUndefined, isBoolean, isNull } from '@posthog/core'
+import { isNullish, isUndefined, isBoolean, isNull } from '@hanzo/insights-core'
 import { isToolbarInstance } from '../../utils'
 
 const logger = createLogger('[Conversations]')

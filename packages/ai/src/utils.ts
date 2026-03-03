@@ -1,4 +1,4 @@
-import { EventMessage, PostHog } from 'posthog-node'
+import { EventMessage, PostHog } from '@hanzo/insights-node'
 import OpenAIOrignal from 'openai'
 import AnthropicOriginal from '@anthropic-ai/sdk'
 import type { ChatCompletionTool } from 'openai/resources/chat/completions'
@@ -8,7 +8,7 @@ import type { FormattedMessage, FormattedContent, TokenUsage } from './types'
 import { version } from '../package.json'
 import { v4 as uuidv4 } from 'uuid'
 import { isString } from './typeGuards'
-import { uuidv7, ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { uuidv7, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { redactBase64DataUrl } from './sanitization'
 
 type ChatCompletionCreateParamsBase = OpenAIOrignal.Chat.Completions.ChatCompletionCreateParams
