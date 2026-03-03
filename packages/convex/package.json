@@ -1,22 +1,27 @@
 {
   "name": "@hanzo/insights-convex",
-  "description": "Send analytics events to PostHog from your Convex backend.",
+  "description": "Send analytics events to Hanzo Insights from your Convex backend.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/convex"
   },
-  "homepage": "https://github.com/PostHog/posthog-js/tree/main/packages/convex#readme",
+  "homepage": "https://docs.hanzo.ai/insights/convex",
   "bugs": {
-    "url": "https://github.com/PostHog/posthog-js/issues"
+    "url": "https://github.com/hanzoai/insights-js/issues"
   },
-  "author": "PostHog Inc.",
+  "author": {
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
+  },
   "version": "0.1.5",
   "license": "MIT",
   "keywords": [
     "convex",
     "component",
-    "posthog",
+    "hanzo",
+    "insights",
     "analytics"
   ],
   "scripts": {
