@@ -1,10 +1,10 @@
 {
   "name": "@hanzo/insights-rollup-plugin",
   "version": "1.2.14",
-  "description": "PostHog Rollup plugin",
+  "description": "Rollup plugin for Hanzo Insights source map upload.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/rollup-plugin"
   },
   "type": "module",

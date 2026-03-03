@@ -1,14 +1,14 @@
 {
   "name": "@hanzo/insights-types",
   "version": "1.357.1",
-  "description": "Type definitions for the PostHog JavaScript SDK",
+  "description": "Type definitions for the Hanzo Insights JavaScript SDK.",
   "license": "MIT",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/types"
   },
   "files": [

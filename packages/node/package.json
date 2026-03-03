@@ -1,10 +1,10 @@
 {
   "name": "@hanzo/insights-node",
   "version": "5.26.2",
-  "description": "PostHog Node.js integration",
+  "description": "Hanzo Insights Node.js SDK for server-side analytics and feature flags.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/node"
   },
   "scripts": {
@@ -29,9 +29,9 @@
   ],
   "license": "MIT",
   "author": {
-    "name": "PostHog",
-    "email": "hey@posthog.com",
-    "url": "https://posthog.com"
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
   },
   "main": "dist/entrypoints/index.node.js",
   "module": "dist/entrypoints/index.node.mjs",
@@ -48,10 +48,10 @@
     "jest": "catalog:"
   },
   "keywords": [
-    "posthog",
-    "stats",
-    "analysis",
-    "funnels"
+    "hanzo",
+    "insights",
+    "analytics",
+    "feature-flags"
   ],
   "exports": {
     ".": {
