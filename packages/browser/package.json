@@ -1,11 +1,19 @@
 {
   "name": "@hanzo/insights",
   "version": "1.357.1",
-  "description": "Posthog-js allows you to automatically capture usage and send events to PostHog.",
-  "repository": "https://github.com/PostHog/posthog-js",
-  "author": "hey@posthog.com",
+  "description": "Hanzo Insights browser SDK for automatic event capture and behavioral analytics.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "directory": "packages/browser"
+  },
+  "author": {
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
+  },
   "license": "SEE LICENSE IN LICENSE",
-  "homepage": "https://posthog.com/docs/libraries/js",
+  "homepage": "https://docs.hanzo.ai/insights/js",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "clean": "rimraf lib dist react/dist",

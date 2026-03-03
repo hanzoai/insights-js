@@ -1,16 +1,16 @@
 {
   "name": "@hanzo/insights-nextjs",
   "version": "1.8.19",
-  "description": "NextJS configuration helper for Posthog \ud83e\udd94",
+  "description": "Next.js configuration helper for Hanzo Insights.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/nextjs-config"
   },
   "author": {
-    "name": "PostHog",
-    "email": "hey@posthog.com",
-    "url": "https://posthog.com"
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -48,7 +48,8 @@
     "@hanzo/insights-webpack-plugin": "workspace:*"
   },
   "keywords": [
-    "posthog",
+    "hanzo",
+    "insights",
     "nextjs"
   ],
   "devDependencies": {
