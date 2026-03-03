@@ -1,16 +1,16 @@
 {
   "name": "@hanzo/insights-webpack-plugin",
   "version": "1.2.25",
-  "description": "Webpack plugin for Posthog \ud83e\udd94",
+  "description": "Webpack plugin for Hanzo Insights source map upload.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/webpack-plugin"
   },
   "author": {
-    "name": "PostHog",
-    "email": "hey@posthog.com",
-    "url": "https://posthog.com"
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

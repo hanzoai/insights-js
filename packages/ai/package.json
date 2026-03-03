@@ -1,10 +1,10 @@
 {
   "name": "@hanzo/insights-ai",
   "version": "7.9.4",
-  "description": "PostHog Node.js AI integrations",
+  "description": "Hanzo Insights AI integrations for LLM observability.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/ai"
   },
   "main": "dist/index.cjs",
@@ -35,7 +35,8 @@
     "@hanzo/insights-node": "workspace:*"
   },
   "keywords": [
-    "posthog",
+    "hanzo",
+    "insights",
     "ai",
     "openai",
     "anthropic",
@@ -117,9 +118,13 @@
     "lib": "lib",
     "test": "tests"
   },
-  "author": "PostHog",
-  "bugs": {
-    "url": "https://github.com/PostHog/posthog-js-lite/issues"
+  "author": {
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
   },
-  "homepage": "https://github.com/PostHog/posthog-js-lite#readme"
+  "bugs": {
+    "url": "https://github.com/hanzoai/insights-js/issues"
+  },
+  "homepage": "https://docs.hanzo.ai/insights/ai"
 }

@@ -1,15 +1,19 @@
 {
   "name": "@hanzo/insights-react",
   "version": "1.8.1",
-  "description": "Provides components and hooks for React integrations of PostHog.",
+  "description": "React components and hooks for Hanzo Insights.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoai/insights-js.git",
     "directory": "packages/react"
   },
-  "author": "hey@posthog.com",
+  "author": {
+    "name": "Hanzo AI",
+    "email": "dev@hanzo.ai",
+    "url": "https://hanzo.ai"
+  },
   "license": "MIT",
-  "homepage": "https://posthog.com/docs/libraries/react",
+  "homepage": "https://docs.hanzo.ai/insights/react",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "clean": "rimraf dist",
