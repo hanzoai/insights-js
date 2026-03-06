@@ -1,10 +1,10 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 import { BrowserContext, Page } from '@playwright/test'
-import { PostHogConfig } from '@/types'
+import { InsightsConfig } from '@/types'
 import { assertThatRecordingStarted, pollUntilEventCaptured } from '../utils/event-capture-utils'
 
-async function startWith(config: Partial<PostHogConfig>, page: Page, context: BrowserContext) {
+async function startWith(config: Partial<InsightsConfig>, page: Page, context: BrowserContext) {
     // there will be a flags call
     const flagsResponse = page.waitForResponse('**/flags/*')
 
@@ -36,7 +36,7 @@ test.describe('Session Recording - opting out', () => {
         void expect(page.waitForResponse('**/ses/*', { timeout: 250 })).rejects.toThrowError('Timeout')
         await startWith({ opt_out_capturing_by_default: true }, page, context)
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await page.waitForTimeout(250) // short delay since there's no snapshot to wait for
         await page.expectCapturedEventsToBe([])
     })
@@ -48,7 +48,7 @@ test.describe('Session Recording - opting out', () => {
 
         await startWith({ disable_session_recording: true }, page, context)
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await page.waitForTimeout(250) // short delay since there's no snapshot to wait for
         await page.expectCapturedEventsToBe(['$pageview'])
     })
@@ -60,7 +60,7 @@ test.describe('Session Recording - opting out', () => {
             urlPatternsToWaitFor: ['**/*recorder.js*'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.opt_in_capturing()
                     ph?.startSessionRecording()
                 })
@@ -71,7 +71,7 @@ test.describe('Session Recording - opting out', () => {
 
         await page.resetCapturedEvents()
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })
@@ -84,13 +84,13 @@ test.describe('Session Recording - opting out', () => {
             action: async () => {
                 await page.resetCapturedEvents()
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.startSessionRecording()
                 })
             },
         })
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })
@@ -110,7 +110,7 @@ test.describe('Session Recording - opting out', () => {
             return null
         })
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
 
         void callsToSessionRecording.then((response) => {
             if (response) {

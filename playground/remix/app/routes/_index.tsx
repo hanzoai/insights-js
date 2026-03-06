@@ -1,18 +1,18 @@
-import { usePostHog } from '@posthog/react'
+import { useInsights } from '@insights/react'
 import type { MetaFunction } from '@remix-run/node'
 
 export const meta: MetaFunction = () => {
     return [
-        { title: 'PostHog Remix Playground' },
-        { name: 'description', content: 'Test PostHog integration with Remix' },
+        { title: 'Insights Remix Playground' },
+        { name: 'description', content: 'Test Insights integration with Remix' },
     ]
 }
 
 export default function Index() {
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     const handleCustomEvent = () => {
-        posthog?.capture('custom_button_click', {
+        insights?.capture('custom_button_click', {
             location: 'homepage',
             timestamp: new Date().toISOString(),
         })
@@ -20,10 +20,10 @@ export default function Index() {
 
     return (
         <div style={{ fontFamily: 'system-ui, sans-serif', lineHeight: '1.8', padding: '2rem' }}>
-            <p>This is a basic Remix application with PostHog integration.</p>
+            <p>This is a basic Remix application with Insights integration.</p>
 
             <div style={{ marginTop: '2rem' }}>
-                <h2>Test PostHog Events</h2>
+                <h2>Test Insights Events</h2>
                 <button
                     onClick={handleCustomEvent}
                     style={{
@@ -45,7 +45,7 @@ export default function Index() {
                 <ul>
                     <li>Automatic pageview tracking</li>
                     <li>Custom event capture</li>
-                    <li>PostHog React hooks integration</li>
+                    <li>Insights React hooks integration</li>
                     <li>Multiple example pages</li>
                 </ul>
             </div>
@@ -68,7 +68,7 @@ export default function Index() {
                     <li>
                         Run <code>pnpm dev</code> to start the development server
                     </li>
-                    <li>Open the browser console to see PostHog events</li>
+                    <li>Open the browser console to see Insights events</li>
                     <li>Navigate between pages to see pageview tracking</li>
                 </ol>
             </div>

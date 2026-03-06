@@ -1,4 +1,4 @@
-import { getChangedState } from '../../customizations/posthogReduxLogger'
+import { getChangedState } from '../../customizations/insightsReduxLogger'
 
 // Helper function to create complex nested state objects
 function createComplexState(depth: number, breadth: number, includeArrays = false): Record<string, any> {

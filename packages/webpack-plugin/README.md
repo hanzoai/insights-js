@@ -1,13 +1,13 @@
-# @posthog/webpack-plugin
+# @hanzo/webpack-plugin
 
-Webpack plugin for uploading source maps to PostHog for error tracking.
+Webpack plugin for uploading source maps to Insights for error tracking.
 
-[SEE FULL DOCS](https://posthog.com/docs/error-tracking/upload-source-maps/webpack)
+[SEE FULL DOCS](https://insights.hanzo.ai/docs/error-tracking/upload-source-maps/webpack)
 
 ## Installation
 
 ```bash
-npm install @posthog/webpack-plugin --save-dev
+npm install @hanzo/webpack-plugin --save-dev
 ```
 
 ## Usage
@@ -15,14 +15,14 @@ npm install @posthog/webpack-plugin --save-dev
 Add the plugin to your webpack configuration:
 
 ```typescript
-import { PosthogWebpackPlugin } from '@posthog/webpack-plugin'
+import { InsightsWebpackPlugin } from '@hanzo/webpack-plugin'
 
 export default {
     // ... your webpack config
     plugins: [
-        new PosthogWebpackPlugin({
-            personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY,
-            projectId: process.env.POSTHOG_PROJECT_ID,
+        new InsightsWebpackPlugin({
+            personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY,
+            projectId: process.env.INSIGHTS_PROJECT_ID,
             sourcemaps: {
                 enabled: true,
                 releaseName: 'my-app',
@@ -37,12 +37,12 @@ export default {
 
 | Option                         | Type                                                 | Required | Default                    | Description                                 |
 | ------------------------------ | ---------------------------------------------------- | -------- | -------------------------- | ------------------------------------------- |
-| `personalApiKey`               | `string`                                             | Yes      | -                          | Your PostHog personal API key               |
-| `projectId`                    | `string`                                             | Yes      | -                          | Your PostHog project/environment ID         |
+| `personalApiKey`               | `string`                                             | Yes      | -                          | Your Insights personal API key               |
+| `projectId`                    | `string`                                             | Yes      | -                          | Your Insights project/environment ID         |
 | `envId`                        | `string`                                             | No       | -                          | Deprecated alias for `projectId`            |
-| `host`                         | `string`                                             | No       | `https://us.i.posthog.com` | PostHog instance host                       |
+| `host`                         | `string`                                             | No       | `https://us.i.insights.hanzo.ai` | Insights instance host                       |
 | `logLevel`                     | `'debug' \| 'info' \| 'warn' \| 'error' \| 'silent'` | No       | `'info'`                   | Logging verbosity                           |
-| `cliBinaryPath`                | `string`                                             | No       | Auto-detected              | Path to the PostHog CLI binary              |
+| `cliBinaryPath`                | `string`                                             | No       | Auto-detected              | Path to the Insights CLI binary              |
 | `sourcemaps.enabled`           | `boolean`                                            | No       | `true` in production       | Enable source map processing                |
 | `sourcemaps.releaseName`       | `string`                                             | No       | -                          | Release name for source map grouping        |
 | `sourcemaps.releaseVersion`    | `string`                                             | No       | -                          | Version identifier for the release          |
@@ -54,7 +54,7 @@ export default {
 ```typescript
 import path from 'node:path'
 import webpack from 'webpack'
-import { PosthogWebpackPlugin } from '@posthog/webpack-plugin'
+import { InsightsWebpackPlugin } from '@hanzo/webpack-plugin'
 import packageJson from './package.json'
 
 const config: webpack.Configuration = {
@@ -65,10 +65,10 @@ const config: webpack.Configuration = {
         path: path.resolve(__dirname, 'dist'),
     },
     plugins: [
-        new PosthogWebpackPlugin({
-            personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY,
-            projectId: process.env.POSTHOG_PROJECT_ID,
-            host: process.env.POSTHOG_API_HOST,
+        new InsightsWebpackPlugin({
+            personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY,
+            projectId: process.env.INSIGHTS_PROJECT_ID,
+            host: process.env.INSIGHTS_API_HOST,
             logLevel: 'error',
             sourcemaps: {
                 enabled: true,
@@ -85,4 +85,4 @@ export default config
 
 ## Questions?
 
-### [Check out our community page.](https://posthog.com/docs/error-tracking/upload-source-maps/webpack)
+### [Check out our community page.](https://insights.hanzo.ai/docs/error-tracking/upload-source-maps/webpack)

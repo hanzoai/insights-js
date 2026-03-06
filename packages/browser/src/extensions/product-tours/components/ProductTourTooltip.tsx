@@ -5,7 +5,7 @@ import {
     ProductTourStep,
     ProductTourDismissReason,
     ProductTourStepButton,
-} from '../../../posthog-product-tours-types'
+} from '../../../insights-product-tours-types'
 import { isUndefined, SurveyPosition } from '@hanzo/insights-core'
 import {
     calculateTooltipPosition,

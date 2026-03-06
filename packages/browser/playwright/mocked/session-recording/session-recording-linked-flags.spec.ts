@@ -1,4 +1,4 @@
-import { test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, StartOptions, waitForRemoteConfig } from '../utils/setup'
 import { assertThatRecordingStarted, pollUntilEventCaptured } from '../utils/event-capture-utils'
 import { BrowserContext, Page } from '@playwright/test'
@@ -69,7 +69,7 @@ test.describe('Session recording - linked flags', () => {
         await recorderPromise
 
         // even activity won't trigger a snapshot, we're buffering
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         // short delay since there's no snapshot to wait for
         await page.waitForTimeout(250)
 
@@ -99,7 +99,7 @@ test.describe('Session recording - linked flags', () => {
 
         await recorderPromise
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })
@@ -136,7 +136,7 @@ test.describe('Session recording - linked flags', () => {
 
         await recorderPromise
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })
@@ -178,7 +178,7 @@ test.describe('Session recording - linked flags', () => {
 
         await recorderPromise
 
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })
@@ -221,7 +221,7 @@ test.describe('Session recording - linked flags', () => {
         await recorderPromise
 
         // even activity won't trigger a snapshot, we're buffering
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         // short delay since there's no snapshot to wait for
         await page.waitForTimeout(250)
 
@@ -257,7 +257,7 @@ test.describe('Session recording - linked flags', () => {
             urlPatternsToWaitFor: ['**/*recorder.js*'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.opt_in_capturing()
                     // starting does not begin recording because of the linked flag
                     ph?.startSessionRecording()
@@ -270,10 +270,10 @@ test.describe('Session recording - linked flags', () => {
         await page.resetCapturedEvents()
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.startSessionRecording({ linked_flag: true })
         })
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })

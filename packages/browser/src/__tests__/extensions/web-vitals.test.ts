@@ -1,8 +1,8 @@
 import '../helpers/mock-logger'
 
-import { createPosthogInstance } from '../helpers/posthog-instance'
+import { createInsightsInstance } from '../helpers/insights-instance'
 import { uuidv7 } from '../../uuidv7'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { FlagsResponse, PerformanceCaptureConfig, RemoteConfig, SupportedWebVitalsMetrics } from '../../types'
 import { assignableWindow } from '../../utils/globals'
 import { DEFAULT_FLUSH_TO_CAPTURE_TIMEOUT_MILLISECONDS, FIFTEEN_MINUTES_IN_MILLIS } from '../../extensions/web-vitals'
@@ -33,7 +33,7 @@ jest.mock('../../utils/globals', () => {
         ...original,
         assignableWindow: {
             ...original.assignableWindow,
-            __PosthogExtensions__: {},
+            __InsightsExtensions__: {},
         },
         get location() {
             return mockLocation()
@@ -43,7 +43,7 @@ jest.mock('../../utils/globals', () => {
 })
 
 describe('web vitals', () => {
-    let posthog: PostHog
+    let insights: Insights
     let beforeSendMock = jest.fn().mockImplementation((e) => e)
     let onLCPCallback: ((metric: Record<string, any>) => void) | undefined = undefined
     let onCLSCallback: ((metric: Record<string, any>) => void) | undefined = undefined
@@ -130,7 +130,7 @@ describe('web vitals', () => {
         ) => {
             beforeEach(async () => {
                 beforeSendMock.mockClear()
-                posthog = await createPosthogInstance(uuidv7(), {
+                insights = await createInsightsInstance(uuidv7(), {
                     before_send: beforeSendMock,
                     capture_performance: { web_vitals: true, web_vitals_allowed_metrics: clientConfig },
                     // sometimes pageviews sneak in and make asserting on mock capture tricky
@@ -139,8 +139,8 @@ describe('web vitals', () => {
 
                 loadScriptMock.mockImplementation((_ph, _path, callback) => {
                     // we need a set of fake web vitals handlers, so we can manually trigger the events
-                    assignableWindow.__PosthogExtensions__ = {}
-                    assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = {
+                    assignableWindow.__InsightsExtensions__ = {}
+                    assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = {
                         onLCP: (cb: any) => {
                             onLCPCallback = cb
                         },
@@ -157,15 +157,15 @@ describe('web vitals', () => {
                     callback()
                 })
 
-                assignableWindow.__PosthogExtensions__ = {}
-                assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+                assignableWindow.__InsightsExtensions__ = {}
+                assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
                 // need to force this to get the web vitals script loaded
-                posthog.webVitalsAutocapture!.onRemoteConfig({
+                insights.webVitalsAutocapture!.onRemoteConfig({
                     capturePerformance: { web_vitals: true },
                 } as unknown as FlagsResponse)
 
-                expect(posthog.webVitalsAutocapture.allowedMetrics).toEqual(expectedAllowedMetrics)
+                expect(insights.webVitalsAutocapture.allowedMetrics).toEqual(expectedAllowedMetrics)
             })
 
             it('should emit when all allowed metrics are captured', async () => {
@@ -201,7 +201,7 @@ describe('web vitals', () => {
             })
 
             it('should emit after configured timeout even when only 1 to 3 metrics captured', async () => {
-                ;(posthog.config.capture_performance as PerformanceCaptureConfig).web_vitals_delayed_flush_ms = 1000
+                ;(insights.config.capture_performance as PerformanceCaptureConfig).web_vitals_delayed_flush_ms = 1000
                 onCLSCallback?.({ name: 'CLS', value: 123.45, extra: 'property' })
 
                 expect(beforeSendMock).toBeCalledTimes(0)
@@ -230,7 +230,7 @@ describe('web vitals', () => {
             })
 
             it('can be configured not to ignore a ridiculous value', async () => {
-                posthog.config.capture_performance = { __web_vitals_max_value: 0 }
+                insights.config.capture_performance = { __web_vitals_max_value: 0 }
                 onCLSCallback?.({ name: 'CLS', value: FIFTEEN_MINUTES_IN_MILLIS, extra: 'property' })
 
                 expect(beforeSendMock).toBeCalledTimes(0)
@@ -250,12 +250,12 @@ describe('web vitals', () => {
         ])(
             'when web_vitals_attribution is %p, useAttribution should be %p',
             async (attributionConfig, expectedUseAttribution) => {
-                posthog = await createPosthogInstance(uuidv7(), {
+                insights = await createInsightsInstance(uuidv7(), {
                     capture_performance: { web_vitals: true, web_vitals_attribution: attributionConfig },
                     capture_pageview: false,
                 })
 
-                expect(posthog.webVitalsAutocapture!.useAttribution).toBe(expectedUseAttribution)
+                expect(insights.webVitalsAutocapture!.useAttribution).toBe(expectedUseAttribution)
             }
         )
 
@@ -265,8 +265,8 @@ describe('web vitals', () => {
             [true, 'web-vitals-with-attribution'],
         ])('when web_vitals_attribution is %p, should load %s bundle', async (attributionConfig, expectedBundle) => {
             const loadScriptMock = jest.fn().mockImplementation((_ph, _kind, callback) => {
-                assignableWindow.__PosthogExtensions__ = {}
-                assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = {
+                assignableWindow.__InsightsExtensions__ = {}
+                assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = {
                     onLCP: jest.fn(),
                     onCLS: jest.fn(),
                     onFCP: jest.fn(),
@@ -275,15 +275,15 @@ describe('web vitals', () => {
                 callback()
             })
 
-            assignableWindow.__PosthogExtensions__ = {}
-            assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+            assignableWindow.__InsightsExtensions__ = {}
+            assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
-            posthog = await createPosthogInstance(uuidv7(), {
+            insights = await createInsightsInstance(uuidv7(), {
                 capture_performance: { web_vitals: true, web_vitals_attribution: attributionConfig },
                 capture_pageview: false,
             })
 
-            posthog.webVitalsAutocapture!.onRemoteConfig({
+            insights.webVitalsAutocapture!.onRemoteConfig({
                 capturePerformance: { web_vitals: true },
             } as RemoteConfig)
 
@@ -294,46 +294,46 @@ describe('web vitals', () => {
     describe('onRemoteConfig empty config handling', () => {
         beforeEach(async () => {
             beforeSendMock = jest.fn()
-            posthog = await createPosthogInstance(uuidv7(), {
+            insights = await createInsightsInstance(uuidv7(), {
                 before_send: beforeSendMock,
             })
         })
 
         it('does not overwrite persistence when called with empty config', () => {
             // Set up existing persisted values
-            posthog.persistence!.register({
+            insights.persistence!.register({
                 [WEB_VITALS_ENABLED_SERVER_SIDE]: true,
                 [WEB_VITALS_ALLOWED_METRICS]: ['LCP', 'FCP'],
             })
 
             // Call with empty config (simulating config fetch failure)
-            posthog.webVitalsAutocapture!.onRemoteConfig({} as RemoteConfig)
+            insights.webVitalsAutocapture!.onRemoteConfig({} as RemoteConfig)
 
             // Should NOT have overwritten the existing values
-            expect(posthog.persistence!.props[WEB_VITALS_ENABLED_SERVER_SIDE]).toBe(true)
-            expect(posthog.persistence!.props[WEB_VITALS_ALLOWED_METRICS]).toEqual(['LCP', 'FCP'])
+            expect(insights.persistence!.props[WEB_VITALS_ENABLED_SERVER_SIDE]).toBe(true)
+            expect(insights.persistence!.props[WEB_VITALS_ALLOWED_METRICS]).toEqual(['LCP', 'FCP'])
         })
 
         it('updates persistence when capturePerformance key is present', () => {
-            posthog.persistence!.register({
+            insights.persistence!.register({
                 [WEB_VITALS_ENABLED_SERVER_SIDE]: true,
                 [WEB_VITALS_ALLOWED_METRICS]: ['LCP', 'FCP'],
             })
 
-            posthog.webVitalsAutocapture!.onRemoteConfig({
+            insights.webVitalsAutocapture!.onRemoteConfig({
                 capturePerformance: { web_vitals: false, web_vitals_allowed_metrics: ['CLS'] },
             } as RemoteConfig)
 
-            expect(posthog.persistence!.props[WEB_VITALS_ENABLED_SERVER_SIDE]).toBe(false)
-            expect(posthog.persistence!.props[WEB_VITALS_ALLOWED_METRICS]).toEqual(['CLS'])
+            expect(insights.persistence!.props[WEB_VITALS_ENABLED_SERVER_SIDE]).toBe(false)
+            expect(insights.persistence!.props[WEB_VITALS_ALLOWED_METRICS]).toEqual(['CLS'])
         })
     })
 
     describe('afterFlagsResponse()', () => {
         beforeEach(async () => {
             // we need a set of fake web vitals handlers, so we can manually trigger the events
-            assignableWindow.__PosthogExtensions__ = {}
-            assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = {
+            assignableWindow.__InsightsExtensions__ = {}
+            assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = {
                 onLCP: (cb: any) => {
                     onLCPCallback = cb
                 },
@@ -349,18 +349,18 @@ describe('web vitals', () => {
             }
 
             beforeSendMock = jest.fn()
-            posthog = await createPosthogInstance(uuidv7(), {
+            insights = await createInsightsInstance(uuidv7(), {
                 before_send: beforeSendMock,
             })
         })
 
         it('should not be enabled before the flags response', () => {
-            expect(posthog.webVitalsAutocapture!.isEnabled).toBe(false)
+            expect(insights.webVitalsAutocapture!.isEnabled).toBe(false)
         })
 
         it('should be enabled if client config option is enabled', () => {
-            posthog.config.capture_performance = { web_vitals: true }
-            expect(posthog.webVitalsAutocapture!.isEnabled).toBe(true)
+            insights.config.capture_performance = { web_vitals: true }
+            expect(insights.webVitalsAutocapture!.isEnabled).toBe(true)
         })
 
         it.each([
@@ -378,37 +378,37 @@ describe('web vitals', () => {
         ])(
             'when client side config is %p and remote opt in is %p - web vitals enabled should be %p',
             (clientSideOptIn, serverSideOptIn, expected) => {
-                posthog.config.capture_performance = { web_vitals: clientSideOptIn }
-                posthog.webVitalsAutocapture!.onRemoteConfig({
+                insights.config.capture_performance = { web_vitals: clientSideOptIn }
+                insights.webVitalsAutocapture!.onRemoteConfig({
                     capturePerformance: { web_vitals: serverSideOptIn },
                 } as FlagsResponse)
-                expect(posthog.webVitalsAutocapture!.isEnabled).toBe(expected)
+                expect(insights.webVitalsAutocapture!.isEnabled).toBe(expected)
             }
         )
     })
 
     it('should be disabled if capture_performance is set to false', async () => {
-        posthog = await createPosthogInstance(uuidv7(), {
+        insights = await createInsightsInstance(uuidv7(), {
             before_send: beforeSendMock,
             capture_performance: false,
         })
 
-        expect(posthog.webVitalsAutocapture!.isEnabled).toBe(false)
+        expect(insights.webVitalsAutocapture!.isEnabled).toBe(false)
     })
 
     it('should be disabled if capture_performance is set to false even if enabled server-side', async () => {
-        posthog = await createPosthogInstance(uuidv7(), {
+        insights = await createInsightsInstance(uuidv7(), {
             before_send: beforeSendMock,
             capture_performance: false,
         })
 
-        posthog.webVitalsAutocapture!.onRemoteConfig({
+        insights.webVitalsAutocapture!.onRemoteConfig({
             capturePerformance: {
                 web_vitals: true,
             },
         } as RemoteConfig)
 
-        expect(posthog.webVitalsAutocapture!.isEnabled).toBe(false)
+        expect(insights.webVitalsAutocapture!.isEnabled).toBe(false)
     })
 
     it('should not run on file:// protocol', async () => {
@@ -421,16 +421,16 @@ describe('web vitals', () => {
             href: 'file:///Users/robbie/Desktop/test.html',
         })
 
-        posthog = await createPosthogInstance(uuidv7(), {
+        insights = await createInsightsInstance(uuidv7(), {
             before_send: beforeSendMock,
             capture_performance: { web_vitals: true },
         })
 
-        posthog.webVitalsAutocapture!.onRemoteConfig({
+        insights.webVitalsAutocapture!.onRemoteConfig({
             capturePerformance: { web_vitals: true },
         } as RemoteConfig)
 
-        expect(posthog.webVitalsAutocapture!.isEnabled).toBe(false)
+        expect(insights.webVitalsAutocapture!.isEnabled).toBe(false)
     })
 
     it.each([
@@ -475,16 +475,16 @@ describe('web vitals', () => {
             href: `${protocol}://localhost/`,
         })
 
-        posthog = await createPosthogInstance(uuidv7(), {
+        insights = await createInsightsInstance(uuidv7(), {
             before_send: beforeSendMock,
             capture_performance: { web_vitals: true },
         })
 
-        posthog.webVitalsAutocapture!.onRemoteConfig({
+        insights.webVitalsAutocapture!.onRemoteConfig({
             capturePerformance: { web_vitals: true },
         } as RemoteConfig)
 
-        expect(posthog.webVitalsAutocapture!.isEnabled).toBe(false)
+        expect(insights.webVitalsAutocapture!.isEnabled).toBe(false)
     })
 
     it.each(['http', 'https'])('should run on %s protocol', async (protocol) => {
@@ -497,16 +497,16 @@ describe('web vitals', () => {
             href: `${protocol}://localhost/`,
         })
 
-        posthog = await createPosthogInstance(uuidv7(), {
+        insights = await createInsightsInstance(uuidv7(), {
             before_send: beforeSendMock,
             capture_performance: { web_vitals: true },
         })
 
-        posthog.webVitalsAutocapture!.onRemoteConfig({
+        insights.webVitalsAutocapture!.onRemoteConfig({
             capturePerformance: { web_vitals: true },
         } as FlagsResponse)
 
-        expect(posthog.webVitalsAutocapture!.isEnabled).toBe(true)
+        expect(insights.webVitalsAutocapture!.isEnabled).toBe(true)
     })
 
     describe.each([
@@ -531,7 +531,7 @@ describe('web vitals', () => {
                 })
 
                 beforeSendMock.mockClear()
-                posthog = await createPosthogInstance(uuidv7(), {
+                insights = await createInsightsInstance(uuidv7(), {
                     before_send: beforeSendMock,
                     capture_performance: { web_vitals: true },
                     // sometimes pageviews sneak in and make asserting on mock capture tricky
@@ -542,8 +542,8 @@ describe('web vitals', () => {
 
                 loadScriptMock.mockImplementation((_ph, _path, callback) => {
                     // we need a set of fake web vitals handlers, so we can manually trigger the events
-                    assignableWindow.__PosthogExtensions__ = {}
-                    assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = {
+                    assignableWindow.__InsightsExtensions__ = {}
+                    assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = {
                         onLCP: (cb: any) => {
                             onLCPCallback = cb
                         },
@@ -560,11 +560,11 @@ describe('web vitals', () => {
                     callback()
                 })
 
-                assignableWindow.__PosthogExtensions__ = {}
-                assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+                assignableWindow.__InsightsExtensions__ = {}
+                assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
                 // need to force this to get the web vitals script loaded
-                posthog.webVitalsAutocapture!.onRemoteConfig({
+                insights.webVitalsAutocapture!.onRemoteConfig({
                     capturePerformance: { web_vitals: true },
                 } as unknown as FlagsResponse)
             })

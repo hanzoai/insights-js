@@ -145,18 +145,18 @@ const plugins = (es5, noExternal) => [
 
                               // used in surveys, however, this shouldn't be needed
                               // TODO: figure out how to remove them
-                              '_posthog',
+                              '_insights',
                               '_instance',
                               '_surveyEventReceiver',
                               // we don't mangle _surveyManager as it's used by external surveys to paint them on the dom directly
                               '_surveyManager',
 
-                              // used in conversations - external bundle needs to access these on the posthog instance
+                              // used in conversations - external bundle needs to access these on the insights instance
                               '_conversationsManager',
                               '_conversations',
                               '_send_request', // called by conversations external bundle
 
-                              // used in product-tours - external bundle needs to access this on the posthog instance
+                              // used in product-tours - external bundle needs to access this on the insights instance
                               '_addCaptureHook',
 
                               // part of setup/teardown code, preserve these out of caution
@@ -174,11 +174,11 @@ const plugins = (es5, noExternal) => [
                               '_sessionTimeoutMs',
 
                               // set on global window object (the ones using __ are not mangled anyway BUT be abundantly cautious)
-                              '_POSTHOG_REMOTE_CONFIG',
-                              '__POSTHOG_INSTRUMENTED__',
-                              '__PosthogExtensions__',
-                              '__posthog_wrapped__',
-                              '__Posthog__',
+                              '_INSIGHTS_REMOTE_CONFIG',
+                              '__INSIGHTS_INSTRUMENTED__',
+                              '__InsightsExtensions__',
+                              '__insights_wrapped__',
+                              '__Insights__',
                               '_patchFetch',
                               '_patchXHR',
 
@@ -204,7 +204,7 @@ const plugins = (es5, noExternal) => [
                               'getSurveys',
                               'getActiveMatchingSurveys',
                               'captureException',
-                              'posthog',
+                              'insights',
                               'version',
                               'surveys',
                               'calculateEventProperties',
@@ -215,7 +215,7 @@ const plugins = (es5, noExternal) => [
                               '_calculate_event_properties', // deprecated in favour of calculateEventProperties
 
                               // URL parameters
-                              '__posthog_debug',
+                              '__insights_debug',
 
                               // attribution params, not used in a way that would be mangled but be cautious
                               '_kx',
@@ -304,7 +304,7 @@ const plugins = (es5, noExternal) => [
         name: 'block-node-protocol-imports',
         resolveId(source) {
             if (source.startsWith('node:')) {
-                // See https://posthog.slack.com/archives/C03P7NL6RMW/p1761119028457109 for context
+                // See https://insights.slack.com/archives/C03P7NL6RMW/p1761119028457109 for context
                 // Please don't fix this by adding a polyfill, instead use an approach which keeps the bundle size small, even if it means doing something bespoke.
                 throw new Error(
                     `Node.js protocol import detected: "${source}". This will cause issues in browser/edge environments. Check the comments in rollup.config.mjs for details.`
@@ -348,7 +348,7 @@ const entrypointTargets = entrypoints.map((file) => {
                 format,
                 ...(format === 'iife'
                     ? {
-                          name: 'posthog',
+                          name: 'insights',
                           globals: {
                               preact: 'preact',
                           },

@@ -3,7 +3,7 @@ import { spawnLocal, resolveBinaryPath, LogLevel } from '@hanzo/insights-core/pr
 import path from 'node:path'
 import fs from 'node:fs/promises'
 
-export interface PostHogRollupPluginOptions {
+export interface InsightsRollupPluginOptions {
     personalApiKey: string
     /** @deprecated Use projectId instead */
     envId?: string
@@ -24,7 +24,7 @@ export interface PostHogRollupPluginOptions {
     }
 }
 
-interface ResolvedPostHogRollupPluginOptions {
+interface ResolvedInsightsRollupPluginOptions {
     personalApiKey: string
     projectId: string
     host: string
@@ -39,17 +39,17 @@ interface ResolvedPostHogRollupPluginOptions {
     }
 }
 
-export default function posthogRollupPlugin(userOptions: PostHogRollupPluginOptions) {
-    const posthogOptions = resolveOptions(userOptions)
+export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOptions) {
+    const insightsOptions = resolveOptions(userOptions)
     return {
-        name: 'posthog-rollup-plugin',
+        name: 'insights-rollup-plugin',
 
         outputOptions: {
             order: 'post',
             handler(options: OutputOptions) {
                 return {
                     ...options,
-                    sourcemap: posthogOptions.sourcemaps.deleteAfterUpload ? 'hidden' : true,
+                    sourcemap: insightsOptions.sourcemaps.deleteAfterUpload ? 'hidden' : true,
                 }
             },
         },
@@ -58,9 +58,9 @@ export default function posthogRollupPlugin(userOptions: PostHogRollupPluginOpti
             // Write bundle is executed in parallel, make it sequential to ensure correct order
             sequential: true,
             async handler(options: OutputOptions, bundle: { [fileName: string]: OutputAsset | OutputChunk }) {
-                if (!posthogOptions.sourcemaps.enabled) return
+                if (!insightsOptions.sourcemaps.enabled) return
                 const args = ['sourcemap', 'process']
-                const cliPath = posthogOptions.cliBinaryPath
+                const cliPath = insightsOptions.cliBinaryPath
                 const chunks: { [fileName: string]: OutputChunk } = {}
                 const basePaths = []
 
@@ -89,25 +89,25 @@ export default function posthogRollupPlugin(userOptions: PostHogRollupPluginOpti
                     return
                 }
 
-                if (posthogOptions.sourcemaps.releaseName) {
-                    args.push('--release-name', posthogOptions.sourcemaps.releaseName)
+                if (insightsOptions.sourcemaps.releaseName) {
+                    args.push('--release-name', insightsOptions.sourcemaps.releaseName)
                 }
-                if (posthogOptions.sourcemaps.releaseVersion) {
-                    args.push('--release-version', posthogOptions.sourcemaps.releaseVersion)
+                if (insightsOptions.sourcemaps.releaseVersion) {
+                    args.push('--release-version', insightsOptions.sourcemaps.releaseVersion)
                 }
-                if (posthogOptions.sourcemaps.deleteAfterUpload) {
+                if (insightsOptions.sourcemaps.deleteAfterUpload) {
                     args.push('--delete-after')
                 }
-                if (posthogOptions.sourcemaps.batchSize) {
-                    args.push('--batch-size', posthogOptions.sourcemaps.batchSize.toString())
+                if (insightsOptions.sourcemaps.batchSize) {
+                    args.push('--batch-size', insightsOptions.sourcemaps.batchSize.toString())
                 }
                 await spawnLocal(cliPath, args, {
                     env: {
                         ...process.env,
-                        RUST_LOG: `posthog_cli=${posthogOptions.logLevel}`,
-                        POSTHOG_CLI_HOST: posthogOptions.host,
-                        POSTHOG_CLI_API_KEY: posthogOptions.personalApiKey,
-                        POSTHOG_CLI_PROJECT_ID: posthogOptions.projectId,
+                        RUST_LOG: `insights_cli=${insightsOptions.logLevel}`,
+                        INSIGHTS_CLI_HOST: insightsOptions.host,
+                        INSIGHTS_CLI_API_KEY: insightsOptions.personalApiKey,
+                        INSIGHTS_CLI_PROJECT_ID: insightsOptions.projectId,
                     },
                     stdio: 'inherit',
                     cwd: process.cwd(),
@@ -126,7 +126,7 @@ export default function posthogRollupPlugin(userOptions: PostHogRollupPluginOpti
     } as Plugin
 }
 
-function resolveOptions(userOptions: PostHogRollupPluginOptions): ResolvedPostHogRollupPluginOptions {
+function resolveOptions(userOptions: InsightsRollupPluginOptions): ResolvedInsightsRollupPluginOptions {
     const projectId = userOptions.projectId ?? userOptions.envId
     if (!projectId) {
         throw new Error('projectId is required (envId is deprecated)')
@@ -134,13 +134,13 @@ function resolveOptions(userOptions: PostHogRollupPluginOptions): ResolvedPostHo
         throw new Error('personalApiKey is required')
     }
     const userSourcemaps = userOptions.sourcemaps ?? {}
-    const posthogOptions: ResolvedPostHogRollupPluginOptions = {
-        host: userOptions.host || 'https://us.i.posthog.com',
+    const insightsOptions: ResolvedInsightsRollupPluginOptions = {
+        host: userOptions.host || 'https://us.i.insights.com',
         personalApiKey: userOptions.personalApiKey,
         projectId,
         cliBinaryPath:
             userOptions.cliBinaryPath ??
-            resolveBinaryPath('posthog-cli', {
+            resolveBinaryPath('insights-cli', {
                 path: process.env.PATH ?? '',
                 cwd: process.cwd(),
             }),
@@ -153,5 +153,5 @@ function resolveOptions(userOptions: PostHogRollupPluginOptions): ResolvedPostHo
             releaseVersion: userSourcemaps.releaseVersion ?? userSourcemaps.version,
         },
     }
-    return posthogOptions
+    return insightsOptions
 }

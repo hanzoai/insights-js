@@ -1,4 +1,4 @@
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const startOptions = {
@@ -38,14 +38,14 @@ test.describe('surveys - core display logic', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
         await page.reload()
 
         await start({ ...startOptions, type: 'reload' }, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
     })
 
     test('does not show the same survey to user if they have dismissed it before', async ({ page, context }) => {
@@ -69,9 +69,9 @@ test.describe('surveys - core display logic', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await page.locator('.PostHogSurvey-123').locator('.form-cancel').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.form-cancel').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeInViewport()
 
         expect(
             await page.evaluate(() => {
@@ -84,7 +84,7 @@ test.describe('surveys - core display logic', () => {
         await start({ ...startOptions, type: 'reload' }, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeInViewport()
     })
 
     test('does not show the same survey to user if they responded to it before', async ({ page, context }) => {
@@ -108,9 +108,9 @@ test.describe('surveys - core display logic', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await page.locator('.PostHogSurvey-123').locator('textarea').type('some feedback')
-        await page.locator('.PostHogSurvey-123').locator('.form-submit').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('textarea').type('some feedback')
+        await page.locator('.InsightsSurvey-123').locator('.form-submit').click()
 
         expect(
             await page.evaluate(() => {
@@ -118,14 +118,14 @@ test.describe('surveys - core display logic', () => {
             })
         ).toBeTruthy()
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeInViewport()
 
         await page.reload()
 
         await start({ ...startOptions, type: 'reload' }, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeInViewport()
 
         expect(
             await page.evaluate(() => {
@@ -159,7 +159,7 @@ test.describe('surveys - core display logic', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
         const lastSeenDate = await page.evaluate(() => {
             return window.localStorage.getItem('lastSeenSurveyDate')
@@ -172,7 +172,7 @@ test.describe('surveys - core display logic', () => {
         await start({ ...startOptions, type: 'reload' }, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeInViewport()
     })
 
     test('does not allow user to submit non optional survey questions if they have not responded to it', async ({
@@ -200,10 +200,10 @@ test.describe('surveys - core display logic', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.form-submit')).toHaveAttribute('disabled')
-        await page.locator('.PostHogSurvey-123').locator('textarea').type('some feedback')
-        await expect(page.locator('.PostHogSurvey-123').locator('.form-submit')).not.toHaveAttribute('disabled')
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.form-submit')).toHaveAttribute('disabled')
+        await page.locator('.InsightsSurvey-123').locator('textarea').type('some feedback')
+        await expect(page.locator('.InsightsSurvey-123').locator('.form-submit')).not.toHaveAttribute('disabled')
     })
 
     test('survey popup delay is respected', async ({ page, context }) => {
@@ -236,12 +236,12 @@ test.describe('surveys - core display logic', () => {
         await surveysAPICall
         await surveysResponse
 
-        const surveyLocator = page.locator('.PostHogSurvey-delay-test-survey').locator('.survey-form')
+        const surveyLocator = page.locator('.InsightsSurvey-delay-test-survey').locator('.survey-form')
 
         await expect(surveyLocator).not.toBeVisible()
 
         await page.evaluate(() => {
-            ;(window as any).posthog.capture('trigger_event')
+            ;(window as any).insights.capture('trigger_event')
         })
 
         await page.waitForTimeout(2000)
@@ -283,17 +283,17 @@ test.describe('surveys - core display logic', () => {
         await surveysAPICall
         await surveysResponse
 
-        const surveyLocator = page.locator('.PostHogSurvey-cancel-test-survey').locator('.survey-form')
+        const surveyLocator = page.locator('.InsightsSurvey-cancel-test-survey').locator('.survey-form')
 
         await expect(surveyLocator).not.toBeVisible()
 
         await page.evaluate(() => {
-            ;(window as any).posthog.capture('trigger_event')
+            ;(window as any).insights.capture('trigger_event')
         })
 
         await page.waitForTimeout(2000)
         await page.evaluate(() => {
-            ;(window as any).posthog.capture('cancel_event')
+            ;(window as any).insights.capture('cancel_event')
         })
 
         await page.waitForTimeout(5000)

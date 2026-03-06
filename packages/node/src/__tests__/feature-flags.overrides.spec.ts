@@ -1,17 +1,17 @@
-import { PostHogOptions } from '@/types'
-import { PostHog } from '@/entrypoints/index.node'
+import { InsightsOptions } from '@/types'
+import { Insights } from '@/entrypoints/index.node'
 import { apiImplementation, waitForPromises } from './utils'
 
 jest.spyOn(console, 'debug').mockImplementation()
 
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
 
-const posthogImmediateResolveOptions: PostHogOptions = {
+const insightsImmediateResolveOptions: InsightsOptions = {
   fetchRetryCount: 0,
 }
 
 describe('overrideFeatureFlags', () => {
-  let posthog: PostHog
+  let insights: Insights
 
   jest.useFakeTimers()
 
@@ -20,7 +20,7 @@ describe('overrideFeatureFlags', () => {
   })
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   describe('basic overrides', () => {
@@ -39,112 +39,112 @@ describe('overrideFeatureFlags', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Without override, should be false (0% rollout)
-      expect(await posthog.getFeatureFlag('test-flag', 'user-123')).toBe(false)
+      expect(await insights.getFeatureFlag('test-flag', 'user-123')).toBe(false)
 
       // Override the flag
-      posthog.overrideFeatureFlags({ 'test-flag': true })
+      insights.overrideFeatureFlags({ 'test-flag': true })
 
       // Now should return the override value
-      expect(await posthog.getFeatureFlag('test-flag', 'user-123')).toBe(true)
+      expect(await insights.getFeatureFlag('test-flag', 'user-123')).toBe(true)
     })
 
     it('should support string variant overrides', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
-      posthog.overrideFeatureFlags({ 'variant-flag': 'control' })
+      insights.overrideFeatureFlags({ 'variant-flag': 'control' })
 
-      expect(await posthog.getFeatureFlag('variant-flag', 'user-123')).toBe('control')
+      expect(await insights.getFeatureFlag('variant-flag', 'user-123')).toBe('control')
     })
 
     it('should support array syntax to enable multiple flags', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
-      posthog.overrideFeatureFlags(['flag-a', 'flag-b', 'flag-c'])
+      insights.overrideFeatureFlags(['flag-a', 'flag-b', 'flag-c'])
 
-      expect(await posthog.getFeatureFlag('flag-a', 'user-123')).toBe(true)
-      expect(await posthog.getFeatureFlag('flag-b', 'user-123')).toBe(true)
-      expect(await posthog.getFeatureFlag('flag-c', 'user-123')).toBe(true)
+      expect(await insights.getFeatureFlag('flag-a', 'user-123')).toBe(true)
+      expect(await insights.getFeatureFlag('flag-b', 'user-123')).toBe(true)
+      expect(await insights.getFeatureFlag('flag-c', 'user-123')).toBe(true)
     })
 
     it('should clear all overrides when passed false', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Set overrides
-      posthog.overrideFeatureFlags({ 'test-flag': true })
-      expect(await posthog.getFeatureFlag('test-flag', 'user-123')).toBe(true)
+      insights.overrideFeatureFlags({ 'test-flag': true })
+      expect(await insights.getFeatureFlag('test-flag', 'user-123')).toBe(true)
 
       // Clear overrides
-      posthog.overrideFeatureFlags(false)
+      insights.overrideFeatureFlags(false)
 
       // Should return undefined (no flag exists)
-      expect(await posthog.getFeatureFlag('test-flag', 'user-123')).toBe(undefined)
+      expect(await insights.getFeatureFlag('test-flag', 'user-123')).toBe(undefined)
     })
 
     it('should handle falsy override values correctly', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Override with false should return false, not undefined
-      posthog.overrideFeatureFlags({ 'disabled-flag': false })
+      insights.overrideFeatureFlags({ 'disabled-flag': false })
 
-      expect(await posthog.getFeatureFlag('disabled-flag', 'user-123')).toBe(false)
+      expect(await insights.getFeatureFlag('disabled-flag', 'user-123')).toBe(false)
     })
 
     it('should return undefined when flag is overridden to undefined (simulates missing flag)', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Override with undefined should return undefined (simulates flag doesn't exist)
-      posthog.overrideFeatureFlags({ 'undefined-flag': undefined as any })
+      insights.overrideFeatureFlags({ 'undefined-flag': undefined as any })
 
-      expect(await posthog.getFeatureFlag('undefined-flag', 'user-123')).toBeUndefined()
+      expect(await insights.getFeatureFlag('undefined-flag', 'user-123')).toBeUndefined()
     })
   })
 
@@ -152,20 +152,20 @@ describe('overrideFeatureFlags', () => {
     it('should return overridden payload value', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         flags: { 'test-flag': 'variant-a' },
         payloads: { 'test-flag': { discount: 20, message: 'Welcome!' } },
       })
 
-      expect(await posthog.getFeatureFlagPayload('test-flag', 'user-123')).toEqual({
+      expect(await insights.getFeatureFlagPayload('test-flag', 'user-123')).toEqual({
         discount: 20,
         message: 'Welcome!',
       })
@@ -186,23 +186,23 @@ describe('overrideFeatureFlags', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Override only payload
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         payloads: { 'test-flag': { customData: true } },
       })
 
       // Flag should still be evaluated normally
-      expect(await posthog.getFeatureFlag('test-flag', 'user-123')).toBe(true)
+      expect(await insights.getFeatureFlag('test-flag', 'user-123')).toBe(true)
       // But payload should be overridden
-      expect(await posthog.getFeatureFlagPayload('test-flag', 'user-123')).toEqual({ customData: true })
+      expect(await insights.getFeatureFlagPayload('test-flag', 'user-123')).toEqual({ customData: true })
     })
 
     it('should support payload-only overrides with getFeatureFlagResult', async () => {
@@ -221,21 +221,21 @@ describe('overrideFeatureFlags', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Override only payload (no flag override)
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         payloads: { 'test-flag': { overriddenPayload: 'custom-value' } },
       })
 
       // getFeatureFlagResult should also respect the payload override
-      const result = await posthog.getFeatureFlagResult('test-flag', 'user-123')
+      const result = await insights.getFeatureFlagResult('test-flag', 'user-123')
       expect(result).toBeDefined()
       expect(result?.enabled).toBe(true) // Flag evaluated normally
       expect(result?.payload).toEqual({ overriddenPayload: 'custom-value' }) // Payload should be overridden
@@ -258,20 +258,20 @@ describe('overrideFeatureFlags', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         'override-flag': 'variant-x',
         'server-flag': false, // Override server flag
       })
 
-      const allFlags = await posthog.getAllFlags('user-123')
+      const allFlags = await insights.getAllFlags('user-123')
 
       expect(allFlags['override-flag']).toBe('variant-x')
       expect(allFlags['server-flag']).toBe(false) // Override takes precedence
@@ -282,18 +282,18 @@ describe('overrideFeatureFlags', () => {
     it('should use override value for isFeatureEnabled', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
-      posthog.overrideFeatureFlags({ 'enabled-flag': true, 'disabled-flag': false })
+      insights.overrideFeatureFlags({ 'enabled-flag': true, 'disabled-flag': false })
 
-      expect(await posthog.isFeatureEnabled('enabled-flag', 'user-123')).toBe(true)
-      expect(await posthog.isFeatureEnabled('disabled-flag', 'user-123')).toBe(false)
+      expect(await insights.isFeatureEnabled('enabled-flag', 'user-123')).toBe(true)
+      expect(await insights.isFeatureEnabled('disabled-flag', 'user-123')).toBe(false)
     })
   })
 
@@ -301,130 +301,130 @@ describe('overrideFeatureFlags', () => {
     it('should handle flag named "flags" correctly', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // A flag named "flags" with value true should work
-      posthog.overrideFeatureFlags({ flags: true })
+      insights.overrideFeatureFlags({ flags: true })
 
-      expect(await posthog.getFeatureFlag('flags', 'user-123')).toBe(true)
+      expect(await insights.getFeatureFlag('flags', 'user-123')).toBe(true)
     })
 
     it('should handle flag named "payloads" correctly', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // A flag named "payloads" with value "variant-a" should work
-      posthog.overrideFeatureFlags({ payloads: 'variant-a' })
+      insights.overrideFeatureFlags({ payloads: 'variant-a' })
 
-      expect(await posthog.getFeatureFlag('payloads', 'user-123')).toBe('variant-a')
+      expect(await insights.getFeatureFlag('payloads', 'user-123')).toBe('variant-a')
     })
 
     it('should handle empty string as override value', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Empty string is a falsy value but should still be returned (not undefined)
-      posthog.overrideFeatureFlags({ 'my-flag': '' as any })
+      insights.overrideFeatureFlags({ 'my-flag': '' as any })
 
-      expect(await posthog.getFeatureFlag('my-flag', 'user-123')).toBe('')
+      expect(await insights.getFeatureFlag('my-flag', 'user-123')).toBe('')
     })
 
     it('should replace all flag overrides when passed empty object', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Set initial overrides
-      posthog.overrideFeatureFlags({ 'flag-a': true, 'flag-b': 'variant' })
-      expect(await posthog.getFeatureFlag('flag-a', 'user-123')).toBe(true)
+      insights.overrideFeatureFlags({ 'flag-a': true, 'flag-b': 'variant' })
+      expect(await insights.getFeatureFlag('flag-a', 'user-123')).toBe(true)
 
       // Empty object replaces with empty overrides (effectively clearing)
-      posthog.overrideFeatureFlags({})
+      insights.overrideFeatureFlags({})
 
-      expect(await posthog.getFeatureFlag('flag-a', 'user-123')).toBe(undefined)
-      expect(await posthog.getFeatureFlag('flag-b', 'user-123')).toBe(undefined)
+      expect(await insights.getFeatureFlag('flag-a', 'user-123')).toBe(undefined)
+      expect(await insights.getFeatureFlag('flag-b', 'user-123')).toBe(undefined)
     })
 
     it('should clear only flags when flags is false but preserve payload overrides', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Set both flag and payload overrides
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         flags: { 'my-flag': 'variant-a' },
         payloads: { 'my-flag': { data: 'preserved' } },
       })
 
-      expect(await posthog.getFeatureFlag('my-flag', 'user-123')).toBe('variant-a')
-      expect(await posthog.getFeatureFlagPayload('my-flag', 'user-123')).toEqual({ data: 'preserved' })
+      expect(await insights.getFeatureFlag('my-flag', 'user-123')).toBe('variant-a')
+      expect(await insights.getFeatureFlagPayload('my-flag', 'user-123')).toEqual({ data: 'preserved' })
 
       // Clear only flag overrides
-      posthog.overrideFeatureFlags({ flags: false })
+      insights.overrideFeatureFlags({ flags: false })
 
       // Flag should be undefined, but payload should still be overridden
-      expect(await posthog.getFeatureFlag('my-flag', 'user-123')).toBe(undefined)
-      expect(await posthog.getFeatureFlagPayload('my-flag', 'user-123')).toEqual({ data: 'preserved' })
+      expect(await insights.getFeatureFlag('my-flag', 'user-123')).toBe(undefined)
+      expect(await insights.getFeatureFlagPayload('my-flag', 'user-123')).toEqual({ data: 'preserved' })
     })
 
     it('should clear only payloads when payloads is false but preserve flag overrides', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: { flags: [] } }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       await waitForPromises()
 
       // Set both flag and payload overrides
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         flags: { 'my-flag': 'variant-a' },
         payloads: { 'my-flag': { data: 'will-be-cleared' } },
       })
 
-      expect(await posthog.getFeatureFlag('my-flag', 'user-123')).toBe('variant-a')
-      expect(await posthog.getFeatureFlagPayload('my-flag', 'user-123')).toEqual({ data: 'will-be-cleared' })
+      expect(await insights.getFeatureFlag('my-flag', 'user-123')).toBe('variant-a')
+      expect(await insights.getFeatureFlagPayload('my-flag', 'user-123')).toEqual({ data: 'will-be-cleared' })
 
       // Clear only payload overrides
-      posthog.overrideFeatureFlags({ payloads: false })
+      insights.overrideFeatureFlags({ payloads: false })
 
       // Flag should still be overridden, but payload should fall back to evaluation (null = not found)
-      expect(await posthog.getFeatureFlag('my-flag', 'user-123')).toBe('variant-a')
-      expect(await posthog.getFeatureFlagPayload('my-flag', 'user-123')).toBeNull()
+      expect(await insights.getFeatureFlag('my-flag', 'user-123')).toBe('variant-a')
+      expect(await insights.getFeatureFlagPayload('my-flag', 'user-123')).toBeNull()
     })
   })
 })

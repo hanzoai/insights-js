@@ -1,4 +1,4 @@
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 import { useEffect, useState } from 'react'
 
 interface SessionState {
@@ -9,12 +9,12 @@ interface SessionState {
 }
 
 export function SessionInteractions() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [sessionState, setSessionState] = useState<SessionState | null>(null)
 
     useEffect(() => {
         const refresh = () => {
-            const persistence = (posthog as any)?.persistence
+            const persistence = (insights as any)?.persistence
             const sesid = persistence?.props?.$sesid // [activityTs, sessionId, startTs]
             const activityTs = sesid?.[0]
             const sessionId = sesid?.[1]
@@ -34,7 +34,7 @@ export function SessionInteractions() {
         return () => {
             clearInterval(t)
         }
-    }, [posthog])
+    }, [insights])
 
     return (
         <div className="border-2 border-dashed border-orange-400 rounded p-4 my-4">
@@ -43,7 +43,7 @@ export function SessionInteractions() {
             <div className="flex items-center gap-2 flex-wrap">
                 <button
                     onClick={() => {
-                        const persistence = (posthog as any).persistence
+                        const persistence = (insights as any).persistence
                         const twentyFiveHoursAgo = Date.now() - 25 * 60 * 60 * 1000
                         const currentSesid = persistence?.props?.$sesid
 
@@ -59,7 +59,7 @@ export function SessionInteractions() {
                 </button>
                 <button
                     onClick={() => {
-                        const persistence = (posthog as any).persistence
+                        const persistence = (insights as any).persistence
                         const thirtyFiveMinutesAgo = Date.now() - 35 * 60 * 1000
                         const currentSesid = persistence?.props?.$sesid
 

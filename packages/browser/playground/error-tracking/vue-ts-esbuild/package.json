@@ -6,12 +6,12 @@
     "scripts": {
         "dev": "vite",
         "build": "vue-tsc -b && vite build",
-        "upload": "posthog-cli sourcemap upload --directory ./dist/assets",
-        "inject": "posthog-cli sourcemap inject --directory ./dist/assets",
+        "upload": "insights-cli sourcemap upload --directory ./dist/assets",
+        "inject": "insights-cli sourcemap inject --directory ./dist/assets",
         "preview": "vite preview"
     },
     "dependencies": {
-        "posthog-js": "link:../../..",
+        "@hanzo/insights": "link:../../..",
         "vue": "^3.5.13"
     },
     "devDependencies": {

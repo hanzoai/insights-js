@@ -1,5 +1,5 @@
 import { BrowserContext, Page } from '@playwright/test'
-import { ProductTour, ProductTourStep } from '@/posthog-product-tours-types'
+import { ProductTour, ProductTourStep } from '@/insights-product-tours-types'
 import { FeatureFlagDetail } from '@/types'
 import { start, StartOptions } from '../utils/setup'
 import {
@@ -136,7 +136,7 @@ export function getSessionState(page: Page): Promise<{ tourId?: string; stepInde
 export function captureEvent(page: Page, eventName: string, properties?: Record<string, unknown>): Promise<void> {
     return page.evaluate(
         ({ name, props }) => {
-            ;(window as any).posthog.capture(name, props)
+            ;(window as any).insights.capture(name, props)
         },
         { name: eventName, props: properties }
     )

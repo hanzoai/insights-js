@@ -2,7 +2,7 @@ import type { MetaFunction } from '@remix-run/node'
 import { useEffect, useState } from 'react'
 
 export const meta: MetaFunction = () => {
-    return [{ title: 'Media - PostHog Remix Playground' }, { name: 'description', content: 'Test base64 images' }]
+    return [{ title: 'Media - Insights Remix Playground' }, { name: 'description', content: 'Test base64 images' }]
 }
 
 function generateBase64PNG(width: number, height: number, complexity: number): string {

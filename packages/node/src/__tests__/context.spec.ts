@@ -1,4 +1,4 @@
-import { PostHog } from '@/entrypoints/index.node'
+import { Insights } from '@/entrypoints/index.node'
 import { apiImplementation } from './utils'
 import { waitForPromises } from './utils'
 
@@ -18,14 +18,14 @@ const getLastBatchEvents = (): any[] | undefined => {
   return JSON.parse((call[1] as any).body as any).batch
 }
 
-describe('PostHog Context', () => {
-  let posthog: PostHog
+describe('Insights Context', () => {
+  let insights: Insights
 
   jest.useFakeTimers()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       flushAt: 1,
       fetchRetryCount: 0,
@@ -40,12 +40,12 @@ describe('PostHog Context', () => {
   })
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('should attach context tags to events', async () => {
-    posthog.withContext({ properties: { plan: 'premium', region: 'us-east' } }, () => {
-      posthog.capture({ distinctId: 'user-1', event: 'test_event' })
+    insights.withContext({ properties: { plan: 'premium', region: 'us-east' } }, () => {
+      insights.capture({ distinctId: 'user-1', event: 'test_event' })
     })
 
     await waitForFlush()
@@ -59,8 +59,8 @@ describe('PostHog Context', () => {
   })
 
   it('should allow explicit properties to override context tags', async () => {
-    posthog.withContext({ properties: { plan: 'free', region: 'us-west' } }, () => {
-      posthog.capture({
+    insights.withContext({ properties: { plan: 'free', region: 'us-west' } }, () => {
+      insights.capture({
         distinctId: 'user-2',
         event: 'test_event',
         properties: { plan: 'enterprise' },
@@ -77,8 +77,8 @@ describe('PostHog Context', () => {
   })
 
   it('should set $session_id from context sessionId', async () => {
-    posthog.withContext({ sessionId: 'session-123', properties: { env: 'prod' } }, () => {
-      posthog.capture({ distinctId: 'user-3', event: 'test_event' })
+    insights.withContext({ sessionId: 'session-123', properties: { env: 'prod' } }, () => {
+      insights.capture({ distinctId: 'user-3', event: 'test_event' })
     })
 
     await waitForFlush()
@@ -91,8 +91,8 @@ describe('PostHog Context', () => {
   })
 
   it('should use distinctId from context if not explicitly provided', async () => {
-    posthog.withContext({ distinctId: 'context-user' }, () => {
-      posthog.capture({ event: 'test_event' })
+    insights.withContext({ distinctId: 'context-user' }, () => {
+      insights.capture({ event: 'test_event' })
     })
 
     await waitForFlush()
@@ -102,9 +102,9 @@ describe('PostHog Context', () => {
   })
 
   it('should merge contexts by default (fresh: false)', async () => {
-    posthog.withContext({ properties: { outer: 'value1', shared: 'parent' } }, () => {
-      posthog.withContext({ properties: { inner: 'value2', shared: 'child' } }, () => {
-        posthog.capture({ distinctId: 'user-4', event: 'test_event' })
+    insights.withContext({ properties: { outer: 'value1', shared: 'parent' } }, () => {
+      insights.withContext({ properties: { inner: 'value2', shared: 'child' } }, () => {
+        insights.capture({ distinctId: 'user-4', event: 'test_event' })
       })
     })
 
@@ -119,11 +119,11 @@ describe('PostHog Context', () => {
   })
 
   it('should isolate contexts when fresh: true', async () => {
-    posthog.withContext({ properties: { outer: 'value1' } }, () => {
-      posthog.withContext(
+    insights.withContext({ properties: { outer: 'value1' } }, () => {
+      insights.withContext(
         { properties: { inner: 'value2' } },
         () => {
-          posthog.capture({ distinctId: 'user-5', event: 'test_event' })
+          insights.capture({ distinctId: 'user-5', event: 'test_event' })
         },
         { fresh: true }
       )
@@ -141,9 +141,9 @@ describe('PostHog Context', () => {
   })
 
   it('should merge sessionId from parent context', async () => {
-    posthog.withContext({ sessionId: 'session-parent', properties: { level: '1' } }, () => {
-      posthog.withContext({ properties: { level: '2' } }, () => {
-        posthog.capture({ distinctId: 'user-6', event: 'test_event' })
+    insights.withContext({ sessionId: 'session-parent', properties: { level: '1' } }, () => {
+      insights.withContext({ properties: { level: '2' } }, () => {
+        insights.capture({ distinctId: 'user-6', event: 'test_event' })
       })
     })
 
@@ -157,8 +157,8 @@ describe('PostHog Context', () => {
   })
 
   it('should use personless processing when no distinctId provided', async () => {
-    posthog.withContext({ properties: { plan: 'free' } }, () => {
-      posthog.capture({ event: 'test_event' })
+    insights.withContext({ properties: { plan: 'free' } }, () => {
+      insights.capture({ event: 'test_event' })
     })
 
     await waitForFlush()
@@ -178,12 +178,12 @@ describe('PostHog Context', () => {
     jest.useRealTimers()
 
     const operations = Array.from({ length: 50 }, (_, index) => {
-      return posthog.withContext({ properties: { index, operation: `op-${index}` } }, async () => {
+      return insights.withContext({ properties: { index, operation: `op-${index}` } }, async () => {
         const delay = Math.floor(Math.random() * 200)
 
         await new Promise((r) => setTimeout(r, delay))
 
-        posthog.capture({
+        insights.capture({
           distinctId: `user-${index}`,
           event: 'concurrent_test',
           properties: { step: 'after_delay' },
@@ -215,26 +215,26 @@ describe('PostHog Context', () => {
 
   it('should properly inherit and restore context through nested enter/exit operations', async () => {
     // Enter context A
-    posthog.withContext({ properties: { contextA: 'valueA', level: 'A' } }, () => {
+    insights.withContext({ properties: { contextA: 'valueA', level: 'A' } }, () => {
       // Enter context B (inherits from A by default)
-      posthog.withContext({ properties: { contextB: 'valueB', level: 'B' } }, () => {
+      insights.withContext({ properties: { contextB: 'valueB', level: 'B' } }, () => {
         // Enter context C1 (inherits from B, which has A's stuff)
-        posthog.withContext({ properties: { contextC1: 'valueC1', level: 'C1' } }, () => {
+        insights.withContext({ properties: { contextC1: 'valueC1', level: 'C1' } }, () => {
           // Event 1: Should have A, B, and C1 context
-          posthog.capture({ distinctId: 'user-nested', event: 'event_in_C1' })
+          insights.capture({ distinctId: 'user-nested', event: 'event_in_C1' })
         })
 
         // Exit C1 - Event 2: Should have A and B, but not C1
-        posthog.capture({ distinctId: 'user-nested', event: 'event_after_C1' })
+        insights.capture({ distinctId: 'user-nested', event: 'event_after_C1' })
 
         // Enter context C2 (inherits from B, which still has A's stuff)
-        posthog.withContext({ properties: { contextC2: 'valueC2', level: 'C2' } }, () => {
+        insights.withContext({ properties: { contextC2: 'valueC2', level: 'C2' } }, () => {
           // Event 3: Should have A, B, and C2 (but not C1)
-          posthog.capture({ distinctId: 'user-nested', event: 'event_in_C2' })
+          insights.capture({ distinctId: 'user-nested', event: 'event_in_C2' })
         })
 
         // Exit C2 - Event 4: Should have A and B again (no C1 or C2)
-        posthog.capture({ distinctId: 'user-nested', event: 'event_after_C2' })
+        insights.capture({ distinctId: 'user-nested', event: 'event_after_C2' })
       })
     })
 
@@ -293,9 +293,9 @@ describe('PostHog Context', () => {
 
   describe('enterContext', () => {
     it('should set context without a callback wrapper', async () => {
-      posthog.enterContext({ distinctId: 'entered-user', properties: { source: 'test' } })
+      insights.enterContext({ distinctId: 'entered-user', properties: { source: 'test' } })
 
-      posthog.capture({ event: 'test_event' })
+      insights.capture({ event: 'test_event' })
 
       await waitForFlush()
 
@@ -308,10 +308,10 @@ describe('PostHog Context', () => {
     })
 
     it('should merge with existing context by default', async () => {
-      posthog.enterContext({ distinctId: 'user-1', properties: { outer: 'value1' } })
-      posthog.enterContext({ properties: { inner: 'value2' } })
+      insights.enterContext({ distinctId: 'user-1', properties: { outer: 'value1' } })
+      insights.enterContext({ properties: { inner: 'value2' } })
 
-      posthog.capture({ event: 'test_event' })
+      insights.capture({ event: 'test_event' })
 
       await waitForFlush()
 
@@ -324,10 +324,10 @@ describe('PostHog Context', () => {
     })
 
     it('should replace context when fresh: true', async () => {
-      posthog.enterContext({ distinctId: 'user-1', properties: { outer: 'value1' } })
-      posthog.enterContext({ distinctId: 'user-2', properties: { inner: 'value2' } }, { fresh: true })
+      insights.enterContext({ distinctId: 'user-1', properties: { outer: 'value1' } })
+      insights.enterContext({ distinctId: 'user-2', properties: { inner: 'value2' } }, { fresh: true })
 
-      posthog.capture({ event: 'test_event' })
+      insights.capture({ event: 'test_event' })
 
       await waitForFlush()
 
@@ -344,7 +344,7 @@ describe('PostHog Context', () => {
     it('should return undefined when calling getFeatureFlagResult without distinctId and no context', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': true } }))
 
-      const result = await posthog.getFeatureFlagResult('test-flag')
+      const result = await insights.getFeatureFlagResult('test-flag')
 
       expect(result).toBeUndefined()
     })
@@ -357,8 +357,8 @@ describe('PostHog Context', () => {
         })
       )
 
-      const result = await posthog.withContext({ distinctId: 'context-user' }, async () => {
-        return posthog.getFeatureFlagResult('test-flag')
+      const result = await insights.withContext({ distinctId: 'context-user' }, async () => {
+        return insights.getFeatureFlagResult('test-flag')
       })
 
       expect(result).toMatchObject({
@@ -376,8 +376,8 @@ describe('PostHog Context', () => {
     it('should prefer explicit distinctId over context', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': true } }))
 
-      await posthog.withContext({ distinctId: 'context-user' }, async () => {
-        await posthog.getFeatureFlagResult('test-flag', 'explicit-user')
+      await insights.withContext({ distinctId: 'context-user' }, async () => {
+        await insights.getFeatureFlagResult('test-flag', 'explicit-user')
       })
 
       const flagsCall = mockedFetch.mock.calls.find((c) => (c[0] as string).includes('/flags/'))
@@ -388,7 +388,7 @@ describe('PostHog Context', () => {
     it('should return empty when calling getAllFlags without distinctId and no context', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': true } }))
 
-      const result = await posthog.getAllFlags()
+      const result = await insights.getAllFlags()
 
       expect(result).toEqual({})
     })
@@ -396,8 +396,8 @@ describe('PostHog Context', () => {
     it('should use distinctId from context for getAllFlags', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': 'variant-a' } }))
 
-      const result = await posthog.withContext({ distinctId: 'context-user' }, async () => {
-        return posthog.getAllFlags()
+      const result = await insights.withContext({ distinctId: 'context-user' }, async () => {
+        return insights.getAllFlags()
       })
 
       expect(result).toEqual({ 'test-flag': 'variant-a' })
@@ -410,8 +410,8 @@ describe('PostHog Context', () => {
     it('should prefer explicit distinctId over context for getAllFlags', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': true } }))
 
-      await posthog.withContext({ distinctId: 'context-user' }, async () => {
-        await posthog.getAllFlags('explicit-user')
+      await insights.withContext({ distinctId: 'context-user' }, async () => {
+        await insights.getAllFlags('explicit-user')
       })
 
       const flagsCall = mockedFetch.mock.calls.find((c) => (c[0] as string).includes('/flags/'))
@@ -422,7 +422,7 @@ describe('PostHog Context', () => {
     it('should return empty when calling getAllFlagsAndPayloads without distinctId and no context', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': true } }))
 
-      const result = await posthog.getAllFlagsAndPayloads()
+      const result = await insights.getAllFlagsAndPayloads()
 
       expect(result).toEqual({ featureFlags: {}, featureFlagPayloads: {} })
     })
@@ -435,8 +435,8 @@ describe('PostHog Context', () => {
         })
       )
 
-      const result = await posthog.withContext({ distinctId: 'context-user' }, async () => {
-        return posthog.getAllFlagsAndPayloads()
+      const result = await insights.withContext({ distinctId: 'context-user' }, async () => {
+        return insights.getAllFlagsAndPayloads()
       })
 
       expect(result.featureFlags).toEqual({ 'test-flag': 'variant-a' })
@@ -450,8 +450,8 @@ describe('PostHog Context', () => {
     it('should prefer explicit distinctId over context for getAllFlagsAndPayloads', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: { 'test-flag': true } }))
 
-      await posthog.withContext({ distinctId: 'context-user' }, async () => {
-        await posthog.getAllFlagsAndPayloads('explicit-user')
+      await insights.withContext({ distinctId: 'context-user' }, async () => {
+        await insights.getAllFlagsAndPayloads('explicit-user')
       })
 
       const flagsCall = mockedFetch.mock.calls.find((c) => (c[0] as string).includes('/flags/'))

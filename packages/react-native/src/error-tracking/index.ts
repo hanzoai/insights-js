@@ -1,5 +1,5 @@
-import type { PostHog } from '../posthog-rn'
-import { JsonType, Logger, PostHogEventProperties, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
+import type { Insights } from '../insights-rn'
+import { JsonType, Logger, InsightsEventProperties, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { trackConsole, trackUncaughtExceptions, trackUnhandledRejections } from './utils'
 import { getRemoteConfigBool, isHermes } from '../utils'
 
@@ -43,7 +43,7 @@ export class ErrorTracking {
   private _autocaptureEnabled: boolean = true
 
   constructor(
-    private instance: PostHog,
+    private instance: Insights,
     options: ErrorTrackingOptions = {},
     logger: Logger
   ) {
@@ -86,13 +86,13 @@ export class ErrorTracking {
     )
   }
 
-  captureException(input: unknown, additionalProperties: PostHogEventProperties, hint: CoreErrorTracking.EventHint) {
+  captureException(input: unknown, additionalProperties: InsightsEventProperties, hint: CoreErrorTracking.EventHint) {
     try {
       const properties = this.errorPropertiesBuilder.buildFromUnknown(input, hint)
       return this.instance.capture('$exception', {
         ...properties,
         ...additionalProperties,
-      } as unknown as PostHogEventProperties)
+      } as unknown as InsightsEventProperties)
     } catch (error) {
       this.logger.error('An error occurred while capturing an $exception event:', error)
     }

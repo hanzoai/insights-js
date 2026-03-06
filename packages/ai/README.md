@@ -2,7 +2,7 @@
 
 TypeScript SDK for LLM observability with Hanzo Insights.
 
-[SEE FULL DOCS](https://posthog.com/docs/ai-engineering/observability)
+[SEE FULL DOCS](https://insights.hanzo.ai/docs/ai-engineering/observability)
 
 ## Installation
 
@@ -14,23 +14,23 @@ npm install @hanzo/insights-ai
 
 ```typescript
 import { OpenAI } from '@hanzo/insights-ai'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 
-const phClient = new PostHog('<YOUR_PROJECT_API_KEY>', { host: 'https://us.i.posthog.com' })
+const phClient = new Insights('<YOUR_PROJECT_API_KEY>', { host: 'https://us.i.insights.hanzo.ai' })
 
 const client = new OpenAI({
   apiKey: '<YOUR_OPENAI_API_KEY>',
-  posthog: phClient,
+  insights: phClient,
 })
 
 const completion = await client.chat.completions.create({
   model: 'gpt-3.5-turbo',
   messages: [{ role: 'user', content: 'Tell me a fun fact about hedgehogs' }],
-  posthogDistinctId: 'user_123', // optional
-  posthogTraceId: 'trace_123', // optional
-  posthogProperties: { conversation_id: 'abc123', paid: true }, //optional
-  posthogGroups: { company: 'company_id_in_your_db' }, // optional
-  posthogPrivacyMode: false, // optional
+  insightsDistinctId: 'user_123', // optional
+  insightsTraceId: 'trace_123', // optional
+  insightsProperties: { conversation_id: 'abc123', paid: true }, //optional
+  insightsGroups: { company: 'company_id_in_your_db' }, // optional
+  insightsPrivacyMode: false, // optional
 })
 
 console.log(completion.choices[0].message.content)
@@ -41,20 +41,20 @@ await phClient.shutdown()
 
 ## OTEL + AI SDK (`experimental_telemetry`)
 
-Use this when working with Vercel AI SDK telemetry. `@posthog/ai` exposes an OTEL `SpanProcessor` that maps spans to PostHog AI events and sends them through `posthog-node`.
+Use this when working with Vercel AI SDK telemetry. `@hanzo/ai` exposes an OTEL `SpanProcessor` that maps spans to Insights AI events and sends them through `@hanzo/insights-node`.
 
 ```typescript
 import { NodeSDK } from '@opentelemetry/sdk-node'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
-import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
+import { InsightsSpanProcessor } from '@hanzo/insights-ai/otel'
 
-const phClient = new PostHog('<YOUR_PROJECT_API_KEY>', { host: 'https://us.i.posthog.com' })
+const phClient = new Insights('<YOUR_PROJECT_API_KEY>', { host: 'https://us.i.insights.hanzo.ai' })
 
 const sdk = new NodeSDK({
   spanProcessors: [
-    new PostHogSpanProcessor(phClient),
+    new InsightsSpanProcessor(phClient),
   ],
 })
 
@@ -81,23 +81,23 @@ await phClient.shutdown()
 The OTEL processor supports adapter mappers for different span formats:
 
 - `aiSdkSpanMapper` is the default mapper.
-- You can pass custom `mappers` in `PostHogSpanProcessor` options to support additional span schemas.
+- You can pass custom `mappers` in `InsightsSpanProcessor` options to support additional span schemas.
 
 ### Per-call Metadata (Recommended)
 
 For dynamic properties, pass values in `experimental_telemetry.metadata` on each AI SDK call.
-These are captured from `ai.telemetry.metadata.*` and forwarded as PostHog event properties.
-Use processor options (`posthogProperties`) only for global defaults.
+These are captured from `ai.telemetry.metadata.*` and forwarded as Insights event properties.
+Use processor options (`insightsProperties`) only for global defaults.
 
 ## Notes
 
-- The OTEL route currently maps supported spans into PostHog AI events (manual capture path).
+- The OTEL route currently maps supported spans into Insights AI events (manual capture path).
 - Existing wrapper-based tracing (for example `withTracing`) still works and is unchanged.
 
-LLM Observability [docs](https://posthog.com/docs/ai-engineering/observability)
+LLM Observability [docs](https://insights.hanzo.ai/docs/ai-engineering/observability)
 
-Please see the main [PostHog docs](https://www.posthog.com/docs).
+Please see the main [Insights docs](https://www.insights.hanzo.ai/docs).
 
 ## Questions?
 
-### [Check out our community page.](https://posthog.com/posts)
+### [Check out our community page.](https://insights.hanzo.ai/posts)

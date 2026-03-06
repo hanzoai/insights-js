@@ -5,7 +5,7 @@ import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { posthog } from '../posthog'
+import { insights } from '../insights'
 import { useState } from 'react'
 
 export default function HomeScreen() {
@@ -15,13 +15,13 @@ export default function HomeScreen() {
   const [replayStatus, setReplayStatus] = useState('Unknown')
 
   const handleClick = () => {
-    posthog.capture('button_clicked', { name: 'example' })
+    insights.capture('button_clicked', { name: 'example' })
     setButtonText('button_clicked' + new Date().toISOString())
   }
 
   const handleStartRecording = async (resumeCurrent: boolean) => {
     try {
-      await posthog.startSessionRecording(resumeCurrent)
+      await insights.startSessionRecording(resumeCurrent)
       setReplayStatus(`Started (resume=${resumeCurrent})`)
     } catch (e) {
       setReplayStatus(`Error: ${e}`)
@@ -30,7 +30,7 @@ export default function HomeScreen() {
 
   const handleStopRecording = async () => {
     try {
-      await posthog.stopSessionRecording()
+      await insights.stopSessionRecording()
       setReplayStatus('Stopped')
     } catch (e) {
       setReplayStatus(`Error: ${e}`)
@@ -39,7 +39,7 @@ export default function HomeScreen() {
 
   const handleCheckStatus = async () => {
     try {
-      const isActive = await posthog.isSessionReplayActive()
+      const isActive = await insights.isSessionReplayActive()
       setReplayStatus(`Active: ${isActive}`)
     } catch (e) {
       setReplayStatus(`Error: ${e}`)

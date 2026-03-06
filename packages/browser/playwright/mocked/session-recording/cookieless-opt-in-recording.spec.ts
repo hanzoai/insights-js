@@ -1,10 +1,10 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 import { BrowserContext, Page } from '@playwright/test'
-import { PostHogConfig } from '@/types'
+import { InsightsConfig } from '@/types'
 import { assertThatRecordingStarted, pollUntilEventCaptured } from '../utils/event-capture-utils'
 
-async function startWith(config: Partial<PostHogConfig>, page: Page, context: BrowserContext) {
+async function startWith(config: Partial<InsightsConfig>, page: Page, context: BrowserContext) {
     const flagsResponse = page.waitForResponse('**/flags/*')
 
     await start(
@@ -33,7 +33,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
     }) => {
         // NOTE: cookieless_mode: 'on_reject' already behaves like opt_out_capturing_by_default,
         // so using both is redundant, but we test with both to match the customer's exact setup
-        const customerConfig: Partial<PostHogConfig> = {
+        const customerConfig: Partial<InsightsConfig> = {
             cross_subdomain_cookie: false,
             capture_pageview: true,
             capture_pageleave: true,
@@ -49,7 +49,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
         await startWith(customerConfig, page, context)
 
         // Verify no events are captured initially
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await page.waitForTimeout(250)
         await page.expectCapturedEventsToBe([])
 
@@ -58,7 +58,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
             urlPatternsToWaitFor: ['**/*recorder.js*'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.opt_in_capturing()
                 })
             },
@@ -69,7 +69,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
 
         // Check localStorage to confirm opt-in is stored
         const optInValue = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             const token = ph?.config.token
             return localStorage.getItem(`__ph_opt_in_out_${token}`)
         })
@@ -87,7 +87,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
     test('cookieless_mode on_reject acts like opt_out_capturing_by_default', async ({ page, context }) => {
         // Test that cookieless_mode: 'on_reject' alone also prevents recording
         // until explicit consent is given (it treats pending consent as opted out)
-        const config: Partial<PostHogConfig> = {
+        const config: Partial<InsightsConfig> = {
             cookieless_mode: 'on_reject',
             capture_pageview: true,
         }
@@ -99,7 +99,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
         await startWith(config, page, context)
 
         // No events should be captured initially
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await page.waitForTimeout(250)
         await page.expectCapturedEventsToBe([])
 
@@ -108,7 +108,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
             urlPatternsToWaitFor: ['**/*recorder.js*'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.opt_in_capturing()
                 })
             },
@@ -126,7 +126,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
         page,
         context,
     }) => {
-        const customerConfig: Partial<PostHogConfig> = {
+        const customerConfig: Partial<InsightsConfig> = {
             cookieless_mode: 'on_reject',
             opt_out_capturing_by_default: true,
             opt_out_capturing_persistence_type: 'localStorage',
@@ -140,7 +140,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
             urlPatternsToWaitFor: ['**/*recorder.js*'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.opt_in_capturing()
                 })
             },
@@ -150,7 +150,7 @@ test.describe('Session Recording - cookieless mode with opt-in', () => {
         await page.resetCapturedEvents()
 
         // Verify recording works after opt-in
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })

@@ -1,11 +1,11 @@
 /**
- * PostHog Node SDK Compliance Adapter
+ * Insights Node SDK Compliance Adapter
  *
- * Wraps the posthog-node SDK for compliance testing.
+ * Wraps the insights-node SDK for compliance testing.
  */
 
 const express = require('express')
-const { PostHog } = require('../../packages/node/dist/entrypoints/index.node')
+const { Insights } = require('../../packages/node/dist/entrypoints/index.node')
 
 const app = express()
 app.use(express.json())
@@ -22,7 +22,7 @@ const state = {
 
 app.get('/health', (req, res) => {
     res.json({
-        sdk_name: 'posthog-node',
+        sdk_name: 'insights-node',
         sdk_version: require('../../packages/node/package.json').version,
         adapter_version: '1.0.0',
     })
@@ -45,7 +45,7 @@ app.post('/init', (req, res) => {
     state.pendingEvents = 0
 
     // Create new client
-    state.client = new PostHog(api_key, {
+    state.client = new Insights(api_key, {
         host,
         flushAt: flush_at ?? 1,
         flushInterval: flush_interval_ms ?? 100,
@@ -162,5 +162,5 @@ app.post('/reset', (req, res) => {
 
 const port = process.env.PORT || 8080
 app.listen(port, () => {
-    console.log(`PostHog Node SDK adapter listening on port ${port}`)
+    console.log(`Insights Node SDK adapter listening on port ${port}`)
 })

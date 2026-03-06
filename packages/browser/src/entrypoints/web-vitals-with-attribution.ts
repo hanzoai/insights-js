@@ -25,21 +25,21 @@ import {
     onFCP as onFCPWithAttribution,
 } from 'web-vitals/attribution'
 
-const postHogWebVitalsCallbacks = {
+const insightsWebVitalsCallbacks = {
     onLCP: onLCPWithAttribution,
     onCLS: onCLSWithAttribution,
     onFCP: onFCPWithAttribution,
     onINP: onINPWithAttribution,
 }
 
-assignableWindow.__PosthogExtensions__ = assignableWindow.__PosthogExtensions__ || {}
-assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = postHogWebVitalsCallbacks
+assignableWindow.__InsightsExtensions__ = assignableWindow.__InsightsExtensions__ || {}
+assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = insightsWebVitalsCallbacks
 
-// we used to put posthogWebVitalsCallbacks on window, and now we put it on __PosthogExtensions__
+// we used to put insightsWebVitalsCallbacks on window, and now we put it on __InsightsExtensions__
 // but that means that old clients which lazily load this extension are looking in the wrong place
 // yuck,
 // so we also put it directly on the window
 // when 1.161.1 is the oldest version seen in production we can remove this
-assignableWindow.postHogWebVitalsCallbacks = postHogWebVitalsCallbacks
+assignableWindow.insightsWebVitalsCallbacks = insightsWebVitalsCallbacks
 
-export default postHogWebVitalsCallbacks
+export default insightsWebVitalsCallbacks

@@ -7,14 +7,14 @@
         "build": "next build",
         "preview": "next start",
         "lint": "next lint",
-        "inject": "posthog-cli sourcemap inject --directory ./.next/static/chunks",
-        "upload": "posthog-cli sourcemap upload --directory ./.next/static/chunks",
-        "build-posthog": "cd ../../.. && NODE_ENV=dev pnpm i && pnpm run build",
-        "preinstall": "pnpm run build-posthog"
+        "inject": "insights-cli sourcemap inject --directory ./.next/static/chunks",
+        "upload": "insights-cli sourcemap upload --directory ./.next/static/chunks",
+        "build-insights": "cd ../../.. && NODE_ENV=dev pnpm i && pnpm run build",
+        "preinstall": "pnpm run build-insights"
     },
     "dependencies": {
         "next": "^15.5.7",
-        "posthog-js": "file:../../..",
+        "@hanzo/insights": "file:../../..",
         "react": "^19.2.1",
         "react-dom": "^19.2.1"
     },

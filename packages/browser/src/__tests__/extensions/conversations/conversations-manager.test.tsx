@@ -6,8 +6,8 @@ import {
     SendMessageResponse,
     GetMessagesResponse,
     MarkAsReadResponse,
-} from '../../../posthog-conversations-types'
-import { PostHog } from '../../../posthog-core'
+} from '../../../insights-conversations-types'
+import { Insights } from '../../../insights-core'
 import '@testing-library/jest-dom'
 import { act } from '@testing-library/preact'
 
@@ -41,7 +41,7 @@ jest.mock('../../../extensions/conversations/external/persistence', () => {
 
 describe('ConversationsManager', () => {
     let manager: ConversationsManager
-    let mockPosthog: PostHog
+    let mockInsights: Insights
     let mockConfig: ConversationsRemoteConfig
     let mockRestoreResponse: { statusCode: number; json?: Record<string, any> }
 
@@ -119,9 +119,9 @@ describe('ConversationsManager', () => {
             color: '#007bff',
         }
 
-        // Setup mock PostHog instance
+        // Setup mock Insights instance
         // Note: callbacks are called synchronously to avoid issues with Jest fake timers
-        mockPosthog = {
+        mockInsights = {
             _send_request: jest.fn((options) => {
                 // Call callback synchronously to avoid fake timer issues
                 const url = options.url as string
@@ -156,12 +156,12 @@ describe('ConversationsManager', () => {
                 }
             }),
             requestRouter: {
-                endpointFor: jest.fn((type: string, path: string) => `https://test.posthog.com${path}`),
+                endpointFor: jest.fn((type: string, path: string) => `https://test.insights.com${path}`),
             },
             get_distinct_id: jest.fn().mockReturnValue('test-distinct-id'),
             get_property: jest.fn().mockReturnValue(undefined),
             get_session_id: jest.fn().mockReturnValue('test-session-id-123'),
-            get_session_replay_url: jest.fn().mockReturnValue('https://app.posthog.com/replay/test-session?t=100'),
+            get_session_replay_url: jest.fn().mockReturnValue('https://app.insights.com/replay/test-session?t=100'),
             persistence: {
                 props: {
                     $name: 'Test User',
@@ -175,7 +175,7 @@ describe('ConversationsManager', () => {
             capture: jest.fn(),
             on: jest.fn().mockReturnValue(jest.fn()), // Returns unsubscribe function
             _isIdentified: jest.fn().mockReturnValue(false), // Default to anonymous user
-        } as unknown as PostHog
+        } as unknown as Insights
     })
 
     afterEach(() => {
@@ -195,7 +195,7 @@ describe('ConversationsManager', () => {
 
     describe('initialization', () => {
         it('should initialize and render the widget when widgetEnabled is true', async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             const container = document.getElementById('ph-conversations-widget-container')
@@ -207,16 +207,16 @@ describe('ConversationsManager', () => {
                 ...mockConfig,
                 widgetEnabled: false,
             }
-            manager = new ConversationsManager(configWithWidgetDisabled, mockPosthog)
+            manager = new ConversationsManager(configWithWidgetDisabled, mockInsights)
 
             const container = document.getElementById('ph-conversations-widget-container')
             expect(container).not.toBeInTheDocument()
         })
 
         it('should capture $conversations_loaded event always', () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
 
-            expect(mockPosthog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 '$conversations_loaded',
                 expect.objectContaining({
                     hasExistingTicket: expect.any(Boolean),
@@ -227,10 +227,10 @@ describe('ConversationsManager', () => {
         })
 
         it('should capture $conversations_widget_loaded event when widget is rendered', async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
-            expect(mockPosthog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 '$conversations_widget_loaded',
                 expect.objectContaining({
                     hasExistingTicket: expect.any(Boolean),
@@ -244,23 +244,23 @@ describe('ConversationsManager', () => {
                 ...mockConfig,
                 widgetEnabled: false,
             }
-            manager = new ConversationsManager(configWithWidgetDisabled, mockPosthog)
+            manager = new ConversationsManager(configWithWidgetDisabled, mockInsights)
 
             // Should capture $conversations_loaded but NOT $conversations_widget_loaded
-            expect(mockPosthog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 '$conversations_loaded',
                 expect.objectContaining({
                     widgetEnabled: false,
                 })
             )
-            expect(mockPosthog.capture).not.toHaveBeenCalledWith('$conversations_widget_loaded', expect.anything())
+            expect(mockInsights.capture).not.toHaveBeenCalledWith('$conversations_widget_loaded', expect.anything())
         })
 
-        it('should get user traits from PostHog persistence', () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+        it('should get user traits from Insights persistence', () => {
+            manager = new ConversationsManager(mockConfig, mockInsights)
 
-            // User traits are accessed via mockPosthog.persistence.props
-            expect(mockPosthog.persistence?.props).toBeDefined()
+            // User traits are accessed via mockInsights.persistence.props
+            expect(mockInsights.persistence?.props).toBeDefined()
         })
     })
 
@@ -268,10 +268,10 @@ describe('ConversationsManager', () => {
         it('should call restore endpoint when restore token exists in URL', async () => {
             window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-1')
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     method: 'POST',
                     url: expect.stringContaining('/api/conversations/v1/widget/restore'),
@@ -286,7 +286,7 @@ describe('ConversationsManager', () => {
         it('should apply restored ticket/session and clear restore token from URL', async () => {
             window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-2')
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             expect(manager.getWidgetSessionId()).toBe('restored-widget-session-id')
@@ -301,7 +301,7 @@ describe('ConversationsManager', () => {
             }
             window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-3')
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             expect(manager.getWidgetSessionId()).toBe('test-widget-session-id')
@@ -318,7 +318,7 @@ describe('ConversationsManager', () => {
             }
             window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-4')
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             expect(manager.getWidgetSessionId()).toBe('test-widget-session-id')
@@ -334,14 +334,14 @@ describe('ConversationsManager', () => {
             }
             window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-5')
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             expect(window.location.search).toBe('')
         })
 
         it('should clear restore token from URL when restoreFromToken is called directly', async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
             window.history.replaceState({}, '', '/?ph_conv_restore=manual-token')
 
@@ -355,7 +355,7 @@ describe('ConversationsManager', () => {
 
     describe('show and hide', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
         })
 
@@ -412,7 +412,7 @@ describe('ConversationsManager', () => {
 
     describe('isVisible', () => {
         it('should return true when widget is rendered', async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             expect(manager.isVisible()).toBe(true)
@@ -423,7 +423,7 @@ describe('ConversationsManager', () => {
                 ...mockConfig,
                 widgetEnabled: false,
             }
-            manager = new ConversationsManager(configWithWidgetDisabled, mockPosthog)
+            manager = new ConversationsManager(configWithWidgetDisabled, mockInsights)
 
             expect(manager.isVisible()).toBe(false)
         })
@@ -435,7 +435,7 @@ describe('ConversationsManager', () => {
                 ...mockConfig,
                 widgetEnabled: false,
             }
-            manager = new ConversationsManager(configWithWidgetDisabled, mockPosthog)
+            manager = new ConversationsManager(configWithWidgetDisabled, mockInsights)
 
             // Widget should not be rendered initially
             expect(document.getElementById('ph-conversations-widget-container')).not.toBeInTheDocument()
@@ -457,7 +457,7 @@ describe('ConversationsManager', () => {
                 ...mockConfig,
                 widgetEnabled: false,
             }
-            manager = new ConversationsManager(configWithWidgetDisabled, mockPosthog)
+            manager = new ConversationsManager(configWithWidgetDisabled, mockInsights)
 
             jest.clearAllMocks()
 
@@ -466,7 +466,7 @@ describe('ConversationsManager', () => {
             })
             await flushPromises()
 
-            expect(mockPosthog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 '$conversations_widget_loaded',
                 expect.objectContaining({
                     hasExistingTicket: expect.any(Boolean),
@@ -477,7 +477,7 @@ describe('ConversationsManager', () => {
 
     describe('sendMessage', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
             // Clear mocks after initialization (which calls getTickets)
             jest.clearAllMocks()
@@ -488,7 +488,7 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('Hello!')
             })
 
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     url: expect.stringContaining('/api/conversations/v1/widget/message'),
                     method: 'POST',
@@ -505,7 +505,7 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('Hello!')
             })
 
-            expect(mockPosthog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 '$conversations_message_sent',
                 expect.objectContaining({
                     ticketId: 'ticket-123',
@@ -535,7 +535,7 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('Second message')
             })
 
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({
                         ticket_id: 'ticket-123',
@@ -550,12 +550,12 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('First message')
             })
 
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({
                         session_id: 'test-session-id-123',
                         session_context: expect.objectContaining({
-                            session_replay_url: 'https://app.posthog.com/replay/test-session?t=100',
+                            session_replay_url: 'https://app.insights.com/replay/test-session?t=100',
                             current_url: expect.any(String),
                         }),
                     }),
@@ -575,11 +575,11 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('Second message')
             })
 
-            const sendRequestCall = (mockPosthog._send_request as jest.Mock).mock.calls[0][0]
+            const sendRequestCall = (mockInsights._send_request as jest.Mock).mock.calls[0][0]
             // session_id and replay_url should be included for debugging context
             expect(sendRequestCall.data.session_id).toBe('test-session-id-123')
             expect(sendRequestCall.data.session_context).toEqual({
-                session_replay_url: 'https://app.posthog.com/replay/test-session?t=100',
+                session_replay_url: 'https://app.insights.com/replay/test-session?t=100',
                 current_url: undefined, // only sent with new tickets
             })
         })
@@ -596,13 +596,13 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('New ticket message', undefined, true)
             })
 
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({
                         ticket_id: null,
                         session_id: 'test-session-id-123',
                         session_context: expect.objectContaining({
-                            session_replay_url: 'https://app.posthog.com/replay/test-session?t=100',
+                            session_replay_url: 'https://app.insights.com/replay/test-session?t=100',
                             current_url: expect.any(String),
                         }),
                     }),
@@ -612,13 +612,13 @@ describe('ConversationsManager', () => {
 
         it('should handle missing session ID gracefully', async () => {
             // Mock get_session_id to return empty string
-            ;(mockPosthog.get_session_id as jest.Mock).mockReturnValue('')
+            ;(mockInsights.get_session_id as jest.Mock).mockReturnValue('')
 
             await act(async () => {
                 await manager.sendMessage('First message')
             })
 
-            const sendRequestCall = (mockPosthog._send_request as jest.Mock).mock.calls[0][0]
+            const sendRequestCall = (mockInsights._send_request as jest.Mock).mock.calls[0][0]
             expect(sendRequestCall.data.session_id).toBeUndefined()
             // session_context should still be present (has current_url)
             expect(sendRequestCall.data.session_context).toBeDefined()
@@ -626,13 +626,13 @@ describe('ConversationsManager', () => {
 
         it('should handle missing session replay URL gracefully', async () => {
             // Mock get_session_replay_url to return empty string
-            ;(mockPosthog.get_session_replay_url as jest.Mock).mockReturnValue('')
+            ;(mockInsights.get_session_replay_url as jest.Mock).mockReturnValue('')
 
             await act(async () => {
                 await manager.sendMessage('First message')
             })
 
-            const sendRequestCall = (mockPosthog._send_request as jest.Mock).mock.calls[0][0]
+            const sendRequestCall = (mockInsights._send_request as jest.Mock).mock.calls[0][0]
             // session_id should still be present
             expect(sendRequestCall.data.session_id).toBe('test-session-id-123')
             // session_context should have current_url, replay_url is undefined when empty
@@ -647,7 +647,7 @@ describe('ConversationsManager', () => {
                 await manager.sendMessage('First message')
             })
 
-            expect(mockPosthog.get_session_replay_url).toHaveBeenCalledWith({
+            expect(mockInsights.get_session_replay_url).toHaveBeenCalledWith({
                 withTimestamp: true,
                 timestampLookBack: 30,
             })
@@ -655,7 +655,7 @@ describe('ConversationsManager', () => {
 
         it('should handle error during session context capture without failing message send', async () => {
             // Mock get_session_id to throw an error
-            ;(mockPosthog.get_session_id as jest.Mock).mockImplementation(() => {
+            ;(mockInsights.get_session_id as jest.Mock).mockImplementation(() => {
                 throw new Error('Session ID error')
             })
 
@@ -665,7 +665,7 @@ describe('ConversationsManager', () => {
             })
 
             // Verify message was sent even though session capture failed
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     data: expect.objectContaining({
                         message: 'First message',
@@ -689,7 +689,7 @@ describe('ConversationsManager', () => {
 
     describe('message polling', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
             // Send a message to create a ticket
             await act(async () => {
@@ -705,7 +705,7 @@ describe('ConversationsManager', () => {
             })
 
             // Should have made a getMessages request
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     url: expect.stringContaining('/widget/messages/ticket-123'),
                     method: 'GET',
@@ -718,7 +718,7 @@ describe('ConversationsManager', () => {
                 jest.advanceTimersByTime(5000)
             })
 
-            expect(mockPosthog._send_request).toHaveBeenCalledWith(
+            expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     url: expect.stringContaining('widget_session_id='),
                 })
@@ -730,7 +730,7 @@ describe('ConversationsManager', () => {
                 jest.advanceTimersByTime(5000)
             })
 
-            const calls = (mockPosthog._send_request as jest.Mock).mock.calls
+            const calls = (mockInsights._send_request as jest.Mock).mock.calls
             const getMessagesCall = calls.find((call) => call[0].url.includes('/widget/messages/'))
             expect(getMessagesCall[0].url).not.toContain('distinct_id=')
         })
@@ -742,18 +742,18 @@ describe('ConversationsManager', () => {
                 jest.advanceTimersByTime(5000)
             })
 
-            expect(mockPosthog._send_request).not.toHaveBeenCalled()
+            expect(mockInsights._send_request).not.toHaveBeenCalled()
         })
     })
 
     describe('identify handling', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
         })
 
         it('should set up identify listener', () => {
-            expect(mockPosthog.on).toHaveBeenCalledWith('eventCaptured', expect.any(Function))
+            expect(mockInsights.on).toHaveBeenCalledWith('eventCaptured', expect.any(Function))
         })
 
         it('should have an unsubscribe function', () => {
@@ -763,7 +763,7 @@ describe('ConversationsManager', () => {
 
     describe('destroy', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
         })
 
@@ -796,7 +796,7 @@ describe('ConversationsManager', () => {
 
     describe('API integration', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
         })
 
@@ -806,7 +806,7 @@ describe('ConversationsManager', () => {
                     await manager.sendMessage('Hello!')
                 })
 
-                expect(mockPosthog._send_request).toHaveBeenCalledWith(
+                expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'POST',
                         url: expect.stringContaining('/api/conversations/v1/widget/message'),
@@ -840,7 +840,7 @@ describe('ConversationsManager', () => {
                     jest.advanceTimersByTime(5000)
                 })
 
-                expect(mockPosthog._send_request).toHaveBeenCalledWith(
+                expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'GET',
                         url: expect.stringContaining('/api/conversations/v1/widget/messages/ticket-123'),
@@ -851,7 +851,7 @@ describe('ConversationsManager', () => {
                 )
 
                 // Verify widget_session_id is in URL
-                const callArgs = (mockPosthog._send_request as jest.Mock).mock.calls[0][0]
+                const callArgs = (mockInsights._send_request as jest.Mock).mock.calls[0][0]
                 expect(callArgs.url).toContain('widget_session_id=')
             })
 
@@ -904,7 +904,7 @@ describe('ConversationsManager', () => {
                     await manager.sendMessage('Message after switch')
                 })
 
-                expect(mockPosthog._send_request).toHaveBeenCalledWith(
+                expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         data: expect.objectContaining({
                             ticket_id: 'switched-ticket-999',
@@ -950,7 +950,7 @@ describe('ConversationsManager', () => {
                     expect(response).toEqual({ ok: true })
                 })
 
-                expect(mockPosthog._send_request).toHaveBeenCalledWith(
+                expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'POST',
                         url: expect.stringContaining('/api/conversations/v1/widget/restore/request'),
@@ -967,7 +967,7 @@ describe('ConversationsManager', () => {
                     await manager.requestRestoreLink('test@example.com')
                 })
 
-                expect(mockPosthog._send_request).toHaveBeenCalledWith(
+                expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'POST',
                         url: expect.not.stringContaining('request_url='),
@@ -979,7 +979,7 @@ describe('ConversationsManager', () => {
 
     describe('persistence integration', () => {
         beforeEach(async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
         })
 

@@ -1,5 +1,5 @@
 import { SurveyType } from '@hanzo/insights-core'
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const openTextQuestion = {
@@ -62,23 +62,23 @@ test.describe('surveys - displaySurvey on demand', () => {
         await surveysAPICall
 
         // Survey should not be visible initially
-        await expect(page.locator('.PostHogSurvey-test-survey-123').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-test-survey-123').locator('.survey-form')).not.toBeInViewport()
 
         // Call displaySurvey programmatically
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('test-survey-123')
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('test-survey-123')
             })
         })
 
         // Survey should now be visible
-        await expect(page.locator('.PostHogSurvey-test-survey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-test-survey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-test-survey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-test-survey-123').locator('.survey-question')).toHaveText(
             'What feedback do you have for us?'
         )
-        await expect(page.locator('.PostHogSurvey-test-survey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-test-survey-123').locator('.survey-question-description')).toHaveText(
             'Please provide your feedback'
         )
     })
@@ -100,10 +100,10 @@ test.describe('surveys - displaySurvey on demand', () => {
 
         // Call displaySurvey programmatically
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('test-survey-123', {
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('test-survey-123', {
                     displayType: 'inline',
                     selector: '#survey',
                 })
@@ -140,10 +140,10 @@ test.describe('surveys - displaySurvey on demand', () => {
 
         // Call displaySurvey programmat ically
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('test-survey-delay', {
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('test-survey-delay', {
                     displayType: 'inline',
                     selector: '#survey',
                     ignoreDelay: true,
@@ -167,14 +167,14 @@ test.describe('surveys - displaySurvey on demand', () => {
         await surveysAPICall
 
         // Survey should not be visible initially
-        await expect(page.locator('.PostHogSurvey-test-survey-delay').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-test-survey-delay').locator('.survey-form')).not.toBeInViewport()
 
         // Call displaySurvey programmatically
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('test-survey-delay', {
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('test-survey-delay', {
                     displayType: 'popover',
                     ignoreConditions: true,
                     ignoreDelay: true,
@@ -183,8 +183,8 @@ test.describe('surveys - displaySurvey on demand', () => {
         })
 
         // Survey should be visible immediately (ignoring the 3-second delay)
-        await expect(page.locator('.PostHogSurvey-test-survey-delay').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-test-survey-delay').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-test-survey-delay').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-test-survey-delay').locator('.survey-question')).toHaveText(
             'How would you rate your experience?'
         )
     })
@@ -202,14 +202,14 @@ test.describe('surveys - displaySurvey on demand', () => {
         await surveysAPICall
 
         // Survey should not be visible initially
-        await expect(page.locator('.PostHogSurvey-test-survey-delay').locator('.survey-form')).not.toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-test-survey-delay').locator('.survey-form')).not.toBeInViewport()
 
         // Call displaySurvey programmatically
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('test-survey-delay', {
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('test-survey-delay', {
                     displayType: 'popover',
                     ignoreConditions: true,
                 })
@@ -217,8 +217,8 @@ test.describe('surveys - displaySurvey on demand', () => {
         })
 
         // Survey should be visible at some point (Playwright by default has a 10 second timeout)
-        await expect(page.locator('.PostHogSurvey-test-survey-delay').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-test-survey-delay').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-test-survey-delay').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-test-survey-delay').locator('.survey-question')).toHaveText(
             'How would you rate your experience?'
         )
     })
@@ -237,13 +237,13 @@ test.describe('surveys - displaySurvey on demand', () => {
 
         // Call displaySurvey with invalid survey ID
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.displaySurvey('non-existent-survey')
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.displaySurvey('non-existent-survey')
         })
 
         // No survey should be visible
-        await expect(page.locator('.PostHogSurvey-non-existent-survey')).not.toBeVisible()
-        await expect(page.locator('.PostHogSurvey-test-survey-123')).not.toBeVisible()
+        await expect(page.locator('.InsightsSurvey-non-existent-survey')).not.toBeVisible()
+        await expect(page.locator('.InsightsSurvey-test-survey-123')).not.toBeVisible()
     })
 
     Object.values(SurveyType)
@@ -266,20 +266,20 @@ test.describe('surveys - displaySurvey on demand', () => {
 
                 // Call displaySurvey first time
                 await page.evaluate(() => {
-                    // @ts-expect-error - posthog is added to window in test setup
-                    window.posthog.onSurveysLoaded(() => {
-                        // @ts-expect-error - posthog is added to window in test setup
-                        window.posthog.displaySurvey('test-survey-123')
+                    // @ts-expect-error - insights is added to window in test setup
+                    window.hi.onSurveysLoaded(() => {
+                        // @ts-expect-error - insights is added to window in test setup
+                        window.hi.displaySurvey('test-survey-123')
                     })
                 })
 
                 // Survey should be visible
-                await expect(page.locator('.PostHogSurvey-test-survey-123').locator('.survey-form')).toBeVisible()
+                await expect(page.locator('.InsightsSurvey-test-survey-123').locator('.survey-form')).toBeVisible()
 
                 // Dismiss the survey
-                await page.locator('.PostHogSurvey-test-survey-123').locator('.form-cancel').click()
+                await page.locator('.InsightsSurvey-test-survey-123').locator('.form-cancel').click()
                 await expect(
-                    page.locator('.PostHogSurvey-test-survey-123').locator('.survey-form')
+                    page.locator('.InsightsSurvey-test-survey-123').locator('.survey-form')
                 ).not.toBeInViewport()
 
                 // Wait for 1 second so survey is dismissed internally
@@ -287,15 +287,15 @@ test.describe('surveys - displaySurvey on demand', () => {
 
                 // Call displaySurvey again
                 await page.evaluate(() => {
-                    // @ts-expect-error - posthog is added to window in test setup
-                    window.posthog.displaySurvey('test-survey-123', {
+                    // @ts-expect-error - insights is added to window in test setup
+                    window.hi.displaySurvey('test-survey-123', {
                         displayType: 'popover',
                         ignoreConditions: true,
                     })
                 })
 
                 // Survey should be visible again (ignoring normal dismissal logic)
-                await expect(page.locator('.PostHogSurvey-test-survey-123').locator('.survey-form')).toBeVisible()
+                await expect(page.locator('.InsightsSurvey-test-survey-123').locator('.survey-form')).toBeVisible()
             })
         })
 
@@ -315,12 +315,12 @@ test.describe('surveys - displaySurvey on demand', () => {
 
         // Call displaySurvey when surveys are not initialized
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.displaySurvey('test-survey-123')
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.displaySurvey('test-survey-123')
         })
 
         // No survey should be visible
-        await expect(page.locator('.PostHogSurvey-test-survey-123')).not.toBeVisible()
+        await expect(page.locator('.InsightsSurvey-test-survey-123')).not.toBeVisible()
     })
 
     test('displaySurvey can render multiple different surveys', async ({ page, context }) => {
@@ -350,31 +350,31 @@ test.describe('surveys - displaySurvey on demand', () => {
 
         // Call displaySurvey for first survey
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('survey-1')
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('survey-1')
             })
         })
 
         // First survey should be visible
-        await expect(page.locator('.PostHogSurvey-survey-1').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-survey-1').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-survey-1').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-survey-1').locator('.survey-question')).toHaveText(
             'What feedback do you have for us?'
         )
 
         // Close first survey
-        await page.locator('.PostHogSurvey-survey-1').locator('.form-cancel').click()
+        await page.locator('.InsightsSurvey-survey-1').locator('.form-cancel').click()
 
         // Call displaySurvey for second survey
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.displaySurvey('survey-2')
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.displaySurvey('survey-2')
         })
 
         // Second survey should be visible
-        await expect(page.locator('.PostHogSurvey-survey-2').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-survey-2').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-survey-2').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-survey-2').locator('.survey-question')).toHaveText(
             'How would you rate your experience?'
         )
     })

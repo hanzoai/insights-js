@@ -9,10 +9,10 @@ import {
     previousElementSibling,
 } from '../autocapture'
 import { shouldCaptureDomEvent } from '../autocapture-utils'
-import { AutocaptureConfig, FlagsResponse, PostHogConfig, RageclickConfig } from '../types'
-import { PostHog } from '../posthog-core'
+import { AutocaptureConfig, FlagsResponse, InsightsConfig, RageclickConfig } from '../types'
+import { Insights } from '../insights-core'
 import { window } from '../utils/globals'
-import { createPosthogInstance } from './helpers/posthog-instance'
+import { createInsightsInstance } from './helpers/insights-instance'
 import { uuidv7 } from '../uuidv7'
 import { isUndefined } from '@hanzo/insights-core'
 
@@ -61,7 +61,7 @@ describe('Autocapture system', () => {
     const originalWindowLocation = window!.location
 
     let autocapture: Autocapture
-    let posthog: PostHog
+    let insights: Insights
     let beforeSendMock: jest.Mock
 
     beforeEach(async () => {
@@ -77,17 +77,17 @@ describe('Autocapture system', () => {
 
         beforeSendMock = jest.fn().mockImplementation((...args) => args)
 
-        posthog = await createPosthogInstance(uuidv7(), {
+        insights = await createInsightsInstance(uuidv7(), {
             api_host: 'https://test.com',
             token: 'testtoken',
             autocapture: true,
             before_send: beforeSendMock,
         })
 
-        if (isUndefined(posthog.autocapture)) {
+        if (isUndefined(insights.autocapture)) {
             throw new Error('helping TS by confirming this is created by now')
         }
-        autocapture = posthog.autocapture
+        autocapture = insights.autocapture
     })
 
     afterEach(() => {
@@ -377,7 +377,7 @@ describe('Autocapture system', () => {
 
     describe('_captureEvent', () => {
         beforeEach(() => {
-            posthog.config.rageclick = true
+            insights.config.rageclick = true
             // Trigger proper enabling
             autocapture.onRemoteConfig({} as FlagsResponse)
         })
@@ -415,8 +415,8 @@ describe('Autocapture system', () => {
             ],
         ])(
             'autocapture and rageclick testcase: %s',
-            (_title, rageclickConfig: PostHogConfig['rageclick'], parentClassname: string, expectedCaptured) => {
-                posthog.config.rageclick = rageclickConfig
+            (_title, rageclickConfig: InsightsConfig['rageclick'], parentClassname: string, expectedCaptured) => {
+                insights.config.rageclick = rageclickConfig
 
                 const elTarget = document.createElement('img')
                 const elParent = document.createElement('span')
@@ -523,7 +523,7 @@ describe('Autocapture system', () => {
                 async (_title, rageclickConfig: boolean | RageclickConfig, clickEvents, expectedCaptured) => {
                     // Create fresh instance with custom config, since
                     // rageclick behaviour is set on construction
-                    const customPosthog = await createPosthogInstance(uuidv7(), {
+                    const customInsights = await createInsightsInstance(uuidv7(), {
                         api_host: 'https://test.com',
                         token: 'testtoken',
                         autocapture: true,
@@ -531,11 +531,11 @@ describe('Autocapture system', () => {
                         rageclick: rageclickConfig,
                     })
 
-                    if (isUndefined(customPosthog.autocapture)) {
+                    if (isUndefined(customInsights.autocapture)) {
                         throw new Error('helping TS by confirming this is created by now')
                     }
 
-                    const customAutocapture = customPosthog.autocapture
+                    const customAutocapture = customInsights.autocapture
                     customAutocapture.onRemoteConfig({} as FlagsResponse)
 
                     // Create element and simulate clicks
@@ -659,7 +659,7 @@ describe('Autocapture system', () => {
         })
 
         it('should not capture events when config returns false, when an element matching any of the event selectors is clicked', () => {
-            posthog.config.autocapture = false
+            insights.config.autocapture = false
             autocapture.onRemoteConfig({} as FlagsResponse)
 
             const eventElement1 = document.createElement('div')
@@ -1045,7 +1045,7 @@ describe('Autocapture system', () => {
       </button>
       `
 
-            posthog.config.mask_all_element_attributes = true
+            insights.config.mask_all_element_attributes = true
 
             document.body.innerHTML = dom
             const button1 = document.getElementById('button1')
@@ -1065,7 +1065,7 @@ describe('Autocapture system', () => {
           Dont capture me!
         </a>
         `
-            posthog.config.mask_all_text = true
+            insights.config.mask_all_text = true
 
             document.body.innerHTML = dom
             const a = document.getElementById('a1')
@@ -1160,7 +1160,7 @@ describe('Autocapture system', () => {
     describe('_addDomEventHandlers', () => {
         beforeEach(() => {
             document.title = 'test page'
-            posthog.config.mask_all_element_attributes = false
+            insights.config.mask_all_element_attributes = false
             autocapture.onRemoteConfig({} as FlagsResponse)
         })
 
@@ -1189,7 +1189,7 @@ describe('Autocapture system', () => {
         })
 
         it('should be enabled before the flags response if flags is disabled', () => {
-            posthog.config.advanced_disable_flags = true
+            insights.config.advanced_disable_flags = true
             expect(autocapture.isEnabled).toBe(true)
         })
 
@@ -1199,7 +1199,7 @@ describe('Autocapture system', () => {
         })
 
         it('should be disabled before the flags response if client side opted out', () => {
-            posthog.config.autocapture = false
+            insights.config.autocapture = false
             expect(autocapture.isEnabled).toBe(false)
         })
 
@@ -1213,7 +1213,7 @@ describe('Autocapture system', () => {
         ])(
             'when client side config is %p and remote opt out is %p - autocapture enabled should be %p',
             (clientSideOptIn, serverSideOptOut, expected) => {
-                posthog.config.autocapture = clientSideOptIn
+                insights.config.autocapture = clientSideOptIn
                 autocapture.onRemoteConfig({
                     autocapture_opt_out: serverSideOptOut,
                 } as FlagsResponse)
@@ -1222,7 +1222,7 @@ describe('Autocapture system', () => {
         )
 
         it('should call _addDomEventHandlders if autocapture is true in client config', () => {
-            posthog.config.autocapture = true
+            insights.config.autocapture = true
             autocapture['_initialized'] = false
             autocapture.onRemoteConfig({} as FlagsResponse)
             expect(autocapture['_addDomEventHandlers']).toHaveBeenCalled()
@@ -1235,7 +1235,7 @@ describe('Autocapture system', () => {
 
         it('should not call _addDomEventHandlders if autocapture is disabled in client config', () => {
             expect(autocapture['_addDomEventHandlers']).not.toHaveBeenCalled()
-            posthog.config.autocapture = false
+            insights.config.autocapture = false
 
             autocapture.onRemoteConfig({} as FlagsResponse)
 
@@ -1263,14 +1263,14 @@ describe('Autocapture system', () => {
                 composedPath: () => [button, main_el],
             })
             const autocapture_config = {
-                url_allowlist: ['https://posthog.com/test/*'],
+                url_allowlist: ['https://insights.com/test/*'],
             }
 
-            window!.location = new URL('https://posthog.com/test/matching') as unknown as string & Location
+            window!.location = new URL('https://insights.com/test/matching') as unknown as string & Location
 
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(true)
 
-            window!.location = new URL('https://posthog.com/docs/not-matching') as unknown as string & Location
+            window!.location = new URL('https://insights.com/docs/not-matching') as unknown as string & Location
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(false)
         })
 
@@ -1284,14 +1284,14 @@ describe('Autocapture system', () => {
                 composedPath: () => [button, main_el],
             })
             const autocapture_config = {
-                url_ignorelist: ['https://posthog.com/test/*'],
+                url_ignorelist: ['https://insights.com/test/*'],
             }
 
-            window!.location = new URL('https://posthog.com/test/matching') as unknown as string & Location
+            window!.location = new URL('https://insights.com/test/matching') as unknown as string & Location
 
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(false)
 
-            window!.location = new URL('https://posthog.com/docs/not-matching') as unknown as string & Location
+            window!.location = new URL('https://insights.com/docs/not-matching') as unknown as string & Location
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(true)
         })
 
@@ -1308,7 +1308,7 @@ describe('Autocapture system', () => {
                 url_allowlist: [],
             }
 
-            window!.location = new URL('https://posthog.com/test/captured') as unknown as string & Location
+            window!.location = new URL('https://insights.com/test/captured') as unknown as string & Location
 
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(false)
         })

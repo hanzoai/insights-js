@@ -1,8 +1,8 @@
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 import { useEffect, useState } from 'react'
 
 export default function Home() {
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     const [otherHost, setOtherHost] = useState('')
 
@@ -25,7 +25,7 @@ export default function Home() {
                     src={`http://${otherHost}:3000/`}
                     style={{ width: '100%', height: '500px' }}
                     onLoad={() => {
-                        posthog.capture('iframe loaded')
+                        insights.capture('iframe loaded')
                     }}
                 />
             )}

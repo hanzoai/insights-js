@@ -1,4 +1,4 @@
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { RemoteConfig, SupportedWebVitalsMetrics } from '../../types'
 import { createLogger } from '../../utils/logger'
 import { isBoolean, isNullish, isNumber, isUndefined, isObject } from '@hanzo/insights-core'
@@ -25,7 +25,7 @@ export class WebVitalsAutocapture {
     private _buffer: WebVitalsEventBuffer = { url: undefined, metrics: [], firstMetricTimestamp: undefined }
     private _delayedFlushTimer: ReturnType<typeof setTimeout> | undefined
 
-    constructor(private readonly _instance: PostHog) {
+    constructor(private readonly _instance: Insights) {
         this._enabledServerSide = !!this._instance.persistence?.props[WEB_VITALS_ENABLED_SERVER_SIDE]
 
         this.startIfEnabled()
@@ -118,7 +118,7 @@ export class WebVitalsAutocapture {
     }
 
     private _loadScript(cb: () => void): void {
-        if (assignableWindow.__PosthogExtensions__?.postHogWebVitalsCallbacks) {
+        if (assignableWindow.__InsightsExtensions__?.insightsWebVitalsCallbacks) {
             // already loaded
             cb()
             return
@@ -126,7 +126,7 @@ export class WebVitalsAutocapture {
 
         const kind = this.useAttribution ? 'web-vitals-with-attribution' : 'web-vitals'
 
-        assignableWindow.__PosthogExtensions__?.loadExternalDependency?.(this._instance, kind, (err) => {
+        assignableWindow.__InsightsExtensions__?.loadExternalDependency?.(this._instance, kind, (err) => {
             if (err) {
                 logger.error('failed to load script', err)
                 return
@@ -257,9 +257,9 @@ export class WebVitalsAutocapture {
         let onFCP: WebVitalsMetricCallback | undefined
         let onINP: WebVitalsMetricCallback | undefined
 
-        const posthogExtensions = assignableWindow.__PosthogExtensions__
-        if (!isUndefined(posthogExtensions) && !isUndefined(posthogExtensions.postHogWebVitalsCallbacks)) {
-            ;({ onLCP, onCLS, onFCP, onINP } = posthogExtensions.postHogWebVitalsCallbacks)
+        const insightsExtensions = assignableWindow.__InsightsExtensions__
+        if (!isUndefined(insightsExtensions) && !isUndefined(insightsExtensions.insightsWebVitalsCallbacks)) {
+            ;({ onLCP, onCLS, onFCP, onINP } = insightsExtensions.insightsWebVitalsCallbacks)
         }
 
         if (!onLCP || !onCLS || !onFCP || !onINP) {

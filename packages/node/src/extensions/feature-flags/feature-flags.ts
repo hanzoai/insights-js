@@ -1,5 +1,5 @@
-import { FeatureFlagCondition, FlagProperty, FlagPropertyValue, PostHogFeatureFlag, PropertyGroup } from '../../types'
-import type { FeatureFlagValue, JsonType, PostHogFetchOptions, PostHogFetchResponse } from '@hanzo/insights-core'
+import { FeatureFlagCondition, FlagProperty, FlagPropertyValue, InsightsFeatureFlag, PropertyGroup } from '../../types'
+import type { FeatureFlagValue, JsonType, InsightsFetchOptions, InsightsFetchResponse } from '@hanzo/insights-core'
 import { safeSetTimeout } from '@hanzo/insights-core'
 import { hashSHA1 } from './crypto'
 import { FlagDefinitionCacheProvider, FlagDefinitionCacheData } from './cache'
@@ -50,7 +50,7 @@ type FeatureFlagsPollerOptions = {
   host: string
   pollingInterval: number
   timeout?: number
-  fetch?: (url: string, options: PostHogFetchOptions) => Promise<PostHogFetchResponse>
+  fetch?: (url: string, options: InsightsFetchOptions) => Promise<InsightsFetchResponse>
   onError?: (error: Error) => void
   onLoad?: (count: number) => void
   customHeaders?: { [key: string]: string }
@@ -75,15 +75,15 @@ class FeatureFlagsPoller {
   pollingInterval: number
   personalApiKey: string
   projectApiKey: string
-  featureFlags: Array<PostHogFeatureFlag>
-  featureFlagsByKey: Record<string, PostHogFeatureFlag>
+  featureFlags: Array<InsightsFeatureFlag>
+  featureFlagsByKey: Record<string, InsightsFeatureFlag>
   groupTypeMapping: Record<string, string>
   cohorts: Record<string, PropertyGroup>
   loadedSuccessfullyOnce: boolean
   timeout?: number
   host: FeatureFlagsPollerOptions['host']
   poller?: NodeJS.Timeout
-  fetch: (url: string, options: PostHogFetchOptions) => Promise<PostHogFetchResponse>
+  fetch: (url: string, options: InsightsFetchOptions) => Promise<InsightsFetchResponse>
   debugMode: boolean = false
   onError?: (error: Error) => void
   customHeaders?: { [key: string]: string }
@@ -237,7 +237,7 @@ class FeatureFlagsPoller {
   }
 
   async computeFlagAndPayloadLocally(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     evaluationContext: FeatureFlagEvaluationContext,
     options: ComputeFlagAndPayloadOptions = {}
   ): Promise<{
@@ -271,7 +271,7 @@ class FeatureFlagsPoller {
   }
 
   private async computeFlagValueLocally(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     evaluationContext: FeatureFlagEvaluationContext
   ): Promise<FeatureFlagValue> {
     const { distinctId, groups, personProperties, groupProperties } = evaluationContext
@@ -334,7 +334,7 @@ class FeatureFlagsPoller {
   }
 
   private getBucketingValueForFlag(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     distinctId: string,
     properties: Record<string, any>
   ): string | undefined {
@@ -478,7 +478,7 @@ class FeatureFlagsPoller {
   }
 
   async matchFeatureFlagProperties(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     bucketingValue: string,
     properties: Record<string, any>,
     evaluationContext: FeatureFlagEvaluationContext
@@ -526,7 +526,7 @@ class FeatureFlagsPoller {
   }
 
   async isConditionMatch(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     bucketingValue: string,
     condition: FeatureFlagCondition,
     properties: Record<string, any>,
@@ -566,7 +566,7 @@ class FeatureFlagsPoller {
     return true
   }
 
-  async getMatchingVariant(flag: PostHogFeatureFlag, bucketingValue: string): Promise<FeatureFlagValue | undefined> {
+  async getMatchingVariant(flag: InsightsFeatureFlag, bucketingValue: string): Promise<FeatureFlagValue | undefined> {
     const hashValue = await _hash(flag.key, bucketingValue, 'variant')
     const matchingVariant = this.variantLookupTable(flag).find((variant) => {
       return hashValue >= variant.valueMin && hashValue < variant.valueMax
@@ -578,7 +578,7 @@ class FeatureFlagsPoller {
     return undefined
   }
 
-  variantLookupTable(flag: PostHogFeatureFlag): { valueMin: number; valueMax: number; key: string }[] {
+  variantLookupTable(flag: InsightsFeatureFlag): { valueMin: number; valueMax: number; key: string }[] {
     const lookupTable: { valueMin: number; valueMax: number; key: string }[] = []
     let valueMin = 0
     let valueMax = 0
@@ -603,7 +603,7 @@ class FeatureFlagsPoller {
     this.featureFlags = flagData.flags
     this.featureFlagsByKey = flagData.flags.reduce(
       (acc, curr) => ((acc[curr.key] = curr), acc),
-      <Record<string, PostHogFeatureFlag>>{}
+      <Record<string, InsightsFeatureFlag>>{}
     )
     this.groupTypeMapping = flagData.groupTypeMapping
     this.cohorts = flagData.cohorts
@@ -615,7 +615,7 @@ class FeatureFlagsPoller {
    * Called after loading flag definitions when local evaluation is enabled.
    * Only warns if strictLocalEvaluation is NOT enabled (when it's enabled, server fallback is already prevented).
    */
-  private warnAboutExperienceContinuityFlags(flags: PostHogFeatureFlag[]): void {
+  private warnAboutExperienceContinuityFlags(flags: InsightsFeatureFlag[]): void {
     // Don't warn if strictLocalEvaluation is enabled - server fallback is already prevented
     if (this.strictLocalEvaluation) {
       return
@@ -624,12 +624,12 @@ class FeatureFlagsPoller {
     const experienceContinuityFlags = flags.filter((f) => f.ensure_experience_continuity)
     if (experienceContinuityFlags.length > 0) {
       console.warn(
-        `[PostHog] You are using local evaluation but ${experienceContinuityFlags.length} flag(s) have experience ` +
+        `[Insights] You are using local evaluation but ${experienceContinuityFlags.length} flag(s) have experience ` +
           `continuity enabled: ${experienceContinuityFlags.map((f) => f.key).join(', ')}. ` +
           `Experience continuity is incompatible with local evaluation and will cause a server request on every ` +
           `flag evaluation, negating local evaluation cost savings. ` +
           `To avoid server requests and unexpected costs, either disable experience continuity on these flags ` +
-          `in PostHog, use strictLocalEvaluation: true in client init, or pass onlyEvaluateLocally: true ` +
+          `in Insights, use strictLocalEvaluation: true in client init, or pass onlyEvaluateLocally: true ` +
           `per flag call (flags that cannot be evaluated locally will return undefined).`
       )
     }
@@ -813,13 +813,13 @@ class FeatureFlagsPoller {
           // Invalid API key
           this.beginBackoff()
           throw new ClientError(
-            `Your project key or personal API key is invalid. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://posthog.com/docs/api#rate-limiting`
+            `Your project key or personal API key is invalid. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://insights.com/docs/api#rate-limiting`
           )
 
         case 402:
           // Quota exceeded - clear all flags
           console.warn(
-            '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://posthog.com/docs/billing/limits-alerts'
+            '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://insights.com/docs/billing/limits-alerts'
           )
           this.featureFlags = []
           this.featureFlagsByKey = {}
@@ -831,14 +831,14 @@ class FeatureFlagsPoller {
           // Permissions issue
           this.beginBackoff()
           throw new ClientError(
-            `Your personal API key does not have permission to fetch feature flag definitions for local evaluation. Setting next polling interval to ${this.getPollingInterval()}ms. Are you sure you're using the correct personal and Project API key pair? More information: https://posthog.com/docs/api/overview`
+            `Your personal API key does not have permission to fetch feature flag definitions for local evaluation. Setting next polling interval to ${this.getPollingInterval()}ms. Are you sure you're using the correct personal and Project API key pair? More information: https://insights.com/docs/api/overview`
           )
 
         case 429:
           // Rate limited
           this.beginBackoff()
           throw new ClientError(
-            `You are being rate limited. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://posthog.com/docs/api#rate-limiting`
+            `You are being rate limited. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://insights.com/docs/api#rate-limiting`
           )
 
         case 200: {
@@ -854,7 +854,7 @@ class FeatureFlagsPoller {
           this.flagsEtag = res.headers?.get('ETag') ?? undefined
 
           const flagData: FlagDefinitionCacheData = {
-            flags: (responseJson.flags as PostHogFeatureFlag[]) ?? [],
+            flags: (responseJson.flags as InsightsFeatureFlag[]) ?? [],
             groupTypeMapping: (responseJson.group_type_mapping as Record<string, string>) || {},
             cohorts: (responseJson.cohorts as Record<string, PropertyGroup>) || {},
           }
@@ -896,7 +896,7 @@ class FeatureFlagsPoller {
   private getPersonalApiKeyRequestOptions(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' = 'GET',
     etag?: string
-  ): PostHogFetchOptions {
+  ): InsightsFetchOptions {
     const headers: { [key: string]: string } = {
       ...this.customHeaders,
       'Content-Type': 'application/json',
@@ -913,7 +913,7 @@ class FeatureFlagsPoller {
     }
   }
 
-  _requestFeatureFlagDefinitions(): Promise<PostHogFetchResponse> {
+  _requestFeatureFlagDefinitions(): Promise<InsightsFetchResponse> {
     const url = `${this.host}/api/feature_flag/local_evaluation?token=${this.projectApiKey}&send_cohorts`
 
     const options = this.getPersonalApiKeyRequestOptions('GET', this.flagsEtag)

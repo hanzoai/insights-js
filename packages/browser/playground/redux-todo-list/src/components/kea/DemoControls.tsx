@@ -36,7 +36,7 @@ export default function DemoControls() {
         <div className="demo-controls">
             <h3>Kea Demo Controls</h3>
             <p className="demo-note">
-                These controls demonstrate various Kea actions being logged by PostHog. Check your browser console to
+                These controls demonstrate various Kea actions being logged by Insights. Check your browser console to
                 see the logging output.
             </p>
 

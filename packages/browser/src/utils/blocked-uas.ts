@@ -1,4 +1,4 @@
-// Re-export shared bot detection logic from @posthog/core
+// Re-export shared bot detection logic from @insights/core
 import { isBlockedUA as isBlockedUACore } from '@hanzo/insights-core'
 export { DEFAULT_BLOCKED_UA_STRS, isBlockedUA } from '@hanzo/insights-core'
 
@@ -52,5 +52,5 @@ export const isLikelyBot = function (navigator: Navigator | undefined, customBlo
     // We could also use the data in navigator.userAgentData.getHighEntropyValues() to detect bots, but we should wait
     // until this stops being experimental. The MDN docs imply that this might eventually require user permission.
     // See https://developer.mozilla.org/en-US/docs/Web/API/NavigatorUAData/getHighEntropyValues
-    // It would be very bad if posthog-js caused a permission prompt to appear on every page load.
+    // It would be very bad if @hanzo/insights caused a permission prompt to appear on every page load.
 }

@@ -1,5 +1,5 @@
 import { render } from 'preact'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import {
     ProductTour,
     ProductTourBannerConfig,
@@ -11,8 +11,8 @@ import {
     ProductTourStep,
     ProductTourStepButton,
     ShowTourOptions,
-} from '../../posthog-product-tours-types'
-import { SurveyEventName, SurveyEventProperties } from '../../posthog-surveys-types'
+} from '../../insights-product-tours-types'
+import { SurveyEventName, SurveyEventProperties } from '../../insights-surveys-types'
 import {
     addProductTourCSSVariablesToElement,
     ElementFindResult,
@@ -215,7 +215,7 @@ function removeTourFromDom(tourId: string): void {
 const PRODUCT_TOUR_TARGETING_FLAG_PREFIX = 'product-tour-targeting-'
 
 export class ProductTourManager {
-    private _instance: PostHog
+    private _instance: Insights
     private _activeTour: ProductTour | null = null
     private _currentStepIndex: number = 0
     private _isPreviewMode: boolean = false
@@ -227,7 +227,7 @@ export class ProductTourManager {
     private _registeredEventTourIds: Set<string> = new Set()
     private _preloadedImageUrls: Set<string> = new Set()
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this._instance = instance
         this._eventReceiver = new ProductTourEventReceiver(instance)
     }
@@ -1104,7 +1104,7 @@ export class ProductTourManager {
         })
     }
 
-    // Public API methods delegated from PostHogProductTours
+    // Public API methods delegated from InsightsProductTours
     getActiveProductTours(callback: ProductTourCallback): void {
         this._instance.productTours?.getProductTours((tours, context) => {
             if (!context?.isLoaded) {

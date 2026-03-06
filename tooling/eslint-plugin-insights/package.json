@@ -1,0 +1,5 @@
+{
+    "name": "eslint-plugin-insights",
+    "main": "index.js",
+    "type": "commonjs"
+}

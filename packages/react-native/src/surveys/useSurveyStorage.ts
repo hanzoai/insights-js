@@ -1,6 +1,6 @@
-import { PostHogPersistedProperty } from '@hanzo/insights-core'
+import { InsightsPersistedProperty } from '@hanzo/insights-core'
 import { useCallback, useEffect, useState } from 'react'
-import { usePostHog } from '../hooks/usePostHog'
+import { useInsights } from '../hooks/useInsights'
 
 type SurveyStorage = {
   seenSurveys: string[]
@@ -10,18 +10,18 @@ type SurveyStorage = {
 }
 
 export function useSurveyStorage(): SurveyStorage {
-  const posthogStorage = usePostHog()
+  const insightsStorage = useInsights()
   const [lastSeenSurveyDate, setLastSeenSurveyDate] = useState<Date | undefined>(undefined)
   const [seenSurveys, setSeenSurveys] = useState<string[]>([])
 
   useEffect(() => {
-    posthogStorage.ready().then(() => {
-      const lastSeenSurveyDate = posthogStorage.getPersistedProperty(PostHogPersistedProperty.SurveyLastSeenDate)
+    insightsStorage.ready().then(() => {
+      const lastSeenSurveyDate = insightsStorage.getPersistedProperty(InsightsPersistedProperty.SurveyLastSeenDate)
       if (typeof lastSeenSurveyDate === 'string') {
         setLastSeenSurveyDate(new Date(lastSeenSurveyDate))
       }
 
-      const serialisedSeenSurveys = posthogStorage.getPersistedProperty(PostHogPersistedProperty.SurveysSeen)
+      const serialisedSeenSurveys = insightsStorage.getPersistedProperty(InsightsPersistedProperty.SurveysSeen)
       if (typeof serialisedSeenSurveys === 'string') {
         const parsedSeenSurveys: unknown = JSON.parse(serialisedSeenSurveys)
         if (Array.isArray(parsedSeenSurveys) && typeof parsedSeenSurveys[0] === 'string') {
@@ -29,7 +29,7 @@ export function useSurveyStorage(): SurveyStorage {
         }
       }
     })
-  }, [posthogStorage])
+  }, [insightsStorage])
 
   return {
     seenSurveys,
@@ -38,22 +38,22 @@ export function useSurveyStorage(): SurveyStorage {
         setSeenSurveys((current) => {
           // To keep storage bounded, only keep the last 20 seen surveys
           const newValue = [surveyId, ...current.filter((id) => id !== surveyId)]
-          posthogStorage.setPersistedProperty(
-            PostHogPersistedProperty.SurveysSeen,
+          insightsStorage.setPersistedProperty(
+            InsightsPersistedProperty.SurveysSeen,
             JSON.stringify(newValue.slice(0, 20))
           )
           return newValue
         })
       },
-      [posthogStorage]
+      [insightsStorage]
     ),
     lastSeenSurveyDate,
     setLastSeenSurveyDate: useCallback(
       (date: Date) => {
         setLastSeenSurveyDate(date)
-        posthogStorage.setPersistedProperty(PostHogPersistedProperty.SurveyLastSeenDate, date.toISOString())
+        insightsStorage.setPersistedProperty(InsightsPersistedProperty.SurveyLastSeenDate, date.toISOString())
       },
-      [posthogStorage]
+      [insightsStorage]
     ),
   }
 }

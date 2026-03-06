@@ -1,14 +1,14 @@
-import { PostHogPersistence } from './posthog-persistence'
+import { InsightsPersistence } from './insights-persistence'
 import { SESSION_ID } from './constants'
 import { sessionStore } from './storage'
-import { PostHogConfig, SessionIdChangedCallback } from './types'
+import { InsightsConfig, SessionIdChangedCallback } from './types'
 import { uuid7ToTimestampMs, uuidv7 } from './uuidv7'
 import { window } from './utils/globals'
 
 import { createLogger } from './utils/logger'
 
 import { isArray, isUndefined, clampToRange, isPositiveNumber } from '@hanzo/insights-core'
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 import { addEventListener } from './utils'
 import { SimpleEventEmitter } from './utils/simple-event-emitter'
 
@@ -22,8 +22,8 @@ const SESSION_LENGTH_LIMIT_MILLISECONDS = 24 * 3600 * 1000 // 24 hours
 export class SessionIdManager {
     private readonly _sessionIdGenerator: () => string
     private readonly _windowIdGenerator: () => string
-    private _config: Partial<PostHogConfig>
-    private _persistence: PostHogPersistence
+    private _config: Partial<InsightsConfig>
+    private _persistence: InsightsPersistence
     private _windowId: string | null | undefined
     private _sessionId: string | null | undefined
     private readonly _window_id_storage_key: string
@@ -44,9 +44,9 @@ export class SessionIdManager {
         return this._eventEmitter.on(event, handler)
     }
 
-    constructor(instance: PostHog, sessionIdGenerator?: () => string, windowIdGenerator?: () => string) {
+    constructor(instance: Insights, sessionIdGenerator?: () => string, windowIdGenerator?: () => string) {
         if (!instance.persistence) {
-            throw new Error('SessionIdManager requires a PostHogPersistence instance')
+            throw new Error('SessionIdManager requires a InsightsPersistence instance')
         }
         if (instance.config.cookieless_mode === 'always') {
             throw new Error('SessionIdManager cannot be used with cookieless_mode="always"')

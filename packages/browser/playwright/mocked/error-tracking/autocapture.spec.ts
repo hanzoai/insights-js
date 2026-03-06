@@ -1,4 +1,4 @@
-import { expect } from '../utils/posthog-playwright-test-base'
+import { expect } from '../utils/insights-playwright-test-base'
 import { EventsPage, test } from '../../fixtures'
 import { BasePage } from 'fixtures/page'
 
@@ -23,7 +23,7 @@ test.describe('ErrorTracking autocapture', () => {
 
     test.describe('autocapture', () => {
         test('should capture thrown errors when remote config is enabled', async ({
-            posthog,
+            insights,
             page,
             network,
             events,
@@ -32,20 +32,20 @@ test.describe('ErrorTracking autocapture', () => {
             await network.mockFlags({
                 autocaptureExceptions: true,
             })
-            await posthog.init()
+            await insights.init()
             await network.waitForFlags()
             await page.click('[data-cy-button-throws-error]')
             await checkException(events, browserName)
         })
 
         test('should capture thrown errors when local config is enabled', async ({
-            posthog,
+            insights,
             page,
             network,
             events,
             browserName,
         }) => {
-            await posthog.init({
+            await insights.init({
                 capture_exceptions: true,
             })
             await network.waitForFlags()
@@ -53,18 +53,18 @@ test.describe('ErrorTracking autocapture', () => {
             await checkException(events, browserName)
         })
 
-        test('should not capture when remote disabled', async ({ posthog, page, network, events }) => {
+        test('should not capture when remote disabled', async ({ insights, page, network, events }) => {
             await network.mockFlags({
                 autocaptureExceptions: false,
             })
-            await posthog.init()
+            await insights.init()
             await network.waitForFlags()
             await page.click('[data-cy-button-throws-error]')
             await checkNoException(page, events)
         })
 
-        test('should not capture when config disabled', async ({ posthog, page, network, events }) => {
-            await posthog.init({
+        test('should not capture when config disabled', async ({ insights, page, network, events }) => {
+            await insights.init({
                 capture_exceptions: false,
             })
             await network.waitForFlags()
@@ -73,12 +73,12 @@ test.describe('ErrorTracking autocapture', () => {
         })
 
         test('should not capture unhandled promise rejection when config disabled', async ({
-            posthog,
+            insights,
             page,
             network,
             events,
         }) => {
-            await posthog.init({
+            await insights.init({
                 capture_exceptions: false,
             })
             await network.waitForFlags()
@@ -90,8 +90,8 @@ test.describe('ErrorTracking autocapture', () => {
     })
 
     test.describe('unhandled promise rejections', () => {
-        test('should capture with error', async ({ posthog, page, network, events, browserName }) => {
-            await posthog.init({
+        test('should capture with error', async ({ insights, page, network, events, browserName }) => {
+            await insights.init({
                 capture_exceptions: true,
             })
             await network.waitForFlags()
@@ -117,8 +117,8 @@ test.describe('ErrorTracking autocapture', () => {
             }
         })
 
-        test('should capture with string', async ({ posthog, page, network, events }) => {
-            await posthog.init({
+        test('should capture with string', async ({ insights, page, network, events }) => {
+            await insights.init({
                 capture_exceptions: true,
             })
             await network.waitForFlags()
@@ -137,8 +137,8 @@ test.describe('ErrorTracking autocapture', () => {
     })
 
     test.describe('unhandled errors', () => {
-        test('should capture ReferenceError', async ({ posthog, network, page, events, browserName }) => {
-            await posthog.init({
+        test('should capture ReferenceError', async ({ insights, network, page, events, browserName }) => {
+            await insights.init({
                 capture_exceptions: true,
             })
             await network.waitForFlags()
@@ -164,8 +164,8 @@ test.describe('ErrorTracking autocapture', () => {
             expect(frames).toHaveLength(1)
         })
 
-        test('should capture SyntaxError', async ({ posthog, network, page, events, browserName }) => {
-            await posthog.init({
+        test('should capture SyntaxError', async ({ insights, network, page, events, browserName }) => {
+            await insights.init({
                 capture_exceptions: true,
             })
             await network.waitForFlags()
@@ -196,8 +196,8 @@ test.describe('ErrorTracking autocapture', () => {
             }
         })
 
-        test('should capture console errors', async ({ posthog, network, page, events }) => {
-            await posthog.init({
+        test('should capture console errors', async ({ insights, network, page, events }) => {
+            await insights.init({
                 capture_exceptions: {
                     capture_console_errors: true,
                     capture_unhandled_errors: false,

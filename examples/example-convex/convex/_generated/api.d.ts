@@ -9,7 +9,7 @@
  */
 
 import type * as example from "../example.js";
-import type * as posthog from "../posthog.js";
+import type * as insights from "../insights.js";
 
 import type {
   ApiFromModules,
@@ -19,7 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   example: typeof example;
-  posthog: typeof posthog;
+  insights: typeof insights;
 }>;
 
 /**
@@ -49,7 +49,7 @@ export declare const internal: FilterApi<
 >;
 
 export declare const components: {
-  posthog: {
+  insights: {
     lib: {
       alias: FunctionReference<
         "action",

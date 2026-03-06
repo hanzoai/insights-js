@@ -1,11 +1,11 @@
-import { test, WindowWithPostHog } from './utils/posthog-playwright-test-base'
+import { test, WindowWithInsights } from './utils/insights-playwright-test-base'
 import { start, gotoPage } from './utils/setup'
 
 test.describe('opting out', () => {
     test.describe('when not initialized', () => {
         test('does not capture events without init', async ({ page }) => {
             await gotoPage(page, './playground/cypress/index.html')
-            await page.type('[data-cy-input]', 'hello posthog!')
+            await page.type('[data-cy-input]', 'hello insights!')
             await page.expectCapturedEventsToBe([])
         })
     })
@@ -28,7 +28,7 @@ test.describe('opting out', () => {
 
             await page.expectCapturedEventsToBe([])
 
-            await page.type('[data-cy-input]', 'hello posthog!')
+            await page.type('[data-cy-input]', 'hello insights!')
 
             await page.expectCapturedEventsToBe([])
         })
@@ -51,7 +51,7 @@ test.describe('opting out', () => {
             await page.expectCapturedEventsToBe([])
 
             await page.evaluate(() => {
-                ;(window as WindowWithPostHog).posthog?.opt_in_capturing()
+                ;(window as WindowWithInsights).insights?.opt_in_capturing()
             })
 
             await page.expectCapturedEventsToBe(['$opt_in', '$pageview'])
@@ -76,7 +76,7 @@ test.describe('opting out', () => {
             await page.expectCapturedEventsToBe(['$pageview'])
 
             await page.evaluate(() => {
-                ;(window as WindowWithPostHog).posthog?.opt_in_capturing()
+                ;(window as WindowWithInsights).insights?.opt_in_capturing()
             })
 
             await page.expectCapturedEventsToBe(['$pageview', '$opt_in'])
@@ -103,7 +103,7 @@ test.describe('opting out', () => {
             await page.expectCapturedEventsToBe(['$pageview', '$autocapture', 'custom-event'])
 
             await page.evaluate(() => {
-                ;(window as WindowWithPostHog).posthog?.opt_out_capturing()
+                ;(window as WindowWithInsights).insights?.opt_out_capturing()
             })
 
             await page.click('[data-cy-custom-event-button]')

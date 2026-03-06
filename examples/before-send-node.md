@@ -1,6 +1,6 @@
-# Using `before_send` in PostHog Node.js SDK
+# Using `before_send` in Insights Node.js SDK
 
-The `before_send` feature allows you to modify or drop events before they are sent to PostHog. This is useful for:
+The `before_send` feature allows you to modify or drop events before they are sent to Insights. This is useful for:
 
 - Filtering out sensitive data
 - Sampling events
@@ -10,13 +10,13 @@ The `before_send` feature allows you to modify or drop events before they are se
 
 ## Basic Usage
 
-Pass a `before_send` function to the PostHog constructor:
+Pass a `before_send` function to the Insights constructor:
 
 ```javascript
-const { PostHog } = require('posthog-node')
+const { Insights } = require('@hanzo/insights-node')
 
-const posthog = new PostHog('YOUR_API_KEY', {
-    host: 'https://us.i.posthog.com',
+const insights = new Insights('YOUR_API_KEY', {
+    host: 'https://us.i.insights.hanzo.ai',
 
     before_send: (event) => {
         // Modify the event
@@ -36,8 +36,8 @@ const posthog = new PostHog('YOUR_API_KEY', {
 Return `null` to drop an event completely:
 
 ```javascript
-const posthog = new PostHog('YOUR_API_KEY', {
-    host: 'https://us.i.posthog.com',
+const insights = new Insights('YOUR_API_KEY', {
+    host: 'https://us.i.insights.hanzo.ai',
 
     before_send: (event) => {
         // Drop all events from test environments
@@ -55,8 +55,8 @@ const posthog = new PostHog('YOUR_API_KEY', {
 You can provide an array of `before_send` functions. They will be executed in order, with each function receiving the output of the previous one:
 
 ```javascript
-const posthog = new PostHog('YOUR_API_KEY', {
-    host: 'https://us.i.posthog.com',
+const insights = new Insights('YOUR_API_KEY', {
+    host: 'https://us.i.insights.hanzo.ai',
 
     before_send: [
         // First: Add metadata

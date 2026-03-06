@@ -1,5 +1,5 @@
 import { PageViewManager } from '../page-view'
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { ScrollManager } from '../scroll-manager'
 import { SessionIdChangedCallback } from '../types'
 
@@ -19,7 +19,7 @@ describe('PageView ID manager', () => {
     const pageviewId2 = 'pageview-id-2'
 
     describe('doPageView', () => {
-        let instance: PostHog
+        let instance: Insights
         let pageViewIdManager: PageViewManager
 
         beforeEach(() => {
@@ -129,7 +129,7 @@ describe('PageView ID manager', () => {
     })
 
     describe('session rotation handling', () => {
-        let instance: PostHog
+        let instance: Insights
         let pageViewManager: PageViewManager
         let sessionIdCallback: SessionIdChangedCallback
 
@@ -148,7 +148,7 @@ describe('PageView ID manager', () => {
                     resetContext: jest.fn(),
                     getContext: jest.fn(),
                 },
-            } as unknown as PostHog
+            } as unknown as Insights
 
             pageViewManager = new PageViewManager(instance)
             mockWindowGetter.mockReturnValue({
@@ -193,11 +193,11 @@ describe('PageView ID manager', () => {
             expect(pageViewManager._currentPageview).toBeUndefined()
         })
 
-        it('should clear state on noSessionId (after posthog.reset())', () => {
+        it('should clear state on noSessionId (after insights.reset())', () => {
             // Setup: Create initial pageview
             pageViewManager.doPageView(new Date('2024-01-01T10:00:00'), 'pv-1')
 
-            // Act: Simulate session change after posthog.reset()
+            // Act: Simulate session change after insights.reset()
             sessionIdCallback('new-session-id', 'new-window-id', {
                 noSessionId: true,
                 activityTimeout: false,
@@ -253,7 +253,7 @@ describe('PageView ID manager', () => {
                 config: {},
                 sessionManager: { onSessionId: mockOnSessionId },
                 scrollManager: { resetContext: jest.fn(), getContext: jest.fn() },
-            } as unknown as PostHog
+            } as unknown as Insights
 
             pageViewManager = new PageViewManager(instance)
             pageViewManager.destroy()
@@ -267,7 +267,7 @@ describe('PageView ID manager', () => {
                 config: {},
                 sessionManager: undefined,
                 scrollManager: { resetContext: jest.fn(), getContext: jest.fn() },
-            } as unknown as PostHog
+            } as unknown as Insights
 
             // Should not throw
             expect(() => {
@@ -292,7 +292,7 @@ describe('PageView ID manager', () => {
                 config: {},
                 sessionManager: { onSessionId: mockOnSessionId },
                 scrollManager: { resetContext: jest.fn(), getContext: jest.fn() },
-            } as unknown as PostHog
+            } as unknown as Insights
 
             pageViewManager = new PageViewManager(instance)
 

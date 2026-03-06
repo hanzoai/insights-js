@@ -1,4 +1,4 @@
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { DEAD_CLICKS_ENABLED_SERVER_SIDE } from '../constants'
 import { isBoolean, isObject } from '@hanzo/insights-core'
 import { assignableWindow, document, LazyLoadedDeadClicksAutocaptureInterface } from '../utils/globals'
@@ -30,7 +30,7 @@ export class DeadClicksAutocapture {
     private _lazyLoadedDeadClicksAutocapture: LazyLoadedDeadClicksAutocaptureInterface | undefined
 
     constructor(
-        readonly instance: PostHog,
+        readonly instance: Insights,
         readonly isEnabled: (dca: DeadClicksAutocapture) => boolean,
         readonly onCapture?: DeadClicksAutoCaptureConfig['__onCapture']
     ) {
@@ -61,11 +61,11 @@ export class DeadClicksAutocapture {
     }
 
     private _loadScript(cb: () => void): void {
-        if (assignableWindow.__PosthogExtensions__?.initDeadClicksAutocapture) {
+        if (assignableWindow.__InsightsExtensions__?.initDeadClicksAutocapture) {
             // already loaded
             cb()
         }
-        assignableWindow.__PosthogExtensions__?.loadExternalDependency?.(
+        assignableWindow.__InsightsExtensions__?.loadExternalDependency?.(
             this.instance,
             'dead-clicks-autocapture',
             (err) => {
@@ -86,14 +86,14 @@ export class DeadClicksAutocapture {
 
         if (
             !this._lazyLoadedDeadClicksAutocapture &&
-            assignableWindow.__PosthogExtensions__?.initDeadClicksAutocapture
+            assignableWindow.__InsightsExtensions__?.initDeadClicksAutocapture
         ) {
             const config = isObject(this.instance.config.capture_dead_clicks)
                 ? this.instance.config.capture_dead_clicks
                 : {}
             config.__onCapture = this.onCapture
 
-            this._lazyLoadedDeadClicksAutocapture = assignableWindow.__PosthogExtensions__.initDeadClicksAutocapture(
+            this._lazyLoadedDeadClicksAutocapture = assignableWindow.__InsightsExtensions__.initDeadClicksAutocapture(
                 this.instance,
                 config
             )

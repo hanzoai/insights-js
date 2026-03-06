@@ -9,7 +9,7 @@ const path = require('path');
 const loadApiPackage = (filePath) => 
     apiExtractor.ApiPackage.loadFromJsonFile(filePath);
 
-const findPostHogClass = (apiPackage, className) =>
+const findInsightsClass = (apiPackage, className) =>
     apiPackage.entryPoints[0].members.find(member =>
         member.kind === apiExtractor.ApiItemKind.Class && member.name === className
     );
@@ -35,8 +35,8 @@ const enhanceTypeWithExample = (type, config) => {
 };
 
 // Filter public methods
-const filterPublicMethods = (posthogClass, parentClass) => 
-    methods.collectMethodsWithInheritance(posthogClass, parentClass);
+const filterPublicMethods = (insightsClass, parentClass) => 
+    methods.collectMethodsWithInheritance(insightsClass, parentClass);
 
 // Transform parameters
 const transformParameter = (method) => (param) => ({
@@ -47,7 +47,7 @@ const transformParameter = (method) => (param) => ({
 });
 
 // Transform methods
-const transformMethod = (posthogClass) => (method) => {
+const transformMethod = (insightsClass) => (method) => {
     const returnType = method.returnTypeExcerpt?.text || 'any';
     
     return {
@@ -64,27 +64,27 @@ const transformMethod = (posthogClass) => (method) => {
             id: returnType,
             name: returnType
         },
-        ...(posthogClass && 'fileUrlPath' in posthogClass ? { path: posthogClass.fileUrlPath } : {})
+        ...(insightsClass && 'fileUrlPath' in insightsClass ? { path: insightsClass.fileUrlPath } : {})
     };
 };
 
 // Create class definition
-const createClassDefinition = (posthogClass, functions) => ({
-    description: documentation.getDocComment(posthogClass),
-    id: posthogClass?.name || 'PostHog',
-    title: posthogClass?.name || 'PostHog',
+const createClassDefinition = (insightsClass, functions) => ({
+    description: documentation.getDocComment(insightsClass),
+    id: insightsClass?.name || 'Insights',
+    title: insightsClass?.name || 'Insights',
     functions
 });
 
 // Compose final output
-const composeOutput = (posthogClass, functions, types, config) => ({
+const composeOutput = (insightsClass, functions, types, config) => ({
     id: config.id,
     hogRef: config.hogRef,
     info: {
         version: config.version,
         ...config.specInfo
     },
-    classes: [createClassDefinition(posthogClass, functions)],
+    classes: [createClassDefinition(insightsClass, functions)],
     types,
     // Set with most important categories first
     categories: [...new Set(['Initialization', 'Identification', 'Capture', ...functions.map(f => f.category).filter(Boolean)])]
@@ -92,14 +92,14 @@ const composeOutput = (posthogClass, functions, types, config) => ({
 
 const generateApiSpecs = (config) => {
     const apiPackage = loadApiPackage(config.apiJsonPath);
-    const posthogClass = findPostHogClass(apiPackage, config.parentClass);
+    const insightsClass = findInsightsClass(apiPackage, config.parentClass);
     
     const resolvedTypes = types
         .resolveTypeDefinitions(apiPackage)
         .map(type => enhanceTypeWithExample(type, config));
     
-    const methods = filterPublicMethods(posthogClass, config.parentClass);
-    const functions = methods.map(transformMethod(posthogClass));
+    const methods = filterPublicMethods(insightsClass, config.parentClass);
+    const functions = methods.map(transformMethod(insightsClass));
     
     // Process extra methods if specified
     const extraMethods = findExtraMethods(apiPackage, config.extraMethods);
@@ -108,7 +108,7 @@ const generateApiSpecs = (config) => {
     // Combine regular methods with extra methods
     const allFunctions = [...providerMethods,...functions];
     
-    const output = composeOutput(posthogClass, allFunctions, resolvedTypes, config);
+    const output = composeOutput(insightsClass, allFunctions, resolvedTypes, config);
     
     return output;
 };

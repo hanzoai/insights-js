@@ -11,7 +11,7 @@ const rules = {
     'no-empty': 'off',
     'no-console': 'error',
     'no-only-tests/no-only-tests': 'error',
-    'posthog-js/no-external-replay-imports': 'error',
+    '@hanzo/insights/no-external-replay-imports': 'error',
     '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -28,7 +28,7 @@ const extend = [
     'plugin:@typescript-eslint/recommended',
     'prettier',
     'plugin:compat/recommended',
-    'plugin:posthog-js/all',
+    'plugin:@hanzo/insights/all',
 ]
 
 module.exports = {
@@ -81,15 +81,15 @@ module.exports = {
                 'no-console': 'off',
                 '@typescript-eslint/no-unused-vars': 'off',
                 '@typescript-eslint/naming-convention': 'off',
-                'posthog-js/no-direct-undefined-check': 'off',
-                'posthog-js/no-direct-boolean-check': 'off',
-                'posthog-js/no-direct-null-check': 'off',
-                'posthog-js/no-direct-function-check': 'off',
-                'posthog-js/no-direct-number-check': 'off',
-                'posthog-js/no-direct-date-check': 'off',
-                'posthog-js/no-direct-array-check': 'off',
+                '@hanzo/insights/no-direct-undefined-check': 'off',
+                '@hanzo/insights/no-direct-boolean-check': 'off',
+                '@hanzo/insights/no-direct-null-check': 'off',
+                '@hanzo/insights/no-direct-function-check': 'off',
+                '@hanzo/insights/no-direct-number-check': 'off',
+                '@hanzo/insights/no-direct-date-check': 'off',
+                '@hanzo/insights/no-direct-array-check': 'off',
                 '@typescript-eslint/ban-ts-comment': 'off',
-                'posthog-js/no-add-event-listener': 'off',
+                '@hanzo/insights/no-add-event-listener': 'off',
                 'no-constant-condition': 'off',
                 'compat/compat': 'off',
             },

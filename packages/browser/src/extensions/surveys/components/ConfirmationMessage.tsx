@@ -1,5 +1,5 @@
 import { h } from 'preact'
-import { SurveyAppearance, SurveyQuestionDescriptionContentType } from '../../../posthog-surveys-types'
+import { SurveyAppearance, SurveyQuestionDescriptionContentType } from '../../../insights-surveys-types'
 import { renderChildrenAsTextOrHtml } from '../surveys-extension-utils'
 import { BottomSection } from './BottomSection'
 import { Cancel } from './QuestionHeader'

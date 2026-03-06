@@ -6,17 +6,17 @@ import {
     Survey,
     SurveyActionType,
     ActionStepStringMatching,
-} from '../../posthog-surveys-types'
-import { PostHogPersistence } from '../../posthog-persistence'
-import { PostHog } from '../../posthog-core'
-import { CaptureResult, PostHogConfig, PropertyMatchType } from '../../types'
+} from '../../insights-surveys-types'
+import { InsightsPersistence } from '../../insights-persistence'
+import { Insights } from '../../insights-core'
+import { CaptureResult, InsightsConfig, PropertyMatchType } from '../../types'
 import { SurveyEventReceiver } from '../../utils/survey-event-receiver'
-import { createMockPostHog, createMockConfig } from '../helpers/posthog-instance'
+import { createMockInsights, createMockConfig } from '../helpers/insights-instance'
 
 describe('survey-event-receiver', () => {
     describe('event based surveys', () => {
-        let config: PostHogConfig
-        let instance: PostHog
+        let config: InsightsConfig
+        let instance: Insights
         let mockAddCaptureHook: jest.Mock
 
         const surveysWithEvents: Survey[] = [
@@ -80,13 +80,13 @@ describe('survey-event-receiver', () => {
             mockAddCaptureHook = jest.fn()
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 persistence: 'memory',
             })
 
-            instance = createMockPostHog({
+            instance = createMockInsights({
                 config: config,
-                persistence: new PostHogPersistence(config),
+                persistence: new InsightsPersistence(config),
                 _addCaptureHook: mockAddCaptureHook,
                 getSurveys: jest.fn((callback) => callback(surveysWithEvents)),
             })
@@ -173,8 +173,8 @@ describe('survey-event-receiver', () => {
     })
 
     describe('property filter based surveys', () => {
-        let config: PostHogConfig
-        let instance: PostHog
+        let config: InsightsConfig
+        let instance: Insights
         let mockAddCaptureHook: jest.Mock
 
         const createEventPayload = (eventName: string, properties: Record<string, any> = {}): CaptureResult => ({
@@ -213,13 +213,13 @@ describe('survey-event-receiver', () => {
             mockAddCaptureHook = jest.fn()
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 persistence: 'memory',
             })
 
-            instance = createMockPostHog({
+            instance = createMockInsights({
                 config: config,
-                persistence: new PostHogPersistence(config),
+                persistence: new InsightsPersistence(config),
                 _addCaptureHook: mockAddCaptureHook,
                 getSurveys: jest.fn((callback) => callback([])),
             })
@@ -396,19 +396,19 @@ describe('survey-event-receiver', () => {
     })
 
     describe('action based surveys', () => {
-        let config: PostHogConfig
-        let instance: PostHog
+        let config: InsightsConfig
+        let instance: Insights
 
         beforeEach(() => {
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 persistence: 'memory',
             })
 
-            instance = createMockPostHog({
+            instance = createMockInsights({
                 config: config,
-                persistence: new PostHogPersistence(config),
+                persistence: new InsightsPersistence(config),
                 _addCaptureHook: jest.fn(),
                 getSurveys: jest.fn((callback) => callback([])),
             })
@@ -501,35 +501,35 @@ describe('survey-event-receiver', () => {
         })
 
         it('can match action on current_url exact', () => {
-            autoCaptureSurvey.conditions.actions.values = [createAction(2, '$autocapture', 'https://us.posthog.com')]
+            autoCaptureSurvey.conditions.actions.values = [createAction(2, '$autocapture', 'https://us.insights.com')]
             const surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$autocapture', 'https://eu.posthog.com'))
+                .on('$autocapture', createCaptureResult('$autocapture', 'https://eu.insights.com'))
             expect(surveyEventReceiver.getSurveys()).not.toEqual(['first-survey'])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$autocapture', 'https://us.posthog.com'))
+                .on('$autocapture', createCaptureResult('$autocapture', 'https://us.insights.com'))
             expect(surveyEventReceiver.getSurveys()).toEqual(['first-survey'])
         })
 
         it('can match action on current_url regexp', () => {
             autoCaptureSurvey.conditions.actions.values = [
-                createAction(2, '$current_url_regexp', '[a-z][a-z].posthog.*', 'regex'),
+                createAction(2, '$current_url_regexp', '[a-z][a-z].insights.*', 'regex'),
             ]
             let surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$current_url_regexp', 'https://eu.posthog.com'))
+                .on('$autocapture', createCaptureResult('$current_url_regexp', 'https://eu.insights.com'))
             expect(surveyEventReceiver.getSurveys()).toEqual(['first-survey'])
 
             surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$autocapture', 'https://us.posthog.com'))
+                .on('$autocapture', createCaptureResult('$autocapture', 'https://us.insights.com'))
             expect(surveyEventReceiver.getSurveys()).toEqual(['first-survey'])
         })
 
@@ -537,7 +537,7 @@ describe('survey-event-receiver', () => {
             const action = createAction(2, '$autocapture')
             action.steps[0].selector = '* > #__next .flex > button:nth-child(2)'
             autoCaptureSurvey.conditions.actions.values = [action]
-            const result = createCaptureResult('$autocapture', 'https://eu.posthog.com')
+            const result = createCaptureResult('$autocapture', 'https://eu.insights.com')
             result.properties.$element_selectors = ['* > #__next .flex > button:nth-child(2)']
             const surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
@@ -547,8 +547,8 @@ describe('survey-event-receiver', () => {
     })
 
     describe('cancel events', () => {
-        let config: PostHogConfig
-        let instance: PostHog
+        let config: InsightsConfig
+        let instance: Insights
         let mockAddCaptureHook: jest.Mock
         let mockCancelPendingSurvey: jest.Mock
 
@@ -570,13 +570,13 @@ describe('survey-event-receiver', () => {
             mockCancelPendingSurvey = jest.fn()
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 persistence: 'memory',
             })
 
-            instance = createMockPostHog({
+            instance = createMockInsights({
                 config: config,
-                persistence: new PostHogPersistence(config),
+                persistence: new InsightsPersistence(config),
                 _addCaptureHook: mockAddCaptureHook,
                 getSurveys: jest.fn((callback) => callback([surveyWithCancelEvent])),
                 cancelPendingSurvey: mockCancelPendingSurvey,

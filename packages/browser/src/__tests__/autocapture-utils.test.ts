@@ -427,7 +427,7 @@ describe(`Autocapture utility functions`, () => {
             })
         })
 
-        // See https://github.com/posthog/posthog-js/issues/165
+        // See https://github.com/insights/@hanzo/insights/issues/165
         // Under specific circumstances a bug caused .replace to be called on a DOM element
         // instead of a string, removing the element from the page. Ensure this issue is mitigated.
         it(`shouldn't inadvertently replace DOM nodes`, () => {

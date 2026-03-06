@@ -1,11 +1,11 @@
 import OpenAIOrignal, { AzureOpenAI } from 'openai'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import {
   AIEvent,
   formatResponseOpenAI,
   MonitoringParams,
-  sendEventToPosthog,
-  sendEventWithErrorToPosthog,
+  sendEventToInsights,
+  sendEventWithErrorToInsights,
   withPrivacyMode,
   formatOpenAIResponsesInput,
 } from '../utils'
@@ -15,7 +15,7 @@ import type { ParsedResponse } from 'openai/resources/responses/responses'
 import type { ResponseCreateParamsWithTools, ExtractParsedContentFromParams } from 'openai/lib/ResponsesParser'
 import type { FormattedMessage, FormattedContent, FormattedFunctionCall } from '../types'
 import { sanitizeOpenAI } from '../sanitization'
-import { extractPosthogParams } from '../utils'
+import { extractInsightsParams } from '../utils'
 import { isResponseTokenChunk } from './utils'
 
 type ChatCompletion = OpenAIOrignal.ChatCompletion
@@ -31,28 +31,28 @@ type EmbeddingCreateParams = OpenAIOrignal.EmbeddingCreateParams
 
 interface MonitoringOpenAIConfig {
   apiKey: string
-  posthog: PostHog
+  insights: Insights
   baseURL?: string
 }
 
 type RequestOptions = Record<string, any>
 
-export class PostHogAzureOpenAI extends AzureOpenAI {
-  private readonly phClient: PostHog
+export class InsightsAzureOpenAI extends AzureOpenAI {
+  private readonly phClient: Insights
   public chat: WrappedChat
   public embeddings: WrappedEmbeddings
 
   constructor(config: MonitoringOpenAIConfig) {
-    const { posthog, ...openAIConfig } = config
+    const { insights, ...openAIConfig } = config
     super(openAIConfig)
-    this.phClient = posthog
+    this.phClient = insights
     this.chat = new WrappedChat(this, this.phClient)
     this.embeddings = new WrappedEmbeddings(this, this.phClient)
   }
 }
 
 export class WrappedChat extends AzureOpenAI.Chat {
-  constructor(parentClient: PostHogAzureOpenAI, phClient: PostHog) {
+  constructor(parentClient: InsightsAzureOpenAI, phClient: Insights) {
     super(parentClient)
     this.completions = new WrappedCompletions(parentClient, phClient)
   }
@@ -61,10 +61,10 @@ export class WrappedChat extends AzureOpenAI.Chat {
 }
 
 export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: AzureOpenAI, phClient: PostHog) {
+  constructor(client: AzureOpenAI, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -93,7 +93,7 @@ export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
     body: ChatCompletionCreateParamsBase & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<ChatCompletion | Stream<ChatCompletionChunk>> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(openAIParams, options)
@@ -229,9 +229,9 @@ export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
 
               const latency = (Date.now() - startTime) / 1000
               const timeToFirstToken = firstTokenTime !== undefined ? (firstTokenTime - startTime) / 1000 : undefined
-              await sendEventToPosthog({
+              await sendEventToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model ?? modelFromResponse,
                 provider: 'azure',
                 input: sanitizeOpenAI(openAIParams.messages),
@@ -244,9 +244,9 @@ export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
                 usage,
               })
             } catch (error: unknown) {
-              const enrichedError = await sendEventWithErrorToPosthog({
+              const enrichedError = await sendEventWithErrorToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model,
                 provider: 'azure',
                 input: sanitizeOpenAI(openAIParams.messages),
@@ -271,9 +271,9 @@ export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
         async (result) => {
           if ('choices' in result) {
             const latency = (Date.now() - startTime) / 1000
-            await sendEventToPosthog({
+            await sendEventToInsights({
               client: this.phClient,
-              ...posthogParams,
+              ...insightsParams,
               model: openAIParams.model ?? result.model,
               provider: 'azure',
               input: openAIParams.messages,
@@ -298,9 +298,9 @@ export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
               ? ((error as { status?: number }).status ?? 500)
               : 500
 
-          await sendEventToPosthog({
+          await sendEventToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model,
             provider: 'azure',
             input: openAIParams.messages,
@@ -325,10 +325,10 @@ export class WrappedCompletions extends AzureOpenAI.Chat.Completions {
 }
 
 export class WrappedResponses extends AzureOpenAI.Responses {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: AzureOpenAI, phClient: PostHog) {
+  constructor(client: AzureOpenAI, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -357,7 +357,7 @@ export class WrappedResponses extends AzureOpenAI.Responses {
     body: ResponsesCreateParamsBase & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<OpenAIOrignal.Responses.Response | Stream<OpenAIOrignal.Responses.ResponseStreamEvent>> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(openAIParams, options)
@@ -413,9 +413,9 @@ export class WrappedResponses extends AzureOpenAI.Responses {
 
               const latency = (Date.now() - startTime) / 1000
               const timeToFirstToken = firstTokenTime !== undefined ? (firstTokenTime - startTime) / 1000 : undefined
-              await sendEventToPosthog({
+              await sendEventToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model ?? modelFromResponse,
                 provider: 'azure',
                 input: formatOpenAIResponsesInput(openAIParams.input, openAIParams.instructions),
@@ -428,9 +428,9 @@ export class WrappedResponses extends AzureOpenAI.Responses {
                 usage,
               })
             } catch (error: unknown) {
-              const enrichedError = await sendEventWithErrorToPosthog({
+              const enrichedError = await sendEventWithErrorToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model,
                 provider: 'azure',
                 input: formatOpenAIResponsesInput(openAIParams.input, openAIParams.instructions),
@@ -454,9 +454,9 @@ export class WrappedResponses extends AzureOpenAI.Responses {
         async (result) => {
           if ('output' in result) {
             const latency = (Date.now() - startTime) / 1000
-            await sendEventToPosthog({
+            await sendEventToInsights({
               client: this.phClient,
-              ...posthogParams,
+              ...insightsParams,
               model: openAIParams.model ?? result.model,
               provider: 'azure',
               input: formatOpenAIResponsesInput(openAIParams.input, openAIParams.instructions),
@@ -481,9 +481,9 @@ export class WrappedResponses extends AzureOpenAI.Responses {
               ? ((error as { status?: number }).status ?? 500)
               : 500
 
-          await sendEventToPosthog({
+          await sendEventToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model,
             provider: 'azure',
             input: formatOpenAIResponsesInput(openAIParams.input, openAIParams.instructions),
@@ -510,7 +510,7 @@ export class WrappedResponses extends AzureOpenAI.Responses {
     body: Params & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<ParsedResponse<ParsedT>> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.parse(openAIParams, options)
@@ -518,9 +518,9 @@ export class WrappedResponses extends AzureOpenAI.Responses {
     const wrappedPromise = parentPromise.then(
       async (result) => {
         const latency = (Date.now() - startTime) / 1000
-        await sendEventToPosthog({
+        await sendEventToInsights({
           client: this.phClient,
-          ...posthogParams,
+          ...insightsParams,
           model: openAIParams.model ?? result.model,
           provider: 'azure',
           input: formatOpenAIResponsesInput(openAIParams.input, openAIParams.instructions),
@@ -539,9 +539,9 @@ export class WrappedResponses extends AzureOpenAI.Responses {
         return result
       },
       async (error: any) => {
-        await sendEventToPosthog({
+        await sendEventToInsights({
           client: this.phClient,
-          ...posthogParams,
+          ...insightsParams,
           model: openAIParams.model,
           provider: 'azure',
           input: formatOpenAIResponsesInput(openAIParams.input, openAIParams.instructions),
@@ -565,10 +565,10 @@ export class WrappedResponses extends AzureOpenAI.Responses {
 }
 
 export class WrappedEmbeddings extends AzureOpenAI.Embeddings {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: AzureOpenAI, phClient: PostHog) {
+  constructor(client: AzureOpenAI, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -578,20 +578,20 @@ export class WrappedEmbeddings extends AzureOpenAI.Embeddings {
     body: EmbeddingCreateParams & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<CreateEmbeddingResponse> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(openAIParams, options)
     const wrappedPromise = parentPromise.then(
       async (result) => {
         const latency = (Date.now() - startTime) / 1000
-        await sendEventToPosthog({
+        await sendEventToInsights({
           client: this.phClient,
           eventType: AIEvent.Embedding,
-          ...posthogParams,
+          ...insightsParams,
           model: openAIParams.model,
           provider: 'azure',
-          input: withPrivacyMode(this.phClient, posthogParams.privacyMode, openAIParams.input),
+          input: withPrivacyMode(this.phClient, insightsParams.privacyMode, openAIParams.input),
           output: null, // Embeddings don't have output content
           latency,
           baseURL: this.baseURL,
@@ -607,13 +607,13 @@ export class WrappedEmbeddings extends AzureOpenAI.Embeddings {
         const httpStatus =
           error && typeof error === 'object' && 'status' in error ? ((error as { status?: number }).status ?? 500) : 500
 
-        await sendEventToPosthog({
+        await sendEventToInsights({
           client: this.phClient,
           eventType: AIEvent.Embedding,
-          ...posthogParams,
+          ...insightsParams,
           model: openAIParams.model,
           provider: 'azure',
-          input: withPrivacyMode(this.phClient, posthogParams.privacyMode, openAIParams.input),
+          input: withPrivacyMode(this.phClient, insightsParams.privacyMode, openAIParams.input),
           output: null,
           latency: 0,
           baseURL: this.baseURL,
@@ -632,6 +632,6 @@ export class WrappedEmbeddings extends AzureOpenAI.Embeddings {
   }
 }
 
-export default PostHogAzureOpenAI
+export default InsightsAzureOpenAI
 
-export { PostHogAzureOpenAI as OpenAI }
+export { InsightsAzureOpenAI as OpenAI }

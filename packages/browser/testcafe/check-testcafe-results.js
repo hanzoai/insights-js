@@ -1,5 +1,5 @@
 // This script checks the events produced by running the testcafe tests and asserts that the events have shown up in
-// our production US cloud posthog. The actual assert functions live alongside the tests themselves, which save the test
+// our production US cloud insights. The actual assert functions live alongside the tests themselves, which save the test
 // information to a file. This script reads those files, and then runs relevant assert functions.
 
 // This happens after the testcafe tests have all finished, so that we are not waiting on ingestion lag per test, only
@@ -25,7 +25,7 @@ import {
 } from './e2e.spec'
 // end of hackiness
 
-import { getResultsJsonFiles, log, error, POSTHOG_PROJECT_ID } from './helpers'
+import { getResultsJsonFiles, log, error, INSIGHTS_PROJECT_ID } from './helpers'
 const asserts = {
     assertConfigOptionsChangeAutocaptureBehaviourAccordingly,
     assertAutocapturedEventsWorkAndAreAccessibleViaApi,
@@ -33,9 +33,9 @@ const asserts = {
 }
 async function main() {
     log(`
-Waiting for events from tests to appear in PostHog.
-You can manually confirm whether the events have shown up at https://us.posthog.com/project/${POSTHOG_PROJECT_ID}/activity/explore
-If they seem to be failing unexpectedly, check grafana for ingestion lag at https://grafana.prod-us.posthog.dev/d/homepage/homepage
+Waiting for events from tests to appear in Insights.
+You can manually confirm whether the events have shown up at https://us.insights.com/project/${INSIGHTS_PROJECT_ID}/activity/explore
+If they seem to be failing unexpectedly, check grafana for ingestion lag at https://grafana.prod-us.insights.dev/d/homepage/homepage
 `)
     // each test will put a results.json file in this folder, so let's list all the files in this folder
     const files = getResultsJsonFiles()

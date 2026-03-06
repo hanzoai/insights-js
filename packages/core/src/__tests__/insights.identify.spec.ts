@@ -1,0 +1,342 @@
+import {
+  parseBody,
+  waitForPromises,
+  createTestClient,
+  InsightsCoreTestClient,
+  InsightsCoreTestClientMocks,
+} from '@/testing'
+import { InsightsPersistedProperty } from '@/types'
+
+describe('Insights Core', () => {
+  let insights: InsightsCoreTestClient
+  let mocks: InsightsCoreTestClientMocks
+
+  jest.useFakeTimers()
+  jest.setSystemTime(new Date('2022-01-01'))
+
+  beforeEach(() => {
+    ;[insights, mocks] = createTestClient('TEST_API_KEY', { flushAt: 1 })
+  })
+
+  describe('identify', () => {
+    // Identify also triggers a subsequent flags call so we should expect 2 calls
+    it('should send an $identify event', async () => {
+      insights.identify('id-1', { foo: 'bar' })
+      await waitForPromises()
+      expect(mocks.fetch).toHaveBeenCalledTimes(2)
+      const batchCall = mocks.fetch.mock.calls[1]
+      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(parseBody(batchCall)).toMatchObject({
+        api_key: 'TEST_API_KEY',
+        batch: [
+          {
+            event: '$identify',
+            distinct_id: insights.getDistinctId(),
+            library: 'insights-core-tests',
+            library_version: '2.0.0-alpha',
+            properties: {
+              $lib: 'insights-core-tests',
+              $lib_version: '2.0.0-alpha',
+              $anon_distinct_id: expect.any(String),
+              $session_id: expect.any(String),
+              $set: {
+                foo: 'bar',
+              },
+            },
+            timestamp: expect.any(String),
+            uuid: expect.any(String),
+            type: 'identify',
+          },
+        ],
+        sent_at: expect.any(String),
+      })
+    })
+
+    it('should send an $identify with $set and $set_once event', async () => {
+      insights.identify('id-1', {
+        $set: {
+          foo: 'bar',
+        },
+        $set_once: {
+          vip: true,
+        },
+      })
+      await waitForPromises()
+      expect(mocks.fetch).toHaveBeenCalledTimes(2)
+      const batchCall = mocks.fetch.mock.calls[1]
+      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(parseBody(batchCall)).toMatchObject({
+        api_key: 'TEST_API_KEY',
+        batch: [
+          {
+            event: '$identify',
+            distinct_id: insights.getDistinctId(),
+            library: 'insights-core-tests',
+            library_version: '2.0.0-alpha',
+            properties: {
+              $lib: 'insights-core-tests',
+              $lib_version: '2.0.0-alpha',
+              $anon_distinct_id: expect.any(String),
+              $session_id: expect.any(String),
+              $set: {
+                foo: 'bar',
+              },
+              $set_once: {
+                vip: true,
+              },
+            },
+            timestamp: expect.any(String),
+            uuid: expect.any(String),
+            type: 'identify',
+          },
+        ],
+        sent_at: expect.any(String),
+      })
+    })
+
+    it('should send an $identify with $set_once event', async () => {
+      insights.identify('id-1', {
+        foo: 'bar',
+        $set_once: {
+          vip: true,
+        },
+      })
+      await waitForPromises()
+      expect(mocks.fetch).toHaveBeenCalledTimes(2)
+      const batchCall = mocks.fetch.mock.calls[1]
+      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(parseBody(batchCall)).toMatchObject({
+        api_key: 'TEST_API_KEY',
+        batch: [
+          {
+            event: '$identify',
+            distinct_id: insights.getDistinctId(),
+            library: 'insights-core-tests',
+            library_version: '2.0.0-alpha',
+            properties: {
+              $lib: 'insights-core-tests',
+              $lib_version: '2.0.0-alpha',
+              $anon_distinct_id: expect.any(String),
+              $session_id: expect.any(String),
+              $set: {
+                foo: 'bar',
+              },
+              $set_once: {
+                vip: true,
+              },
+            },
+            timestamp: expect.any(String),
+            uuid: expect.any(String),
+            type: 'identify',
+          },
+        ],
+        sent_at: expect.any(String),
+      })
+    })
+
+    it('should include anonymous ID if set', async () => {
+      insights.identify('id-1', { foo: 'bar' })
+      await waitForPromises()
+
+      expect(mocks.fetch).toHaveBeenCalledTimes(2)
+      const batchCall = mocks.fetch.mock.calls[1]
+      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(parseBody(batchCall)).toMatchObject({
+        batch: [
+          {
+            distinct_id: insights.getDistinctId(),
+            properties: {
+              $anon_distinct_id: expect.any(String),
+            },
+          },
+        ],
+      })
+    })
+
+    it('should update distinctId if different', () => {
+      const distinctId = insights.getDistinctId()
+      insights.identify('id-1', { foo: 'bar' })
+
+      expect(mocks.storage.setItem).toHaveBeenCalledWith('anonymous_id', distinctId)
+      expect(mocks.storage.setItem).toHaveBeenCalledWith('distinct_id', 'id-1')
+    })
+
+    it('should use existing distinctId from storage', async () => {
+      mocks.storage.setItem(InsightsPersistedProperty.AnonymousId, 'my-old-value')
+      mocks.storage.setItem.mockClear()
+      insights.identify('id-1', { foo: 'bar' })
+      await waitForPromises()
+
+      // One call exists for the queueing, one for persisting distinct id
+      expect(mocks.storage.setItem).toHaveBeenCalledWith('distinct_id', 'id-1')
+      expect(mocks.fetch).toHaveBeenCalledTimes(2)
+      const batchCall = mocks.fetch.mock.calls[1]
+      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(parseBody(batchCall)).toMatchObject({
+        batch: [
+          {
+            distinct_id: 'id-1',
+            properties: {
+              $anon_distinct_id: 'my-old-value',
+            },
+          },
+        ],
+      })
+    })
+
+    it('should not update stored properties if distinct_id the same', () => {
+      mocks.storage.setItem(InsightsPersistedProperty.DistinctId, 'id-1')
+      mocks.storage.setItem.mockClear()
+      insights.identify('id-1', { foo: 'bar' })
+      expect(mocks.storage.setItem).not.toHaveBeenCalledWith('distinct_id', 'id-1')
+    })
+
+    it('should send $anon_distinct_id when identify is called during in-flight preload flags', async () => {
+      // This test verifies the fix for the race condition where identify() calls
+      // triggered during preloadFeatureFlags would drop the $anon_distinct_id.
+      // See: https://github.com/Insights/insights-ios/issues/456
+
+      let resolvePreloadRequest: () => void
+      let preloadFlagsBody: any = null
+      let identifyFlagsBody: any = null
+      let flagsCallCount = 0
+
+      ;[insights, mocks] = createTestClient('TEST_API_KEY', { flushAt: 1 }, (_mocks) => {
+        _mocks.fetch.mockImplementation((url) => {
+          if (url.includes('/flags/')) {
+            flagsCallCount++
+            const currentCall = flagsCallCount
+
+            if (currentCall === 1) {
+              // First flags call (preload) - delay to simulate network latency
+              return new Promise((resolve) => {
+                resolvePreloadRequest = () =>
+                  resolve({
+                    status: 200,
+                    text: () => Promise.resolve('ok'),
+                    json: () =>
+                      Promise.resolve({
+                        featureFlags: {},
+                        featureFlagPayloads: {},
+                      }),
+                  })
+              })
+            } else if (currentCall === 2) {
+              // Second flags call (from identify's pending reload)
+              // This should include $anon_distinct_id
+              return Promise.resolve({
+                status: 200,
+                text: () => Promise.resolve('ok'),
+                json: () =>
+                  Promise.resolve({
+                    featureFlags: {},
+                    featureFlagPayloads: {},
+                  }),
+              })
+            }
+          }
+
+          return Promise.resolve({
+            status: 200,
+            text: () => Promise.resolve('ok'),
+            json: () => Promise.resolve({ status: 'ok' }),
+          })
+        })
+      })
+
+      // Start preload (simulates app init with preloadFeatureFlags: true)
+      insights.reloadFeatureFlags()
+      await waitForPromises()
+
+      // Get the anonymous ID before identify changes it
+      const anonId = insights.getDistinctId()
+
+      // Now identify while preload is in flight
+      insights.identify('user-123', { name: 'Test User' })
+      await waitForPromises()
+
+      // At this point, first call is in flight, identify queued a pending reload
+      expect(flagsCallCount).toBe(1)
+
+      // Capture the first request body for comparison
+      preloadFlagsBody = mocks.fetch.mock.calls.find((call: any) => call[0].includes('/flags/'))?.[1]?.body
+      if (preloadFlagsBody) {
+        preloadFlagsBody = JSON.parse(preloadFlagsBody)
+      }
+
+      // Complete the preload request
+      resolvePreloadRequest!()
+      await waitForPromises()
+
+      // The pending reload from identify should now execute
+      expect(flagsCallCount).toBe(2)
+
+      // Find the second flags call and verify it contains $anon_distinct_id
+      const flagsCalls = mocks.fetch.mock.calls.filter((call: any) => call[0].includes('/flags/'))
+      expect(flagsCalls.length).toBe(2)
+
+      identifyFlagsBody = JSON.parse(flagsCalls[1][1].body)
+
+      // The second request (from identify) should include $anon_distinct_id
+      // This is the key assertion - without the fix, this request would have been dropped
+      expect(identifyFlagsBody.$anon_distinct_id).toBe(anonId)
+      expect(identifyFlagsBody.distinct_id).toBe('user-123')
+    })
+
+    it('should send $set event when distinct_id is the same but properties are different', async () => {
+      // First identify with a new user
+      insights.identify('id-1', { foo: 'bar' })
+      await waitForPromises()
+      mocks.fetch.mockClear()
+
+      // Second identify with the same user but different properties should send $set
+      insights.identify('id-1', { foo: 'baz' })
+      await waitForPromises()
+
+      expect(mocks.fetch).toHaveBeenCalled()
+      const batchCall = mocks.fetch.mock.calls.find((call) => call[0].includes('/batch/'))
+      expect(batchCall).toBeDefined()
+      expect(parseBody(batchCall)).toMatchObject({
+        batch: [
+          {
+            event: '$set',
+            properties: {
+              $set: { foo: 'baz' },
+              $set_once: {},
+            },
+          },
+        ],
+      })
+    })
+
+    it('should not send event when distinct_id and properties are the same', async () => {
+      // First identify
+      insights.identify('id-1', { foo: 'bar' })
+      await waitForPromises()
+      mocks.fetch.mockClear()
+
+      // Second identify with exact same properties should be ignored
+      insights.identify('id-1', { foo: 'bar' })
+      await waitForPromises()
+
+      // Should not have made a batch call (only flags call)
+      const batchCalls = mocks.fetch.mock.calls.filter((call) => call[0].includes('/batch/'))
+      expect(batchCalls.length).toBe(0)
+    })
+
+    it('should not send event when only distinct_id is provided (no properties)', async () => {
+      // First identify
+      insights.identify('id-1')
+      await waitForPromises()
+      mocks.fetch.mockClear()
+
+      // Second identify with no properties should not send anything
+      insights.identify('id-1')
+      await waitForPromises()
+
+      // Should not have made a batch call
+      const batchCalls = mocks.fetch.mock.calls.filter((call) => call[0].includes('/batch/'))
+      expect(batchCalls.length).toBe(0)
+    })
+  })
+})

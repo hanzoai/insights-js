@@ -1,4 +1,4 @@
-import posthog from '@posthog/rollup-plugin'
+import insights from '@insights/rollup-plugin'
 import packageJson from './package.json' with { type: 'json' }
 
 export default {
@@ -18,11 +18,11 @@ export default {
         },
     ],
     plugins: [
-        posthog({
-            personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY,
-            projectId: process.env.POSTHOG_PROJECT_ID,
-            host: process.env.POSTHOG_API_HOST,
-            cliBinaryPath: process.env.POSTHOG_CLI_BINARY_PATH,
+        insights({
+            personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY,
+            projectId: process.env.INSIGHTS_PROJECT_ID,
+            host: process.env.INSIGHTS_API_HOST,
+            cliBinaryPath: process.env.INSIGHTS_CLI_BINARY_PATH,
             logLevel: 'info',
             sourcemaps: {
                 enabled: true,

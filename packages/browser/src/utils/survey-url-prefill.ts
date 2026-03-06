@@ -1,4 +1,4 @@
-import { Survey, SurveyQuestion, SurveyQuestionBranchingType, SurveyQuestionType } from '../posthog-surveys-types'
+import { Survey, SurveyQuestion, SurveyQuestionBranchingType, SurveyQuestionType } from '../insights-surveys-types'
 import { getSurveyResponseKey } from '../extensions/surveys/surveys-extension-utils'
 import { logger } from './logger'
 import { isUndefined } from '@hanzo/insights-core'

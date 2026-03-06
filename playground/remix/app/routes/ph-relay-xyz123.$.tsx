@@ -1,9 +1,9 @@
 import type { ActionFunction, LoaderFunction } from '@remix-run/node'
 
-const API_HOST = 'eu.i.posthog.com'
-const ASSET_HOST = 'eu-assets.i.posthog.com'
+const API_HOST = 'eu.i.insights.com'
+const ASSET_HOST = 'eu-assets.i.insights.com'
 
-const posthogProxy = async (request: Request) => {
+const insightsProxy = async (request: Request) => {
     const url = new URL(request.url)
     const hostname = url.pathname.startsWith('/ph-relay-xyz123/static/') ? ASSET_HOST : API_HOST
 
@@ -31,6 +31,6 @@ const posthogProxy = async (request: Request) => {
     })
 }
 
-export const loader: LoaderFunction = async ({ request }) => posthogProxy(request)
+export const loader: LoaderFunction = async ({ request }) => insightsProxy(request)
 
-export const action: ActionFunction = async ({ request }) => posthogProxy(request)
+export const action: ActionFunction = async ({ request }) => insightsProxy(request)

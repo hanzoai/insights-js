@@ -1,6 +1,6 @@
 import { PRODUCT_TOURS_ACTIVATED } from '../constants'
-import { ProductTour, ProductTourEventName } from '../posthog-product-tours-types'
-import { PostHog } from '../posthog-core'
+import { ProductTour, ProductTourEventName } from '../insights-product-tours-types'
+import { Insights } from '../insights-core'
 import { EventReceiver } from './event-receiver'
 import { createLogger } from './logger'
 import { localStore } from '../storage'
@@ -9,7 +9,7 @@ import { TOUR_COMPLETED_KEY_PREFIX, TOUR_DISMISSED_KEY_PREFIX } from '../extensi
 const logger = createLogger('[Product Tour Event Receiver]')
 
 export class ProductTourEventReceiver extends EventReceiver<ProductTour> {
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         super(instance)
     }
 

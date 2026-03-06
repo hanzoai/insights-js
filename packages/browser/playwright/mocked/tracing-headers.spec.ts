@@ -1,4 +1,4 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 import { Page, BrowserContext, Request } from '@playwright/test'
 
@@ -35,7 +35,7 @@ async function setupAndTriggerRequest(
 
     await page.waitForFunction(() => {
         const win = window as any
-        return win.__PosthogExtensions__?.tracingHeadersPatchFns && win.posthog
+        return win.__InsightsExtensions__?.tracingHeadersPatchFns && win.insights
     })
 
     if (method === 'fetch') {
@@ -66,10 +66,10 @@ test.describe('tracing headers', () => {
 
             const headers = await setupAndTriggerRequest(page, context, { domain, startOptions })
 
-            expect(headers['x-posthog-distinct-id']).toBeTruthy()
+            expect(headers['x-insights-distinct-id']).toBeTruthy()
             if (!disableSession) {
-                expect(headers['x-posthog-session-id']).toBeTruthy()
-                expect(headers['x-posthog-window-id']).toBeTruthy()
+                expect(headers['x-insights-session-id']).toBeTruthy()
+                expect(headers['x-insights-window-id']).toBeTruthy()
             }
         })
     }
@@ -83,9 +83,9 @@ test.describe('tracing headers', () => {
         test(`does NOT add tracing headers: ${name}`, async ({ page, context }) => {
             const headers = await setupAndTriggerRequest(page, context, { domain, method })
 
-            expect(headers['x-posthog-distinct-id']).toBeUndefined()
-            expect(headers['x-posthog-session-id']).toBeUndefined()
-            expect(headers['x-posthog-window-id']).toBeUndefined()
+            expect(headers['x-insights-distinct-id']).toBeUndefined()
+            expect(headers['x-insights-session-id']).toBeUndefined()
+            expect(headers['x-insights-window-id']).toBeUndefined()
         })
     }
 })

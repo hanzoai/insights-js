@@ -4,11 +4,11 @@ import type { ReadableSpan, SpanProcessor } from '@opentelemetry/sdk-trace-base'
 
 export type UsageData = Record<string, unknown>
 
-export interface PostHogSpanMapperContext {
-  options: PostHogTelemetryOptions
+export interface InsightsSpanMapperContext {
+  options: InsightsTelemetryOptions
 }
 
-export interface PostHogSpanMapperResult {
+export interface InsightsSpanMapperResult {
   distinctId?: string
   traceId?: string
   model?: string
@@ -23,31 +23,31 @@ export interface PostHogSpanMapperResult {
   usage?: UsageData
   tools?: any[] | null
   modelParams?: Record<string, unknown>
-  posthogProperties?: Record<string, unknown>
+  insightsProperties?: Record<string, unknown>
   error?: unknown
 }
 
-export interface PostHogSpanMapper {
+export interface InsightsSpanMapper {
   name: string
   canMap: (span: ReadableSpan) => boolean
-  map: (span: ReadableSpan, context: PostHogSpanMapperContext) => PostHogSpanMapperResult | null
+  map: (span: ReadableSpan, context: InsightsSpanMapperContext) => InsightsSpanMapperResult | null
 }
 
 export type ShouldExportSpan = (params: { otelSpan: ReadableSpan }) => boolean
 
-export interface PostHogTelemetryOptions {
-  posthogDistinctId?: string
-  posthogTraceId?: string
-  posthogProperties?: Record<string, any>
-  posthogPrivacyMode?: boolean
-  posthogGroups?: Record<string, any>
-  posthogModelOverride?: string
-  posthogProviderOverride?: string
-  posthogCostOverride?: CostOverride
-  posthogCaptureImmediate?: boolean
-  mappers?: PostHogSpanMapper[]
+export interface InsightsTelemetryOptions {
+  insightsDistinctId?: string
+  insightsTraceId?: string
+  insightsProperties?: Record<string, any>
+  insightsPrivacyMode?: boolean
+  insightsGroups?: Record<string, any>
+  insightsModelOverride?: string
+  insightsProviderOverride?: string
+  insightsCostOverride?: CostOverride
+  insightsCaptureImmediate?: boolean
+  mappers?: InsightsSpanMapper[]
   shouldExportSpan?: ShouldExportSpan
 }
 
-export type PostHogReadableSpan = ReadableSpan
-export type PostHogTelemetrySpanProcessor = SpanProcessor
+export type InsightsReadableSpan = ReadableSpan
+export type InsightsTelemetrySpanProcessor = SpanProcessor

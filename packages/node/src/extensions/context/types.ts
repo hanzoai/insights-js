@@ -13,7 +13,7 @@ export interface ContextOptions {
   fresh?: boolean
 }
 
-export interface IPostHogContext {
+export interface IInsightsContext {
   get(): ContextData | undefined
   run<T>(context: ContextData, fn: () => T, options?: ContextOptions): T
   enter(context: ContextData, options?: ContextOptions): void

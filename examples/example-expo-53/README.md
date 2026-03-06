@@ -32,7 +32,7 @@ Or...
 ```bash
 npx expo run:ios
 npx expo run:android
-npx expo start --web # uncomment "persistence: 'memory'" inside posthog.tsx for it to work
+npx expo start --web # uncomment "persistence: 'memory'" inside insights.tsx for it to work
 ```
 
 If your RN SDK changes are not picked up:

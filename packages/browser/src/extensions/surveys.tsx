@@ -1,6 +1,6 @@
 import { type JSX, type RefObject, render, Fragment } from 'preact'
 import { useContext, useEffect, useMemo, useRef, useState } from 'preact/hooks'
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import {
     DisplaySurveyPopoverOptions,
     Survey,
@@ -17,7 +17,7 @@ import {
     SurveyType,
     SurveyWidgetType,
     SurveyWithTypeAndAppearance,
-} from '../posthog-surveys-types'
+} from '../insights-surveys-types'
 import { addEventListener } from '../utils'
 import { document as _document, window as _window } from '../utils/globals'
 import {
@@ -120,19 +120,19 @@ function getNextToTriggerPosition(target: HTMLElement, surveyWidth: number): JSX
     }
 }
 
-// Keep in sync with posthog/constants.py on main repo
+// Keep in sync with insights/constants.py on main repo
 const SURVEY_TARGETING_FLAG_PREFIX = 'survey-targeting-'
 
 export class SurveyManager {
-    private _posthog: PostHog
+    private _insights: Insights
     private _surveyInFocus: string | null
     private _surveyTimeouts: Map<string, NodeJS.Timeout> = new Map()
     private _widgetSelectorListeners: Map<string, { element: Element; listener: EventListener; survey: Survey }> =
         new Map()
     private _prefillHandledSurveys: Set<string> = new Set()
 
-    constructor(posthog: PostHog) {
-        this._posthog = posthog
+    constructor(insights: Insights) {
+        this._insights = insights
         // This is used to track the survey that is currently in focus. We only show one survey at a time.
         this._surveyInFocus = null
     }
@@ -140,13 +140,13 @@ export class SurveyManager {
     public handlePageUnload = (): void => {
         // we don't use getSurveys to avoid adding extra API calls here.
         // if no surveys are cached, there's nothing to do anyways
-        const surveys = this._posthog.get_property(SURVEYS) as Survey[] | undefined
+        const surveys = this._insights.get_property(SURVEYS) as Survey[] | undefined
         if (!surveys) {
             return
         }
         for (const survey of surveys) {
             if (isSurveyInProgress(survey)) {
-                sendSurveyAbandonedEvent(survey, this._posthog)
+                sendSurveyAbandonedEvent(survey, this._insights)
             }
         }
     }
@@ -222,10 +222,10 @@ export class SurveyManager {
         }
 
         const delaySeconds = survey.appearance?.surveyPopupDelaySeconds || 0
-        const { shadow } = retrieveSurveyShadow(survey, this._posthog)
+        const { shadow } = retrieveSurveyShadow(survey, this._insights)
 
         const surveyPopupProps: SurveyPopupProps = {
-            posthog: this._posthog,
+            insights: this._insights,
             survey: survey,
             removeSurveyFromFocus: this._removeSurveyFromFocus,
             properties: properties,
@@ -264,14 +264,14 @@ export class SurveyManager {
 
     private _handleWidget = (survey: Survey): void => {
         // Ensure widget container exists if it doesn't
-        const { shadow, isNewlyCreated } = retrieveSurveyShadow(survey, this._posthog)
+        const { shadow, isNewlyCreated } = retrieveSurveyShadow(survey, this._insights)
 
         // If the widget is already rendered, do nothing. Otherwise the widget will be re-rendered every second
         if (!isNewlyCreated) {
             return
         }
 
-        render(<FeedbackWidget posthog={this._posthog} survey={survey} key={survey.id} />, shadow)
+        render(<FeedbackWidget insights={this._insights} survey={survey} key={survey.id} />, shadow)
     }
 
     private _removeWidgetSelectorListener = (survey: Pick<Survey, 'id' | 'type' | 'appearance'>): void => {
@@ -368,22 +368,22 @@ export class SurveyManager {
     }
 
     public renderPopover = (survey: Survey): void => {
-        const { shadow } = retrieveSurveyShadow(survey, this._posthog)
+        const { shadow } = retrieveSurveyShadow(survey, this._insights)
         render(
-            <SurveyPopup posthog={this._posthog} survey={survey} removeSurveyFromFocus={this._removeSurveyFromFocus} />,
+            <SurveyPopup insights={this._insights} survey={survey} removeSurveyFromFocus={this._removeSurveyFromFocus} />,
             shadow
         )
     }
 
     public renderSurvey = (survey: Survey, selector: Element, properties?: Properties): void => {
         let isSurveyCompleted = false
-        if (this._posthog.config?.surveys?.prefillFromUrl) {
+        if (this._insights.config?.surveys?.prefillFromUrl) {
             isSurveyCompleted = this._handleUrlPrefill(survey)
         }
 
         render(
             <SurveyPopup
-                posthog={this._posthog}
+                insights={this._insights}
                 survey={survey}
                 removeSurveyFromFocus={this._removeSurveyFromFocus}
                 isPopup={false}
@@ -426,7 +426,7 @@ export class SurveyManager {
                 responses: isSurveyCompleted ? responses : skippedResponses,
                 survey,
                 surveySubmissionId: submissionId,
-                posthog: this._posthog,
+                insights: this._insights,
                 isSurveyCompleted,
             })
         }
@@ -467,7 +467,7 @@ export class SurveyManager {
             responses,
             survey,
             surveySubmissionId: submissionId,
-            posthog: this._posthog,
+            insights: this._insights,
             isSurveyCompleted,
             properties,
         })
@@ -523,12 +523,12 @@ export class SurveyManager {
         if (!flagKey) {
             return true
         }
-        const isFeatureEnabled = !!this._posthog.featureFlags.isFeatureEnabled(flagKey, {
+        const isFeatureEnabled = !!this._insights.featureFlags.isFeatureEnabled(flagKey, {
             send_event: !flagKey.startsWith(SURVEY_TARGETING_FLAG_PREFIX),
         })
         let flagVariantCheck = true
         if (flagVariant) {
-            const flagVariantValue = this._posthog.featureFlags.getFeatureFlag(flagKey, { send_event: false })
+            const flagVariantValue = this._insights.featureFlags.getFeatureFlag(flagKey, { send_event: false })
             flagVariantCheck = flagVariantValue === flagVariant || flagVariant === 'any'
         }
         return isFeatureEnabled && flagVariantCheck
@@ -614,7 +614,7 @@ export class SurveyManager {
             return true
         }
         const surveysActivatedByEventsOrActions: string[] | undefined =
-            this._posthog.surveys._surveyEventReceiver?.getSurveys()
+            this._insights.surveys._surveyEventReceiver?.getSurveys()
         return !!surveysActivatedByEventsOrActions?.includes(survey.id)
     }
 
@@ -632,7 +632,7 @@ export class SurveyManager {
     }
 
     public getActiveMatchingSurveys = (callback: SurveyCallback, forceReload = false): void => {
-        this._posthog?.surveys.getSurveys((surveys) => {
+        this._insights?.surveys.getSurveys((surveys) => {
             const targetingMatchedSurveys = surveys.filter((survey) => {
                 const eligibility = this.checkSurveyEligibility(survey)
                 return (
@@ -760,7 +760,7 @@ export const renderSurveysPreview = ({
     previewPageIndex: number
     forceDisableHtml?: boolean
     onPreviewSubmit?: (res: string | string[] | number | null) => void
-    posthog?: PostHog
+    insights?: Insights
     positionStyles?: JSX.CSSProperties
 }) => {
     const currentStyle = parentElement.querySelector('style[data-ph-survey-style]')
@@ -804,14 +804,14 @@ export const renderFeedbackWidgetPreview = ({
 }
 
 // This is the main exported function
-export function generateSurveys(posthog: PostHog, isSurveysEnabled: boolean | undefined) {
+export function generateSurveys(insights: Insights, isSurveysEnabled: boolean | undefined) {
     // NOTE: Important to ensure we never try and run surveys without a window environment
     if (!document || !window) {
         return
     }
 
-    const surveyManager = new SurveyManager(posthog)
-    if (posthog.config.disable_surveys_automatic_display) {
+    const surveyManager = new SurveyManager(insights)
+    if (insights.config.disable_surveys_automatic_display) {
         logger.info('Surveys automatic display is disabled. Skipping call surveys and evaluate display logic.')
         return surveyManager
     }
@@ -866,7 +866,7 @@ type UseHideSurveyOnURLChangeProps = {
 
 /**
  * This hook handles URL-based survey visibility after the initial mount.
- * The initial URL check is handled by the `getActiveMatchingSurveys` method in  the `PostHogSurveys` class,
+ * The initial URL check is handled by the `getActiveMatchingSurveys` method in  the `InsightsSurveys` class,
  * which ensures the URL matches before displaying a survey for the first time.
  * That is the method that is called every second to see if there's a matching survey.
  *
@@ -934,7 +934,7 @@ export function useHideSurveyOnURLChange({
 
 export function usePopupVisibility(
     survey: Survey,
-    posthog: PostHog | undefined,
+    insights: Insights | undefined,
     millisecondDelay: number,
     isPreviewMode: boolean,
     removeSurveyFromFocus: (survey: SurveyWithTypeAndAppearance) => void,
@@ -979,8 +979,8 @@ export function usePopupVisibility(
     }
 
     useEffect(() => {
-        if (!posthog) {
-            logger.error('usePopupVisibility hook called without a PostHog instance.')
+        if (!insights) {
+            logger.error('usePopupVisibility hook called without a Insights instance.')
             return
         }
         if (isPreviewMode) {
@@ -1010,12 +1010,12 @@ export function usePopupVisibility(
             setIsPopupVisible(true)
             window.dispatchEvent(new Event('PHSurveyShown'))
             if (!skipShownEvent) {
-                posthog.capture(SurveyEventName.SHOWN, {
+                insights.capture(SurveyEventName.SHOWN, {
                     [SurveyEventProperties.SURVEY_NAME]: survey.name,
                     [SurveyEventProperties.SURVEY_ID]: survey.id,
                     [SurveyEventProperties.SURVEY_ITERATION]: survey.current_iteration,
                     [SurveyEventProperties.SURVEY_ITERATION_START_DATE]: survey.current_iteration_start_date,
-                    sessionRecordingUrl: posthog.get_session_replay_url?.(),
+                    sessionRecordingUrl: insights.get_session_replay_url?.(),
                 })
             }
             localStorage.setItem('lastSeenSurveyDate', new Date().toISOString())
@@ -1056,7 +1056,7 @@ export function usePopupVisibility(
 interface SurveyPopupProps {
     survey: Survey
     forceDisableHtml?: boolean
-    posthog?: PostHog
+    insights?: Insights
     style?: JSX.CSSProperties
     previewPageIndex?: number | undefined
     removeSurveyFromFocus?: (survey: SurveyWithTypeAndAppearance) => void
@@ -1095,7 +1095,7 @@ function getTabPositionStyles(position: SurveyTabPosition = SurveyTabPosition.Ri
 export function SurveyPopup({
     survey,
     forceDisableHtml,
-    posthog,
+    insights,
     style = {},
     previewPageIndex,
     removeSurveyFromFocus = () => {},
@@ -1115,7 +1115,7 @@ export function SurveyPopup({
         : 0
     const { isPopupVisible, isSurveySent, hidePopupWithViewTransition } = usePopupVisibility(
         survey,
-        posthog,
+        insights,
         surveyPopupDelayMilliseconds,
         isPreviewMode,
         removeSurveyFromFocus,
@@ -1139,16 +1139,16 @@ export function SurveyPopup({
             isPreviewMode,
             previewPageIndex: previewPageIndex,
             onPopupSurveyDismissed: () => {
-                dismissedSurveyEvent(survey, posthog, isPreviewMode)
+                dismissedSurveyEvent(survey, insights, isPreviewMode)
                 onPopupSurveyDismissed()
             },
             isPopup: isPopup || false,
             surveySubmissionId: getInProgressSurvey?.surveySubmissionId || uuidv7(),
             onPreviewSubmit,
-            posthog,
+            insights,
             properties,
         }
-    }, [isPreviewMode, previewPageIndex, isPopup, posthog, survey, onPopupSurveyDismissed, onPreviewSubmit, properties])
+    }, [isPreviewMode, previewPageIndex, isPopup, insights, survey, onPopupSurveyDismissed, onPreviewSubmit, properties])
 
     if (!isPopupVisible) {
         return null
@@ -1165,7 +1165,7 @@ export function SurveyPopup({
                 ref={surveyContainerRef}
             >
                 {!shouldShowConfirmation ? (
-                    <Questions survey={survey} forceDisableHtml={!!forceDisableHtml} posthog={posthog} />
+                    <Questions survey={survey} forceDisableHtml={!!forceDisableHtml} insights={insights} />
                 ) : (
                     <ConfirmationMessage
                         header={survey.appearance?.thankYouMessageHeader || 'Thank you!'}
@@ -1187,11 +1187,11 @@ export function SurveyPopup({
 export function Questions({
     survey,
     forceDisableHtml,
-    posthog,
+    insights,
 }: {
     survey: Survey
     forceDisableHtml: boolean
-    posthog?: PostHog
+    insights?: Insights
 }) {
     // Initialize responses from localStorage or empty object
     const [questionsResponses, setQuestionsResponses] = useState(() => {
@@ -1232,8 +1232,8 @@ export function Questions({
         displayQuestionIndex: number
         questionId?: string
     }) => {
-        if (!posthog) {
-            logger.error('onNextButtonClick called without a PostHog instance.')
+        if (!insights) {
+            logger.error('onNextButtonClick called without a Insights instance.')
             return
         }
 
@@ -1267,7 +1267,7 @@ export function Questions({
                 survey,
                 surveySubmissionId,
                 isSurveyCompleted,
-                posthog,
+                insights,
                 properties,
             })
         }
@@ -1315,12 +1315,12 @@ export function Questions({
 export function FeedbackWidget({
     survey,
     forceDisableHtml,
-    posthog,
+    insights,
     readOnly,
 }: {
     survey: Survey
     forceDisableHtml?: boolean
-    posthog?: PostHog
+    insights?: Insights
     readOnly?: boolean
 }): JSX.Element | null {
     const [isFeedbackButtonVisible, setIsFeedbackButtonVisible] = useState(true)
@@ -1332,8 +1332,8 @@ export function FeedbackWidget({
     }
 
     useEffect(() => {
-        if (!posthog) {
-            logger.error('FeedbackWidget called without a PostHog instance.')
+        if (!insights) {
+            logger.error('FeedbackWidget called without a Insights instance.')
             return
         }
         if (readOnly) {
@@ -1363,7 +1363,7 @@ export function FeedbackWidget({
             window.removeEventListener(DISPATCH_FEEDBACK_WIDGET_EVENT, handleShowSurvey)
         }
     }, [
-        posthog,
+        insights,
         readOnly,
         survey.id,
         survey.appearance?.widgetType,
@@ -1405,7 +1405,7 @@ export function FeedbackWidget({
             )}
             {showSurvey && (
                 <SurveyPopup
-                    posthog={posthog}
+                    insights={insights}
                     survey={survey}
                     forceDisableHtml={forceDisableHtml}
                     style={styleOverrides}

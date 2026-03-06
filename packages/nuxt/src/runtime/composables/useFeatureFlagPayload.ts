@@ -1,5 +1,5 @@
 import { ref, onMounted, onUnmounted } from 'vue'
-import { usePostHog } from './usePostHog'
+import { useInsights } from './useInsights'
 import type { JsonType } from '@hanzo/insights'
 
 /**
@@ -7,12 +7,12 @@ import type { JsonType } from '@hanzo/insights'
  *
  * @remarks
  * This composable initializes with the current feature flag payload and automatically
- * updates when PostHog feature flags are reloaded.
+ * updates when Insights feature flags are reloaded.
  *
  * **Server-Side Rendering (SSR) Behavior:**
- * - During SSR, PostHog is typically not available or feature flags are not yet loaded
+ * - During SSR, Insights is typically not available or feature flags are not yet loaded
  * - The returned ref will be `undefined` on the server side
- * - The ref will be properly hydrated on the client side once PostHog initializes
+ * - The ref will be properly hydrated on the client side once Insights initializes
  * - Consider using a fallback value or `v-if` directive when rendering based on this value
  *
  * @example
@@ -24,19 +24,19 @@ import type { JsonType } from '@hanzo/insights'
  * @returns A reactive ref containing the feature flag payload
  */
 export function useFeatureFlagPayload(flag: string) {
-  const posthog = usePostHog()
-  const featureFlagPayload = ref<JsonType | undefined>(posthog?.getFeatureFlagPayload?.(flag))
+  const insights = useInsights()
+  const featureFlagPayload = ref<JsonType | undefined>(insights?.getFeatureFlagPayload?.(flag))
 
   let unsubscribe: (() => void) | undefined
   onMounted(() => {
-    if (!posthog) return
+    if (!insights) return
 
     // Set initial value in case it wasn't available during setup
-    featureFlagPayload.value = posthog.getFeatureFlagPayload(flag)
+    featureFlagPayload.value = insights.getFeatureFlagPayload(flag)
 
     // Update when feature flags are loaded
-    unsubscribe = posthog.onFeatureFlags?.(() => {
-      featureFlagPayload.value = posthog.getFeatureFlagPayload(flag)
+    unsubscribe = insights.onFeatureFlags?.(() => {
+      featureFlagPayload.value = insights.getFeatureFlagPayload(flag)
     })
   })
 

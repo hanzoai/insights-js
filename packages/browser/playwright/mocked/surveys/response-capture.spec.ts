@@ -1,6 +1,6 @@
 import { getSurveyResponseKey } from '@/extensions/surveys/surveys-extension-utils'
 import { pollUntilEventCaptured } from '../utils/event-capture-utils'
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const startOptions = {
@@ -41,8 +41,8 @@ test.describe('surveys - feedback widget', () => {
 
         await pollUntilEventCaptured(page, 'survey shown')
 
-        await page.locator('.PostHogSurvey-123 textarea').type('experiments is awesome!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').type('experiments is awesome!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent = await page
@@ -99,8 +99,8 @@ test.describe('surveys - feedback widget', () => {
             })
         )
 
-        await page.locator('.PostHogSurvey-123 textarea').type('experiments is awesome!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').type('experiments is awesome!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent = await page
@@ -145,7 +145,7 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await page.locator('.PostHogSurvey-123 .form-cancel').click()
+        await page.locator('.InsightsSurvey-123 .form-cancel').click()
         await pollUntilEventCaptured(page, 'survey dismissed')
         const surveyDismissedEvent = await page
             .capturedEvents()
@@ -180,7 +180,7 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await page.locator('.PostHogSurvey-123 .form-cancel').click()
+        await page.locator('.InsightsSurvey-123 .form-cancel').click()
         await pollUntilEventCaptured(page, 'survey dismissed')
         const surveyDismissedEvent = await page
             .capturedEvents()
@@ -230,8 +230,8 @@ test.describe('surveys - feedback widget', () => {
 
         await pollUntilEventCaptured(page, 'survey shown')
 
-        await page.locator('.PostHogSurvey-123 textarea').fill('experiments is awesome!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').fill('experiments is awesome!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent = await page
@@ -246,8 +246,8 @@ test.describe('surveys - feedback widget', () => {
             })
         )
 
-        await page.locator('.PostHogSurvey-123 textarea').fill('partial responses!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').fill('partial responses!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent2 = await page.capturedEvents().then((events) => getLastSurveySentEvent(events))
         expect(surveySentEvent2!.properties).toEqual(
@@ -260,8 +260,8 @@ test.describe('surveys - feedback widget', () => {
             })
         )
 
-        await page.locator('.PostHogSurvey-123 textarea').fill('partial responses is finished!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').fill('partial responses is finished!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent3 = await page.capturedEvents().then((events) => getLastSurveySentEvent(events))
         expect(surveySentEvent3!.properties).toEqual(
@@ -311,8 +311,8 @@ test.describe('surveys - feedback widget', () => {
 
         await pollUntilEventCaptured(page, 'survey shown')
 
-        await page.locator('.PostHogSurvey-123 textarea').fill('experiments is awesome!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').fill('experiments is awesome!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent = await page
@@ -327,8 +327,8 @@ test.describe('surveys - feedback widget', () => {
             })
         )
 
-        await page.locator('.PostHogSurvey-123 textarea').fill('partial responses!')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').fill('partial responses!')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent2 = await page.capturedEvents().then((events) => getLastSurveySentEvent(events))
         expect(surveySentEvent2!.properties).toEqual(
@@ -341,7 +341,7 @@ test.describe('surveys - feedback widget', () => {
             })
         )
 
-        await page.locator('.PostHogSurvey-123 .form-cancel').click()
+        await page.locator('.InsightsSurvey-123 .form-cancel').click()
         await pollUntilEventCaptured(page, 'survey dismissed')
         const surveyDismissedEvent = await page
             .capturedEvents()
@@ -383,10 +383,10 @@ test.describe('surveys - displaySurvey with custom properties', () => {
         await surveysAPICall
 
         await page.evaluate(() => {
-            // @ts-expect-error - posthog is added to window in test setup
-            window.posthog.onSurveysLoaded(() => {
-                // @ts-expect-error - posthog is added to window in test setup
-                window.posthog.displaySurvey('custom-props-survey', {
+            // @ts-expect-error - insights is added to window in test setup
+            window.hi.onSurveysLoaded(() => {
+                // @ts-expect-error - insights is added to window in test setup
+                window.hi.displaySurvey('custom-props-survey', {
                     displayType: 'popover',
                     ignoreConditions: true,
                     ignoreDelay: true,
@@ -399,8 +399,8 @@ test.describe('surveys - displaySurvey with custom properties', () => {
             })
         })
 
-        await page.locator('.PostHogSurvey-custom-props-survey textarea').fill('feedback with custom props')
-        await page.locator('.PostHogSurvey-custom-props-survey .form-submit').click()
+        await page.locator('.InsightsSurvey-custom-props-survey textarea').fill('feedback with custom props')
+        await page.locator('.InsightsSurvey-custom-props-survey .form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
         const surveySentEvent = await page

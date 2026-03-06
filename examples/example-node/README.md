@@ -1,6 +1,6 @@
-# PostHog Node.js SDK Example
+# Insights Node.js SDK Example
 
-This interactive example demonstrates various PostHog Node.js SDK capabilities including:
+This interactive example demonstrates various Insights Node.js SDK capabilities including:
 
 - Basic event capture and user identification
 - Feature flag local evaluation
@@ -10,9 +10,9 @@ This interactive example demonstrates various PostHog Node.js SDK capabilities i
 
 ## Setup
 
-### 1. Configure PostHog Credentials
+### 1. Configure Insights Credentials
 
-Copy the example environment file and fill in your PostHog credentials:
+Copy the example environment file and fill in your Insights credentials:
 
 ```bash
 cp .env.example .env
@@ -21,31 +21,31 @@ cp .env.example .env
 Edit `.env` with your actual values:
 
 ```bash
-# Your project API key (found on the /setup page in PostHog)
-POSTHOG_PROJECT_API_KEY=phc_your_project_api_key_here
+# Your project API key (found on the /setup page in Insights)
+INSIGHTS_PROJECT_API_KEY=phc_your_project_api_key_here
 
 # Your personal API key (for local evaluation and other advanced features)
-POSTHOG_PERSONAL_API_KEY=phx_your_personal_api_key_here
+INSIGHTS_PERSONAL_API_KEY=phx_your_personal_api_key_here
 
-# PostHog host URL (remove this line if using posthog.com)
-POSTHOG_HOST=https://app.posthog.com
+# Insights host URL (remove this line if using insights.hanzo.ai)
+INSIGHTS_HOST=https://app.insights.hanzo.ai
 ```
 
 ### 2. Getting Your API Keys
 
 **Project API Key:**
 
-1. Go to your PostHog instance → Settings → Project Settings
+1. Go to your Insights instance → Settings → Project Settings
 2. Copy the "Project API Key"
 
 **Personal API Key:**
 
-1. Go to your PostHog instance → Settings → Personal API Keys
+1. Go to your Insights instance → Settings → Personal API Keys
 2. Create a new Personal API Key (required for local evaluation)
 
 ### 3. Install Dependencies
 
-From the workspace root (`/path/to/posthog-js/`):
+From the workspace root (`/path/to/@hanzo/insights/`):
 
 ```bash
 # Build and package the SDK
@@ -71,7 +71,7 @@ npx tsx example.ts
 When you run the example, you'll see an interactive menu:
 
 ```
-🚀 PostHog Node.js SDK Demo - Choose an example to run:
+🚀 Insights Node.js SDK Demo - Choose an example to run:
 
 1. Identify and capture examples
 2. Feature flag local evaluation examples
@@ -134,7 +134,7 @@ The example includes a comprehensive flag dependencies demonstration showing:
 
 ### Optional: Setup Test Flags
 
-For the best experience, create these flags in your PostHog instance:
+For the best experience, create these flags in your Insights instance:
 
 1. **`beta-feature`** flag:
 
@@ -151,7 +151,7 @@ The example will work without these flags (they'll evaluate to `false`), but cre
 
 When you run the example, you'll see:
 
-1. **Authentication Test**: Validates your PostHog credentials
+1. **Authentication Test**: Validates your Insights credentials
 2. **Interactive Menu**: Choose which examples to run
 3. **Selected Examples**: Run with detailed output and explanations
 
@@ -183,6 +183,6 @@ This will run a condensed version of all SDK capabilities in sequence.
 
 ## Troubleshooting
 
-- **"Missing PostHog credentials"**: Make sure your `.env` file exists and has valid API keys
+- **"Missing Insights credentials"**: Make sure your `.env` file exists and has valid API keys
 - **"Authentication test failed"**: Check that your Personal API key is correct and has the right permissions
-- **Flags evaluate to `false`**: This is normal if you haven't created the test flags in your PostHog instance
+- **Flags evaluate to `false`**: This is normal if you haven't created the test flags in your Insights instance

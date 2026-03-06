@@ -1,21 +1,21 @@
 import { isPromise } from '@hanzo/insights-core'
-import { PostHogCustomStorage } from './types'
+import { InsightsCustomStorage } from './types'
 
-const POSTHOG_STORAGE_KEY = '.posthog-rn.json'
-const POSTHOG_STORAGE_VERSION = 'v1'
+const INSIGHTS_STORAGE_KEY = '.insights-rn.json'
+const INSIGHTS_STORAGE_VERSION = 'v1'
 
-type PostHogStorageContents = { [key: string]: any }
+type InsightsStorageContents = { [key: string]: any }
 
-export class PostHogRNStorage {
-  memoryCache: PostHogStorageContents = {}
-  storage: PostHogCustomStorage
+export class InsightsRNStorage {
+  memoryCache: InsightsStorageContents = {}
+  storage: InsightsCustomStorage
   preloadPromise: Promise<void> | undefined
   private _pendingPromises: Set<Promise<void>> = new Set()
 
-  constructor(storage: PostHogCustomStorage) {
+  constructor(storage: InsightsCustomStorage) {
     this.storage = storage
 
-    const preloadResult = this.storage.getItem(POSTHOG_STORAGE_KEY)
+    const preloadResult = this.storage.getItem(INSIGHTS_STORAGE_KEY)
 
     if (isPromise(preloadResult)) {
       this.preloadPromise = preloadResult.then((res) => {
@@ -47,17 +47,17 @@ export class PostHogRNStorage {
 
   persist(): void {
     const payload = {
-      version: POSTHOG_STORAGE_VERSION,
+      version: INSIGHTS_STORAGE_VERSION,
       content: this.memoryCache,
     }
 
-    const result = this.storage.setItem(POSTHOG_STORAGE_KEY, JSON.stringify(payload))
+    const result = this.storage.setItem(INSIGHTS_STORAGE_KEY, JSON.stringify(payload))
 
     // Track async persist operations so we can wait for them if needed
     if (isPromise(result)) {
       const promise = result
         .catch((err) => {
-          console.warn('PostHog storage persist failed:', err)
+          console.warn('Insights storage persist failed:', err)
         })
         .finally(() => {
           this._pendingPromises.delete(promise)
@@ -96,14 +96,14 @@ export class PostHogRNStorage {
       }
     } catch (e) {
       console.warn(
-        "PostHog failed to load persisted data from storage. This is likely because the storage format is. We'll reset the storage.",
+        "Insights failed to load persisted data from storage. This is likely because the storage format is. We'll reset the storage.",
         e
       )
     }
   }
 }
 
-export class PostHogRNSyncMemoryStorage extends PostHogRNStorage {
+export class InsightsRNSyncMemoryStorage extends InsightsRNStorage {
   constructor() {
     const cache: { [key: string]: any | undefined } = {}
     const storage = {

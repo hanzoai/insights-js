@@ -1,22 +1,22 @@
 {
-    "name": "posthog-vscode-playground",
-    "displayName": "PostHog VS Code Playground",
-    "description": "A playground for testing PostHog integration in a VS Code extension.",
+    "name": "insights-vscode-playground",
+    "displayName": "Insights VS Code Playground",
+    "description": "A playground for testing Insights integration in a VS Code extension.",
     "version": "0.0.1",
-    "publisher": "posthog",
+    "publisher": "insights",
     "engines": {
         "vscode": "^1.74.0"
     },
     "activationEvents": [
-        "onCommand:posthog.start"
+        "onCommand:insights.start"
     ],
     "main": "./src/extension.js",
     "contributes": {
         "commands": [
             {
-                "command": "posthog.start",
-                "title": "Start PostHog Playground",
-                "category": "PostHog"
+                "command": "insights.start",
+                "title": "Start Insights Playground",
+                "category": "Insights"
             }
         ]
     },

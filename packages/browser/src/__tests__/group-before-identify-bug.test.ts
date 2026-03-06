@@ -1,7 +1,7 @@
 /**
  * Test to verify bug: calling group() before identify() causes initial person props to be lost
  */
-import { createPosthogInstance } from './helpers/posthog-instance'
+import { createInsightsInstance } from './helpers/insights-instance'
 import { uuidv7 } from '../uuidv7'
 
 jest.mock('../utils/globals', () => {
@@ -46,16 +46,16 @@ describe('group before identify bug', () => {
         const token = uuidv7()
         const beforeSendMock = jest.fn().mockImplementation((e) => e)
 
-        const posthog = await createPosthogInstance(token, {
+        const insights = await createInsightsInstance(token, {
             before_send: beforeSendMock,
             person_profiles: 'identified_only',
         })
 
         // Simulate what Clerk does: call group() with properties before identify()
-        posthog.group('organization', 'org_123', { name: 'Acme Corp' })
+        insights.group('organization', 'org_123', { name: 'Acme Corp' })
 
         // Then call identify
-        posthog.identify('user_123')
+        insights.identify('user_123')
 
         // Find the events
         const calls = beforeSendMock.mock.calls
@@ -80,13 +80,13 @@ describe('group before identify bug', () => {
         const token = uuidv7()
         const beforeSendMock = jest.fn().mockImplementation((e) => e)
 
-        const posthog = await createPosthogInstance(token, {
+        const insights = await createInsightsInstance(token, {
             before_send: beforeSendMock,
             person_profiles: 'identified_only',
         })
 
         // Just call identify without group first
-        posthog.identify('user_123')
+        insights.identify('user_123')
 
         const calls = beforeSendMock.mock.calls
         const identifyCall = calls.find((c: any) => c[0].event === '$identify')

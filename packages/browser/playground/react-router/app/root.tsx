@@ -1,5 +1,5 @@
-import type { PostHogConfig } from '@hanzo/insights'
-import { PostHogProvider } from 'posthog-js/react'
+import type { InsightsConfig } from '@hanzo/insights'
+import { InsightsProvider } from '@hanzo/insights/react'
 
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import type { Route } from './+types/root'
@@ -38,9 +38,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
     )
 }
 
-const posthogKey: string = import.meta.env.VITE_PUBLIC_POSTHOG_KEY!
-const posthogOptions: Partial<PostHogConfig> = {
-    api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+const insightsKey: string = import.meta.env.VITE_PUBLIC_INSIGHTS_KEY!
+const insightsOptions: Partial<InsightsConfig> = {
+    api_host: import.meta.env.VITE_PUBLIC_INSIGHTS_HOST,
     capture_pageview: 'history_change',
     capture_pageleave: true,
     debug: true,
@@ -48,9 +48,9 @@ const posthogOptions: Partial<PostHogConfig> = {
 
 export default function App() {
     return (
-        <PostHogProvider apiKey={posthogKey} options={posthogOptions}>
+        <InsightsProvider apiKey={insightsKey} options={insightsOptions}>
             <AppInner />
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }
 
