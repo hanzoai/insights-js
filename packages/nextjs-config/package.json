@@ -42,7 +42,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@hanzo/cli": "catalog:",
     "semver": "^7.7.2",
     "@hanzo/insights-core": "workspace:*",
     "@hanzo/insights-webpack-plugin": "workspace:*"

@@ -16,7 +16,6 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "@hanzo/cli": "catalog:",
     "@hanzo/insights-core": "workspace:*"
   },
   "files": [

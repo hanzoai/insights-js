@@ -140,9 +140,9 @@
     "tslib": "catalog:",
     "typescript": "catalog:",
     "yargs": "^17.7.2",
-    "@hanzo/rrweb-plugin-console-record": "^0.0.45",
-    "@hanzo/rrweb-record": "^0.0.45",
-    "@hanzo/rrweb-types": "^0.0.45"
+    "@hanzo/rrweb-plugin-console-record": "^0.0.47",
+    "@hanzo/rrweb-record": "^0.0.47",
+    "@hanzo/rrweb-types": "^0.0.47"
   },
   "browserslist": [
     "> 0.5%, last 2 versions, Firefox ESR, not dead, IE 11"

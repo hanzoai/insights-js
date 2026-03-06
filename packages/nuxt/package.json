@@ -29,7 +29,6 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@hanzo/cli": "catalog:",
     "@nuxt/kit": ">=3.7.0",
     "@hanzo/insights-node": "workspace:*",
     "@hanzo/insights-core": "workspace:*",

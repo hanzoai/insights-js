@@ -24,7 +24,6 @@
     "dist"
   ],
   "dependencies": {
-    "@hanzo/cli": "catalog:",
     "@hanzo/insights-core": "workspace:*"
   },
   "peerDependencies": {
