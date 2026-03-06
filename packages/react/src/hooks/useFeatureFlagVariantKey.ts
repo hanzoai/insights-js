@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
-import { PostHogContext } from '../context'
+import { InsightsContext } from '../context'
 
 export function useFeatureFlagVariantKey(flag: string): string | boolean | undefined {
-    const { client, bootstrap } = useContext(PostHogContext)
+    const { client, bootstrap } = useContext(InsightsContext)
 
     const [featureFlagVariantKey, setFeatureFlagVariantKey] = useState<string | boolean | undefined>(() =>
         client.getFeatureFlag(flag)

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { renderHook, act } from '@testing-library/react'
-import { PostHogProvider, PostHog } from '../../context'
+import { InsightsProvider, Insights } from '../../context'
 import { isUndefined } from '../../utils/type-utils'
 import {
     useFeatureFlagPayload,
@@ -30,11 +30,11 @@ const FEATURE_FLAG_PAYLOADS: Record<string, any> = {
 }
 
 describe('feature flag hooks', () => {
-    let posthog: PostHog
+    let insights: Insights
     let renderProvider: React.FC<{ children: React.ReactNode }>
 
     beforeEach(() => {
-        posthog = {
+        insights = {
             isFeatureEnabled: (flag: string) => !!FEATURE_FLAG_STATUS[flag],
             getFeatureFlag: (flag: string) => FEATURE_FLAG_STATUS[flag],
             getFeatureFlagPayload: (flag: string) => FEATURE_FLAG_PAYLOADS[flag],
@@ -63,11 +63,11 @@ describe('feature flag hooks', () => {
             featureFlags: {
                 getFlags: () => ACTIVE_FEATURE_FLAGS,
                 hasLoadedFlags: true,
-            } as unknown as PostHog['featureFlags'],
-        } as unknown as PostHog
+            } as unknown as Insights['featureFlags'],
+        } as unknown as Insights
 
         // eslint-disable-next-line react/display-name
-        renderProvider = ({ children }) => <PostHogProvider client={posthog}>{children}</PostHogProvider>
+        renderProvider = ({ children }) => <InsightsProvider client={insights}>{children}</InsightsProvider>
     })
 
     it.each([
@@ -132,12 +132,12 @@ describe('feature flag hooks', () => {
                     },
                     featureFlags: {
                         hasLoadedFlags: false,
-                    } as unknown as PostHog['featureFlags'],
-                } as unknown as PostHog
+                    } as unknown as Insights['featureFlags'],
+                } as unknown as Insights
 
                 // eslint-disable-next-line react/display-name
                 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-                    <PostHogProvider client={client}>{children}</PostHogProvider>
+                    <InsightsProvider client={client}>{children}</InsightsProvider>
                 )
 
                 return wrapper
@@ -211,12 +211,12 @@ describe('feature flag hooks', () => {
                     },
                     featureFlags: {
                         hasLoadedFlags: true,
-                    } as unknown as PostHog['featureFlags'],
-                } as unknown as PostHog
+                    } as unknown as Insights['featureFlags'],
+                } as unknown as Insights
 
                 // eslint-disable-next-line react/display-name
                 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-                    <PostHogProvider client={client}>{children}</PostHogProvider>
+                    <InsightsProvider client={client}>{children}</InsightsProvider>
                 )
 
                 const { result } = renderHook(() => useFeatureFlagResult('flag'), { wrapper })
@@ -254,12 +254,12 @@ describe('feature flag hooks', () => {
                     onFeatureFlags: () => unsubscribe,
                     featureFlags: {
                         hasLoadedFlags: true,
-                    } as unknown as PostHog['featureFlags'],
-                } as unknown as PostHog
+                    } as unknown as Insights['featureFlags'],
+                } as unknown as Insights
 
                 // eslint-disable-next-line react/display-name
                 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-                    <PostHogProvider client={client}>{children}</PostHogProvider>
+                    <InsightsProvider client={client}>{children}</InsightsProvider>
                 )
 
                 const { unmount } = renderHook(() => useFeatureFlagResult('flag'), { wrapper })
