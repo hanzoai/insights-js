@@ -1,10 +1,10 @@
-/* eslint-disable posthog-js/no-direct-function-check, no-console, @typescript-eslint/no-unused-vars */
-import { expect, test } from './utils/posthog-playwright-test-base'
+/* eslint-disable @hanzo/insights/no-direct-function-check, no-console, @typescript-eslint/no-unused-vars */
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 
 test.describe('logs extension', () => {
     test('should load logs extension when enabled in remote config', async ({ page, context }) => {
-        // Start PostHog
+        // Start Insights
         await start(
             {
                 options: {
@@ -16,13 +16,13 @@ test.describe('logs extension', () => {
             context
         )
 
-        // Wait for PostHog to initialize
+        // Wait for Insights to initialize
         await page.waitForTimeout(100)
 
-        // Check that PostHog logs is available
+        // Check that Insights logs is available
         const logsAvailable = await page.evaluate(() => {
-            const posthog = (window as any).posthog
-            return !!(posthog && posthog.logs)
+            const insights = (window as any).insights
+            return !!(insights && insights.logs)
         })
 
         expect(logsAvailable).toBe(true)
@@ -40,17 +40,17 @@ test.describe('logs extension', () => {
             context
         )
 
-        // Wait for PostHog to initialize
+        // Wait for Insights to initialize
         await page.waitForTimeout(100)
 
         // Test that we can call onRemoteConfig with logs enabled
         const result = await page.evaluate(() => {
-            const posthog = (window as any).posthog
+            const insights = (window as any).insights
             let configCalled = false
 
-            if (posthog && posthog.logs && typeof posthog.logs.onRemoteConfig === 'function') {
+            if (insights && insights.logs && typeof insights.logs.onRemoteConfig === 'function') {
                 try {
-                    posthog.logs.onRemoteConfig({
+                    insights.logs.onRemoteConfig({
                         logs: {
                             captureConsoleLogs: true,
                         },
@@ -63,14 +63,14 @@ test.describe('logs extension', () => {
             }
 
             return {
-                hasPosthog: !!posthog,
-                hasLogs: !!(posthog && posthog.logs),
-                hasOnRemoteConfig: !!(posthog && posthog.logs && typeof posthog.logs.onRemoteConfig === 'function'),
+                hasInsights: !!insights,
+                hasLogs: !!(insights && insights.logs),
+                hasOnRemoteConfig: !!(insights && insights.logs && typeof insights.logs.onRemoteConfig === 'function'),
                 configCalled: configCalled,
             }
         })
 
-        expect(result.hasPosthog).toBe(true)
+        expect(result.hasInsights).toBe(true)
         expect(result.hasLogs).toBe(true)
         expect(result.hasOnRemoteConfig).toBe(true)
         expect(result.configCalled).toBe(true)
@@ -88,17 +88,17 @@ test.describe('logs extension', () => {
             context
         )
 
-        // Wait for PostHog to initialize
+        // Wait for Insights to initialize
         await page.waitForTimeout(100)
 
         // Test that we can call onRemoteConfig with logs disabled
         const result = await page.evaluate(() => {
-            const posthog = (window as any).posthog
+            const insights = (window as any).insights
             let configCalled = false
 
-            if (posthog && posthog.logs && typeof posthog.logs.onRemoteConfig === 'function') {
+            if (insights && insights.logs && typeof insights.logs.onRemoteConfig === 'function') {
                 try {
-                    posthog.logs.onRemoteConfig({
+                    insights.logs.onRemoteConfig({
                         logs: {
                             captureConsoleLogs: false,
                         },
@@ -111,13 +111,13 @@ test.describe('logs extension', () => {
             }
 
             return {
-                hasPosthog: !!posthog,
-                hasLogs: !!(posthog && posthog.logs),
+                hasInsights: !!insights,
+                hasLogs: !!(insights && insights.logs),
                 configCalled: configCalled,
             }
         })
 
-        expect(result.hasPosthog).toBe(true)
+        expect(result.hasInsights).toBe(true)
         expect(result.hasLogs).toBe(true)
         expect(result.configCalled).toBe(true)
     })
@@ -134,14 +134,14 @@ test.describe('logs extension', () => {
             context
         )
 
-        // Wait for PostHog to initialize
+        // Wait for Insights to initialize
         await page.waitForTimeout(100)
 
         // Set up the logs extension and initialize it in the same context
         const result = await page.evaluate(() => {
             // Set up the logs extension directly
-            ;(window as any).__PosthogExtensions__ = {
-                initializeLogs: (posthog: any) => {
+            ;(window as any).__InsightsExtensions__ = {
+                initializeLogs: (insights: any) => {
                     // Simple console interception
                     const originalConsole = {
                         log: console.log,
@@ -178,10 +178,10 @@ test.describe('logs extension', () => {
             }
 
             // Initialize the logs extension
-            const posthog = (window as any).posthog
-            const extensions = (window as any).__PosthogExtensions__
-            if (extensions && extensions.initializeLogs && posthog) {
-                extensions.initializeLogs(posthog)
+            const insights = (window as any).insights
+            const extensions = (window as any).__InsightsExtensions__
+            if (extensions && extensions.initializeLogs && insights) {
+                extensions.initializeLogs(insights)
             }
 
             // Test console methods immediately after initialization

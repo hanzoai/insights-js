@@ -3,7 +3,7 @@ import type { Route } from './+types/home'
 
 // eslint-disable-next-line no-empty-pattern
 export function meta({}: Route.MetaArgs) {
-    return [{ title: 'PostHog React Router Demo' }]
+    return [{ title: 'Insights React Router Demo' }]
 }
 
 export default function Home() {

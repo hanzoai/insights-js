@@ -1,5 +1,5 @@
 /* eslint-disable compat/compat */
-import { PostHogConversations, ConversationsManager } from '../../../extensions/conversations/posthog-conversations'
+import { InsightsConversations, ConversationsManager } from '../../../extensions/conversations/insights-conversations'
 import {
     ConversationsRemoteConfig,
     SendMessageResponse,
@@ -9,16 +9,16 @@ import {
     RestoreFromTokenResponse,
     RequestRestoreLinkResponse,
     UserProvidedTraits,
-} from '../../../posthog-conversations-types'
-import { PostHog } from '../../../posthog-core'
+} from '../../../insights-conversations-types'
+import { Insights } from '../../../insights-core'
 import { RemoteConfig } from '../../../types'
 import { assignableWindow } from '../../../utils/globals'
-import { createMockPostHog, createMockConfig, createMockPersistence } from '../../helpers/posthog-instance'
+import { createMockInsights, createMockConfig, createMockPersistence } from '../../helpers/insights-instance'
 import Config from '../../../config'
 
 describe('Conversations API Methods', () => {
-    let conversations: PostHogConversations
-    let mockPostHog: PostHog
+    let conversations: InsightsConversations
+    let mockInsights: Insights
     let mockManager: ConversationsManager
     let consoleWarnSpy: jest.SpyInstance
 
@@ -50,10 +50,10 @@ describe('Conversations API Methods', () => {
             getWidgetSessionId: jest.fn(),
         } as unknown as ConversationsManager
 
-        // Setup mock PostHog instance
-        mockPostHog = createMockPostHog({
+        // Setup mock Insights instance
+        mockInsights = createMockInsights({
             config: createMockConfig({
-                api_host: 'https://test.posthog.com',
+                api_host: 'https://test.insights.com',
                 token: 'test-token',
                 disable_conversations: false,
             }),
@@ -64,7 +64,7 @@ describe('Conversations API Methods', () => {
                 },
             }),
             requestRouter: {
-                endpointFor: jest.fn().mockReturnValue('https://test.posthog.com/api/test'),
+                endpointFor: jest.fn().mockReturnValue('https://test.insights.com/api/test'),
             } as any,
             consent: {
                 isOptedOut: jest.fn().mockReturnValue(false),
@@ -73,16 +73,16 @@ describe('Conversations API Methods', () => {
             on: jest.fn().mockReturnValue(jest.fn()),
         })
 
-        // Setup PostHog extensions
-        assignableWindow.__PosthogExtensions__ = {
+        // Setup Insights extensions
+        assignableWindow.__InsightsExtensions__ = {
             initConversations: undefined,
             loadExternalDependency: jest.fn((_instance, _path, callback) => {
-                assignableWindow.__PosthogExtensions__!.initConversations = jest.fn().mockReturnValue(mockManager)
+                assignableWindow.__InsightsExtensions__!.initConversations = jest.fn().mockReturnValue(mockManager)
                 callback(null)
             }),
         }
 
-        conversations = new PostHogConversations(mockPostHog)
+        conversations = new InsightsConversations(mockInsights)
     })
 
     afterEach(() => {
@@ -96,7 +96,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })
@@ -106,7 +106,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })
@@ -116,7 +116,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })
@@ -126,7 +126,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })
@@ -150,7 +150,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })
@@ -160,7 +160,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })
@@ -170,7 +170,7 @@ describe('Conversations API Methods', () => {
 
             expect(result).toBeNull()
             expect(consoleWarnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [Conversations]',
+                '[Insights.js] [Conversations]',
                 expect.stringContaining('Conversations not available yet')
             )
         })

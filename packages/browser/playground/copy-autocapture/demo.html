@@ -1,14 +1,14 @@
 <script src="../../dist/array.js"></script>
 <script>
-    posthog.init('sTMFPsFhdP1Ssg', {
+    insights.init('sTMFPsFhdP1Ssg', {
         api_host: 'http://127.0.0.1:8000',
         autocapture: {
             capture_copied_text: true,
         },
         debug: true,
         persistence: 'memory',
-        loaded: function(posthog) {
-            posthog.identify('test')
+        loaded: function(insights) {
+            insights.identify('test')
         },
         before_send: (event) => {
             if (event.event === '$copy_autocapture') {
@@ -25,7 +25,7 @@
 <button>Here's a button you could click if you want to</button><br /><br />
 <body>
 <div>
-    <a href="https://posthog.com">Here's a link to the outside world</a>
+    <a href="https://insights.hanzo.ai">Here's a link to the outside world</a>
 </div>
 <div id="shadow"></div>
 

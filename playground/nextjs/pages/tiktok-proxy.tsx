@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 import { useState, useCallback } from 'react'
 
 /**
  * Simulates TikTok's in-app browser Proxy behavior.
  *
- * TikTok's WebView injects a script that wraps `window.posthog` with a
+ * TikTok's WebView injects a script that wraps `window.hi` with a
  * JavaScript Proxy. The Proxy intercepts known analytics method calls
  * (capture, identify, getFeatureFlag, isFeatureEnabled, has_opted_out_capturing,
  * etc.) and converts them into `target.push([methodName, ...args])` calls.
@@ -20,7 +20,7 @@ import { useState, useCallback } from 'react'
 function wrapWithTikTokProxy(): { interceptCount: number } {
     const state = { interceptCount: 0 }
 
-    const target = (window as any).posthog
+    const target = (window as any).insights
     if (!target || target.__tiktokProxied) {
         return state
     }
@@ -63,13 +63,13 @@ function wrapWithTikTokProxy(): { interceptCount: number } {
     })
 
     proxy.__tiktokProxied = true
-    ;(window as any).posthog = proxy
+    ;(window as any).insights = proxy
 
     return state
 }
 
 export default function TikTokProxyPage() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [log, setLog] = useState<string[]>([])
     const [proxyActive, setProxyActive] = useState(false)
     const [interceptCount, setInterceptCount] = useState(0)
@@ -83,17 +83,17 @@ export default function TikTokProxyPage() {
         const state = wrapWithTikTokProxy()
         setProxyState(state)
         setProxyActive(true)
-        addLog('TikTok Proxy enabled — window.posthog is now wrapped')
+        addLog('TikTok Proxy enabled — window.hi is now wrapped')
     }, [addLog])
 
     const disableProxy = useCallback(() => {
-        if ((window as any).posthog?.__tiktokProxied) {
-            // Restore the original posthog instance
-            ;(window as any).posthog = posthog
+        if ((window as any).insights?.__tiktokProxied) {
+            // Restore the original insights instance
+            ;(window as any).insights = insights
             setProxyActive(false)
-            addLog('TikTok Proxy disabled — window.posthog restored')
+            addLog('TikTok Proxy disabled — window.hi restored')
         }
-    }, [posthog, addLog])
+    }, [insights, addLog])
 
     const refreshCount = useCallback(() => {
         if (proxyState) {
@@ -103,8 +103,8 @@ export default function TikTokProxyPage() {
 
     const testCapture = useCallback(() => {
         try {
-            addLog('Calling window.posthog.capture("test-tiktok-event")...')
-            ;(window as any).posthog.capture('test-tiktok-event', { source: 'tiktok-proxy-test' })
+            addLog('Calling window.insights.capture("test-tiktok-event")...')
+            ;(window as any).insights.capture('test-tiktok-event', { source: 'tiktok-proxy-test' })
             addLog('capture() completed without error')
         } catch (e: any) {
             addLog(`ERROR: ${e.name}: ${e.message}`)
@@ -114,8 +114,8 @@ export default function TikTokProxyPage() {
 
     const testGetFeatureFlag = useCallback(() => {
         try {
-            addLog('Calling window.posthog.getFeatureFlag("test-flag")...')
-            const result = (window as any).posthog.getFeatureFlag('test-flag')
+            addLog('Calling window.hi.getFeatureFlag("test-flag")...')
+            const result = (window as any).insights.getFeatureFlag('test-flag')
             addLog(`getFeatureFlag() returned: ${JSON.stringify(result)}`)
         } catch (e: any) {
             addLog(`ERROR: ${e.name}: ${e.message}`)
@@ -125,8 +125,8 @@ export default function TikTokProxyPage() {
 
     const testIsFeatureEnabled = useCallback(() => {
         try {
-            addLog('Calling window.posthog.isFeatureEnabled("test-flag")...')
-            const result = (window as any).posthog.isFeatureEnabled('test-flag')
+            addLog('Calling window.hi.isFeatureEnabled("test-flag")...')
+            const result = (window as any).insights.isFeatureEnabled('test-flag')
             addLog(`isFeatureEnabled() returned: ${JSON.stringify(result)}`)
         } catch (e: any) {
             addLog(`ERROR: ${e.name}: ${e.message}`)
@@ -136,8 +136,8 @@ export default function TikTokProxyPage() {
 
     const testHasOptedOut = useCallback(() => {
         try {
-            addLog('Calling window.posthog.has_opted_out_capturing()...')
-            const result = (window as any).posthog.has_opted_out_capturing()
+            addLog('Calling window.hi.has_opted_out_capturing()...')
+            const result = (window as any).insights.has_opted_out_capturing()
             addLog(`has_opted_out_capturing() returned: ${JSON.stringify(result)}`)
         } catch (e: any) {
             addLog(`ERROR: ${e.name}: ${e.message}`)
@@ -159,7 +159,7 @@ export default function TikTokProxyPage() {
             <h1>TikTok In-App Browser Proxy Reproduction</h1>
             <p style={{ color: '#666', maxWidth: 700 }}>
                 This page simulates the behavior of TikTok&apos;s in-app browser, which wraps{' '}
-                <code>window.posthog</code> with a JavaScript Proxy that converts method calls into <code>push()</code>{' '}
+                <code>window.hi</code> with a JavaScript Proxy that converts method calls into <code>push()</code>{' '}
                 calls, causing infinite recursion.
             </p>
 

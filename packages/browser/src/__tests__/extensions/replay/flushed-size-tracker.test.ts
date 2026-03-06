@@ -1,16 +1,16 @@
 import { FlushedSizeTracker } from '../../../extensions/replay/external/flushed-size-tracker'
-import { PostHog } from '../../../posthog-core'
+import { Insights } from '../../../insights-core'
 import { jest } from '@jest/globals'
-import { PostHogPersistence } from '../../../posthog-persistence'
-import { createMockPostHog, createMockConfig } from '../../helpers/posthog-instance'
+import { InsightsPersistence } from '../../../insights-persistence'
+import { createMockInsights, createMockConfig } from '../../helpers/insights-instance'
 
 describe('FlushedSizeTracker', () => {
-    let mockPostHog: PostHog
+    let mockInsights: Insights
     let tracker: FlushedSizeTracker
-    let persistence: PostHogPersistence
+    let persistence: InsightsPersistence
 
     beforeEach(() => {
-        persistence = new PostHogPersistence(
+        persistence = new InsightsPersistence(
             createMockConfig({
                 persistence: 'memory',
             }),
@@ -21,12 +21,12 @@ describe('FlushedSizeTracker', () => {
         persistence.get_property = persistence.get_property.bind(persistence)
         persistence.set_property = persistence.set_property.bind(persistence)
 
-        mockPostHog = createMockPostHog({
+        mockInsights = createMockInsights({
             get_property: persistence.get_property,
             persistence,
         })
 
-        tracker = new FlushedSizeTracker(mockPostHog)
+        tracker = new FlushedSizeTracker(mockInsights)
     })
 
     afterEach(() => {
@@ -40,23 +40,23 @@ describe('FlushedSizeTracker', () => {
         })
 
         it('throws error when persistence is missing', () => {
-            const invalidPostHog = createMockPostHog({
+            const invalidInsights = createMockInsights({
                 get_property: () => {},
                 persistence: undefined,
             })
 
-            expect(() => new FlushedSizeTracker(invalidPostHog)).toThrow(
+            expect(() => new FlushedSizeTracker(invalidInsights)).toThrow(
                 'it is not valid to not have persistence and be this far into setting up the application'
             )
         })
 
         it('throws error when persistence is null', () => {
-            const invalidPostHog = createMockPostHog({
+            const invalidInsights = createMockInsights({
                 get_property: () => {},
                 persistence: null,
             })
 
-            expect(() => new FlushedSizeTracker(invalidPostHog)).toThrow(
+            expect(() => new FlushedSizeTracker(invalidInsights)).toThrow(
                 'it is not valid to not have persistence and be this far into setting up the application'
             )
         })

@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks'
-import { ContextData, ContextOptions, IPostHogContext } from './types'
+import { ContextData, ContextOptions, IInsightsContext } from './types'
 
-export class PostHogContext implements IPostHogContext {
+export class InsightsContext implements IInsightsContext {
   private storage: AsyncLocalStorage<ContextData>
 
   constructor() {

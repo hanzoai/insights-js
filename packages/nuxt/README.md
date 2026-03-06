@@ -1,24 +1,24 @@
-# PostHog Nuxt module
+# Insights Nuxt module
 
-- Handles sourcemap configuration and upload for the PostHog Error Tracking product
-- Provides posthog client and auto exception capture for Vue and Nitro
+- Handles sourcemap configuration and upload for the Insights Error Tracking product
+- Provides insights client and auto exception capture for Vue and Nitro
 
-Please see the main [PostHog Error tracking docs](https://posthog.com/docs/error-tracking).
+Please see the main [Insights Error tracking docs](https://insights.hanzo.ai/docs/error-tracking).
 
 ## Usage
 
 1. Install the package
 
 ```
-pnpm add @posthog/nuxt
+pnpm add @hanzo/nuxt
 ```
 
-2. Configure posthog module
+2. Configure insights module
 
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: ['@posthog/nuxt'], // Add module reference
+  modules: ['@hanzo/nuxt'], // Add module reference
 
   sourcemap: { client: 'hidden' }, // Make sure to set it (otherwise client sourcemaps will not be generated)
 
@@ -30,14 +30,14 @@ export default defineNuxtConfig({
     },
   },
 
-  posthogConfig: {
-    host: 'http://localhost:8010', // (optional) Host URL, defaults to https://us.posthog.com
+  insightsConfig: {
+    host: 'http://localhost:8010', // (optional) Host URL, defaults to https://us.insights.hanzo.ai
     publicKey: 'public api key', // Your public web snippet key. You can find it in settings
-    clientConfig?: Partial<PostHogConfig> // (optional) It will be passed to the posthog-js client on init in vue
-    serverConfig?: PostHogOptions // (optional) It will be passed to the posthog-node client on init in nitro. Please note that this client instance is intended for error-tracking purposes only
+    clientConfig?: Partial<InsightsConfig> // (optional) It will be passed to the @hanzo/insights client on init in vue
+    serverConfig?: InsightsOptions // (optional) It will be passed to the @hanzo/insights-node client on init in nitro. Please note that this client instance is intended for error-tracking purposes only
     sourcemaps: {
       enabled: true, // Enables sourcemaps generation and upload
-      projectId: '2', // Project ID, see https://app.posthog.com/settings/project#variables
+      projectId: '2', // Project ID, see https://app.insights.hanzo.ai/settings/project#variables
       releaseName: 'my-application', // (optional) Release name, defaults to git repository name
       releaseVersion: '1.0.0', // (optional) Release version, defaults to current git commit
       personalApiKey: 'personal api key', // Your personal API key. You can generate it in settings -> Personal API keys
@@ -46,26 +46,26 @@ export default defineNuxtConfig({
 })
 ```
 
-3. You can access your vue posthog client inside vue using
+3. You can access your vue insights client inside vue using
 
 ```ts
 // some-file.vue
-const { $posthog } = useNuxtApp()
+const { $insights } = useNuxtApp()
 ```
 
 ## Composables
 
 The module provides auto-imported composables for working with feature flags:
 
-### `usePostHog()`
+### `useInsights()`
 
-Returns the PostHog client instance.
+Returns the Insights client instance.
 
 ```vue
 <script setup>
-const posthog = usePostHog()
+const insights = useInsights()
 
-posthog.capture('event_name')
+insights.capture('event_name')
 </script>
 ```
 
@@ -114,12 +114,12 @@ const payload = useFeatureFlagPayload('config-flag')
 
 All these composables automatically update when feature flags are loaded or changed.
 
-4. On the server side, the PostHog client instance initialized by the plugin is intended exclusively for error tracking. If you require additional PostHog client functionality for other purposes, please instantiate a separate client within your application as needed.
+4. On the server side, the Insights client instance initialized by the plugin is intended exclusively for error tracking. If you require additional Insights client functionality for other purposes, please instantiate a separate client within your application as needed.
 
 ## FAQ
 
 ```
-Q: I see typescript errors in the posthog config after adding this module
+Q: I see typescript errors in the insights config after adding this module
 A: It is possible that after adding a new module to `modules` typescript will complain about types. Solution is to remove `.nuxt` directory and regenerate it by running `build` command you are using. This will properly regenerate config types.
 ```
 
@@ -140,4 +140,4 @@ A: Double check whether you enabled sourcemaps generation in the nuxt config bot
 
 ## Questions?
 
-### [Check out our community page.](https://posthog.com/posts)
+### [Check out our community page.](https://insights.hanzo.ai/posts)

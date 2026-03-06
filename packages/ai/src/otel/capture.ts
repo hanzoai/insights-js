@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid'
-import { PostHog } from '@hanzo/insights-node'
-import { sendEventToPosthog, sendEventWithErrorToPosthog } from '../utils'
+import { Insights } from '@hanzo/insights-node'
+import { sendEventToInsights, sendEventWithErrorToInsights } from '../utils'
 import { defaultSpanMappers } from './mappers'
 import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
-import type { PostHogTelemetryOptions, PostHogSpanMapper, UsageData } from './types'
+import type { InsightsTelemetryOptions, InsightsSpanMapper, UsageData } from './types'
 
-function pickMapper(span: ReadableSpan, mappers: PostHogSpanMapper[]): PostHogSpanMapper | undefined {
+function pickMapper(span: ReadableSpan, mappers: InsightsSpanMapper[]): InsightsSpanMapper | undefined {
   return mappers.find((mapper) => {
     try {
       return mapper.canMap(span)
@@ -15,42 +15,42 @@ function pickMapper(span: ReadableSpan, mappers: PostHogSpanMapper[]): PostHogSp
   })
 }
 
-function getTraceId(span: ReadableSpan, options: PostHogTelemetryOptions, mapperTraceId?: string): string {
+function getTraceId(span: ReadableSpan, options: InsightsTelemetryOptions, mapperTraceId?: string): string {
   if (mapperTraceId) {
     return mapperTraceId
   }
-  if (options.posthogTraceId) {
-    return options.posthogTraceId
+  if (options.insightsTraceId) {
+    return options.insightsTraceId
   }
   const spanTraceId = span.spanContext?.().traceId
   return spanTraceId || uuidv4()
 }
 
-function buildPosthogParams(
-  options: PostHogTelemetryOptions,
+function buildInsightsParams(
+  options: InsightsTelemetryOptions,
   traceId: string,
   distinctId: string | undefined,
   modelParams: Record<string, unknown>,
-  posthogProperties: Record<string, unknown>
+  insightsProperties: Record<string, unknown>
 ): Record<string, unknown> {
   return {
     ...modelParams,
-    posthogDistinctId: distinctId,
-    posthogTraceId: traceId,
-    posthogProperties,
-    posthogPrivacyMode: options.posthogPrivacyMode,
-    posthogGroups: options.posthogGroups,
-    posthogModelOverride: options.posthogModelOverride,
-    posthogProviderOverride: options.posthogProviderOverride,
-    posthogCostOverride: options.posthogCostOverride,
-    posthogCaptureImmediate: options.posthogCaptureImmediate,
+    insightsDistinctId: distinctId,
+    insightsTraceId: traceId,
+    insightsProperties,
+    insightsPrivacyMode: options.insightsPrivacyMode,
+    insightsGroups: options.insightsGroups,
+    insightsModelOverride: options.insightsModelOverride,
+    insightsProviderOverride: options.insightsProviderOverride,
+    insightsCostOverride: options.insightsCostOverride,
+    insightsCaptureImmediate: options.insightsCaptureImmediate,
   }
 }
 
 export async function captureSpan(
   span: ReadableSpan,
-  phClient: PostHog,
-  options: PostHogTelemetryOptions = {}
+  phClient: Insights,
+  options: InsightsTelemetryOptions = {}
 ): Promise<void> {
   if (options.shouldExportSpan && options.shouldExportSpan({ otelSpan: span }) === false) {
     return
@@ -68,18 +68,18 @@ export async function captureSpan(
   }
 
   const traceId = getTraceId(span, options, mapped.traceId)
-  const distinctId = mapped.distinctId ?? options.posthogDistinctId
-  const posthogProperties = {
-    ...options.posthogProperties,
-    ...mapped.posthogProperties,
+  const distinctId = mapped.distinctId ?? options.insightsDistinctId
+  const insightsProperties = {
+    ...options.insightsProperties,
+    ...mapped.insightsProperties,
   }
 
-  const params = buildPosthogParams(options, traceId, distinctId, mapped.modelParams ?? {}, posthogProperties)
+  const params = buildInsightsParams(options, traceId, distinctId, mapped.modelParams ?? {}, insightsProperties)
   const baseURL = mapped.baseURL ?? ''
   const usage: UsageData = mapped.usage ?? {}
 
   if (mapped.error !== undefined) {
-    await sendEventWithErrorToPosthog({
+    await sendEventWithErrorToInsights({
       eventType: mapped.eventType,
       client: phClient,
       distinctId,
@@ -94,12 +94,12 @@ export async function captureSpan(
       usage,
       tools: mapped.tools,
       error: mapped.error,
-      captureImmediate: options.posthogCaptureImmediate,
+      captureImmediate: options.insightsCaptureImmediate,
     })
     return
   }
 
-  await sendEventToPosthog({
+  await sendEventToInsights({
     eventType: mapped.eventType,
     client: phClient,
     distinctId,
@@ -115,6 +115,6 @@ export async function captureSpan(
     httpStatus: mapped.httpStatus ?? 200,
     usage,
     tools: mapped.tools,
-    captureImmediate: options.posthogCaptureImmediate,
+    captureImmediate: options.insightsCaptureImmediate,
   })
 }

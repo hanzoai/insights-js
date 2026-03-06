@@ -6,10 +6,10 @@
  */
 
 import { OptionalReactNativeNavigationWix } from '../optional/OptionalReactNativeNavigationWix'
-import { PostHog } from '../posthog-rn'
-import { PostHogAutocaptureOptions } from '../types'
+import { Insights } from '../insights-rn'
+import { InsightsAutocaptureOptions } from '../types'
 
-export const withReactNativeNavigation = (posthog: PostHog, options: PostHogAutocaptureOptions = {}): boolean => {
+export const withReactNativeNavigation = (insights: Insights, options: InsightsAutocaptureOptions = {}): boolean => {
   if (!OptionalReactNativeNavigationWix) {
     return false
   }
@@ -27,7 +27,7 @@ export const withReactNativeNavigation = (posthog: PostHog, options: PostHogAuto
 
     if (currentRouteName) {
       const properties = options?.navigation?.routeToProperties?.(currentRouteName, passProps || {})
-      posthog.screen(currentRouteName, properties)
+      insights.screen(currentRouteName, properties)
     }
   })
 

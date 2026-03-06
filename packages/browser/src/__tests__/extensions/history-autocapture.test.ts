@@ -2,7 +2,7 @@ import '../helpers/mock-logger'
 import { HistoryAutocapture } from '../../extensions/history-autocapture'
 
 describe('HistoryAutocapture', () => {
-    let posthog: any
+    let insights: any
     let capture: jest.Mock
     let historyAutocapture: HistoryAutocapture
     let originalPushState: typeof window.history.pushState
@@ -32,7 +32,7 @@ describe('HistoryAutocapture', () => {
         pageViewManagerDoPageView = jest.fn().mockReturnValue({ $pageview_id: 'test-id' })
         scrollManagerResetContext = jest.fn()
 
-        posthog = {
+        insights = {
             capture,
             config: {
                 capture_pageview: 'history_change',
@@ -45,7 +45,7 @@ describe('HistoryAutocapture', () => {
             },
         }
 
-        historyAutocapture = new HistoryAutocapture(posthog)
+        historyAutocapture = new HistoryAutocapture(insights)
         historyAutocapture.startIfEnabled()
     })
 
@@ -59,25 +59,25 @@ describe('HistoryAutocapture', () => {
     describe('Initialization and Configuration', () => {
         it('should initialize correctly', () => {
             expect(historyAutocapture).toBeDefined()
-            expect((window.history.pushState as any).__posthog_wrapped__).toBe(true)
-            expect((window.history.replaceState as any).__posthog_wrapped__).toBe(true)
+            expect((window.history.pushState as any).__insights_wrapped__).toBe(true)
+            expect((window.history.replaceState as any).__insights_wrapped__).toBe(true)
         })
 
         it('should NOT be enabled with true option for backwards compatibility', () => {
-            posthog.config.capture_pageview = true
-            const historyAutocaptureEnabled = new HistoryAutocapture(posthog)
+            insights.config.capture_pageview = true
+            const historyAutocaptureEnabled = new HistoryAutocapture(insights)
             expect(historyAutocaptureEnabled.isEnabled).toBe(false)
         })
 
         it('should be disabled with false option', () => {
-            posthog.config.capture_pageview = false
-            const historyAutocaptureDisabled = new HistoryAutocapture(posthog)
+            insights.config.capture_pageview = false
+            const historyAutocaptureDisabled = new HistoryAutocapture(insights)
             expect(historyAutocaptureDisabled.isEnabled).toBe(false)
         })
 
         it('should be enabled with history_change option', () => {
-            posthog.config.capture_pageview = 'history_change'
-            const historyAutocaptureEnabled = new HistoryAutocapture(posthog)
+            insights.config.capture_pageview = 'history_change'
+            const historyAutocaptureEnabled = new HistoryAutocapture(insights)
             expect(historyAutocaptureEnabled.isEnabled).toBe(true)
         })
 
@@ -85,12 +85,12 @@ describe('HistoryAutocapture', () => {
             window.history.pushState = originalPushState
             window.history.replaceState = originalReplaceState
 
-            posthog.config.capture_pageview = false
-            const historyAutocaptureDisabled = new HistoryAutocapture(posthog)
+            insights.config.capture_pageview = false
+            const historyAutocaptureDisabled = new HistoryAutocapture(insights)
             historyAutocaptureDisabled.startIfEnabled()
 
-            expect((window.history.pushState as any).__posthog_wrapped__).toBeUndefined()
-            expect((window.history.replaceState as any).__posthog_wrapped__).toBeUndefined()
+            expect((window.history.pushState as any).__insights_wrapped__).toBeUndefined()
+            expect((window.history.replaceState as any).__insights_wrapped__).toBeUndefined()
         })
 
         it('should be idempotent - calling monitorHistoryChanges multiple times', () => {
@@ -129,8 +129,8 @@ describe('HistoryAutocapture', () => {
 
         it('should not capture pageview when capture_pageview is disabled', () => {
             historyAutocapture.stop()
-            posthog.config.capture_pageview = false
-            historyAutocapture = new HistoryAutocapture(posthog)
+            insights.config.capture_pageview = false
+            historyAutocapture = new HistoryAutocapture(insights)
             historyAutocapture.startIfEnabled()
 
             capture.mockClear()
@@ -297,7 +297,7 @@ describe('HistoryAutocapture', () => {
 
             // Make sure lastPathname is set to root
             historyAutocapture.stop()
-            historyAutocapture = new HistoryAutocapture(posthog)
+            historyAutocapture = new HistoryAutocapture(insights)
             historyAutocapture.startIfEnabled()
 
             // Then navigate to another path
@@ -321,7 +321,7 @@ describe('HistoryAutocapture', () => {
 
             // Make sure lastPathname is set
             historyAutocapture.stop()
-            historyAutocapture = new HistoryAutocapture(posthog)
+            historyAutocapture = new HistoryAutocapture(insights)
             historyAutocapture.startIfEnabled()
             capture.mockClear()
 
@@ -416,7 +416,7 @@ describe('HistoryAutocapture', () => {
             const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
 
             // Create a new instance to track the fresh add/remove calls
-            const newHistoryAutocapture = new HistoryAutocapture(posthog)
+            const newHistoryAutocapture = new HistoryAutocapture(insights)
             newHistoryAutocapture.startIfEnabled()
 
             expect(addEventListenerSpy).toHaveBeenCalledWith('popstate', expect.any(Function), expect.any(Object))

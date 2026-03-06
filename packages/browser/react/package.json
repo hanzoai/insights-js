@@ -1,11 +1,11 @@
 {
-    "name": "posthog-js-react",
+    "name": "@hanzo/insights-react",
     "version": "1.0.0",
     "private": true,
-    "description": "Provides components and hooks for React integrations of PostHog. It is not published to NPM, but is used in the main posthog-js package.",
+    "description": "Provides components and hooks for React integrations of Insights. It is not published to NPM, but is used in the main @hanzo/insights package.",
     "repository": {
         "type": "git",
-        "url": "https://github.com/PostHog/posthog-js",
+        "url": "https://github.com/hanzoai/@hanzo/insights",
         "directory": "packages/react"
     },
     "main": "dist/umd/index.js",

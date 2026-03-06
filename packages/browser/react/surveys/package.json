@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/react-surveys",
+    "name": "@hanzo/react-surveys",
     "private": true,
     "main": "../dist/umd/surveys/index.js",
     "module": "../dist/esm/surveys/index.js",

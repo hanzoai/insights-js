@@ -58,7 +58,7 @@ import {
     SESSION_RECORDING_REMOTE_CONFIG,
     SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION,
 } from '../../../constants'
-import { PostHog } from '../../../posthog-core'
+import { Insights } from '../../../insights-core'
 import {
     CaptureResult,
     NetworkRecordOptions,
@@ -142,7 +142,7 @@ const newQueuedEvent = (rrwebMethod: () => void): QueuedRRWebEvent => ({
 })
 
 function getRRWeb() {
-    return assignableWindow?.__PosthogExtensions__?.rrweb
+    return assignableWindow?.__InsightsExtensions__?.rrweb
 }
 
 function getRRWebRecord(): rrwebRecordType | undefined {
@@ -352,7 +352,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     }
 
     private _flushBufferTimer?: any
-    // we have a buffer - that contains PostHog snapshot events ready to be sent to the server
+    // we have a buffer - that contains Insights snapshot events ready to be sent to the server
     private _buffer: SnapshotBuffer
 
     private _removePageViewCaptureHook: (() => void) | undefined = undefined
@@ -403,7 +403,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     private _samplingSessionListener: (() => void) | undefined = undefined
     private _forceIdleSessionIdListener: (() => void) | undefined = undefined
 
-    constructor(private readonly _instance: PostHog) {
+    constructor(private readonly _instance: Insights) {
         // we know there's a sessionManager, so don't need to start without a session id
         const { sessionId, windowId } = this._sessionManager.checkAndGetSessionAndWindowId()
         this._sessionId = sessionId
@@ -507,12 +507,12 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     private _gatherRRWebPlugins() {
         const plugins: RecordPlugin[] = []
 
-        const recordConsolePlugin = assignableWindow.__PosthogExtensions__?.rrwebPlugins?.getRecordConsolePlugin
+        const recordConsolePlugin = assignableWindow.__InsightsExtensions__?.rrwebPlugins?.getRecordConsolePlugin
         if (recordConsolePlugin && this._isConsoleLogCaptureEnabled) {
             plugins.push(recordConsolePlugin())
         }
 
-        const networkPlugin = assignableWindow.__PosthogExtensions__?.rrwebPlugins?.getRecordNetworkPlugin
+        const networkPlugin = assignableWindow.__InsightsExtensions__?.rrwebPlugins?.getRecordNetworkPlugin
         if (!!this._networkPayloadCapture && isFunction(networkPlugin)) {
             const canRecordNetwork = !isLocalhost() || this._forceAllowLocalhostNetworkCapture
 
@@ -1163,7 +1163,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
      * this ignores the sampling config and (if other conditions are met) causes capture to start
      *
      * It is not usual to call this directly,
-     * instead call `posthog.startSessionRecording({sampling: true})`
+     * instead call `insights.startSessionRecording({sampling: true})`
      * */
     public overrideSampling() {
         this._instance.persistence?.register({
@@ -1178,7 +1178,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
      * this ignores the URL/Event trigger config and (if other conditions are met) causes capture to start
      *
      * It is not usual to call this directly,
-     * instead call `posthog.startSessionRecording({trigger: 'url' | 'event'})`
+     * instead call `insights.startSessionRecording({trigger: 'url' | 'event'})`
      * */
     public overrideTrigger(triggerType: TriggerType) {
         this._activateTrigger(triggerType)
@@ -1664,7 +1664,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             activePlugins: activePlugins.map((p) => p?.name),
         })
 
-        this._tryAddCustomEvent('$posthog_config', {
+        this._tryAddCustomEvent('$insights_config', {
             config: this._instance.config,
         })
     }

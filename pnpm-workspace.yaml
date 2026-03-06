@@ -13,7 +13,7 @@ catalog:
   "@babel/preset-env": ^7.27.1
   "@babel/preset-react": ^7.27.1
   "@babel/preset-typescript": ^7.27.1
-  "@posthog/cli": ~0.5.29
+  "@hanzo/cli": ~0.5.29
   "@rslib/core": 0.10.6
   "@testing-library/dom": ^10.4.1
   "@testing-library/jest-dom": ^6.9.1
@@ -46,8 +46,8 @@ minimumReleaseAgeExclude:
   - "@posthog/rrweb@0.0.45"
   - "@posthog/rrweb-snapshot@0.0.45"
   - "@posthog/rrdom@0.0.45"
-  - "@posthog/cli"
-  - "posthog-react-native-session-replay"
+  - "@hanzo/cli"
+  - "@hanzo/insights-react-native-session-replay"
 
 supportedArchitectures:
   cpu: [x64, arm64v8, arm64]

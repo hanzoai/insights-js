@@ -25,18 +25,18 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-import PostHog from 'posthog-react-native';
+import Insights from 'insights-react-native';
 
-export const posthog = new PostHog(
+export const insights = new Insights(
   'phc_pQ70jJhZKHRvDIL5ruOErnPy6xiAiWCqlL4ayELj4X8',
   {
-    // host: 'https://us.i.posthog.com',
+    // host: 'https://us.i.insights.com',
     // persistence: 'memory',
   },
 );
 
-posthog.debug();
-posthog.identify('test-user-id-macos');
+insights.debug();
+insights.identify('test-user-id-macos');
 
 type SectionProps = PropsWithChildren<{
   title: string;

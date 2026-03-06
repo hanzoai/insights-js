@@ -1,194 +1,194 @@
-# @posthog/webpack-plugin
+# @hanzo/webpack-plugin
 
 ## 1.2.25
 
 ### Patch Changes
 
-- Updated dependencies [[`5e8d5fc`](https://github.com/PostHog/posthog-js/commit/5e8d5fc9c12e5545e015c9c5556167b9fb279347)]:
-    - @posthog/core@1.23.2
+- Updated dependencies [[`5e8d5fc`](https://github.com/hanzoai/@hanzo/insights/commit/5e8d5fc9c12e5545e015c9c5556167b9fb279347)]:
+    - @hanzo/core@1.23.2
 
 ## 1.2.24
 
 ### Patch Changes
 
-- Updated dependencies [[`9dbc05e`](https://github.com/PostHog/posthog-js/commit/9dbc05ed65ddc8c37c9262b9aebfc51d0c748971)]:
-    - @posthog/core@1.23.1
+- Updated dependencies [[`9dbc05e`](https://github.com/hanzoai/@hanzo/insights/commit/9dbc05ed65ddc8c37c9262b9aebfc51d0c748971)]:
+    - @hanzo/core@1.23.1
 
 ## 1.2.23
 
 ### Patch Changes
 
-- Updated dependencies [[`e962f01`](https://github.com/PostHog/posthog-js/commit/e962f01c80476b9325f0bbb4ca591820cfb9f338)]:
-    - @posthog/core@1.23.0
+- Updated dependencies [[`e962f01`](https://github.com/hanzoai/@hanzo/insights/commit/e962f01c80476b9325f0bbb4ca591820cfb9f338)]:
+    - @hanzo/core@1.23.0
 
 ## 1.2.22
 
 ### Patch Changes
 
-- [#3076](https://github.com/PostHog/posthog-js/pull/3076) [`91234bb`](https://github.com/PostHog/posthog-js/commit/91234bb015ff18b1a95f08448053e7b75730ed81) Thanks [@hpouillot](https://github.com/hpouillot)! - rename sourcemaps config variables with `releaseName`, `releaseVersion`, `projectId`
+- [#3076](https://github.com/hanzoai/@hanzo/insights/pull/3076) [`91234bb`](https://github.com/hanzoai/@hanzo/insights/commit/91234bb015ff18b1a95f08448053e7b75730ed81) Thanks [@hpouillot](https://github.com/hpouillot)! - rename sourcemaps config variables with `releaseName`, `releaseVersion`, `projectId`
   (2026-02-12)
 
 ## 1.2.21
 
 ### Patch Changes
 
-- Updated dependencies [[`0acf16f`](https://github.com/PostHog/posthog-js/commit/0acf16fcbf8c32d5f28b86b6fa200271ad0b647e)]:
-    - @posthog/core@1.22.0
+- Updated dependencies [[`0acf16f`](https://github.com/hanzoai/@hanzo/insights/commit/0acf16fcbf8c32d5f28b86b6fa200271ad0b647e)]:
+    - @hanzo/core@1.22.0
 
 ## 1.2.20
 
 ### Patch Changes
 
-- Updated dependencies [[`d578824`](https://github.com/PostHog/posthog-js/commit/d578824395ceba3b854970c2a7723e97466d9e9d)]:
-    - @posthog/core@1.21.0
+- Updated dependencies [[`d578824`](https://github.com/hanzoai/@hanzo/insights/commit/d578824395ceba3b854970c2a7723e97466d9e9d)]:
+    - @hanzo/core@1.21.0
 
 ## 1.2.19
 
 ### Patch Changes
 
-- Updated dependencies [[`e055f9a`](https://github.com/PostHog/posthog-js/commit/e055f9a344d7c11309c56444383f79df335a5c51)]:
-    - @posthog/core@1.20.2
+- Updated dependencies [[`e055f9a`](https://github.com/hanzoai/@hanzo/insights/commit/e055f9a344d7c11309c56444383f79df335a5c51)]:
+    - @hanzo/core@1.20.2
 
 ## 1.2.18
 
 ### Patch Changes
 
-- Updated dependencies [[`8f75dae`](https://github.com/PostHog/posthog-js/commit/8f75dae39ae2938624ca49e778915a92f2491556)]:
-    - @posthog/core@1.20.1
+- Updated dependencies [[`8f75dae`](https://github.com/hanzoai/@hanzo/insights/commit/8f75dae39ae2938624ca49e778915a92f2491556)]:
+    - @hanzo/core@1.20.1
 
 ## 1.2.17
 
 ### Patch Changes
 
-- Updated dependencies [[`bb62809`](https://github.com/PostHog/posthog-js/commit/bb62809917845685ae7e2e6d5adad6be5528356e)]:
-    - @posthog/core@1.20.0
+- Updated dependencies [[`bb62809`](https://github.com/hanzoai/@hanzo/insights/commit/bb62809917845685ae7e2e6d5adad6be5528356e)]:
+    - @hanzo/core@1.20.0
 
 ## 1.2.16
 
 ### Patch Changes
 
-- Updated dependencies [[`c99e5fe`](https://github.com/PostHog/posthog-js/commit/c99e5feb043870357c8f722eb52542327c3f472b)]:
-    - @posthog/core@1.19.0
+- Updated dependencies [[`c99e5fe`](https://github.com/hanzoai/@hanzo/insights/commit/c99e5feb043870357c8f722eb52542327c3f472b)]:
+    - @hanzo/core@1.19.0
 
 ## 1.2.15
 
 ### Patch Changes
 
-- Updated dependencies [[`7768010`](https://github.com/PostHog/posthog-js/commit/77680105f1e8baf5ed1934d423494793d11ff01a)]:
-    - @posthog/core@1.18.0
+- Updated dependencies [[`7768010`](https://github.com/hanzoai/@hanzo/insights/commit/77680105f1e8baf5ed1934d423494793d11ff01a)]:
+    - @hanzo/core@1.18.0
 
 ## 1.2.14
 
 ### Patch Changes
 
-- Updated dependencies [[`727536c`](https://github.com/PostHog/posthog-js/commit/727536cf5f1ab5a8d21fa9d4e2e6b13efc851fca)]:
-    - @posthog/core@1.17.0
+- Updated dependencies [[`727536c`](https://github.com/hanzoai/@hanzo/insights/commit/727536cf5f1ab5a8d21fa9d4e2e6b13efc851fca)]:
+    - @hanzo/core@1.17.0
 
 ## 1.2.13
 
 ### Patch Changes
 
-- Updated dependencies [[`cbe84c1`](https://github.com/PostHog/posthog-js/commit/cbe84c1ea8b6dd398569ed401139e9698e08fd64)]:
-    - @posthog/core@1.16.0
+- Updated dependencies [[`cbe84c1`](https://github.com/hanzoai/@hanzo/insights/commit/cbe84c1ea8b6dd398569ed401139e9698e08fd64)]:
+    - @hanzo/core@1.16.0
 
 ## 1.2.12
 
 ### Patch Changes
 
-- Updated dependencies [[`8c0c495`](https://github.com/PostHog/posthog-js/commit/8c0c495caaf4cd7f950cbc77fdfc1df499772008)]:
-    - @posthog/core@1.15.0
+- Updated dependencies [[`8c0c495`](https://github.com/hanzoai/@hanzo/insights/commit/8c0c495caaf4cd7f950cbc77fdfc1df499772008)]:
+    - @hanzo/core@1.15.0
 
 ## 1.2.11
 
 ### Patch Changes
 
-- Updated dependencies [[`f51560c`](https://github.com/PostHog/posthog-js/commit/f51560caf78386cef5278f7cf0e9f253b2ec0e50)]:
-    - @posthog/core@1.14.1
+- Updated dependencies [[`f51560c`](https://github.com/hanzoai/@hanzo/insights/commit/f51560caf78386cef5278f7cf0e9f253b2ec0e50)]:
+    - @hanzo/core@1.14.1
 
 ## 1.2.10
 
 ### Patch Changes
 
-- Updated dependencies [[`933c763`](https://github.com/PostHog/posthog-js/commit/933c7639ae30390ca562a0891d59649711b53522)]:
-    - @posthog/core@1.14.0
+- Updated dependencies [[`933c763`](https://github.com/hanzoai/@hanzo/insights/commit/933c7639ae30390ca562a0891d59649711b53522)]:
+    - @hanzo/core@1.14.0
 
 ## 1.2.9
 
 ### Patch Changes
 
-- Updated dependencies [[`8a5a3d5`](https://github.com/PostHog/posthog-js/commit/8a5a3d5693facda62b90b66dead338f7dca19705)]:
-    - @posthog/core@1.13.0
+- Updated dependencies [[`8a5a3d5`](https://github.com/hanzoai/@hanzo/insights/commit/8a5a3d5693facda62b90b66dead338f7dca19705)]:
+    - @hanzo/core@1.13.0
 
 ## 1.2.8
 
 ### Patch Changes
 
-- Updated dependencies [[`b7fa003`](https://github.com/PostHog/posthog-js/commit/b7fa003ef6ef74bdf4666be0748d89a5a6169054), [`f0cbc0d`](https://github.com/PostHog/posthog-js/commit/f0cbc0d8e4e5efc27d9595676e886d6d3d3892f4)]:
-    - @posthog/core@1.12.0
+- Updated dependencies [[`b7fa003`](https://github.com/hanzoai/@hanzo/insights/commit/b7fa003ef6ef74bdf4666be0748d89a5a6169054), [`f0cbc0d`](https://github.com/hanzoai/@hanzo/insights/commit/f0cbc0d8e4e5efc27d9595676e886d6d3d3892f4)]:
+    - @hanzo/core@1.12.0
 
 ## 1.2.7
 
 ### Patch Changes
 
-- Updated dependencies [[`23770e9`](https://github.com/PostHog/posthog-js/commit/23770e9e2eed1aca5c2bc7a34a6d64dc115b0d11)]:
-    - @posthog/core@1.11.0
+- Updated dependencies [[`23770e9`](https://github.com/hanzoai/@hanzo/insights/commit/23770e9e2eed1aca5c2bc7a34a6d64dc115b0d11)]:
+    - @hanzo/core@1.11.0
 
 ## 1.2.6
 
 ### Patch Changes
 
-- Updated dependencies [[`d37e570`](https://github.com/PostHog/posthog-js/commit/d37e5709863e869825df57d0854588140c4294b2)]:
-    - @posthog/core@1.10.0
+- Updated dependencies [[`d37e570`](https://github.com/hanzoai/@hanzo/insights/commit/d37e5709863e869825df57d0854588140c4294b2)]:
+    - @hanzo/core@1.10.0
 
 ## 1.2.5
 
 ### Patch Changes
 
-- Updated dependencies [[`fba9fb2`](https://github.com/PostHog/posthog-js/commit/fba9fb2ea4be2ea396730741b4718b4a2c80d026), [`c1ed63b`](https://github.com/PostHog/posthog-js/commit/c1ed63b0f03380a5e4bb2463491b3f767f64a514)]:
-    - @posthog/core@1.9.1
+- Updated dependencies [[`fba9fb2`](https://github.com/hanzoai/@hanzo/insights/commit/fba9fb2ea4be2ea396730741b4718b4a2c80d026), [`c1ed63b`](https://github.com/hanzoai/@hanzo/insights/commit/c1ed63b0f03380a5e4bb2463491b3f767f64a514)]:
+    - @hanzo/core@1.9.1
 
 ## 1.2.4
 
 ### Patch Changes
 
-- [#2804](https://github.com/PostHog/posthog-js/pull/2804) [`5c2cea5`](https://github.com/PostHog/posthog-js/commit/5c2cea5afea46527120d6cf6ff37956ffb98ebef) Thanks [@hpouillot](https://github.com/hpouillot)! - add batchSize option for sourcemap upload control
+- [#2804](https://github.com/hanzoai/@hanzo/insights/pull/2804) [`5c2cea5`](https://github.com/hanzoai/@hanzo/insights/commit/5c2cea5afea46527120d6cf6ff37956ffb98ebef) Thanks [@hpouillot](https://github.com/hpouillot)! - add batchSize option for sourcemap upload control
   (2025-12-22)
-- Updated dependencies [[`b676b4d`](https://github.com/PostHog/posthog-js/commit/b676b4d7342c8c3b64960aa55630b2810366014e)]:
-    - @posthog/core@1.9.0
+- Updated dependencies [[`b676b4d`](https://github.com/hanzoai/@hanzo/insights/commit/b676b4d7342c8c3b64960aa55630b2810366014e)]:
+    - @hanzo/core@1.9.0
 
 ## 1.2.3
 
 ### Patch Changes
 
-- Updated dependencies [[`6b0aabf`](https://github.com/PostHog/posthog-js/commit/6b0aabff893e44d1710b7d122a68bf023f4e0bd5)]:
-    - @posthog/core@1.8.1
+- Updated dependencies [[`6b0aabf`](https://github.com/hanzoai/@hanzo/insights/commit/6b0aabff893e44d1710b7d122a68bf023f4e0bd5)]:
+    - @hanzo/core@1.8.1
 
 ## 1.2.2
 
 ### Patch Changes
 
-- Updated dependencies [[`2603a8d`](https://github.com/PostHog/posthog-js/commit/2603a8d6e1021cd8f84e8b61be77ce268435ebde)]:
-    - @posthog/core@1.8.0
+- Updated dependencies [[`2603a8d`](https://github.com/hanzoai/@hanzo/insights/commit/2603a8d6e1021cd8f84e8b61be77ce268435ebde)]:
+    - @hanzo/core@1.8.0
 
 ## 1.2.1
 
 ### Patch Changes
 
-- [#2753](https://github.com/PostHog/posthog-js/pull/2753) [`c5f3f65`](https://github.com/PostHog/posthog-js/commit/c5f3f6509fefeb4ad74c11f188fc03c4f0199236) Thanks [@hpouillot](https://github.com/hpouillot)! - add webpack as peer dependency
+- [#2753](https://github.com/hanzoai/@hanzo/insights/pull/2753) [`c5f3f65`](https://github.com/hanzoai/@hanzo/insights/commit/c5f3f6509fefeb4ad74c11f188fc03c4f0199236) Thanks [@hpouillot](https://github.com/hpouillot)! - add webpack as peer dependency
   (2025-12-15)
 
 ## 1.2.0
 
 ### Minor Changes
 
-- [#2741](https://github.com/PostHog/posthog-js/pull/2741) [`5c14781`](https://github.com/PostHog/posthog-js/commit/5c14781dc0b791e3fbdc3d9507dc52ccf1eb9ca4) Thanks [@hpouillot](https://github.com/hpouillot)! - fix sourcemap upload with complex file path
+- [#2741](https://github.com/hanzoai/@hanzo/insights/pull/2741) [`5c14781`](https://github.com/hanzoai/@hanzo/insights/commit/5c14781dc0b791e3fbdc3d9507dc52ccf1eb9ca4) Thanks [@hpouillot](https://github.com/hpouillot)! - fix sourcemap upload with complex file path
   use SourceMapDevToolPlugin to customize sourcemap generation (2025-12-13)
 
 ## 1.1.4
 
 ### Patch Changes
 
-- [#2690](https://github.com/PostHog/posthog-js/pull/2690) [`e9c00fd`](https://github.com/PostHog/posthog-js/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4) Thanks [@robbie-c](https://github.com/robbie-c)! - Related to https://www.wiz.io/blog/critical-vulnerability-in-react-cve-2025-55182
+- [#2690](https://github.com/hanzoai/@hanzo/insights/pull/2690) [`e9c00fd`](https://github.com/hanzoai/@hanzo/insights/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4) Thanks [@robbie-c](https://github.com/robbie-c)! - Related to https://www.wiz.io/blog/critical-vulnerability-in-react-cve-2025-55182
 
     We didn't include any of the vulnerable deps in any of our packages, however we did have them as dev / test / example project dependencies.
 
@@ -198,59 +198,59 @@
 
     Out of an abundance of caution, let's create a new release of all of our packages. (2025-12-04)
 
-- Updated dependencies [[`e9c00fd`](https://github.com/PostHog/posthog-js/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4)]:
-    - @posthog/core@1.7.1
+- Updated dependencies [[`e9c00fd`](https://github.com/hanzoai/@hanzo/insights/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4)]:
+    - @hanzo/core@1.7.1
 
 ## 1.1.3
 
 ### Patch Changes
 
-- Updated dependencies [[`e1617d9`](https://github.com/PostHog/posthog-js/commit/e1617d91255b23dc39b1dcb15b05ae64c735d9d0)]:
-    - @posthog/core@1.7.0
+- Updated dependencies [[`e1617d9`](https://github.com/hanzoai/@hanzo/insights/commit/e1617d91255b23dc39b1dcb15b05ae64c735d9d0)]:
+    - @hanzo/core@1.7.0
 
 ## 1.1.2
 
 ### Patch Changes
 
-- [#2660](https://github.com/PostHog/posthog-js/pull/2660) [`5f0bc7c`](https://github.com/PostHog/posthog-js/commit/5f0bc7ca755457d4bb6e2ac4f0cf7ef944034983) Thanks [@hpouillot](https://github.com/hpouillot)! - fix chunk resolution
+- [#2660](https://github.com/hanzoai/@hanzo/insights/pull/2660) [`5f0bc7c`](https://github.com/hanzoai/@hanzo/insights/commit/5f0bc7ca755457d4bb6e2ac4f0cf7ef944034983) Thanks [@hpouillot](https://github.com/hpouillot)! - fix chunk resolution
   (2025-12-01)
 
 ## 1.1.1
 
 ### Patch Changes
 
-- [#2639](https://github.com/PostHog/posthog-js/pull/2639) [`07457bf`](https://github.com/PostHog/posthog-js/commit/07457bfece0f3e4798a2c5c68e178250139ce505) Thanks [@hpouillot](https://github.com/hpouillot)! - fix cli resolution
+- [#2639](https://github.com/hanzoai/@hanzo/insights/pull/2639) [`07457bf`](https://github.com/hanzoai/@hanzo/insights/commit/07457bfece0f3e4798a2c5c68e178250139ce505) Thanks [@hpouillot](https://github.com/hpouillot)! - fix cli resolution
   (2025-11-28)
 
 ## 1.1.0
 
 ### Minor Changes
 
-- [#2619](https://github.com/PostHog/posthog-js/pull/2619) [`86dab38`](https://github.com/PostHog/posthog-js/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86) Thanks [@hpouillot](https://github.com/hpouillot)! - package deprecation
+- [#2619](https://github.com/hanzoai/@hanzo/insights/pull/2619) [`86dab38`](https://github.com/hanzoai/@hanzo/insights/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86) Thanks [@hpouillot](https://github.com/hpouillot)! - package deprecation
   (2025-11-24)
 
 ### Patch Changes
 
-- Updated dependencies [[`86dab38`](https://github.com/PostHog/posthog-js/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86)]:
-    - @posthog/core@1.6.0
+- Updated dependencies [[`86dab38`](https://github.com/hanzoai/@hanzo/insights/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86)]:
+    - @hanzo/core@1.6.0
 
 ## 1.0.1
 
 ### Patch Changes
 
-- [#2618](https://github.com/PostHog/posthog-js/pull/2618) [`3eed1a4`](https://github.com/PostHog/posthog-js/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe) Thanks [@marandaneto](https://github.com/marandaneto)! - last version was compromised
+- [#2618](https://github.com/hanzoai/@hanzo/insights/pull/2618) [`3eed1a4`](https://github.com/hanzoai/@hanzo/insights/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe) Thanks [@marandaneto](https://github.com/marandaneto)! - last version was compromised
   (2025-11-24)
-- Updated dependencies [[`3eed1a4`](https://github.com/PostHog/posthog-js/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe)]:
-    - @posthog/core@1.5.6
+- Updated dependencies [[`3eed1a4`](https://github.com/hanzoai/@hanzo/insights/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe)]:
+    - @hanzo/core@1.5.6
 
 ## 1.0.0
 
 ### Major Changes
 
-- [#2589](https://github.com/PostHog/posthog-js/pull/2589) [`83f5d07`](https://github.com/PostHog/posthog-js/commit/83f5d07e4ae8c2ae5c6926858b6095ebbfaf319f) Thanks [@hpouillot](https://github.com/hpouillot)! - initial release
+- [#2589](https://github.com/hanzoai/@hanzo/insights/pull/2589) [`83f5d07`](https://github.com/hanzoai/@hanzo/insights/commit/83f5d07e4ae8c2ae5c6926858b6095ebbfaf319f) Thanks [@hpouillot](https://github.com/hpouillot)! - initial release
   (2025-11-20)
 
 ### Patch Changes
 
-- Updated dependencies [[`83f5d07`](https://github.com/PostHog/posthog-js/commit/83f5d07e4ae8c2ae5c6926858b6095ebbfaf319f)]:
-    - @posthog/core@1.5.5
+- Updated dependencies [[`83f5d07`](https://github.com/hanzoai/@hanzo/insights/commit/83f5d07e4ae8c2ae5c6926858b6095ebbfaf319f)]:
+    - @hanzo/core@1.5.5

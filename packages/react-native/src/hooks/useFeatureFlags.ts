@@ -1,20 +1,20 @@
 import { useEffect, useState } from 'react'
-import type { PostHog } from '../posthog-rn'
-import { PostHogFlagsResponse } from '@hanzo/insights-core'
-import { useOverridablePostHog } from './utils'
+import type { Insights } from '../insights-rn'
+import { InsightsFlagsResponse } from '@hanzo/insights-core'
+import { useOverridableInsights } from './utils'
 
-export function useFeatureFlags(client?: PostHog): PostHogFlagsResponse['featureFlags'] | undefined {
-  const posthog = useOverridablePostHog(client, 'useFeatureFlags')
-  const [featureFlags, setFeatureFlags] = useState<PostHogFlagsResponse['featureFlags'] | undefined>(
-    posthog?.getFeatureFlags()
+export function useFeatureFlags(client?: Insights): InsightsFlagsResponse['featureFlags'] | undefined {
+  const insights = useOverridableInsights(client, 'useFeatureFlags')
+  const [featureFlags, setFeatureFlags] = useState<InsightsFlagsResponse['featureFlags'] | undefined>(
+    insights?.getFeatureFlags()
   )
 
   useEffect(() => {
-    setFeatureFlags(posthog?.getFeatureFlags())
-    return posthog?.onFeatureFlags((flags) => {
+    setFeatureFlags(insights?.getFeatureFlags())
+    return insights?.onFeatureFlags((flags) => {
       setFeatureFlags(flags)
     })
-  }, [posthog])
+  }, [insights])
 
   return featureFlags
 }

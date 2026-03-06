@@ -1,7 +1,7 @@
-import { PostHog } from '../../../dist/entrypoints/index.node.mjs'
+import { Insights } from '../../../dist/entrypoints/index.node.mjs'
 import { parentPort } from 'worker_threads'
 
-const posthog = new PostHog('api_key', {
+const insights = new Insights('api_key', {
   enableExceptionAutocapture: true,
 })
 
@@ -18,11 +18,11 @@ parentPort.on('message', (msg) => {
 })
 
 await new Promise((res) => {
-  posthog.capture = (event) => {
+  insights.capture = (event) => {
     event.distinctId = 'stable_id'
     parentPort.postMessage({ method: 'capture', event })
     res()
   }
 })
 
-await posthog.shutdown()
+await insights.shutdown()

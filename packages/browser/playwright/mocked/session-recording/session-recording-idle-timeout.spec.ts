@@ -1,11 +1,11 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 import { Page } from '@playwright/test'
 
 async function ensureRecordingIsStopped(page: Page) {
     // Check recording status without triggering user activity
     const isRecording = await page.evaluate(() => {
-        const ph = (window as WindowWithPostHog).posthog
+        const ph = (window as WindowWithInsights).insights
         return ph?.sessionRecording?.status === 'disabled'
     })
 
@@ -16,7 +16,7 @@ async function ensureActivitySendsSnapshots(page: Page) {
     await page.resetCapturedEvents()
 
     const responsePromise = page.waitForResponse('**/ses/*')
-    await page.locator('[data-cy-input]').type('hello posthog!')
+    await page.locator('[data-cy-input]').type('hello insights!')
     await responsePromise
 
     const capturedEvents = await page.capturedEvents()
@@ -26,7 +26,7 @@ async function ensureActivitySendsSnapshots(page: Page) {
 
 async function triggerForcedIdleTimeout(page: Page) {
     await page.evaluate(() => {
-        const ph = (window as WindowWithPostHog).posthog
+        const ph = (window as WindowWithInsights).insights
         const sessionManager = ph?.sessionManager as any
 
         if (!sessionManager) {
@@ -97,7 +97,7 @@ test.describe('Session recording - idle timeout behavior', () => {
         await ensureActivitySendsSnapshots(page)
 
         const initialSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         expect(initialSessionId).toBeDefined()
@@ -134,7 +134,7 @@ test.describe('Session recording - idle timeout behavior', () => {
 
         // Should have a new session ID
         const newSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         expect(newSessionId).not.toEqual(initialSessionId)
@@ -143,7 +143,7 @@ test.describe('Session recording - idle timeout behavior', () => {
 
         // Verify we got a new session with session_id_changed reason
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('test_after_idle_restart')
         })
 
@@ -180,7 +180,7 @@ test.describe('Session recording - idle timeout behavior', () => {
         await ensureActivitySendsSnapshots(page)
 
         const initialSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         expect(initialSessionId).toBeDefined()
@@ -192,7 +192,7 @@ test.describe('Session recording - idle timeout behavior', () => {
         // by manipulating the lastActivityTimestamp in persistence and clearing the in-memory cache
         // This simulates what happens when a tab is frozen and the forcedIdleReset timer never fires
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             const persistence = ph?.persistence as any
             const sessionManager = ph?.sessionManager as any
 
@@ -235,7 +235,7 @@ test.describe('Session recording - idle timeout behavior', () => {
         })
 
         const newSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
 
@@ -284,7 +284,7 @@ test.describe('Session recording - idle timeout behavior', () => {
             // Config custom events emitted during bootup
             { sessionId: 'new', type: 5, tag: '$remote_config_received' }, // CustomEvent: config
             { sessionId: 'new', type: 5, tag: '$session_options' }, // CustomEvent: recording options
-            { sessionId: 'new', type: 5, tag: '$posthog_config' }, // CustomEvent: posthog config
+            { sessionId: 'new', type: 5, tag: '$insights_config' }, // CustomEvent: insights config
 
             // Session lifecycle events
             { sessionId: 'new', type: 5, tag: '$session_id_change' }, // CustomEvent: session rotation marker
@@ -313,14 +313,14 @@ test.describe('Session recording - idle timeout with sampling', () => {
 
         // Override sampling to start recording
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.startSessionRecording({ sampling: true })
         })
         await ensureActivitySendsSnapshots(page)
 
         // Get current session ID
         const sessionIdBeforeIdle = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
 
@@ -338,7 +338,7 @@ test.describe('Session recording - idle timeout with sampling', () => {
 
         // Verify new session was created
         const sessionIdAfterIdle = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         expect(sessionIdAfterIdle).not.toEqual(sessionIdBeforeIdle)
@@ -348,7 +348,7 @@ test.describe('Session recording - idle timeout with sampling', () => {
 
         // Verify that sampling override can restart recording even after idle timeout
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.startSessionRecording({ sampling: true })
         })
 
@@ -357,7 +357,7 @@ test.describe('Session recording - idle timeout with sampling', () => {
 
         // Verify the start reason is sampling_overridden
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('test_after_sampling_override')
         })
 

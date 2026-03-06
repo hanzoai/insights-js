@@ -44,11 +44,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Core Structure
 
-- **posthog-core.ts** - Main PostHog class with all public APIs
+- **insights-core.ts** - Main Insights class with all public APIs
 - **config.ts** - Configuration management and defaults
-- **posthog-persistence.ts** - Browser storage management (localStorage, cookies)
-- **posthog-featureflags.ts** - Feature flag functionality
-- **posthog-surveys.ts** - Survey management and display
+- **insights-persistence.ts** - Browser storage management (localStorage, cookies)
+- **insights-featureflags.ts** - Feature flag functionality
+- **insights-surveys.ts** - Survey management and display
 - **request-queue.ts** - Event batching and network request handling
 - **sessionid.ts** - Session management
 
@@ -59,7 +59,7 @@ The `/src/extensions/` directory contains modular features:
 - **surveys.tsx** - Survey UI components (Preact-based)
 - **replay/sessionrecording.ts** - Session recording functionality
 - **autocapture/** - Automatic event capture
-- **toolbar.ts** - PostHog toolbar integration
+- **toolbar.ts** - Insights toolbar integration
 - **sentry-integration.ts** - Sentry error tracking integration
 - **segment-integration.ts** - Segment analytics integration
 
@@ -68,7 +68,7 @@ The `/src/extensions/` directory contains modular features:
 - **Extensions Pattern** - Features are modular extensions that can be enabled/disabled
 - **Event Queue** - All events go through a request queue for batching and retry logic
 - **Persistence Layer** - Unified storage abstraction over localStorage/cookies
-- **Remote Config** - Dynamic configuration loaded from PostHog servers
+- **Remote Config** - Dynamic configuration loaded from Insights servers
 - **Consent Management** - GDPR-compliant consent handling
 
 ### Build System
@@ -84,12 +84,12 @@ The `/src/extensions/` directory contains modular features:
 1. **Unit Tests** (Jest) - Core functionality, utils, individual classes
 2. **Functional Tests** - Integration testing with mocked APIs
 3. **Playwright Tests** - Real browser automation testing
-4. **TestCafe E2E** - Full integration with real PostHog instance
+4. **TestCafe E2E** - Full integration with real Insights instance
 
 ### Package Management
 
 - Uses **pnpm** (not npm) for dependency management
-- Workspace setup with `@posthog/core` internal dependency
+- Workspace setup with `@hanzo/core` internal dependency
 - Optional peer dependencies for Angular compiler support
 
 ### Important Notes

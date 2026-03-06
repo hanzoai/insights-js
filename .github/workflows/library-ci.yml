@@ -34,7 +34,7 @@ jobs:
       - uses: ./.github/actions/is-affected
         id: is-affected
         with:
-          package-name: posthog-js
+          package-name: @hanzo/insights
 
       - name: Build package
         run: pnpm build
@@ -74,7 +74,7 @@ jobs:
       - uses: ./.github/actions/is-affected
         id: is-affected
         with:
-          package-name: posthog-js
+          package-name: @hanzo/insights
 
       - name: Build package
         run: pnpm build
@@ -239,8 +239,8 @@ jobs:
         with:
           build: false
 
-      - name: Build posthog-js
-        run: pnpm exec turbo --filter=posthog-js build
+      - name: Build @hanzo/insights
+        run: pnpm exec turbo --filter=@hanzo/insights build
         env:
           WRITE_MANGLED_PROPERTIES: 1
 

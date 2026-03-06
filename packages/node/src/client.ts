@@ -5,13 +5,13 @@ import {
   isBlockedUA,
   isPlainObject,
   JsonType,
-  PostHogCaptureOptions,
-  PostHogCoreStateless,
-  PostHogFetchOptions,
-  PostHogFetchResponse,
-  PostHogFlagsAndPayloadsResponse,
-  PostHogFlagsResponse,
-  PostHogPersistedProperty,
+  InsightsCaptureOptions,
+  InsightsCoreStateless,
+  InsightsFetchOptions,
+  InsightsFetchResponse,
+  InsightsFlagsAndPayloadsResponse,
+  InsightsFlagsResponse,
+  InsightsPersistedProperty,
 } from '@hanzo/insights-core'
 import {
   EventMessage,
@@ -21,9 +21,9 @@ import {
   FeatureFlagResult,
   GroupIdentifyMessage,
   IdentifyMessage,
-  IPostHog,
+  IInsights,
   OverrideFeatureFlagsOptions,
-  PostHogOptions,
+  InsightsOptions,
   SendFeatureFlagsOptions,
   FlagEvaluationOptions,
   AllFlagsOptions,
@@ -35,10 +35,10 @@ import {
   InconclusiveMatchError,
 } from './extensions/feature-flags/feature-flags'
 import ErrorTracking from './extensions/error-tracking'
-import { safeSetTimeout, PostHogEventProperties } from '@hanzo/insights-core'
-import { PostHogMemoryStorage } from './storage-memory'
+import { safeSetTimeout, InsightsEventProperties } from '@hanzo/insights-core'
+import { InsightsMemoryStorage } from './storage-memory'
 import { uuidv7 } from '@hanzo/insights-core'
-import { ContextData, ContextOptions, IPostHogContext } from './extensions/context/types'
+import { ContextData, ContextOptions, IInsightsContext } from './extensions/context/types'
 
 // Standard local evaluation rate limit is 600 per minute (10 per second),
 // so the fastest a poller should ever be set is 100ms.
@@ -47,14 +47,14 @@ const THIRTY_SECONDS = 30 * 1000
 const MAX_CACHE_SIZE = 50 * 1000
 
 // The actual exported Nodejs API.
-export abstract class PostHogBackendClient extends PostHogCoreStateless implements IPostHog {
-  private _memoryStorage = new PostHogMemoryStorage()
+export abstract class InsightsBackendClient extends InsightsCoreStateless implements IInsights {
+  private _memoryStorage = new InsightsMemoryStorage()
 
   private featureFlagsPoller?: FeatureFlagsPoller
   protected errorTracking: ErrorTracking
   private maxCacheSize: number
-  public readonly options: PostHogOptions
-  protected readonly context?: IPostHogContext
+  public readonly options: InsightsOptions
+  protected readonly context?: IInsightsContext
 
   // Feature flag overrides for local testing/development
   private _flagOverrides?: Record<string, FeatureFlagValue>
@@ -63,24 +63,24 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
   distinctIdHasSentFlagCalls: Record<string, string[]>
 
   /**
-   * Initialize a new PostHog client instance.
+   * Initialize a new Insights client instance.
    *
    * @example
    * ```ts
    * // Basic initialization
-   * const client = new PostHogBackendClient(
+   * const client = new InsightsBackendClient(
    *   'your-api-key',
-   *   { host: 'https://app.posthog.com' }
+   *   { host: 'https://app.insights.com' }
    * )
    * ```
    *
    * @example
    * ```ts
    * // With personal API key
-   * const client = new PostHogBackendClient(
+   * const client = new InsightsBackendClient(
    *   'your-api-key',
    *   {
-   *     host: 'https://app.posthog.com',
+   *     host: 'https://app.insights.com',
    *     personalApiKey: 'your-personal-api-key'
    *   }
    * )
@@ -88,10 +88,10 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    *
    * {@label Initialization}
    *
-   * @param apiKey - Your PostHog project API key
+   * @param apiKey - Your Insights project API key
    * @param options - Configuration options for the client
    */
-  constructor(apiKey: string, options: PostHogOptions = {}) {
+  constructor(apiKey: string, options: InsightsOptions = {}) {
     super(apiKey, options)
 
     this.options = options
@@ -158,7 +158,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * @param key - The property key to retrieve
    * @returns The stored property value or undefined if not found
    */
-  getPersistedProperty(key: PostHogPersistedProperty): any | undefined {
+  getPersistedProperty(key: InsightsPersistedProperty): any | undefined {
     return this._memoryStorage.getProperty(key)
   }
 
@@ -182,7 +182,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * @param key - The property key to set
    * @param value - The value to store (null to remove)
    */
-  setPersistedProperty(key: PostHogPersistedProperty, value: any | null): void {
+  setPersistedProperty(key: InsightsPersistedProperty, value: any | null): void {
     return this._memoryStorage.setProperty(key, value)
   }
 
@@ -207,7 +207,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * @param options - Fetch options
    * @returns Promise resolving to the fetch response
    */
-  fetch(url: string, options: PostHogFetchOptions): Promise<PostHogFetchResponse> {
+  fetch(url: string, options: InsightsFetchOptions): Promise<InsightsFetchResponse> {
     return this.options.fetch ? this.options.fetch(url, options) : fetch(url, options)
   }
 
@@ -218,7 +218,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * ```ts
    * // Get version
    * const version = client.getLibraryVersion()
-   * console.log(`Using PostHog SDK version: ${version}`)
+   * console.log(`Using Insights SDK version: ${version}`)
    * ```
    *
    * {@label Initialization}
@@ -236,7 +236,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * ```ts
    * // Get user agent
    * const userAgent = client.getCustomUserAgent()
-   * // Returns: "posthog-node/5.7.0"
+   * // Returns: "insights-node/5.7.0"
    * ```
    *
    * {@label Identification}
@@ -248,7 +248,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
   }
 
   /**
-   * Enable the PostHog client (opt-in).
+   * Enable the Insights client (opt-in).
    *
    * @example
    * ```ts
@@ -266,7 +266,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
   }
 
   /**
-   * Disable the PostHog client (opt-out).
+   * Disable the Insights client (opt-out).
    *
    * @example
    * ```ts
@@ -331,7 +331,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     }
     if (props.event === '$exception' && !props._originatedFromCaptureException) {
       this._logger.warn(
-        "Using `posthog.capture('$exception')` is unreliable because it does not attach required metadata. Use `posthog.captureException(error)` instead, which attaches required metadata automatically."
+        "Using `insights.capture('$exception')` is unreliable because it does not attach required metadata. Use `insights.captureException(error)` instead, which attaches required metadata automatically."
       )
     }
     this.addPendingPromise(
@@ -400,7 +400,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     }
     if (props.event === '$exception' && !props._originatedFromCaptureException) {
       this._logger.warn(
-        "Capturing a `$exception` event via `posthog.captureImmediate('$exception')` is unreliable because it does not attach required metadata. Use `posthog.captureExceptionImmediate(error)` instead, which attaches this metadata by default."
+        "Capturing a `$exception` event via `insights.captureImmediate('$exception')` is unreliable because it does not attach required metadata. Use `insights.captureExceptionImmediate(error)` instead, which attaches this metadata by default."
       )
     }
     return this.addPendingPromise(
@@ -1047,7 +1047,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     )
 
     if (!resolvedDistinctId) {
-      this._logger.warn('[PostHog] distinctId is required — pass it explicitly or use withContext()')
+      this._logger.warn('[Insights] distinctId is required — pass it explicitly or use withContext()')
       return undefined
     }
 
@@ -1198,7 +1198,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     )
     if (!resolvedDistinctId) {
       this._logger.warn(
-        '[PostHog] distinctId is required to get feature flags — pass it explicitly or use withContext()'
+        '[Insights] distinctId is required to get feature flags — pass it explicitly or use withContext()'
       )
       return {}
     }
@@ -1240,19 +1240,19 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * @param options - Optional configuration for flag evaluation
    * @returns Promise that resolves to flags and payloads
    */
-  async getAllFlagsAndPayloads(options?: AllFlagsOptions): Promise<PostHogFlagsAndPayloadsResponse>
-  async getAllFlagsAndPayloads(distinctId: string, options?: AllFlagsOptions): Promise<PostHogFlagsAndPayloadsResponse>
+  async getAllFlagsAndPayloads(options?: AllFlagsOptions): Promise<InsightsFlagsAndPayloadsResponse>
+  async getAllFlagsAndPayloads(distinctId: string, options?: AllFlagsOptions): Promise<InsightsFlagsAndPayloadsResponse>
   async getAllFlagsAndPayloads(
     distinctIdOrOptions?: string | AllFlagsOptions,
     options?: AllFlagsOptions
-  ): Promise<PostHogFlagsAndPayloadsResponse> {
+  ): Promise<InsightsFlagsAndPayloadsResponse> {
     const { distinctId: resolvedDistinctId, options: resolvedOptions } = this._resolveDistinctId(
       distinctIdOrOptions,
       options
     )
     if (!resolvedDistinctId) {
       this._logger.warn(
-        '[PostHog] distinctId is required to get feature flags and payloads — pass it explicitly or use withContext()'
+        '[Insights] distinctId is required to get feature flags and payloads — pass it explicitly or use withContext()'
       )
       return { featureFlags: {}, featureFlagPayloads: {} }
     }
@@ -1502,7 +1502,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     return false
   }
 
-  protected abstract initializeContext(): IPostHogContext | undefined
+  protected abstract initializeContext(): IInsightsContext | undefined
 
   /**
    * Run a function with specific context that will be applied to all events captured within that context.
@@ -1512,8 +1512,8 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    *
    * @example
    * ```ts
-   * posthog.withContext({ distinctId: 'user_123' }, () => {
-   *   posthog.capture({ event: 'button clicked' })
+   * insights.withContext({ distinctId: 'user_123' }, () => {
+   *   insights.capture({ event: 'button clicked' })
    * })
    * ```
    *
@@ -1539,8 +1539,8 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * @example
    * ```ts
    * // Get current context within a withContext block
-   * posthog.withContext({ distinctId: 'user_123' }, () => {
-   *   const context = posthog.getContext()
+   * insights.withContext({ distinctId: 'user_123' }, () => {
+   *   const context = insights.getContext()
    *   console.log(context?.distinctId) // 'user_123'
    * })
    * ```
@@ -1559,7 +1559,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
    * Uses `AsyncLocalStorage.enterWith()` to attach context to the current
    * async execution context. The context lives until that async context ends.
    *
-   * Must be called in the same async scope that makes PostHog calls.
+   * Must be called in the same async scope that makes Insights calls.
    * Calling this outside a request-scoped async context will leak context
    * across unrelated work. Prefer `withContext()` when you can wrap code
    * in a callback — it creates an isolated scope that cleans up automatically.
@@ -1572,7 +1572,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
   }
 
   /**
-   * Shutdown the PostHog client gracefully.
+   * Shutdown the Insights client gracefully.
    *
    * @example
    * ```ts
@@ -1597,14 +1597,14 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     return super._shutdown(shutdownTimeoutMs)
   }
 
-  private async _requestRemoteConfigPayload(flagKey: string): Promise<PostHogFetchResponse | undefined> {
+  private async _requestRemoteConfigPayload(flagKey: string): Promise<InsightsFetchResponse | undefined> {
     if (!this.options.personalApiKey) {
       return undefined
     }
 
     const url = `${this.host}/api/projects/@current/feature_flags/${flagKey}/remote_config?token=${encodeURIComponent(this.apiKey)}`
 
-    const options: PostHogFetchOptions = {
+    const options: InsightsFetchOptions = {
       method: 'GET',
       headers: {
         ...this.getCustomHeaders(),
@@ -1670,7 +1670,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     groups?: Record<string, string | number>,
     disableGeoip?: boolean,
     sendFeatureFlagsOptions?: SendFeatureFlagsOptions
-  ): Promise<PostHogFlagsResponse['featureFlags'] | undefined> {
+  ): Promise<InsightsFlagsResponse['featureFlags'] | undefined> {
     // Use properties directly from options if they exist
     const finalPersonProperties = sendFeatureFlagsOptions?.personProperties || {}
     const finalGroupProperties = sendFeatureFlagsOptions?.groupProperties || {}
@@ -1808,7 +1808,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     uuid?: EventMessage['uuid']
   ): void {
     if (!ErrorTracking.isPreviouslyCapturedError(error)) {
-      const syntheticException = new Error('PostHog syntheticException')
+      const syntheticException = new Error('Insights syntheticException')
       this.addPendingPromise(
         ErrorTracking.buildEventMessage(error, { syntheticException }, distinctId, additionalProperties).then((msg) =>
           this.capture({ ...msg, uuid })
@@ -1858,7 +1858,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
     additionalProperties?: Record<string | number, any>
   ): Promise<void> {
     if (!ErrorTracking.isPreviouslyCapturedError(error)) {
-      const syntheticException = new Error('PostHog syntheticException')
+      const syntheticException = new Error('Insights syntheticException')
       this.addPendingPromise(
         ErrorTracking.buildEventMessage(error, { syntheticException }, distinctId, additionalProperties).then((msg) =>
           this.captureImmediate(msg)
@@ -1870,8 +1870,8 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
   public async prepareEventMessage(props: EventMessage): Promise<{
     distinctId: string
     event: string
-    properties: PostHogEventProperties
-    options: PostHogCaptureOptions
+    properties: InsightsEventProperties
+    options: InsightsCaptureOptions
   }> {
     const { distinctId, event, properties, groups, sendFeatureFlags, timestamp, disableGeoip, uuid }: EventMessage =
       props
@@ -1958,7 +1958,7 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
           ...additionalProperties,
           ...(eventMessage.properties || {}),
           $groups: eventMessage.groups || groups,
-        } as PostHogEventProperties
+        } as InsightsEventProperties
         return props
       })
 

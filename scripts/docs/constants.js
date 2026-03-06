@@ -1,7 +1,7 @@
 const HOG_REF = '0.3';
 
 const PROPERTIES_EXAMPLE = `// Properties is a Record<string, Property> 
-// Below are PostHog's default properties, you can add your own properties during capture
+// Below are Insights's default properties, you can add your own properties during capture
 {
     $timestamp: '2024-05-29T17:32:07.202Z',
     $os: 'Mac OS X',

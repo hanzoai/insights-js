@@ -6,12 +6,12 @@ import path from 'path'
 
 export * from './config'
 
-export class PosthogWebpackPlugin {
+export class InsightsWebpackPlugin {
     resolvedConfig: ResolvedPluginConfig
     logger: Logger
 
     constructor(pluginConfig: PluginConfig) {
-        this.logger = createLogger('[PostHog Webpack]')
+        this.logger = createLogger('[Insights Webpack]')
         this.resolvedConfig = resolveConfig(pluginConfig)
         assertValue(
             this.resolvedConfig.personalApiKey,
@@ -37,15 +37,15 @@ export class PosthogWebpackPlugin {
                 await this.processSourceMaps(stats.compilation, this.resolvedConfig)
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : error
-                this.logger.error('Error running PostHog webpack plugin:', errorMessage)
+                this.logger.error('Error running Insights webpack plugin:', errorMessage)
             }
             return callback()
         }
 
         if (compiler.hooks) {
-            compiler.hooks.done.tapAsync('PosthogWebpackPlugin', onDone)
+            compiler.hooks.done.tapAsync('InsightsWebpackPlugin', onDone)
         } else {
-            throw new Error('PosthogWebpackPlugin is not compatible with webpack version < 5')
+            throw new Error('InsightsWebpackPlugin is not compatible with webpack version < 5')
         }
     }
 
@@ -89,11 +89,11 @@ export class PosthogWebpackPlugin {
         await spawnLocal(config.cliBinaryPath, args, {
             cwd: process.cwd(),
             env: {
-                RUST_LOG: `posthog_cli=${config.logLevel}`,
+                RUST_LOG: `insights_cli=${config.logLevel}`,
                 ...process.env,
-                POSTHOG_CLI_HOST: config.host,
-                POSTHOG_CLI_API_KEY: config.personalApiKey,
-                POSTHOG_CLI_PROJECT_ID: config.projectId,
+                INSIGHTS_CLI_HOST: config.host,
+                INSIGHTS_CLI_API_KEY: config.personalApiKey,
+                INSIGHTS_CLI_PROJECT_ID: config.projectId,
             },
             stdio: 'inherit',
         })

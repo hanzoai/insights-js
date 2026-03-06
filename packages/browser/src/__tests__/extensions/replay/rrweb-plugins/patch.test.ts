@@ -10,6 +10,6 @@ describe('patch', () => {
     it('marks a function as wrapped', () => {
         patch(fakeWindow, 'fakeFetch', () => () => {})
         // eslint-disable-next-line compat/compat
-        expect((fakeWindow.fakeFetch as any).__posthog_wrapped__).toBe(true)
+        expect((fakeWindow.fakeFetch as any).__insights_wrapped__).toBe(true)
     })
 })

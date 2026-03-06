@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PostHog Feature Flag Misconfiguration Test</title>
+    <title>Insights Feature Flag Misconfiguration Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -83,16 +83,16 @@
 </head>
 
 <body>
-    <h1>PostHog Feature Flag Misconfiguration Test</h1>
-    <p>This page tests feature flag misconfiguration detection where flags are called before PostHog has loaded.</p>
+    <h1>Insights Feature Flag Misconfiguration Test</h1>
+    <p>This page tests feature flag misconfiguration detection where flags are called before Insights has loaded.</p>
 
     <div class="scenario">
         <h3>Test Scenarios:</h3>
         <p>These tests simulate common feature flag misconfigurations:</p>
         <ul>
-            <li><strong>Flag before init</strong>: Calling isFeatureEnabled() before posthog.init()</li>
+            <li><strong>Flag before init</strong>: Calling isFeatureEnabled() before insights.init()</li>
             <li><strong>Multiple flags before init</strong>: Several flag calls before initialization</li>
-            <li><strong>Proper usage</strong>: Flags called after PostHog is properly loaded</li>
+            <li><strong>Proper usage</strong>: Flags called after Insights is properly loaded</li>
         </ul>
         <p><strong>Expected result</strong>: SDK Doctor should detect feature flag misconfigurations</p>
     </div>
@@ -112,8 +112,8 @@
     <div id="log"></div>
     <script>
         // Configuration
-        const API_KEY = 'YOUR_POSTHOG_PROJECT_API_KEY'; // Replace with your PostHog project API key (format: phc_...)
-        const API_HOST = 'http://localhost:8010'; // Replace with your PostHog instance URL
+        const API_KEY = 'YOUR_INSIGHTS_PROJECT_API_KEY'; // Replace with your Insights project API key (format: phc_...)
+        const API_HOST = 'http://localhost:8010'; // Replace with your Insights instance URL
 
         // Track test state
         let testsRun = 0;
@@ -124,11 +124,11 @@
         // Dynamic version fetching
         let currentVersion = '1.260.2'; // Fallback
 
-        // Fetch latest PostHog JS versions from changelog (much simpler!)
+        // Fetch latest Insights JS versions from changelog (much simpler!)
         async function fetchLatestVersions() {
             try {
-                log('🔄 Fetching latest PostHog JS SDK versions from CHANGELOG.md...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-js/main/packages/browser/CHANGELOG.md');
+                log('🔄 Fetching latest Insights JS SDK versions from CHANGELOG.md...', 'info');
+                const response = await fetch('https://raw.githubusercontent.com/Insights/@hanzo/insights/main/packages/browser/CHANGELOG.md');
                 if (response.ok) {
                     const changelogText = await response.text();
 
@@ -155,13 +155,13 @@
             }
         }
 
-        // Initialize PostHog with the latest version
-        function initPostHogWithLatestVersion() {
-            // Initialize PostHog snippet
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+        // Initialize Insights with the latest version
+        function initInsightsWithLatestVersion() {
+            // Initialize Insights snippet
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
             // Initialize with the latest version
-            posthog.init(API_KEY, {
+            insights.init(API_KEY, {
                 api_host: API_HOST,
                 person_profiles: 'identified_only',
                 debug: true,
@@ -172,15 +172,15 @@
 
             // Override version to report the fetched latest version
             setTimeout(() => {
-                if (window.posthog && window.posthog.capture) {
-                    const originalCapture = window.posthog.capture;
-                    window.posthog.capture = function (...args) {
+                if (window.insights && window.insights.capture) {
+                    const originalCapture = window.insights.capture;
+                    window.insights.capture = function (...args) {
                         if (args[1] && typeof args[1] === 'object') {
                             args[1].$lib_version = currentVersion;
                         }
                         return originalCapture.apply(this, args);
                     };
-                    log(`✅ PostHog initialized with version: ${currentVersion}`, 'success');
+                    log(`✅ Insights initialized with version: ${currentVersion}`, 'success');
                 }
             }, 1000);
         }
@@ -206,7 +206,7 @@
         // Global counter to ensure unique session IDs
         let sessionCounter = 0;
 
-        // Generate truly unique PostHog-style session IDs
+        // Generate truly unique Insights-style session IDs
         function generateSessionId() {
             sessionCounter++;
             const timestamp = (Date.now() + sessionCounter * 1000).toString(16); // Add counter to timestamp
@@ -286,7 +286,7 @@
             currentDistinctId = null;
 
             log('=== 🚨 Testing Flag Before Init ===', 'warning');
-            log('This will simulate feature flag called BEFORE PostHog initialization', 'info');
+            log('This will simulate feature flag called BEFORE Insights initialization', 'info');
             log('');
 
             try {
@@ -309,20 +309,20 @@
                 updateCounts();
 
                 log(`❌ Flag called: 'test-flag-before-init' before init`, 'error');
-                log('🚨 MISCONFIGURATION: Flag called before PostHog loaded!', 'error');
+                log('🚨 MISCONFIGURATION: Flag called before Insights loaded!', 'error');
 
                 // Wait a moment
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                // Now simulate PostHog initialization (after the flag was called)
+                // Now simulate Insights initialization (after the flag was called)
                 log('', '');
-                log('2️⃣ Now simulating PostHog initialization (too late!)...', 'info');
+                log('2️⃣ Now simulating Insights initialization (too late!)...', 'info');
                 await sendMisconfigEvent('$pageview', sessionId, {
                     init_timing: 'after_flag_call',
                     scenario: 'flag_before_init_test'
                 });
 
-                log('✅ PostHog initialization simulated', 'success');
+                log('✅ Insights initialization simulated', 'success');
                 log('💡 But flag was already called before init - misconfiguration detected!', 'warning');
                 log('📊 SDK Doctor should detect: "Feature flag misconfiguration"', 'info');
 
@@ -346,20 +346,20 @@
             currentDistinctId = null;
 
             log('=== ✅ Testing Proper Flag Usage ===', 'success');
-            log('This will simulate proper PostHog initialization FIRST, then flag calls', 'info');
+            log('This will simulate proper Insights initialization FIRST, then flag calls', 'info');
             log('');
 
             try {
                 const sessionId = generateSessionId();
 
-                // Simulate PostHog initialization first
-                log('1️⃣ Simulating PostHog initialization...', 'info');
+                // Simulate Insights initialization first
+                log('1️⃣ Simulating Insights initialization...', 'info');
                 await sendMisconfigEvent('$pageview', sessionId, {
                     init_timing: 'proper_init_first',
                     scenario: 'proper_flag_usage_test'
                 });
 
-                log('✅ PostHog initialization simulated', 'success');
+                log('✅ Insights initialization simulated', 'success');
 
                 // Wait a moment to simulate loading time
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -372,7 +372,7 @@
                 for (let i = 0; i < flagsToTest.length; i++) {
                     const flagName = flagsToTest[i];
 
-                    // Simulate proper flag call AFTER PostHog initialization
+                    // Simulate proper flag call AFTER Insights initialization
                     await sendMisconfigEvent('$feature_flag_called', sessionId, {
                         $feature_flag: flagName,
                         $feature_flag_response: Math.random() > 0.5, // Random true/false
@@ -390,7 +390,7 @@
                 updateCounts();
 
                 log('');
-                log('🎉 PROPER USAGE: All flags called after PostHog initialization!', 'success');
+                log('🎉 PROPER USAGE: All flags called after Insights initialization!', 'success');
                 log('📊 SDK Doctor should show: "Feature flag health is good"', 'info');
                 log('🔑 Key pattern: Flags called AFTER $pageview (timing-based, not bootstrap-dependent)', 'info');
 
@@ -414,7 +414,7 @@
             currentDistinctId = null;
 
             log('=== 🚨 Testing Multiple Flags Before Init ===', 'error');
-            log('This will simulate SEVERAL flags called before initializing PostHog', 'info');
+            log('This will simulate SEVERAL flags called before initializing Insights', 'info');
             log('');
 
             try {
@@ -422,7 +422,7 @@
                 log(`🔍 Using session ID: ${sessionId}`, 'info');
                 log(`🔍 Using distinct_id: ${getOrGenerateDistinctId()}`, 'info');
 
-                // Simulate multiple feature flags called BEFORE initializing PostHog
+                // Simulate multiple feature flags called BEFORE initializing Insights
                 log('1️⃣ Simulating multiple feature flags before initialization...', 'warning');
 
                 const flags = [
@@ -460,16 +460,16 @@
                 // Wait a moment
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
-                // Now simulate PostHog initialization (too late!)
+                // Now simulate Insights initialization (too late!)
                 log('', '');
-                log('2️⃣ Finally simulating PostHog initialization (way too late!)...', 'info');
+                log('2️⃣ Finally simulating Insights initialization (way too late!)...', 'info');
                 await sendMisconfigEvent('$pageview', sessionId, {
                     init_timing: 'after_multiple_flag_calls',
                     scenario: 'multiple_flags_before_init_test',
                     flags_called_before: flags.length
                 });
 
-                log('✅ PostHog initialization simulated', 'success');
+                log('✅ Insights initialization simulated', 'success');
                 log(`💥 But ${flags.length} flags were already called before init!`, 'error');
                 log('📊 SDK Doctor should detect: "Multiple feature flag misconfigurations"', 'info');
                 log(`📈 Expected detection count: ${flags.length} flags`, 'warning');
@@ -488,14 +488,14 @@
         window.addEventListener('load', async () => {
             log('🚀 Feature flag misconfiguration test loaded', 'info');
             await fetchLatestVersions();
-            log(`Using PostHog JS SDK version: ${currentVersion}`, 'info');
+            log(`Using Insights JS SDK version: ${currentVersion}`, 'info');
 
-            // Initialize PostHog with the fetched latest version
-            initPostHogWithLatestVersion();
+            // Initialize Insights with the fetched latest version
+            initInsightsWithLatestVersion();
 
             log('Ready to test feature flag misconfigurations!', 'success');
             log('📋 Available tests:', 'info');
-            log('  • Flag Before Init - Calls flag before posthog.init()', 'info');
+            log('  • Flag Before Init - Calls flag before insights.init()', 'info');
             log('  • Multiple Flags Before Init - Calls several flags before init', 'info');
             log('  • Proper Flag Usage - Initializes first, then calls flags', 'info');
             log('');

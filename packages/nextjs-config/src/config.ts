@@ -1,18 +1,18 @@
 import type { NextConfig } from 'next'
-import { PosthogWebpackPlugin, PluginConfig, resolveConfig, ResolvedPluginConfig } from '@hanzo/insights-webpack-plugin'
+import { InsightsWebpackPlugin, PluginConfig, resolveConfig, ResolvedPluginConfig } from '@hanzo/insights-webpack-plugin'
 import { hasCompilerHook, isTurbopackEnabled, processSourceMaps } from './utils'
 
 type NextFuncConfig = (phase: string, { defaultConfig }: { defaultConfig: NextConfig }) => NextConfig
 type NextAsyncConfig = (phase: string, { defaultConfig }: { defaultConfig: NextConfig }) => Promise<NextConfig>
 type UserProvidedConfig = NextConfig | NextFuncConfig | NextAsyncConfig
 
-export function withPostHogConfig(userNextConfig: UserProvidedConfig, posthogConfig: PluginConfig): NextConfig {
-  const resolvedConfig = resolveConfig(posthogConfig)
+export function withInsightsConfig(userNextConfig: UserProvidedConfig, insightsConfig: PluginConfig): NextConfig {
+  const resolvedConfig = resolveConfig(insightsConfig)
   const sourceMapEnabled = resolvedConfig.sourcemaps.enabled
   const isCompilerHookSupported = hasCompilerHook()
   const turbopackEnabled = isTurbopackEnabled()
   if (turbopackEnabled && !isCompilerHookSupported) {
-    console.warn('[@posthog/nextjs-config] Turbopack support is only available with next version >= 15.4.1')
+    console.warn('[@insights/nextjs-config] Turbopack support is only available with next version >= 15.4.1')
   }
   return async (phase: string, { defaultConfig }: { defaultConfig: NextConfig }) => {
     const {
@@ -53,9 +53,9 @@ function resolveUserConfig(
   }
 }
 
-function withWebpackConfig(userWebpackConfig: NextConfig['webpack'], posthogConfig: ResolvedPluginConfig) {
+function withWebpackConfig(userWebpackConfig: NextConfig['webpack'], insightsConfig: ResolvedPluginConfig) {
   const defaultWebpackConfig = userWebpackConfig || ((config: any) => config)
-  const sourceMapEnabled = posthogConfig.sourcemaps.enabled
+  const sourceMapEnabled = insightsConfig.sourcemaps.enabled
   const turbopackEnabled = isTurbopackEnabled()
   return (config: any, options: any) => {
     const webpackConfig = defaultWebpackConfig(config, options)
@@ -63,17 +63,17 @@ function withWebpackConfig(userWebpackConfig: NextConfig['webpack'], posthogConf
     if (sourceMapEnabled) {
       if (!turbopackEnabled) {
         webpackConfig.plugins = webpackConfig.plugins || []
-        let currentConfig = posthogConfig
+        let currentConfig = insightsConfig
         if (isServer) {
           currentConfig = {
-            ...posthogConfig,
+            ...insightsConfig,
             sourcemaps: {
-              ...posthogConfig.sourcemaps,
+              ...insightsConfig.sourcemaps,
               deleteAfterUpload: false,
             },
           }
         }
-        webpackConfig.plugins.push(new PosthogWebpackPlugin(currentConfig))
+        webpackConfig.plugins.push(new InsightsWebpackPlugin(currentConfig))
       }
     }
     return webpackConfig
@@ -82,9 +82,9 @@ function withWebpackConfig(userWebpackConfig: NextConfig['webpack'], posthogConf
 
 function withCompilerConfig(
   userCompilerConfig: NextConfig['compiler'],
-  posthogConfig: ResolvedPluginConfig
+  insightsConfig: ResolvedPluginConfig
 ): NextConfig['compiler'] {
-  const sourceMapEnabled = posthogConfig.sourcemaps.enabled
+  const sourceMapEnabled = insightsConfig.sourcemaps.enabled
   const turbopackEnabled = isTurbopackEnabled()
   if (sourceMapEnabled && turbopackEnabled && hasCompilerHook()) {
     const newConfig = userCompilerConfig || {}
@@ -92,7 +92,7 @@ function withCompilerConfig(
     newConfig.runAfterProductionCompile = async (config: { distDir: string; projectDir: string }) => {
       await userCompilerHook?.(config)
       console.debug('Processing source maps from compilation hook...')
-      await processSourceMaps(posthogConfig, config.distDir)
+      await processSourceMaps(insightsConfig, config.distDir)
     }
     return newConfig
   }

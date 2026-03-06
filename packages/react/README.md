@@ -1,65 +1,65 @@
-# @posthog/react
+# @hanzo/react
 
-React components and hooks for PostHog analytics integration.
+React components and hooks for Insights analytics integration.
 
-[SEE FULL DOCS](https://posthog.com/docs/libraries/react)
+[SEE FULL DOCS](https://insights.hanzo.ai/docs/libraries/react)
 
 ## Installation
 
 ```bash
-npm install @posthog/react posthog-js
+npm install @hanzo/react @hanzo/insights
 ```
 
 ## Usage
 
 ### Setting up the Provider
 
-Wrap your application with `PostHogProvider` to make the PostHog client available throughout your app:
+Wrap your application with `InsightsProvider` to make the Insights client available throughout your app:
 
 ```tsx
-import { PostHogProvider } from '@posthog/react'
+import { InsightsProvider } from '@hanzo/react'
 
 function App() {
     return (
-        <PostHogProvider apiKey="<YOUR_PROJECT_API_KEY>" options={{ api_host: 'https://us.i.posthog.com' }}>
+        <InsightsProvider apiKey="<YOUR_PROJECT_API_KEY>" options={{ api_host: 'https://us.i.insights.hanzo.ai' }}>
             <YourApp />
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }
 ```
 
-Or pass an existing PostHog client instance:
+Or pass an existing Insights client instance:
 
 ```tsx
-import posthog from 'posthog-js'
-import { PostHogProvider } from '@posthog/react'
+import insights from '@hanzo/insights'
+import { InsightsProvider } from '@hanzo/react'
 
 // Initialize your client
-posthog.init('<YOUR_PROJECT_API_KEY>', { api_host: 'https://us.i.posthog.com' })
+insights.init('<YOUR_PROJECT_API_KEY>', { api_host: 'https://us.i.insights.hanzo.ai' })
 
 function App() {
     return (
-        <PostHogProvider client={posthog}>
+        <InsightsProvider client={insights}>
             <YourApp />
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }
 ```
 
 ### Hooks
 
-#### usePostHog
+#### useInsights
 
-Access the PostHog client instance to capture events, identify users, etc.
+Access the Insights client instance to capture events, identify users, etc.
 
 ```tsx
-import { usePostHog } from '@posthog/react'
+import { useInsights } from '@hanzo/react'
 
 function MyComponent() {
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     const handleClick = () => {
-        posthog.capture('button_clicked', { button_name: 'signup' })
+        insights.capture('button_clicked', { button_name: 'signup' })
     }
 
     return <button onClick={handleClick}>Sign Up</button>
@@ -71,7 +71,7 @@ function MyComponent() {
 Check if a feature flag is enabled for the current user.
 
 ```tsx
-import { useFeatureFlagEnabled } from '@posthog/react'
+import { useFeatureFlagEnabled } from '@hanzo/react'
 
 function MyComponent() {
     const isEnabled = useFeatureFlagEnabled('new-feature')
@@ -88,7 +88,7 @@ function MyComponent() {
 Get the variant key for a multivariate feature flag.
 
 ```tsx
-import { useFeatureFlagVariantKey } from '@posthog/react'
+import { useFeatureFlagVariantKey } from '@hanzo/react'
 
 function MyComponent() {
     const variant = useFeatureFlagVariantKey('experiment-flag')
@@ -108,7 +108,7 @@ function MyComponent() {
 Get the payload associated with a feature flag.
 
 ```tsx
-import { useFeatureFlagPayload } from '@posthog/react'
+import { useFeatureFlagPayload } from '@hanzo/react'
 
 function MyComponent() {
     const payload = useFeatureFlagPayload('feature-with-payload')
@@ -122,7 +122,7 @@ function MyComponent() {
 Get all active feature flags for the current user.
 
 ```tsx
-import { useActiveFeatureFlags } from '@posthog/react'
+import { useActiveFeatureFlags } from '@hanzo/react'
 
 function MyComponent() {
     const activeFlags = useActiveFeatureFlags()
@@ -139,60 +139,60 @@ function MyComponent() {
 
 ### Components
 
-#### PostHogFeature
+#### InsightsFeature
 
 A component that renders content based on a feature flag's value. Automatically tracks feature views and interactions.
 
 ```tsx
-import { PostHogFeature } from '@posthog/react'
+import { InsightsFeature } from '@hanzo/react'
 
 function MyComponent() {
     return (
-        <PostHogFeature flag="new-cta" fallback={<OldButton />}>
+        <InsightsFeature flag="new-cta" fallback={<OldButton />}>
             <NewButton />
-        </PostHogFeature>
+        </InsightsFeature>
     )
 }
 
 // With variant matching
 function MyComponent() {
     return (
-        <PostHogFeature flag="experiment" match="test" fallback={<ControlVersion />}>
+        <InsightsFeature flag="experiment" match="test" fallback={<ControlVersion />}>
             <TestVersion />
-        </PostHogFeature>
+        </InsightsFeature>
     )
 }
 
 // With payload as render function
 function MyComponent() {
     return (
-        <PostHogFeature flag="banner-config">
+        <InsightsFeature flag="banner-config">
             {(payload) => <Banner title={payload.title} color={payload.color} />}
-        </PostHogFeature>
+        </InsightsFeature>
     )
 }
 ```
 
-#### PostHogErrorBoundary
+#### InsightsErrorBoundary
 
-An error boundary that captures React errors and reports them to PostHog.
+An error boundary that captures React errors and reports them to Insights.
 
 ```tsx
-import { PostHogErrorBoundary } from '@posthog/react'
+import { InsightsErrorBoundary } from '@hanzo/react'
 
 function App() {
     return (
-        <PostHogProvider apiKey="<YOUR_PROJECT_API_KEY>">
-            <PostHogErrorBoundary>
+        <InsightsProvider apiKey="<YOUR_PROJECT_API_KEY>">
+            <InsightsErrorBoundary>
                 <YourApp />
-            </PostHogErrorBoundary>
-        </PostHogProvider>
+            </InsightsErrorBoundary>
+        </InsightsProvider>
     )
 }
 ```
 
-Please see the main [PostHog docs](https://www.posthog.com/docs).
+Please see the main [Insights docs](https://www.insights.hanzo.ai/docs).
 
 ## Questions?
 
-### [Check out our community page.](https://posthog.com/posts)
+### [Check out our community page.](https://insights.hanzo.ai/posts)

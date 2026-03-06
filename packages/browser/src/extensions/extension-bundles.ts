@@ -2,15 +2,15 @@
  * Pre-grouped extension bundles for tree-shaking support.
  *
  * Use these with `__extensionClasses` to control which extensions are included in your bundle.
- * The default `posthog-js` entrypoint includes all extensions. When using `posthog-js/slim`,
+ * The default `@hanzo/insights` entrypoint includes all extensions. When using `@hanzo/insights/slim`,
  * you can import only the bundles you need:
  *
  * @example
  * ```ts
- * import posthog from 'posthog-js/slim'
- * import { ReplayExtensions, AnalyticsExtensions } from 'posthog-js/extensions'
+ * import insights from '@hanzo/insights/slim'
+ * import { ReplayExtensions, AnalyticsExtensions } from '@hanzo/insights/extensions'
  *
- * posthog.init('ph_key', {
+ * insights.init('ph_key', {
  *   __extensionClasses: {
  *     ...ReplayExtensions,
  *     ...AnalyticsExtensions,
@@ -29,11 +29,11 @@ import { TracingHeaders } from './tracing-headers'
 import { WebVitalsAutocapture } from './web-vitals'
 import { SessionRecording } from './replay/session-recording'
 import { Heatmaps } from '../heatmaps'
-import { PostHogProductTours } from '../posthog-product-tours'
+import { InsightsProductTours } from '../insights-product-tours'
 import { SiteApps } from '../site-apps'
-import { PostHogConfig } from '../types'
+import { InsightsConfig } from '../types'
 
-type ExtensionClasses = NonNullable<PostHogConfig['__extensionClasses']>
+type ExtensionClasses = NonNullable<InsightsConfig['__extensionClasses']>
 
 /** Session replay and related extensions. */
 export const SessionReplayExtensions = {
@@ -56,7 +56,7 @@ export const ErrorTrackingExtensions = {
 
 /** In-app product tours. */
 export const ProductToursExtensions = {
-    productTours: PostHogProductTours,
+    productTours: InsightsProductTours,
 } as const satisfies ExtensionClasses
 
 /** Site apps support. */
@@ -69,7 +69,7 @@ export const TracingExtensions = {
     tracingHeaders: TracingHeaders,
 } as const satisfies ExtensionClasses
 
-/** All extensions — equivalent to the default `posthog-js` bundle. */
+/** All extensions — equivalent to the default `@hanzo/insights` bundle. */
 export const AllExtensions = {
     ...SessionReplayExtensions,
     ...AnalyticsExtensions,

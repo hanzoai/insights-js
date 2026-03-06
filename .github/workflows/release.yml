@@ -50,13 +50,13 @@ jobs:
         name: Notify Slack - Approval Needed
         needs: check-changesets
         if: needs.check-changesets.outputs.has-changesets == 'true'
-        uses: PostHog/.github/.github/workflows/notify-approval-needed.yml@main
+        uses: Insights/.github/.github/workflows/notify-approval-needed.yml@main
         with:
             slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
             slack_user_group_id: ${{ vars.GROUP_CLIENT_LIBRARIES_SLACK_GROUP_ID }}
         secrets:
             slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
-            posthog_project_api_key: ${{ secrets.POSTHOG_PROJECT_API_KEY }}
+            insights_project_api_key: ${{ secrets.INSIGHTS_PROJECT_API_KEY }}
 
     version-bump:
         name: Bump versions and commit to main
@@ -73,7 +73,7 @@ jobs:
         steps:
             - name: Notify Slack - Approved
               continue-on-error: true # Don't block release if Slack notification fails
-              uses: PostHog/.github/.github/actions/slack-thread-reply@main
+              uses: Insights/.github/.github/actions/slack-thread-reply@main
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
@@ -85,8 +85,8 @@ jobs:
               id: releaser
               uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
               with:
-                  app-id: ${{ secrets.GH_APP_POSTHOG_JS_RELEASER_APP_ID }}
-                  private-key: ${{ secrets.GH_APP_POSTHOG_JS_RELEASER_PRIVATE_KEY }} # Secrets available only inside the `NPM Release` environment, requires approval from a maintainer
+                  app-id: ${{ secrets.GH_APP_INSIGHTS_JS_RELEASER_APP_ID }}
+                  private-key: ${{ secrets.GH_APP_INSIGHTS_JS_RELEASER_PRIVATE_KEY }} # Secrets available only inside the `NPM Release` environment, requires approval from a maintainer
 
             - name: Checkout repository
               uses: actions/checkout@v4
@@ -105,8 +105,8 @@ jobs:
               with:
                   build: false
 
-            - name: Build @posthog-tooling/changelog
-              run: pnpm turbo --filter=@posthog-tooling/changelog build
+            - name: Build @insights-tooling/changelog
+              run: pnpm turbo --filter=@insights-tooling/changelog build
 
             - name: Update versions and changelogs
               run: |
@@ -165,7 +165,7 @@ jobs:
             - name: Notify Slack - Rejected
               if: steps.check-rejection.outputs.was_rejected == 'true'
               continue-on-error: true
-              uses: PostHog/.github/.github/actions/slack-thread-reply@main
+              uses: Insights/.github/.github/actions/slack-thread-reply@main
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
@@ -188,19 +188,19 @@ jobs:
             fail-fast: false
             matrix:
                 package:
-                    - name: posthog-react-native
-                    - name: posthog-node
-                    - name: posthog-js-lite
-                    - name: posthog-js
-                    - name: '@posthog/core'
-                    - name: '@posthog/react'
-                    - name: '@posthog/ai'
-                    - name: '@posthog/convex'
-                    - name: '@posthog/nextjs-config'
-                    - name: '@posthog/nuxt'
-                    - name: '@posthog/rollup-plugin'
-                    - name: '@posthog/types'
-                    - name: '@posthog/webpack-plugin'
+                    - name: @hanzo/insights-react-native
+                    - name: @hanzo/insights-node
+                    - name: @hanzo/insights-lite
+                    - name: @hanzo/insights
+                    - name: '@hanzo/core'
+                    - name: '@hanzo/react'
+                    - name: '@hanzo/ai'
+                    - name: '@hanzo/convex'
+                    - name: '@hanzo/nextjs-config'
+                    - name: '@hanzo/nuxt'
+                    - name: '@hanzo/rollup-plugin'
+                    - name: '@hanzo/types'
+                    - name: '@hanzo/webpack-plugin'
 
         steps:
             - name: Checkout repository
@@ -228,7 +228,7 @@ jobs:
 
             - name: Check ${{ matrix.package.name }} version and detect an update
               id: check-package-version
-              uses: PostHog/check-package-version@v2.1.0
+              uses: Insights/check-package-version@v2.1.0
               with:
                   path: ${{ steps.get-package-path.outputs.path }}
 
@@ -268,7 +268,7 @@ jobs:
                     --method POST \
                     -H "Accept: application/vnd.github+json" \
                     -H "X-GitHub-Api-Version: 2022-11-28" \
-                    /repos/posthog/posthog-js/releases \
+                    /repos/insights/@hanzo/insights/releases \
                     -f tag_name="${{ matrix.package.name }}@${{ steps.check-package-version.outputs.committed-version }}" \
                     -f target_commitish='main' \
                     -f name="${{ matrix.package.name }}@${{ steps.check-package-version.outputs.committed-version }}" \
@@ -278,9 +278,9 @@ jobs:
                     -F generate_release_notes=false
 
             ########################################################
-            ############## posthog-js auto-update ##################
-            - name: Dispatch posthog upgrade for posthog-js
-              if: matrix.package.name == 'posthog-js' && steps.check-package-version.outputs.is-new-version == 'true'
+            ############## @hanzo/insights auto-update ##################
+            - name: Dispatch insights upgrade for @hanzo/insights
+              if: matrix.package.name == '@hanzo/insights' && steps.check-package-version.outputs.is-new-version == 'true'
               env:
                   PACKAGE_NAME: ${{ matrix.package.name }}
                   PACKAGE_VERSION: ${{ steps.check-package-version.outputs.committed-version }}
@@ -289,7 +289,7 @@ jobs:
                   curl -f -sS -X POST \
                        -H "Accept: application/vnd.github+json" \
                        -H "Authorization: Bearer $GITHUB_TOKEN" \
-                       https://api.github.com/repos/posthog/posthog-js/actions/workflows/posthog-upgrade.yml/dispatches \
+                       https://api.github.com/repos/insights/@hanzo/insights/actions/workflows/insights-upgrade.yml/dispatches \
                        -d "$(jq -n \
                          --arg ref "main" \
                          --arg package_name "$PACKAGE_NAME" \
@@ -297,8 +297,8 @@ jobs:
                          '{ref: $ref, inputs: {package_name: $package_name, package_version: $package_version}}' \
                        )"
 
-            - name: Dispatch posthog.com upgrade for ${{ matrix.package.name }}
-              if: matrix.package.name == '@posthog/types' && steps.check-package-version.outputs.is-new-version == 'true'
+            - name: Dispatch insights.hanzo.ai upgrade for ${{ matrix.package.name }}
+              if: matrix.package.name == '@hanzo/types' && steps.check-package-version.outputs.is-new-version == 'true'
               env:
                   PACKAGE_NAME: ${{ matrix.package.name }}
                   PACKAGE_VERSION: ${{ steps.check-package-version.outputs.committed-version }}
@@ -307,7 +307,7 @@ jobs:
                   curl -f -sS -X POST \
                        -H "Accept: application/vnd.github+json" \
                        -H "Authorization: Bearer $GITHUB_TOKEN" \
-                       https://api.github.com/repos/posthog/posthog-js/actions/workflows/posthog-com-upgrade.yml/dispatches \
+                       https://api.github.com/repos/insights/@hanzo/insights/actions/workflows/insights-com-upgrade.yml/dispatches \
                        -d "$(jq -n \
                          --arg ref "main" \
                          --arg package_name "$PACKAGE_NAME" \
@@ -317,13 +317,13 @@ jobs:
 
             ####################################################
             # Notify ourselves in case of a failure here
-            # https://us.posthog.com/project/11213/functions/019ae9c0-03ee-0000-2f32-971f64be8ffe
-            - name: Send failure event to PostHog
+            # https://us.insights.hanzo.ai/project/11213/functions/019ae9c0-03ee-0000-2f32-971f64be8ffe
+            - name: Send failure event to Insights
               if: ${{ failure() }}
-              uses: PostHog/posthog-github-action@v0.1
+              uses: Insights/insights-github-action@v0.1
               with:
-                  posthog-token: '${{ secrets.POSTHOG_PROJECT_API_KEY }}'
-                  event: 'posthog-js-github-release-workflow-failure'
+                  insights-token: '${{ secrets.INSIGHTS_PROJECT_API_KEY }}'
+                  event: '@hanzo/insights-github-release-workflow-failure'
                   properties: >-
                       {
                         "commitSha": "${{ github.sha }}",
@@ -336,7 +336,7 @@ jobs:
             - name: Notify Slack - Failed
               continue-on-error: true # Slack failure shouldn't mark release as failed
               if: ${{ failure() && needs.notify-approval-needed.outputs.slack_ts != '' }}
-              uses: PostHog/.github/.github/actions/slack-thread-reply@main
+              uses: Insights/.github/.github/actions/slack-thread-reply@main
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
@@ -355,7 +355,7 @@ jobs:
 
             - name: Notify Slack - Released
               continue-on-error: true # Slack failure shouldn't mark release as failed
-              uses: PostHog/.github/.github/actions/slack-thread-reply@main
+              uses: Insights/.github/.github/actions/slack-thread-reply@main
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}

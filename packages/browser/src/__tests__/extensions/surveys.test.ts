@@ -16,16 +16,16 @@ import {
     SurveySchedule,
     SurveyType,
     SurveyWidgetType,
-} from '../../posthog-surveys-types'
+} from '../../insights-surveys-types'
 
 import { afterAll, beforeAll, beforeEach } from '@jest/globals'
 import '@testing-library/jest-dom'
 import * as Preact from 'preact'
 import { useEffect, useRef, useState } from 'preact/hooks'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { FlagsResponse } from '../../types'
 import { SURVEY_IN_PROGRESS_PREFIX } from '../../utils/survey-utils'
-import { createMockPostHog } from '../helpers/posthog-instance'
+import { createMockInsights } from '../helpers/insights-instance'
 
 declare const global: any
 
@@ -41,7 +41,7 @@ describe('survey display logic', () => {
         const surveyId = 'randomSurveyId'
         const { shadow } = retrieveSurveyShadow({ id: surveyId, appearance: {}, type: SurveyType.Popover })
         expect(shadow.mode).toBe('open')
-        expect(shadow.host.className).toBe(`PostHogSurvey-${surveyId}`)
+        expect(shadow.host.className).toBe(`InsightsSurvey-${surveyId}`)
     })
 
     const mockSurveys: Survey[] = [
@@ -76,7 +76,7 @@ describe('survey display logic', () => {
         },
     ]
 
-    const mockPostHog = createMockPostHog({
+    const mockInsights = createMockInsights({
         surveys: {
             getSurveys: jest.fn().mockImplementation((callback) => callback(mockSurveys)),
         },
@@ -90,12 +90,12 @@ describe('survey display logic', () => {
     test('callSurveysAndEvaluateDisplayLogic runs on interval irrespective of url change', () => {
         jest.useFakeTimers()
         jest.spyOn(global, 'setInterval')
-        generateSurveys(mockPostHog, true)
-        expect(mockPostHog.surveys.getSurveys).toBeCalledTimes(1)
+        generateSurveys(mockInsights, true)
+        expect(mockInsights.surveys.getSurveys).toBeCalledTimes(1)
         expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 1000)
 
         jest.advanceTimersByTime(1000)
-        expect(mockPostHog.surveys.getSurveys).toBeCalledTimes(2)
+        expect(mockInsights.surveys.getSurveys).toBeCalledTimes(2)
         expect(setInterval).toHaveBeenLastCalledWith(expect.any(Function), 1000)
     })
 })
@@ -130,7 +130,7 @@ describe('usePopupVisibility', () => {
         current_iteration_start_date: null,
         feature_flag_keys: null,
     }
-    const mockPostHog = createMockPostHog({
+    const mockInsights = createMockInsights({
         getActiveMatchingSurveys: jest.fn().mockImplementation((callback) => callback([mockSurvey])),
         get_session_replay_url: jest.fn(),
         capture: jest.fn().mockImplementation((eventName) => eventName),
@@ -139,13 +139,13 @@ describe('usePopupVisibility', () => {
     const removeSurvey = jest.fn()
 
     test('should set isPopupVisible to true immediately if delay is 0', () => {
-        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 0, false, removeSurvey))
+        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 0, false, removeSurvey))
         expect(result.current.isPopupVisible).toBe(true)
     })
 
     test('should set isPopupVisible to true after delay', () => {
         jest.useFakeTimers()
-        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 1000, false, removeSurvey))
+        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 1000, false, removeSurvey))
         expect(result.current.isPopupVisible).toBe(false)
         act(() => {
             jest.advanceTimersByTime(1000)
@@ -155,7 +155,7 @@ describe('usePopupVisibility', () => {
     })
 
     test('should hide popup when PHSurveyClosed event is dispatched', () => {
-        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 0, false, removeSurvey))
+        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 0, false, removeSurvey))
         act(() => {
             window.dispatchEvent(new CustomEvent('PHSurveyClosed', { detail: { surveyId: mockSurvey.id } }))
         })
@@ -171,7 +171,7 @@ describe('usePopupVisibility', () => {
             thankYouMessageDescription: 'We appreciate your feedback.',
         }
 
-        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 0, false, removeSurvey))
+        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 0, false, removeSurvey))
         act(() => {
             window.dispatchEvent(new CustomEvent('PHSurveySent', { detail: { surveyId: mockSurvey.id } }))
         })
@@ -189,7 +189,7 @@ describe('usePopupVisibility', () => {
 
     test('should clean up event listeners and timers on unmount', () => {
         jest.useFakeTimers()
-        const { unmount } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 1000, false, removeSurvey))
+        const { unmount } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 1000, false, removeSurvey))
         const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
 
         unmount()
@@ -200,13 +200,13 @@ describe('usePopupVisibility', () => {
     })
 
     test('should set isPopupVisible to true if isPreviewMode is true', () => {
-        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 1000, true, removeSurvey))
+        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 1000, true, removeSurvey))
         expect(result.current.isPopupVisible).toBe(true)
     })
 
     test('should set isPopupVisible to true after a delay of 500 milliseconds', () => {
         jest.useFakeTimers()
-        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 500, false, removeSurvey))
+        const { result } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 500, false, removeSurvey))
         expect(result.current.isPopupVisible).toBe(false)
         act(() => {
             jest.advanceTimersByTime(500)
@@ -215,13 +215,13 @@ describe('usePopupVisibility', () => {
         jest.useRealTimers()
     })
 
-    test('should not throw an error if posthog is undefined', () => {
+    test('should not throw an error if insights is undefined', () => {
         const { result } = renderHook(() => usePopupVisibility(mockSurvey, undefined, 0, false, removeSurvey))
         expect(result.current.isPopupVisible).toBe(true)
     })
 
     test('should clean up event listeners on unmount when delay is 0', () => {
-        const { unmount } = renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 0, false, removeSurvey))
+        const { unmount } = renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 0, false, removeSurvey))
         const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener')
 
         unmount()
@@ -232,7 +232,7 @@ describe('usePopupVisibility', () => {
 
     test('should dispatch PHSurveyShown event when survey is shown', () => {
         const dispatchEventSpy = jest.spyOn(window, 'dispatchEvent')
-        renderHook(() => usePopupVisibility(mockSurvey, mockPostHog, 0, false, removeSurvey))
+        renderHook(() => usePopupVisibility(mockSurvey, mockInsights, 0, false, removeSurvey))
 
         expect(dispatchEventSpy).toHaveBeenCalledWith(new Event('PHSurveyShown'))
     })
@@ -241,10 +241,10 @@ describe('usePopupVisibility', () => {
         jest.useFakeTimers()
         const mockSurvey2 = { ...mockSurvey, id: 'testSurvey2', name: 'Test survey 2' } as Survey
         const { result: result1 } = renderHook(() =>
-            usePopupVisibility(mockSurvey, mockPostHog, 0, false, removeSurvey)
+            usePopupVisibility(mockSurvey, mockInsights, 0, false, removeSurvey)
         )
         const { result: result2 } = renderHook(() =>
-            usePopupVisibility(mockSurvey2, mockPostHog, 500, false, removeSurvey)
+            usePopupVisibility(mockSurvey2, mockInsights, 500, false, removeSurvey)
         )
 
         expect(result1.current.isPopupVisible).toBe(true)
@@ -260,7 +260,7 @@ describe('usePopupVisibility', () => {
 })
 
 describe('SurveyManager', () => {
-    let mockPostHog: PostHog
+    let mockInsights: Insights
     let surveyManager: SurveyManager
     let mockSurveys: Survey[]
     const flagsResponse = {
@@ -308,7 +308,7 @@ describe('SurveyManager', () => {
             },
         ]
 
-        mockPostHog = createMockPostHog({
+        mockInsights = createMockInsights({
             getActiveMatchingSurveys: jest.fn(),
             get_session_replay_url: jest.fn(),
             capture: jest.fn(),
@@ -326,18 +326,18 @@ describe('SurveyManager', () => {
             },
         })
 
-        surveyManager = new SurveyManager(mockPostHog)
+        surveyManager = new SurveyManager(mockInsights)
     })
 
     test('callSurveysAndEvaluateDisplayLogic should handle a single popover survey correctly', () => {
-        mockPostHog.getActiveMatchingSurveys = jest.fn((callback) => callback([mockSurveys[0]]))
+        mockInsights.getActiveMatchingSurveys = jest.fn((callback) => callback([mockSurveys[0]]))
         const handlePopoverSurveyMock = jest
             .spyOn(surveyManager as any, 'handlePopoverSurvey')
             .mockImplementation(() => {})
 
         surveyManager.callSurveysAndEvaluateDisplayLogic()
 
-        expect(mockPostHog.surveys.getSurveys).toHaveBeenCalled()
+        expect(mockInsights.surveys.getSurveys).toHaveBeenCalled()
         expect(handlePopoverSurveyMock).toHaveBeenCalledWith(mockSurveys[0])
     })
 
@@ -363,14 +363,14 @@ describe('SurveyManager', () => {
     it('should only display one popover survey if multiple popovers are eligible', () => {
         const anotherPopover = { ...mockSurveys[0], id: 'popover-2' }
 
-        mockPostHog.surveys.getSurveys = jest.fn((callback) => callback([mockSurveys[0], anotherPopover]))
+        mockInsights.surveys.getSurveys = jest.fn((callback) => callback([mockSurveys[0], anotherPopover]))
 
         const handlePopoverSurveySpy = jest.spyOn(surveyManager as any, 'handlePopoverSurvey')
         const addSurveyToFocusSpy = jest.spyOn(surveyManager as any, '_addSurveyToFocus')
 
         surveyManager.callSurveysAndEvaluateDisplayLogic(true)
 
-        expect(mockPostHog.surveys.getSurveys).toHaveBeenCalled()
+        expect(mockInsights.surveys.getSurveys).toHaveBeenCalled()
 
         // First popover should be handled
         expect(handlePopoverSurveySpy).toHaveBeenCalledWith(mockSurveys[0])
@@ -399,7 +399,7 @@ describe('SurveyManager', () => {
 
         surveyManager.callSurveysAndEvaluateDisplayLogic()
 
-        expect(mockPostHog.surveys.getSurveys).toHaveBeenCalled()
+        expect(mockInsights.surveys.getSurveys).toHaveBeenCalled()
         expect(handlePopoverSurveyMock).toHaveBeenCalledWith(mockSurveys[0])
         expect(handleWidgetMock).not.toHaveBeenCalled()
         expect(manageWidgetSelectorListener).not.toHaveBeenCalled()
@@ -453,7 +453,7 @@ describe('SurveyManager', () => {
             targeting_flag_key: null,
             internal_targeting_flag_key: null,
         }
-        mockPostHog.surveys.getSurveys = jest.fn((callback) => callback([mockSurvey]))
+        mockInsights.surveys.getSurveys = jest.fn((callback) => callback([mockSurvey]))
         document.body.innerHTML = '<div class="my-selector">Click Me</div>'
 
         const manageWidgetSelectorListenerSpy = jest.spyOn(surveyManager as any, '_manageWidgetSelectorListener')
@@ -464,17 +464,17 @@ describe('SurveyManager', () => {
     })
 
     test('callSurveysAndEvaluateDisplayLogic should not call surveys in focus', () => {
-        mockPostHog.surveys.getSurveys = jest.fn((callback) => callback(mockSurveys))
+        mockInsights.surveys.getSurveys = jest.fn((callback) => callback(mockSurveys))
 
         surveyManager.getTestAPI().addSurveyToFocus({ id: 'survey1' })
         surveyManager.callSurveysAndEvaluateDisplayLogic()
 
-        expect(mockPostHog.surveys.getSurveys).toHaveBeenCalledTimes(1)
+        expect(mockInsights.surveys.getSurveys).toHaveBeenCalledTimes(1)
         expect(surveyManager.getTestAPI().surveyInFocus).toBe('survey1')
     })
 
     test('surveyInFocus handling works correctly with in callSurveysAndEvaluateDisplayLogic', () => {
-        mockPostHog.surveys.getSurveys = jest.fn((callback) => callback(mockSurveys))
+        mockInsights.surveys.getSurveys = jest.fn((callback) => callback(mockSurveys))
 
         surveyManager.getTestAPI().addSurveyToFocus({ id: 'survey1' })
         surveyManager.callSurveysAndEvaluateDisplayLogic()
@@ -483,7 +483,7 @@ describe('SurveyManager', () => {
             .spyOn(surveyManager as any, 'handlePopoverSurvey')
             .mockImplementation(() => {})
 
-        expect(mockPostHog.surveys.getSurveys).toHaveBeenCalledTimes(1)
+        expect(mockInsights.surveys.getSurveys).toHaveBeenCalledTimes(1)
         expect(surveyManager.getTestAPI().surveyInFocus).toBe('survey1')
         expect(handlePopoverSurveyMock).not.toHaveBeenCalled()
 
@@ -491,7 +491,7 @@ describe('SurveyManager', () => {
 
         surveyManager.callSurveysAndEvaluateDisplayLogic()
 
-        expect(mockPostHog.surveys.getSurveys).toHaveBeenCalledTimes(2)
+        expect(mockInsights.surveys.getSurveys).toHaveBeenCalledTimes(2)
         expect(surveyManager.getTestAPI().surveyInFocus).toBe(null)
         expect(handlePopoverSurveyMock).toHaveBeenCalledTimes(1)
     })
@@ -583,7 +583,7 @@ describe('SurveyManager', () => {
         } as unknown as Survey
 
         beforeEach(() => {
-            surveyManager = new SurveyManager(mockPostHog)
+            surveyManager = new SurveyManager(mockInsights)
         })
 
         it('can render survey', () => {
@@ -626,7 +626,7 @@ describe('SurveyManager', () => {
                 shouldShowConfirmation: false,
             },
         ])('should show confirmation=$shouldShowConfirmation for $scenario', ({ search, shouldShowConfirmation }) => {
-            const mockPH = createMockPostHog({
+            const mockPH = createMockInsights({
                 config: {
                     token: 'test-token',
                     api_host: 'https://test.com',
@@ -691,14 +691,14 @@ describe('SurveyManager', () => {
     })
 
     describe('timeout management', () => {
-        let mockPostHog: PostHog
+        let mockInsights: Insights
         let surveyManager: SurveyManager
         let mockSurvey: Survey
 
         beforeEach(() => {
             jest.useFakeTimers()
             // Set up mocks
-            mockPostHog = createMockPostHog({
+            mockInsights = createMockInsights({
                 getActiveMatchingSurveys: jest.fn(),
                 get_session_replay_url: jest.fn(),
                 capture: jest.fn(),
@@ -707,7 +707,7 @@ describe('SurveyManager', () => {
                 },
             })
 
-            surveyManager = new SurveyManager(mockPostHog)
+            surveyManager = new SurveyManager(mockInsights)
 
             mockSurvey = {
                 id: 'delayed-survey',
@@ -845,7 +845,7 @@ describe('SurveyManager', () => {
                 ],
             } as Survey
 
-            jest.spyOn(mockPostHog.featureFlags, 'isFeatureEnabled').mockImplementation(() => true)
+            jest.spyOn(mockInsights.featureFlags, 'isFeatureEnabled').mockImplementation(() => true)
 
             const result = surveyManager.getTestAPI().checkFlags(survey)
             expect(result).toBe(true)
@@ -861,7 +861,7 @@ describe('SurveyManager', () => {
                 ],
             } as Survey
 
-            jest.spyOn(mockPostHog.featureFlags, 'isFeatureEnabled').mockImplementation((flag) =>
+            jest.spyOn(mockInsights.featureFlags, 'isFeatureEnabled').mockImplementation((flag) =>
                 flag === 'flag-1' ? true : false
             )
 
@@ -880,7 +880,7 @@ describe('SurveyManager', () => {
                 ],
             } as Survey
 
-            jest.spyOn(mockPostHog.featureFlags, 'isFeatureEnabled').mockImplementation(() => true)
+            jest.spyOn(mockInsights.featureFlags, 'isFeatureEnabled').mockImplementation(() => true)
 
             const result = surveyManager.getTestAPI().checkFlags(survey)
             expect(result).toBe(true)
@@ -888,7 +888,7 @@ describe('SurveyManager', () => {
     })
 
     describe('URL prefill auto-submit behavior', () => {
-        let mockPostHog: PostHog
+        let mockInsights: Insights
         let surveyManager: SurveyManager
         let originalLocation: Location
 
@@ -900,7 +900,7 @@ describe('SurveyManager', () => {
             delete (window as any).location
             window.location = { ...originalLocation, search: '' } as Location
 
-            mockPostHog = createMockPostHog({
+            mockInsights = createMockInsights({
                 getActiveMatchingSurveys: jest.fn(),
                 get_session_replay_url: jest.fn(),
                 capture: jest.fn(),
@@ -909,7 +909,7 @@ describe('SurveyManager', () => {
                 },
             })
 
-            surveyManager = new SurveyManager(mockPostHog)
+            surveyManager = new SurveyManager(mockInsights)
         })
 
         afterEach(() => {
@@ -951,7 +951,7 @@ describe('SurveyManager', () => {
             window.location.search = '?q0=8'
             ;(surveyManager as any)._handleUrlPrefill(survey)
 
-            expect(mockPostHog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 'survey sent',
                 expect.objectContaining({
                     $survey_id: 'prefill-survey',
@@ -996,7 +996,7 @@ describe('SurveyManager', () => {
             window.location.search = '?q0=8'
             ;(surveyManager as any)._handleUrlPrefill(survey)
 
-            expect(mockPostHog.capture).not.toHaveBeenCalled()
+            expect(mockInsights.capture).not.toHaveBeenCalled()
         })
 
         it('should NOT auto-submit when enable_partial_responses is false, even with skipSubmitButton true', () => {
@@ -1034,7 +1034,7 @@ describe('SurveyManager', () => {
             window.location.search = '?q0=8'
             ;(surveyManager as any)._handleUrlPrefill(survey)
 
-            expect(mockPostHog.capture).not.toHaveBeenCalled()
+            expect(mockInsights.capture).not.toHaveBeenCalled()
         })
 
         it('should auto-submit when all questions are prefilled with skipSubmitButton true (survey completed)', () => {
@@ -1067,7 +1067,7 @@ describe('SurveyManager', () => {
             window.location.search = '?q0=8'
             ;(surveyManager as any)._handleUrlPrefill(survey)
 
-            expect(mockPostHog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 'survey sent',
                 expect.objectContaining({
                     $survey_id: 'prefill-survey-complete',
@@ -1119,7 +1119,7 @@ describe('SurveyManager', () => {
             window.location.search = '?q0=8&q1=5'
             ;(surveyManager as any)._handleUrlPrefill(survey)
 
-            expect(mockPostHog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 'survey sent',
                 expect.objectContaining({
                     $survey_id: 'prefill-survey-partial',
@@ -1127,7 +1127,7 @@ describe('SurveyManager', () => {
                     $survey_completed: false,
                 })
             )
-            expect(mockPostHog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 'survey sent',
                 expect.not.objectContaining({
                     $survey_response_q2: 5,
@@ -1138,7 +1138,7 @@ describe('SurveyManager', () => {
 })
 
 describe('usePopupVisibility URL changes should hide surveys accordingly', () => {
-    let posthog: PostHog
+    let insights: Insights
     let mockRemoveSurveyFromFocus: jest.Mock
     let originalLocationHref: string
     let originalPushState: typeof window.history.pushState
@@ -1176,8 +1176,8 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
         }) as Survey
 
     beforeEach(() => {
-        // Mock PostHog instance
-        posthog = createMockPostHog({
+        // Mock Insights instance
+        insights = createMockInsights({
             capture: jest.fn(),
             get_session_replay_url: jest.fn(),
         })
@@ -1214,7 +1214,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
             value: new URL('https://example.com/path1'),
             writable: true,
         })
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         act(() => {
             window.history.pushState({}, '', '/path1')
@@ -1226,7 +1226,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
 
     it('should hide survey when URL changes to non-matching - exact match', () => {
         const survey = createTestSurvey({ url: '/path1', urlMatchType: 'exact' })
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         act(() => {
             window.history.pushState({}, '', '/path2')
@@ -1246,7 +1246,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
             writable: true,
         })
 
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         act(() => {
             window.history.pushState({}, '', '/path/subpage')
@@ -1258,7 +1258,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
 
     it('should handle replaceState URL changes', () => {
         const survey = createTestSurvey({ url: 'path', urlMatchType: 'icontains' })
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         act(() => {
             window.history.replaceState({}, '', '/other/page')
@@ -1270,7 +1270,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
 
     it('should handle browser back/forward navigation', () => {
         const survey = createTestSurvey({ url: 'path', urlMatchType: 'icontains' })
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         act(() => {
             Object.defineProperty(window, 'location', {
@@ -1287,7 +1287,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
 
     it('should handle hash-based navigation', () => {
         const survey = createTestSurvey({ url: 'path', urlMatchType: 'icontains' })
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         act(() => {
             Object.defineProperty(window, 'location', {
@@ -1305,7 +1305,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
 
     it('should restore original history methods on unmount', () => {
         const survey = createTestSurvey({ url: 'path', urlMatchType: 'icontains' })
-        const { unmount } = renderHook(() => usePopupVisibility(survey, posthog, 0, false, mockRemoveSurveyFromFocus))
+        const { unmount } = renderHook(() => usePopupVisibility(survey, insights, 0, false, mockRemoveSurveyFromFocus))
 
         unmount()
 
@@ -1333,7 +1333,7 @@ describe('usePopupVisibility URL changes should hide surveys accordingly', () =>
         }
 
         // Start the survey visibility hook
-        const { result } = renderHook(() => usePopupVisibility(survey, posthog, 2000, false, mockRemoveSurveyFromFocus))
+        const { result } = renderHook(() => usePopupVisibility(survey, insights, 2000, false, mockRemoveSurveyFromFocus))
 
         // Initially the survey should not be visible (due to delay)
         expect(result.current.isPopupVisible).toBe(false)

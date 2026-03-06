@@ -1,9 +1,9 @@
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 import { useEffect, useState } from 'react'
-import { ProductTour } from 'posthog-js'
+import { ProductTour } from '@hanzo/insights'
 
 export default function ProductTours() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [tours, setTours] = useState<ProductTour[]>([])
     const [selectedTourId, setSelectedTourId] = useState('')
     const [loading, setLoading] = useState(true)
@@ -11,7 +11,7 @@ export default function ProductTours() {
 
     useEffect(() => {
         try {
-            posthog?.productTours?.getProductTours((fetchedTours: ProductTour[]) => {
+            insights?.productTours?.getProductTours((fetchedTours: ProductTour[]) => {
                 setLoading(false)
                 setTours(fetchedTours)
                 if (fetchedTours.length > 0) {
@@ -21,30 +21,30 @@ export default function ProductTours() {
         } catch (error: any) {
             setError(error)
         }
-    }, [posthog])
+    }, [insights])
 
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedTourId(event.target.value)
     }
 
     const handleLaunchTour = () => {
-        console.log('has it?', posthog?.productTours)
-        if (selectedTourId && posthog?.productTours) {
+        console.log('has it?', insights?.productTours)
+        if (selectedTourId && insights?.productTours) {
             console.log(`showing tour ${selectedTourId}`)
-            posthog.productTours.showProductTour(selectedTourId)
+            insights.productTours.showProductTour(selectedTourId)
         }
     }
 
     const handleResetTour = () => {
-        if (selectedTourId && posthog?.productTours) {
-            posthog.productTours.resetTour(selectedTourId)
+        if (selectedTourId && insights?.productTours) {
+            insights.productTours.resetTour(selectedTourId)
             alert(`Tour "${selectedTourId}" reset. It can now be shown again.`)
         }
     }
 
     const handleResetAllTours = () => {
-        if (posthog?.productTours) {
-            posthog.productTours.resetAllTours()
+        if (insights?.productTours) {
+            insights.productTours.resetAllTours()
             alert('All tours reset. They can now be shown again.')
         }
     }
@@ -287,7 +287,7 @@ export default function ProductTours() {
             <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <h3 className="font-medium mb-2">How to test product tours:</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700">
-                    <li>Open the PostHog toolbar (click the PostHog logo in the corner)</li>
+                    <li>Open the Insights toolbar (click the Insights logo in the corner)</li>
                     <li>Click the "Product Tours" button (spotlight icon)</li>
                     <li>Create a new tour and select elements on this page</li>
                     <li>Save the tour</li>

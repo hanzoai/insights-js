@@ -1,34 +1,34 @@
 import { useEffect, useState } from 'react'
-import { useOverridablePostHog } from './utils'
+import { useOverridableInsights } from './utils'
 import { JsonType, FeatureFlagValue } from '@hanzo/insights-core'
-import { PostHog } from '../posthog-rn'
+import { Insights } from '../insights-rn'
 
-export function useFeatureFlag(flag: string, client?: PostHog): FeatureFlagValue | undefined {
-  const posthog = useOverridablePostHog(client, 'useFeatureFlag')
-  const [featureFlag, setFeatureFlag] = useState<FeatureFlagValue | undefined>(posthog?.getFeatureFlag(flag))
+export function useFeatureFlag(flag: string, client?: Insights): FeatureFlagValue | undefined {
+  const insights = useOverridableInsights(client, 'useFeatureFlag')
+  const [featureFlag, setFeatureFlag] = useState<FeatureFlagValue | undefined>(insights?.getFeatureFlag(flag))
 
   useEffect(() => {
-    setFeatureFlag(posthog?.getFeatureFlag(flag))
-    return posthog?.onFeatureFlags(() => {
-      setFeatureFlag(posthog.getFeatureFlag(flag))
+    setFeatureFlag(insights?.getFeatureFlag(flag))
+    return insights?.onFeatureFlags(() => {
+      setFeatureFlag(insights.getFeatureFlag(flag))
     })
-  }, [posthog, flag])
+  }, [insights, flag])
 
   return featureFlag
 }
 
 export type FeatureFlagWithPayload = [FeatureFlagValue | undefined, JsonType | undefined]
 
-export function useFeatureFlagWithPayload(flag: string, client?: PostHog): FeatureFlagWithPayload {
-  const posthog = useOverridablePostHog(client, 'useFeatureFlagWithPayload')
+export function useFeatureFlagWithPayload(flag: string, client?: Insights): FeatureFlagWithPayload {
+  const insights = useOverridableInsights(client, 'useFeatureFlagWithPayload')
   const [featureFlag, setFeatureFlag] = useState<FeatureFlagWithPayload>([undefined, undefined])
 
   useEffect(() => {
-    setFeatureFlag([posthog?.getFeatureFlag(flag), posthog?.getFeatureFlagPayload(flag)])
-    return posthog?.onFeatureFlags(() => {
-      setFeatureFlag([posthog.getFeatureFlag(flag), posthog.getFeatureFlagPayload(flag)])
+    setFeatureFlag([insights?.getFeatureFlag(flag), insights?.getFeatureFlagPayload(flag)])
+    return insights?.onFeatureFlags(() => {
+      setFeatureFlag([insights.getFeatureFlag(flag), insights.getFeatureFlagPayload(flag)])
     })
-  }, [posthog, flag])
+  }, [insights, flag])
 
   return featureFlag
 }

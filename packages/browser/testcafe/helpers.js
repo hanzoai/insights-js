@@ -3,21 +3,21 @@ import path from 'path'
 import { ClientFunction, RequestLogger, RequestMock } from 'testcafe'
 import fetch from 'node-fetch'
 
-// NOTE: These tests are run against a dedicated test project in PostHog cloud
+// NOTE: These tests are run against a dedicated test project in Insights cloud
 // but can be overridden to call a local API when running locally
-// User admin for the test project: https://us.posthog.com/admin/posthog/organization/0182397e-3df4-0000-52e3-d890b5a16955/change/
+// User admin for the test project: https://us.insights.com/admin/insights/organization/0182397e-3df4-0000-52e3-d890b5a16955/change/
 const currentEnv = process.env
 export const {
-    POSTHOG_PROJECT_API_KEY,
-    POSTHOG_PERSONAL_API_KEY,
-    POSTHOG_API_HOST = 'https://us.i.posthog.com',
-    POSTHOG_PROJECT_ID = '11213',
+    INSIGHTS_PROJECT_API_KEY,
+    INSIGHTS_PERSONAL_API_KEY,
+    INSIGHTS_API_HOST = 'https://us.i.insights.com',
+    INSIGHTS_PROJECT_ID = '11213',
     BRANCH_NAME,
     RUN_ID,
     BROWSER,
 } = currentEnv
 
-const HEADERS = { Authorization: `Bearer ${POSTHOG_PERSONAL_API_KEY}` }
+const HEADERS = { Authorization: `Bearer ${INSIGHTS_PERSONAL_API_KEY}` }
 
 export const captureLogger = RequestLogger(/ip=0/, {
     logRequestHeaders: true,
@@ -42,15 +42,15 @@ export const staticFilesMock = RequestMock()
         res.setBody(html)
     })
 
-export const initPosthog = (testName, config) => {
+export const initInsights = (testName, config) => {
     let testSessionId = Math.round(Math.random() * 10000000000).toString()
-    log(`Initializing posthog with testSessionId "${testSessionId}"`)
+    log(`Initializing insights with testSessionId "${testSessionId}"`)
 
-    const posthogConfig = {
+    const insightsConfig = {
         ...config,
         debug: true,
-        api_host: POSTHOG_API_HOST,
-        api_key: POSTHOG_PROJECT_API_KEY,
+        api_host: INSIGHTS_API_HOST,
+        api_key: INSIGHTS_PROJECT_API_KEY,
         bootstrap: {
             distinctID: 'automated-tester', // We set this to get around the ingestion delay for new distinctIDs
             isIdentifiedID: true,
@@ -68,17 +68,17 @@ export const initPosthog = (testName, config) => {
     }
 
     return ClientFunction(
-        (clientPosthogConfig = {}) => {
-            clientPosthogConfig.loaded = () => {
+        (clientInsightsConfig = {}) => {
+            clientInsightsConfig.loaded = () => {
                 window.loaded = true
                 window.fullCaptures = []
             }
-            clientPosthogConfig.before_send = (event) => {
+            clientInsightsConfig.before_send = (event) => {
                 window.fullCaptures.push(event)
                 return event
             }
-            window.posthog.init(clientPosthogConfig.api_key, clientPosthogConfig)
-            window.posthog.register(register)
+            window.insights.init(clientInsightsConfig.api_key, clientInsightsConfig)
+            window.hi.register(register)
 
             return testSessionId
         },
@@ -88,7 +88,7 @@ export const initPosthog = (testName, config) => {
                 testSessionId,
             },
         }
-    )(posthogConfig)
+    )(insightsConfig)
 }
 
 export const isLoaded = ClientFunction(() => !!window.loaded)
@@ -111,7 +111,7 @@ export const capturesMap = ClientFunction(() => {
 export const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // NOTE: This is limited by the real production ingestion lag, which you can see in grafana is usually
-// in the low minutes https://grafana.prod-us.posthog.dev/d/homepage/homepage
+// in the low minutes https://grafana.prod-us.insights.dev/d/homepage/homepage
 // This means that this test can fail if the ingestion lag is higher than the timeout, so we're pretty
 // generous with the timeout here.
 export async function retryUntilResults(
@@ -158,7 +158,7 @@ export async function retryUntilResults(
 
 export async function queryAPI(testSessionId) {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-    const url = `${POSTHOG_API_HOST}/api/projects/${POSTHOG_PROJECT_ID}/events?properties=[{"key":"testSessionId","value":["${testSessionId}"],"operator":"exact","type":"event"}]&after=${yesterday}`
+    const url = `${INSIGHTS_API_HOST}/api/projects/${INSIGHTS_PROJECT_ID}/events?properties=[{"key":"testSessionId","value":["${testSessionId}"],"operator":"exact","type":"event"}]&after=${yesterday}`
     const response = await fetch(url, {
         headers: HEADERS,
     })

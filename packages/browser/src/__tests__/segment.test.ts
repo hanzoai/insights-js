@@ -4,24 +4,24 @@
  *
  *   - Set the distinct_id to the user's ID if available.
  *   - Set the distinct_id to the anonymous ID if the user's ID is not available.
- *   - Enrich Segment events with PostHog event properties.
+ *   - Enrich Segment events with Insights event properties.
  */
 
 import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 
 import { USER_STATE } from '../constants'
 import { SegmentContext, SegmentPlugin } from '../extensions/segment-integration'
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { assignableWindow } from '../utils/globals'
-import { PostHogConfig } from '../types'
+import { InsightsConfig } from '../types'
 
-const initPostHogInAPromise = (
+const initInsightsInAPromise = (
     segment: any,
-    posthogName: string,
-    config?: Partial<PostHogConfig>
-): Promise<PostHog> => {
+    insightsName: string,
+    config?: Partial<InsightsConfig>
+): Promise<Insights> => {
     return new Promise((resolve) => {
-        return new PostHog().init(
+        return new Insights().init(
             `test-token`,
             {
                 debug: true,
@@ -34,7 +34,7 @@ const initPostHogInAPromise = (
                 advanced_disable_feature_flags: true,
                 ...(config || {}),
             },
-            posthogName
+            insightsName
         )
     })
 }
@@ -45,7 +45,7 @@ jest.retryTimes(6)
 describe(`Segment integration`, () => {
     let segment: any
     let segmentIntegration: SegmentPlugin
-    let posthogName: string
+    let insightsName: string
 
     jest.setTimeout(500)
 
@@ -53,7 +53,7 @@ describe(`Segment integration`, () => {
         // Clear localStorage to avoid state leakage between tests
         localStorage.clear()
 
-        assignableWindow._POSTHOG_REMOTE_CONFIG = {
+        assignableWindow._INSIGHTS_REMOTE_CONFIG = {
             'test-token': {
                 config: {},
                 siteApps: [],
@@ -91,17 +91,17 @@ describe(`Segment integration`, () => {
     })
 
     it('should call loaded after the segment integration has been set up', async () => {
-        const loadPromise = initPostHogInAPromise(segment, posthogName)
+        const loadPromise = initInsightsInAPromise(segment, insightsName)
         expect(segmentIntegration).toBeUndefined()
         await loadPromise
         expect(segmentIntegration).toBeDefined()
     })
 
     it('should set properties from the segment user', async () => {
-        const posthog = await initPostHogInAPromise(segment, posthogName)
+        const insights = await initInsightsInAPromise(segment, insightsName)
 
-        expect(posthog.get_distinct_id()).toBe('test-id')
-        expect(posthog.get_property('$device_id')).toBe('test-anonymous-id')
+        expect(insights.get_distinct_id()).toBe('test-id')
+        expect(insights.get_property('$device_id')).toBe('test-anonymous-id')
     })
 
     // FIXME: Flaky test - fails on main branch, see issue tracking test isolation
@@ -112,10 +112,10 @@ describe(`Segment integration`, () => {
                 id: () => 'test-id',
             })
 
-        const posthog = await initPostHogInAPromise(segment, posthogName)
+        const insights = await initInsightsInAPromise(segment, insightsName)
 
-        expect(posthog.get_distinct_id()).toBe('test-id')
-        expect(posthog.get_property('$device_id')).toBe('test-anonymous-id')
+        expect(insights.get_distinct_id()).toBe('test-id')
+        expect(insights.get_property('$device_id')).toBe('test-anonymous-id')
     })
 
     // FIXME: Flaky test - fails on main branch, see issue tracking test isolation
@@ -125,10 +125,10 @@ describe(`Segment integration`, () => {
             id: () => '',
         })
 
-        const posthog = await initPostHogInAPromise(segment, posthogName, { persistence: 'memory' })
+        const insights = await initInsightsInAPromise(segment, insightsName, { persistence: 'memory' })
 
-        expect(posthog.get_distinct_id()).not.toEqual('test-id')
-        expect(posthog.persistence?.get_property(USER_STATE)).toEqual('anonymous')
+        expect(insights.get_distinct_id()).not.toEqual('test-id')
+        expect(insights.persistence?.get_property(USER_STATE)).toEqual('anonymous')
 
         if (segmentIntegration && segmentIntegration.identify) {
             segmentIntegration.identify({
@@ -139,8 +139,8 @@ describe(`Segment integration`, () => {
                 },
             } as unknown as SegmentContext)
 
-            expect(posthog.get_distinct_id()).toEqual('distinguished user')
-            expect(posthog.persistence?.get_property(USER_STATE)).toEqual('identified')
+            expect(insights.get_distinct_id()).toEqual('distinguished user')
+            expect(insights.persistence?.get_property(USER_STATE)).toEqual('identified')
         }
     })
 })

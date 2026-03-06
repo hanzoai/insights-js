@@ -5,7 +5,7 @@ import {
   getFeatureFlagValue,
   normalizeFlagsResponse,
 } from '@/featureFlagUtils'
-import { PostHogFlagsResponse, FeatureFlagDetail } from '@/types'
+import { InsightsFlagsResponse, FeatureFlagDetail } from '@/types'
 
 describe('featureFlagUtils', () => {
   describe('getFeatureFlagValue', () => {
@@ -164,7 +164,7 @@ describe('featureFlagUtils', () => {
 
   describe('getFlagDetailsFromFlagsAndPayloads', () => {
     it('should convert v1 flags and payloads to flag details', () => {
-      const flagsResponse: PostHogFlagsResponse = {
+      const flagsResponse: InsightsFlagsResponse = {
         featureFlags: {
           'flag-1': true,
           'flag-2': 'variant-1',
@@ -221,7 +221,7 @@ describe('featureFlagUtils', () => {
     })
 
     it('should handle empty flags and payloads', () => {
-      const flagsResponse: PostHogFlagsResponse = {
+      const flagsResponse: InsightsFlagsResponse = {
         featureFlags: {},
         featureFlagPayloads: {},
         flags: {},
@@ -234,7 +234,7 @@ describe('featureFlagUtils', () => {
 
   describe('normalizeFlagsResponse', () => {
     it('should convert v4 response to v1 format', () => {
-      const v4Response: PostHogFlagsResponse = {
+      const v4Response: InsightsFlagsResponse = {
         flags: {
           'flag-1': {
             key: 'flag-1',
@@ -296,7 +296,7 @@ describe('featureFlagUtils', () => {
     })
 
     it('should convert v1 response to v4 format', () => {
-      const v1Response: Omit<PostHogFlagsResponse, 'flags'> = {
+      const v1Response: Omit<InsightsFlagsResponse, 'flags'> = {
         featureFlags: {
           'flag-1': true,
           'flag-2': 'variant-1',
@@ -364,7 +364,7 @@ describe('featureFlagUtils', () => {
     })
 
     it('should handle empty flags and payloads', () => {
-      const v1Response: Omit<PostHogFlagsResponse, 'flags'> = {
+      const v1Response: Omit<InsightsFlagsResponse, 'flags'> = {
         featureFlags: {},
         featureFlagPayloads: {},
         errorsWhileComputingFlags: false,
@@ -381,7 +381,7 @@ describe('featureFlagUtils', () => {
     })
 
     it('should preserve additional fields', () => {
-      const v1Response: Omit<PostHogFlagsResponse, 'flags'> = {
+      const v1Response: Omit<InsightsFlagsResponse, 'flags'> = {
         featureFlags: {
           'flag-1': true,
         },

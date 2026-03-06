@@ -11,7 +11,7 @@ import {
     MultipleSurveyQuestion,
     RatingSurveyQuestion,
     SurveyQuestionType,
-} from '../../../posthog-surveys-types'
+} from '../../../insights-surveys-types'
 
 describe('MultipleChoiceQuestion', () => {
     const mockAppearance = {

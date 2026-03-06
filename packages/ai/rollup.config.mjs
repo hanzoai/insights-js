@@ -32,7 +32,7 @@ configs.push({
   plugins: [resolve({ extensions }), dts()],
 })
 
-// Add submodule builds for posthog-ai
+// Add submodule builds for insights-ai
 const providers = ['anthropic', 'openai', 'vercel', 'langchain', 'gemini', 'otel']
 
 providers.forEach((provider) => {

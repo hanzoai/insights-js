@@ -4,7 +4,7 @@ import { defineConfig, devices } from '@playwright/test'
  * Backward compatibility tests.
  *
  * These tests validate that newly built lazy-loaded extensions (web-vitals, surveys, etc.)
- * work correctly with the currently published NPM version of array.js (posthog core).
+ * work correctly with the currently published NPM version of array.js (insights core).
  *
  * This catches breaking changes where a new extension would fail when loaded by
  * users who have an older cached version of the core library.

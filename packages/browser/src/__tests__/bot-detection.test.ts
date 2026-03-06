@@ -1,33 +1,33 @@
 import './helpers/mock-logger'
 
-import { PostHog } from '../posthog-core'
-import { defaultPostHog } from './helpers/posthog-instance'
+import { Insights } from '../insights-core'
+import { defaultInsights } from './helpers/insights-instance'
 import { uuidv7 } from '../uuidv7'
-import { PostHogConfig } from '../types'
+import { InsightsConfig } from '../types'
 import { navigator } from '../utils/globals'
 
 describe('bot detection and pageview collection', () => {
-    let posthog: PostHog
+    let insights: Insights
     let beforeSendMock: jest.Mock
     let originalUserAgent: string
 
-    const createPostHog = async (config: Partial<PostHogConfig> = {}) => {
+    const createInsights = async (config: Partial<InsightsConfig> = {}) => {
         beforeSendMock = jest.fn().mockImplementation((e) => e)
-        const posthog = await new Promise<PostHog>(
+        const insights = await new Promise<Insights>(
             (resolve) =>
-                defaultPostHog().init(
+                defaultInsights().init(
                     'testtoken',
                     {
                         capture_pageview: false, // Disable auto-capture to avoid race conditions
                         before_send: beforeSendMock,
                         ...config,
-                        loaded: (posthog) => resolve(posthog),
+                        loaded: (insights) => resolve(insights),
                     },
                     uuidv7()
                 )!
         )
-        posthog.debug()
-        return posthog
+        insights.debug()
+        return insights
     }
 
     beforeEach(async () => {
@@ -64,36 +64,36 @@ describe('bot detection and pageview collection', () => {
     describe('default behavior (without preview flag)', () => {
         it('should drop pageview events from bots', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog()
+            insights = await createInsights()
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).not.toHaveBeenCalled()
         })
 
         it('should drop all events from bots, not just pageviews', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)')
-            posthog = await createPostHog()
+            insights = await createInsights()
 
-            posthog.capture('custom_event')
+            insights.capture('custom_event')
 
             expect(beforeSendMock).not.toHaveBeenCalled()
         })
 
         it('should drop events from webdriver-detected bots', async () => {
             setWebdriver(true)
-            posthog = await createPostHog()
+            insights = await createInsights()
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).not.toHaveBeenCalled()
         })
 
         it('should allow events from normal browsers', async () => {
             setBotUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
-            posthog = await createPostHog()
+            insights = await createInsights()
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$pageview')
@@ -105,9 +105,9 @@ describe('bot detection and pageview collection', () => {
     describe('with opt_out_useragent_filter enabled', () => {
         it('should allow all events from bots when opt_out_useragent_filter is true', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({ opt_out_useragent_filter: true })
+            insights = await createInsights({ opt_out_useragent_filter: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$pageview')
@@ -115,9 +115,9 @@ describe('bot detection and pageview collection', () => {
 
         it('should add $browser_type property when opt_out_useragent_filter is true', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({ opt_out_useragent_filter: true })
+            insights = await createInsights({ opt_out_useragent_filter: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             const properties = beforeSendMock.mock.calls[0][0].properties
@@ -126,9 +126,9 @@ describe('bot detection and pageview collection', () => {
 
         it('should set $browser_type to "browser" for non-bots when opt_out_useragent_filter is true', async () => {
             setBotUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
-            posthog = await createPostHog({ opt_out_useragent_filter: true })
+            insights = await createInsights({ opt_out_useragent_filter: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             const properties = beforeSendMock.mock.calls[0][0].properties
@@ -139,9 +139,9 @@ describe('bot detection and pageview collection', () => {
     describe('with __preview_capture_bot_pageviews enabled', () => {
         it('should send bot pageviews as $bot_pageview events', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+            insights = await createInsights({ __preview_capture_bot_pageviews: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$bot_pageview')
@@ -153,9 +153,9 @@ describe('bot detection and pageview collection', () => {
 
         it('should send non-pageview events from bots with original event name', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)')
-            posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+            insights = await createInsights({ __preview_capture_bot_pageviews: true })
 
-            posthog.capture('custom_event')
+            insights.capture('custom_event')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('custom_event')
@@ -163,9 +163,9 @@ describe('bot detection and pageview collection', () => {
 
         it('should send webdriver-detected bot pageviews as $bot_pageview', async () => {
             setWebdriver(true)
-            posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+            insights = await createInsights({ __preview_capture_bot_pageviews: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$bot_pageview')
@@ -173,9 +173,9 @@ describe('bot detection and pageview collection', () => {
 
         it('should send normal browser pageviews as $pageview', async () => {
             setBotUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
-            posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+            insights = await createInsights({ __preview_capture_bot_pageviews: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$pageview')
@@ -193,10 +193,10 @@ describe('bot detection and pageview collection', () => {
 
             for (const ua of botUserAgents) {
                 setBotUserAgent(ua)
-                posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+                insights = await createInsights({ __preview_capture_bot_pageviews: true })
                 beforeSendMock.mockClear()
 
-                posthog.capture('$pageview')
+                insights.capture('$pageview')
 
                 expect(beforeSendMock).toHaveBeenCalled()
                 expect(beforeSendMock.mock.calls[0][0].event).toBe('$bot_pageview')
@@ -207,12 +207,12 @@ describe('bot detection and pageview collection', () => {
     describe('interaction between opt_out_useragent_filter and __preview_capture_bot_pageviews', () => {
         it('should not rename events when opt_out_useragent_filter is true (bot filtering disabled)', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({
+            insights = await createInsights({
                 opt_out_useragent_filter: true,
                 __preview_capture_bot_pageviews: true,
             })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             // Should be $pageview, not $bot_pageview, because opt_out_useragent_filter disables bot detection
@@ -221,12 +221,12 @@ describe('bot detection and pageview collection', () => {
 
         it('should still set $browser_type when opt_out_useragent_filter is true', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({
+            insights = await createInsights({
                 opt_out_useragent_filter: true,
                 __preview_capture_bot_pageviews: true,
             })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             const properties = beforeSendMock.mock.calls[0][0].properties
@@ -235,12 +235,12 @@ describe('bot detection and pageview collection', () => {
 
         it('should allow bot events when opt_out_useragent_filter is true even without preview flag', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({
+            insights = await createInsights({
                 opt_out_useragent_filter: true,
                 __preview_capture_bot_pageviews: false,
             })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$pageview')
@@ -250,12 +250,12 @@ describe('bot detection and pageview collection', () => {
 
         it('should keep original event names for non-pageview bot events when both flags are true', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({
+            insights = await createInsights({
                 opt_out_useragent_filter: true,
                 __preview_capture_bot_pageviews: true,
             })
 
-            posthog.capture('custom_event')
+            insights.capture('custom_event')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('custom_event')
@@ -269,9 +269,9 @@ describe('bot detection and pageview collection', () => {
             const originalNav = (global as any).navigator
             ;(global as any).navigator = undefined
 
-            posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+            insights = await createInsights({ __preview_capture_bot_pageviews: true })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$pageview')
@@ -280,12 +280,12 @@ describe('bot detection and pageview collection', () => {
 
         it('should handle custom blocked user agents', async () => {
             setBotUserAgent('MyCustomBot/1.0')
-            posthog = await createPostHog({
+            insights = await createInsights({
                 custom_blocked_useragents: ['MyCustomBot'],
                 __preview_capture_bot_pageviews: true,
             })
 
-            posthog.capture('$pageview')
+            insights.capture('$pageview')
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$bot_pageview')
@@ -293,9 +293,9 @@ describe('bot detection and pageview collection', () => {
 
         it('should preserve event properties when renaming to $bot_pageview', async () => {
             setBotUserAgent('Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)')
-            posthog = await createPostHog({ __preview_capture_bot_pageviews: true })
+            insights = await createInsights({ __preview_capture_bot_pageviews: true })
 
-            posthog.capture('$pageview', { custom_prop: 'test_value' })
+            insights.capture('$pageview', { custom_prop: 'test_value' })
 
             expect(beforeSendMock).toHaveBeenCalled()
             expect(beforeSendMock.mock.calls[0][0].event).toBe('$bot_pageview')

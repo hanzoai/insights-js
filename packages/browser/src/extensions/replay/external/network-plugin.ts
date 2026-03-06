@@ -354,14 +354,14 @@ function initXhrObserver(cb: networkCallback, win: IWindow, options: Required<Ne
 
                 // This is very tricky code, and making it passive won't bring many performance benefits,
                 // so let's ignore the rule here.
-                // eslint-disable-next-line posthog-js/no-add-event-listener
+                // eslint-disable-next-line @hanzo/insights/no-add-event-listener
                 xhr.addEventListener('readystatechange', readyStateListener)
                 // Also clean up on error, abort, and timeout to prevent memory leaks
-                // eslint-disable-next-line posthog-js/no-add-event-listener
+                // eslint-disable-next-line @hanzo/insights/no-add-event-listener
                 xhr.addEventListener('error', cleanup)
-                // eslint-disable-next-line posthog-js/no-add-event-listener
+                // eslint-disable-next-line @hanzo/insights/no-add-event-listener
                 xhr.addEventListener('abort', cleanup)
-                // eslint-disable-next-line posthog-js/no-add-event-listener
+                // eslint-disable-next-line @hanzo/insights/no-add-event-listener
                 xhr.addEventListener('timeout', cleanup)
 
                 originalOpen.call(xhr, method, url.toString(), async, username, password)

@@ -1,4 +1,4 @@
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 
 const events = [
     {
@@ -66,12 +66,12 @@ const events = [
 ]
 
 export default function Ecommerce() {
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     return (
         <div className="flex items-center gap-2 flex-wrap">
             {events.map((event) => (
-                <button key={event.name} onClick={() => posthog.capture(event.name, event.properties)}>
+                <button key={event.name} onClick={() => insights.capture(event.name, event.properties)}>
                     {event.name}
                 </button>
             ))}

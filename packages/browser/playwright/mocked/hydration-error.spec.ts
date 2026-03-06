@@ -1,4 +1,4 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { gotoPage } from './utils/setup'
 
 const configResponse = {
@@ -31,7 +31,7 @@ test.describe('SSR hydration compatibility', () => {
             route.fulfill({
                 status: 200,
                 contentType: 'application/javascript',
-                body: 'console.log("recorder loaded"); window.__PosthogExtensions__ = window.__PosthogExtensions__ || {}; window.__PosthogExtensions__.rrweb = {};',
+                body: 'console.log("recorder loaded"); window.__InsightsExtensions__ = window.__InsightsExtensions__ || {}; window.__InsightsExtensions__.rrweb = {};',
             })
         })
 
@@ -70,9 +70,9 @@ test.describe('SSR hydration compatibility', () => {
                 contentType: 'application/javascript',
                 body: `
                     console.log("recorder loaded");
-                    window.__PosthogExtensions__ = window.__PosthogExtensions__ || {};
-                    window.__PosthogExtensions__.rrweb = {};
-                    window.__PosthogExtensions__.rrwebPlugins = { getRecordConsolePlugin: function() { return {}; } };
+                    window.__InsightsExtensions__ = window.__InsightsExtensions__ || {};
+                    window.__InsightsExtensions__.rrweb = {};
+                    window.__InsightsExtensions__.rrwebPlugins = { getRecordConsolePlugin: function() { return {}; } };
                 `,
             })
         })
@@ -85,7 +85,7 @@ test.describe('SSR hydration compatibility', () => {
             return scripts.map((s) => ({
                 id: s.id || null,
                 src: s.src || null,
-                isPosthogScript: s.src?.includes('posthog') || s.src?.includes('recorder') || false,
+                isInsightsScript: s.src?.includes('insights') || s.src?.includes('recorder') || false,
             }))
         })
 
@@ -93,14 +93,14 @@ test.describe('SSR hydration compatibility', () => {
             const scripts = Array.from(document.querySelectorAll('head > script')) as HTMLScriptElement[]
             return scripts.map((s) => ({
                 src: s.src || null,
-                isPosthogScript: s.src?.includes('posthog') || s.src?.includes('recorder') || false,
+                isInsightsScript: s.src?.includes('insights') || s.src?.includes('recorder') || false,
             }))
         })
 
-        const posthogScriptsInBody = bodyScripts.filter((s) => s.isPosthogScript)
-        const posthogScriptsInHead = headScripts.filter((s) => s.isPosthogScript)
+        const insightsScriptsInBody = bodyScripts.filter((s) => s.isInsightsScript)
+        const insightsScriptsInHead = headScripts.filter((s) => s.isInsightsScript)
 
-        expect(posthogScriptsInBody).toEqual([])
-        expect(posthogScriptsInHead.length).toBeGreaterThan(0)
+        expect(insightsScriptsInBody).toEqual([])
+        expect(insightsScriptsInHead.length).toBeGreaterThan(0)
     })
 })

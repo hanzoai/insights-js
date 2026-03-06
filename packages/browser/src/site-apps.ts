@@ -1,4 +1,4 @@
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 import { CaptureResult, Properties, RemoteConfig, SiteApp, SiteAppGlobals, SiteAppLoader } from './types'
 import { assignableWindow } from './utils/globals'
 import { createLogger } from './utils/logger'
@@ -11,8 +11,8 @@ export class SiteApps {
     private _stopBuffering?: () => void
     private _bufferedInvocations: SiteAppGlobals[]
 
-    constructor(private _instance: PostHog) {
-        // events captured between loading posthog-js and the site app; up to 1000 events
+    constructor(private _instance: Insights) {
+        // events captured between loading @hanzo/insights and the site app; up to 1000 events
         this._bufferedInvocations = []
         this.apps = {}
     }
@@ -33,7 +33,7 @@ export class SiteApps {
     }
 
     get siteAppLoaders(): SiteAppLoader[] | undefined {
-        return assignableWindow._POSTHOG_REMOTE_CONFIG?.[this._instance.config.token]?.siteApps
+        return assignableWindow._INSIGHTS_REMOTE_CONFIG?.[this._instance.config.token]?.siteApps
     }
 
     init() {
@@ -110,7 +110,7 @@ export class SiteApps {
 
         try {
             const { processEvent } = loader.init({
-                posthog: this._instance,
+                insights: this._instance,
                 callback: (success) => {
                     onLoaded(success)
                 },
@@ -120,7 +120,7 @@ export class SiteApps {
             }
             hasInitReturned = true
         } catch (e) {
-            logger.error(`Error while initializing PostHog app with config id ${loader.id}`, e)
+            logger.error(`Error while initializing Insights app with config id ${loader.id}`, e)
             onLoaded(false)
         }
 
@@ -129,7 +129,7 @@ export class SiteApps {
             try {
                 processBufferedEvents()
             } catch (e) {
-                logger.error(`Error while processing buffered events PostHog app with config id ${loader.id}`, e)
+                logger.error(`Error while processing buffered events Insights app with config id ${loader.id}`, e)
                 app.errored = true
             }
         }
@@ -171,7 +171,7 @@ export class SiteApps {
     onRemoteConfig(response: RemoteConfig): void {
         if (this.siteAppLoaders?.length) {
             if (!this.isEnabled) {
-                logger.error(`PostHog site apps are disabled. Enable the "opt_in_site_apps" config to proceed.`)
+                logger.error(`Insights site apps are disabled. Enable the "opt_in_site_apps" config to proceed.`)
                 return
             }
 
@@ -192,15 +192,15 @@ export class SiteApps {
         }
 
         if (!this.isEnabled) {
-            logger.error(`PostHog site apps are disabled. Enable the "opt_in_site_apps" config to proceed.`)
+            logger.error(`Insights site apps are disabled. Enable the "opt_in_site_apps" config to proceed.`)
             return
         }
 
         for (const { id, url } of response['siteApps']) {
             assignableWindow[`__$$ph_site_app_${id}`] = this._instance
-            assignableWindow.__PosthogExtensions__?.loadSiteApp?.(this._instance, url, (err) => {
+            assignableWindow.__InsightsExtensions__?.loadSiteApp?.(this._instance, url, (err) => {
                 if (err) {
-                    return logger.error(`Error while initializing PostHog app with config id ${id}`, err)
+                    return logger.error(`Error while initializing Insights app with config id ${id}`, err)
                 }
             })
         }

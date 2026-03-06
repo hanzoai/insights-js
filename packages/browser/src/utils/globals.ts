@@ -1,4 +1,4 @@
-import type { PostHog } from '../posthog-core'
+import type { Insights } from '../insights-core'
 import { SessionIdManager } from '../sessionid'
 import {
     DeadClicksAutoCaptureConfig,
@@ -18,9 +18,9 @@ import type {
     RequestRestoreLinkResponse,
     SendMessageResponse,
     UserProvidedTraits,
-} from '../posthog-conversations-types'
+} from '../insights-conversations-types'
 // only importing types here, so won't affect the bundle
-// eslint-disable-next-line posthog-js/no-external-replay-imports
+// eslint-disable-next-line @hanzo/insights/no-external-replay-imports
 import type { SessionRecordingStatus, TriggerType } from '../extensions/replay/external/triggerMatching'
 import { eventWithTime } from '../extensions/replay/types/rrweb-types'
 import { ErrorTracking } from '@hanzo/insights-core'
@@ -41,20 +41,20 @@ const win: (Window & typeof globalThis) | undefined = typeof window !== 'undefin
 export type AssignableWindow = Window &
     typeof globalThis & {
         /*
-         * Main PostHog instance
+         * Main Insights instance
          */
-        posthog: any
+        insights: any
 
         /*
          * This is our contract between (potentially) lazily loaded extensions and the SDK
          */
-        __PosthogExtensions__?: PostHogExtensions
+        __InsightsExtensions__?: InsightsExtensions
 
         /**
          * When loading remote config, we assign it to this global configuration
          * for ease of sharing it with the rest of the SDK
          */
-        _POSTHOG_REMOTE_CONFIG?: Record<
+        _INSIGHTS_REMOTE_CONFIG?: Record<
             string,
             {
                 config: RemoteConfig
@@ -68,13 +68,13 @@ export type AssignableWindow = Window &
          *
          * @see {Config.DEBUG} from config.ts
          */
-        POSTHOG_DEBUG: any
+        INSIGHTS_DEBUG: any
 
         // Exposed by the browser
         doNotTrack: any
 
         // See entrypoints/customizations.full.ts
-        posthogCustomizations: any
+        insightsCustomizations: any
 
         /**
          * This is a legacy way to expose these functions, but we still need to support it for backwards compatibility
@@ -82,17 +82,17 @@ export type AssignableWindow = Window &
          *
          * See entrypoints/exception-autocapture.ts
          *
-         * @deprecated use `__PosthogExtensions__.errorWrappingFunctions` instead
+         * @deprecated use `__InsightsExtensions__.errorWrappingFunctions` instead
          */
-        posthogErrorWrappingFunctions: any
+        insightsErrorWrappingFunctions: any
 
         /**
          * This is a legacy way to expose these functions, but we still need to support it for backwards compatibility
          * Can be removed once we drop support for 1.161.1
          *
-         * See entrypoints/posthog-recorder.ts
+         * See entrypoints/insights-recorder.ts
          *
-         * @deprecated use `__PosthogExtensions__.rrweb` instead
+         * @deprecated use `__InsightsExtensions__.rrweb` instead
          */
         rrweb: any
 
@@ -100,9 +100,9 @@ export type AssignableWindow = Window &
          * This is a legacy way to expose these functions, but we still need to support it for backwards compatibility
          * Can be removed once we drop support for 1.161.1
          *
-         * See entrypoints/posthog-recorder.ts
+         * See entrypoints/insights-recorder.ts
          *
-         * @deprecated use `__PosthogExtensions__.rrwebConsoleRecord` instead
+         * @deprecated use `__InsightsExtensions__.rrwebConsoleRecord` instead
          */
         rrwebConsoleRecord: any
 
@@ -110,9 +110,9 @@ export type AssignableWindow = Window &
          * This is a legacy way to expose these functions, but we still need to support it for backwards compatibility
          * Can be removed once we drop support for 1.161.1
          *
-         * See entrypoints/posthog-recorder.ts
+         * See entrypoints/insights-recorder.ts
          *
-         * @deprecated use `__PosthogExtensions__.getRecordNetworkPlugin` instead
+         * @deprecated use `__InsightsExtensions__.getRecordNetworkPlugin` instead
          */
         getRecordNetworkPlugin: any
 
@@ -122,9 +122,9 @@ export type AssignableWindow = Window &
          *
          * See entrypoints/web-vitals.ts
          *
-         * @deprecated use `__PosthogExtensions__.postHogWebVitalsCallbacks` instead
+         * @deprecated use `__InsightsExtensions__.insightsWebVitalsCallbacks` instead
          */
-        postHogWebVitalsCallbacks: any
+        insightsWebVitalsCallbacks: any
 
         /**
          * This is a legacy way to expose these functions, but we still need to support it for backwards compatibility
@@ -132,9 +132,9 @@ export type AssignableWindow = Window &
          *
          * See entrypoints/tracing-headers.ts
          *
-         * @deprecated use `__PosthogExtensions__.postHogTracingHeadersPatchFns` instead
+         * @deprecated use `__InsightsExtensions__.insightsTracingHeadersPatchFns` instead
          */
-        postHogTracingHeadersPatchFns: any
+        insightsTracingHeadersPatchFns: any
 
         /**
          * This is a legacy way to expose these functions, but we still need to support it for backwards compatibility
@@ -142,9 +142,9 @@ export type AssignableWindow = Window &
          *
          * See entrypoints/surveys.ts
          *
-         * @deprecated use `__PosthogExtensions__.generateSurveys` instead
+         * @deprecated use `__InsightsExtensions__.generateSurveys` instead
          */
-        extendPostHogWithSurveys: any
+        extendInsightsWithSurveys: any
 
         /*
          * These are used to handle our toolbar state.
@@ -162,7 +162,7 @@ export type AssignableWindow = Window &
 
 export type ExternalExtensionKind = 'intercom-integration' | 'crisp-chat-integration'
 
-export type PostHogExtensionKind =
+export type InsightsExtensionKind =
     | 'toolbar'
     | 'exception-autocapture'
     | 'web-vitals'
@@ -219,14 +219,14 @@ export interface LazyLoadedConversationsInterface {
     getWidgetSessionId: () => string
 }
 
-interface PostHogExtensions {
+interface InsightsExtensions {
     loadExternalDependency?: (
-        posthog: PostHog,
-        kind: PostHogExtensionKind,
+        insights: Insights,
+        kind: InsightsExtensionKind,
         callback: (error?: string | Event, event?: Event) => void
     ) => void
 
-    loadSiteApp?: (posthog: PostHog, appUrl: string, callback: (error?: string | Event, event?: Event) => void) => void
+    loadSiteApp?: (insights: Insights, appUrl: string, callback: (error?: string | Event, event?: Event) => void) => void
 
     errorWrappingFunctions?: {
         wrapOnError: (captureFn: (props: ErrorTracking.ErrorProperties) => void) => () => void
@@ -235,12 +235,12 @@ interface PostHogExtensions {
     }
     rrweb?: { record: any; version: string; wasMaxDepthReached?: () => boolean; resetMaxDepthState?: () => void }
     rrwebPlugins?: { getRecordConsolePlugin: any; getRecordNetworkPlugin?: any }
-    generateSurveys?: (posthog: PostHog, isSurveysEnabled: boolean) => any | undefined
-    generateProductTours?: (posthog: PostHog, isEnabled: boolean) => any | undefined
+    generateSurveys?: (insights: Insights, isSurveysEnabled: boolean) => any | undefined
+    generateProductTours?: (insights: Insights, isEnabled: boolean) => any | undefined
     logs?: {
-        initializeLogs?: (posthog: PostHog) => any | undefined
+        initializeLogs?: (insights: Insights) => any | undefined
     }
-    postHogWebVitalsCallbacks?: {
+    insightsWebVitalsCallbacks?: {
         onLCP: (metric: any) => void
         onCLS: (metric: any) => void
         onFCP: (metric: any) => void
@@ -251,25 +251,25 @@ interface PostHogExtensions {
      *
      * this was introduced briefly, it is now always a no-op and only kept for backwards compatibility
      */
-    loadWebVitalsCallbacks?: (useAttribution?: boolean) => PostHogExtensions['postHogWebVitalsCallbacks']
+    loadWebVitalsCallbacks?: (useAttribution?: boolean) => InsightsExtensions['insightsWebVitalsCallbacks']
     tracingHeadersPatchFns?: {
         _patchFetch: (hostnames: string[], distinctId: string, sessionManager?: SessionIdManager) => () => void
         _patchXHR: (hostnames: string[], distinctId: string, sessionManager?: SessionIdManager) => () => void
     }
     initDeadClicksAutocapture?: (
-        ph: PostHog,
+        ph: Insights,
         config: DeadClicksAutoCaptureConfig
     ) => LazyLoadedDeadClicksAutocaptureInterface
     integrations?: {
-        [K in ExternalIntegrationKind]?: { start: (posthog: PostHog) => void; stop: () => void }
+        [K in ExternalIntegrationKind]?: { start: (insights: Insights) => void; stop: () => void }
     }
-    initSessionRecording?: (ph: PostHog) => LazyLoadedSessionRecordingInterface
-    initConversations?: (config: ConversationsRemoteConfig, posthog: PostHog) => LazyLoadedConversationsInterface
+    initSessionRecording?: (ph: Insights) => LazyLoadedSessionRecordingInterface
+    initConversations?: (config: ConversationsRemoteConfig, insights: Insights) => LazyLoadedConversationsInterface
 }
 
 const global: typeof globalThis | undefined = typeof globalThis !== 'undefined' ? globalThis : win
 
-// React Native polyfills for posthog-js compatibility
+// React Native polyfills for @hanzo/insights compatibility
 if (typeof self === 'undefined') {
     ;(global as any).self = global
 }

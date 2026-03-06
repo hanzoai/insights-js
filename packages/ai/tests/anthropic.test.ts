@@ -1,5 +1,5 @@
-import { PostHog } from '@hanzo/insights-node'
-import PostHogAnthropic from '../src/anthropic'
+import { Insights } from '@hanzo/insights-node'
+import InsightsAnthropic from '../src/anthropic'
 import AnthropicOriginal from '@anthropic-ai/sdk'
 import { version } from '../package.json'
 
@@ -66,11 +66,11 @@ interface MockAsyncIterator<T> {
 
 jest.mock('@hanzo/insights-node', () => {
   return {
-    PostHog: jest.fn().mockImplementation(() => {
+    Insights: jest.fn().mockImplementation(() => {
       return {
         capture: jest.fn(),
         captureImmediate: jest.fn(),
-        privacy_mode: false, // Note: This is the correct property name per PostHog Node SDK
+        privacy_mode: false, // Note: This is the correct property name per Insights Node SDK
       }
     }),
   }
@@ -225,11 +225,11 @@ const createMockStreamChunks = (options: MockAnthropicResponseOptions = {}): Moc
 }
 
 /**
- * Asserts that PostHog capture was called with expected parameters
- * @param mockClient - The mocked PostHog client
+ * Asserts that Insights capture was called with expected parameters
+ * @param mockClient - The mocked Insights client
  * @param expectations - Object containing expected values for the capture call
  */
-const assertPostHogCapture = (mockClient: PostHog, expectations: CaptureExpectations): void => {
+const assertInsightsCapture = (mockClient: Insights, expectations: CaptureExpectations): void => {
   const captureMock = mockClient.capture as jest.Mock
   expect(captureMock).toHaveBeenCalledTimes(1)
 
@@ -290,13 +290,13 @@ const assertPostHogCapture = (mockClient: PostHog, expectations: CaptureExpectat
   expect(typeof properties['$ai_latency']).toBe('number')
 
   // Always check $ai_lib and $ai_lib_version
-  expect(properties['$ai_lib']).toBe('posthog-ai')
+  expect(properties['$ai_lib']).toBe('insights-ai')
   expect(properties['$ai_lib_version']).toBe(version)
 }
 
-describe('PostHogAnthropic', () => {
-  let mockPostHogClient: PostHog
-  let client: PostHogAnthropic
+describe('InsightsAnthropic', () => {
+  let mockInsightsClient: Insights
+  let client: InsightsAnthropic
   let mockResponse: AnthropicOriginal.Messages.Message
   let mockStreamChunks: MockStreamChunk[]
 
@@ -325,10 +325,10 @@ describe('PostHogAnthropic', () => {
     jest.clearAllMocks()
 
     // Reset the default mocks
-    mockPostHogClient = new (PostHog as any)()
-    client = new PostHogAnthropic({
+    mockInsightsClient = new (Insights as any)()
+    client = new InsightsAnthropic({
       apiKey: process.env.ANTHROPIC_API_KEY || '',
-      posthog: mockPostHogClient as any,
+      insights: mockInsightsClient as any,
     })
 
     // Set up default mock response
@@ -366,13 +366,13 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello Claude' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
-        posthogProperties: { custom_prop: 'test_value' },
+        insightsDistinctId: 'test-user-123',
+        insightsProperties: { custom_prop: 'test_value' },
       })
 
       expect(response).toEqual(mockResponse)
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         distinctId: 'test-user-123',
         event: '$ai_generation',
         provider: 'anthropic',
@@ -385,7 +385,7 @@ describe('PostHogAnthropic', () => {
         properties: { custom_prop: 'test_value' },
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
       expect(properties['$ai_usage']).toBeDefined()
@@ -397,13 +397,13 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello Claude' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
-        posthogProperties: { $ai_input_tokens: 99999 },
+        insightsDistinctId: 'test-user-123',
+        insightsProperties: { $ai_input_tokens: 99999 },
       })
 
       expect(response).toEqual(mockResponse)
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
       expect(properties['$ai_tokens_source']).toBe('passthrough')
@@ -420,10 +420,10 @@ describe('PostHogAnthropic', () => {
         system: 'You are a helpful assistant.',
         messages: [{ role: 'user', content: 'Who are you?' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -445,10 +445,10 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages,
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -463,7 +463,7 @@ describe('PostHogAnthropic', () => {
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
       // Consume the stream
@@ -475,7 +475,7 @@ describe('PostHogAnthropic', () => {
       // Allow async capture to complete
       await waitForAsyncCapture()
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         distinctId: 'test-user-123',
         event: '$ai_generation',
         provider: 'anthropic',
@@ -498,7 +498,7 @@ describe('PostHogAnthropic', () => {
         messages: [{ role: 'user', content: 'Say hello' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-ttft-user',
+        insightsDistinctId: 'test-ttft-user',
       })
 
       // Consume the stream
@@ -509,7 +509,7 @@ describe('PostHogAnthropic', () => {
       // Allow async capture to complete
       await waitForAsyncCapture()
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       expect(captureMock).toHaveBeenCalledTimes(1)
 
       const [captureArgs] = captureMock.mock.calls
@@ -552,7 +552,7 @@ describe('PostHogAnthropic', () => {
         ] as AnthropicOriginal.Tool[],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
       // Consume the stream
@@ -563,7 +563,7 @@ describe('PostHogAnthropic', () => {
       // Allow async capture to complete
       await waitForAsyncCapture()
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -596,14 +596,14 @@ describe('PostHogAnthropic', () => {
           {
             id: 'tool_456',
             name: 'search',
-            input: { query: 'PostHog features' },
+            input: { query: 'Insights features' },
           },
         ],
       })
 
       await client.messages.create({
         model: 'claude-3-opus-20240229',
-        messages: [{ role: 'user', content: 'Tell me about PostHog' }],
+        messages: [{ role: 'user', content: 'Tell me about Insights' }],
         tools: [
           {
             name: 'search',
@@ -617,10 +617,10 @@ describe('PostHogAnthropic', () => {
           },
         ] as AnthropicOriginal.Tool[],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -635,7 +635,7 @@ describe('PostHogAnthropic', () => {
               id: 'tool_456',
               function: {
                 name: 'search',
-                arguments: { query: 'PostHog features' },
+                arguments: { query: 'Insights features' },
               },
             },
           ],
@@ -676,10 +676,10 @@ describe('PostHogAnthropic', () => {
           },
         ] as AnthropicOriginal.Tool[],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -695,11 +695,11 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Sensitive information' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
-        posthogPrivacyMode: true,
+        insightsDistinctId: 'test-user-123',
+        insightsPrivacyMode: true,
       })
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         hasInput: false,
         hasOutput: false,
       })
@@ -707,17 +707,17 @@ describe('PostHogAnthropic', () => {
 
     conditionalTest('should respect global privacy mode', async () => {
       // Set global privacy mode
-      ;(mockPostHogClient as any).privacy_mode = true
+      ;(mockInsightsClient as any).privacy_mode = true
 
       await client.messages.create({
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Sensitive information' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
-        posthogPrivacyMode: false, // Try to override, but global should take precedence
+        insightsDistinctId: 'test-user-123',
+        insightsPrivacyMode: false, // Try to override, but global should take precedence
       })
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         hasInput: false,
         hasOutput: false,
       })
@@ -738,10 +738,10 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         inputTokens: 50,
         outputTokens: 25,
       })
@@ -762,10 +762,10 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         inputTokens: 100,
         outputTokens: 30,
         cacheCreationInputTokens: 20,
@@ -789,7 +789,7 @@ describe('PostHogAnthropic', () => {
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
       // Consume the stream
@@ -800,7 +800,7 @@ describe('PostHogAnthropic', () => {
       // Allow async capture to complete
       await waitForAsyncCapture()
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         inputTokens: 75,
         outputTokens: 40,
         cacheCreationInputTokens: 10,
@@ -822,17 +822,17 @@ describe('PostHogAnthropic', () => {
           model: 'claude-3-opus-20240229',
           messages: [{ role: 'user', content: 'Hello' }],
           max_tokens: 100,
-          posthogDistinctId: 'test-user-123',
+          insightsDistinctId: 'test-user-123',
         })
       ).rejects.toThrow('API Error')
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         httpStatus: 429,
         inputTokens: 0,
         outputTokens: 0,
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -869,7 +869,7 @@ describe('PostHogAnthropic', () => {
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
       // Try to consume the stream (it should throw)
@@ -882,7 +882,7 @@ describe('PostHogAnthropic', () => {
       // Allow async error capture to complete
       await new Promise(process.nextTick)
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         httpStatus: 500,
         inputTokens: 0,
         outputTokens: 0,
@@ -896,11 +896,11 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
-        posthogGroups: { company: 'acme-corp', team: 'engineering' },
+        insightsDistinctId: 'test-user-123',
+        insightsGroups: { company: 'acme-corp', team: 'engineering' },
       })
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         groups: { company: 'acme-corp', team: 'engineering' },
       })
     })
@@ -910,13 +910,13 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
-        posthogCaptureImmediate: true,
+        insightsDistinctId: 'test-user-123',
+        insightsCaptureImmediate: true,
       })
 
-      const captureImmediateMock = mockPostHogClient.captureImmediate as jest.Mock
+      const captureImmediateMock = mockInsightsClient.captureImmediate as jest.Mock
       expect(captureImmediateMock).toHaveBeenCalledTimes(1)
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(0)
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(0)
     })
 
     conditionalTest('should track model parameters', async () => {
@@ -926,10 +926,10 @@ describe('PostHogAnthropic', () => {
         max_tokens: 100,
         temperature: 0.7,
         top_p: 0.9,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -945,10 +945,10 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogTraceId: 'trace-789',
+        insightsTraceId: 'trace-789',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { distinctId, properties } = captureArgs[0]
 
@@ -961,11 +961,11 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogDistinctId: 'user-456',
-        posthogTraceId: 'trace-789',
+        insightsDistinctId: 'user-456',
+        insightsTraceId: 'trace-789',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { distinctId, properties } = captureArgs[0]
 
@@ -977,7 +977,7 @@ describe('PostHogAnthropic', () => {
   describe('Web Search Tracking', () => {
     conditionalTest('should track web search count in non-streaming mode', async () => {
       mockResponse = createMockResponse({
-        content: 'Based on my search, PostHog is a product analytics platform.',
+        content: 'Based on my search, Insights is a product analytics platform.',
         usage: {
           input_tokens: 50,
           output_tokens: 30,
@@ -989,12 +989,12 @@ describe('PostHogAnthropic', () => {
 
       await client.messages.create({
         model: 'claude-3-opus-20240229',
-        messages: [{ role: 'user', content: 'What is PostHog?' }],
+        messages: [{ role: 'user', content: 'What is Insights?' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         distinctId: 'test-user-123',
         event: '$ai_generation',
         provider: 'anthropic',
@@ -1025,7 +1025,7 @@ describe('PostHogAnthropic', () => {
         messages: [{ role: 'user', content: 'Search for information about AI' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
       // Consume the stream
@@ -1036,7 +1036,7 @@ describe('PostHogAnthropic', () => {
       // Allow async capture to complete
       await waitForAsyncCapture()
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         distinctId: 'test-user-123',
         event: '$ai_generation',
         provider: 'anthropic',
@@ -1063,10 +1063,10 @@ describe('PostHogAnthropic', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hello' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
-      const captureMock = mockPostHogClient.capture as jest.Mock
+      const captureMock = mockInsightsClient.capture as jest.Mock
       const [captureArgs] = captureMock.mock.calls
       const { properties } = captureArgs[0]
 
@@ -1127,7 +1127,7 @@ describe('PostHogAnthropic', () => {
         messages: [{ role: 'user', content: 'Search query' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user-123',
+        insightsDistinctId: 'test-user-123',
       })
 
       // Consume the stream
@@ -1138,7 +1138,7 @@ describe('PostHogAnthropic', () => {
       // Allow async capture to complete
       await waitForAsyncCapture()
 
-      assertPostHogCapture(mockPostHogClient, {
+      assertInsightsCapture(mockInsightsClient, {
         webSearchCount: 4,
       })
     })

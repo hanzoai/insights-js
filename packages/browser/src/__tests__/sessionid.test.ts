@@ -2,10 +2,10 @@ import { DEFAULT_SESSION_IDLE_TIMEOUT_SECONDS, MAX_SESSION_IDLE_TIMEOUT_SECONDS,
 import { SESSION_ID } from '../constants'
 import { sessionStore } from '../storage'
 import { uuid7ToTimestampMs, uuidv7 } from '../uuidv7'
-import { BootstrapConfig, PostHogConfig, Properties } from '../types'
-import { PostHogPersistence } from '../posthog-persistence'
+import { BootstrapConfig, InsightsConfig, Properties } from '../types'
+import { InsightsPersistence } from '../insights-persistence'
 import { assignableWindow } from '../utils/globals'
-import { createMockPostHog } from './helpers/posthog-instance'
+import { createMockInsights } from './helpers/insights-instance'
 
 jest.mock('../uuidv7')
 jest.mock('../storage')
@@ -16,18 +16,18 @@ describe('Session ID manager', () => {
     let timestampOfSessionStart: number
     let registerMock: jest.Mock
 
-    const config: Partial<PostHogConfig> = {
+    const config: Partial<InsightsConfig> = {
         persistence_name: 'persistance-name',
     }
 
-    let persistence: { props: Properties } & Partial<PostHogPersistence>
+    let persistence: { props: Properties } & Partial<InsightsPersistence>
 
-    const sessionIdMgr = (phPersistence: Partial<PostHogPersistence>) => {
+    const sessionIdMgr = (phPersistence: Partial<InsightsPersistence>) => {
         registerMock = jest.fn()
         return new SessionIdManager(
-            createMockPostHog({
+            createMockInsights({
                 config,
-                persistence: phPersistence as PostHogPersistence,
+                persistence: phPersistence as InsightsPersistence,
                 register: registerMock,
             })
         )
@@ -86,9 +86,9 @@ describe('Session ID manager', () => {
                 sessionID: bootstrapSessionId,
             }
             const sessionIdManager = new SessionIdManager(
-                createMockPostHog({
+                createMockInsights({
                     config: { ...config, bootstrap },
-                    persistence: persistence as PostHogPersistence,
+                    persistence: persistence as InsightsPersistence,
                     register: jest.fn(),
                 })
             )
@@ -373,11 +373,11 @@ describe('Session ID manager', () => {
     describe('custom session_idle_timeout_seconds', () => {
         const mockSessionManager = (timeout: number | undefined) =>
             new SessionIdManager(
-                createMockPostHog({
+                createMockInsights({
                     config: {
                         session_idle_timeout_seconds: timeout,
                     },
-                    persistence: persistence as PostHogPersistence,
+                    persistence: persistence as InsightsPersistence,
                     register: jest.fn(),
                 })
             )
@@ -387,7 +387,7 @@ describe('Session ID manager', () => {
         })
 
         it('uses the custom session_idle_timeout_seconds if within bounds', () => {
-            assignableWindow.POSTHOG_DEBUG = true
+            assignableWindow.INSIGHTS_DEBUG = true
             expect(mockSessionManager(61)['_sessionTimeoutMs']).toEqual(61 * 1000)
             expect(console.warn).toHaveBeenCalledTimes(0)
             expect(mockSessionManager(59)['_sessionTimeoutMs']).toEqual(60 * 1000)
@@ -557,17 +557,17 @@ describe('Session ID manager', () => {
             persistence_name: 'test-session-memory',
             persistence: 'memory',
             token: 'test-token',
-        } as PostHogConfig
+        } as InsightsConfig
 
         it.each([
             { description: 'with stale timestamp from simulated frozen tab', offsetMs: 1000 },
             { description: 'with exactly expired timestamp', offsetMs: 1 },
         ])('should detect activity timeout $description', ({ offsetMs }) => {
-            const realPersistence = new PostHogPersistence(memoryConfig)
+            const realPersistence = new InsightsPersistence(memoryConfig)
             const testTimestamp = 1603107479471
 
             const sessionIdManager = new SessionIdManager(
-                createMockPostHog({
+                createMockInsights({
                     config: memoryConfig,
                     persistence: realPersistence,
                     register: jest.fn(),

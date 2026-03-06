@@ -1,6 +1,6 @@
-# PostHog Flags Playground
+# Insights Flags Playground
 
-This directory contains examples for using PostHog feature flags, evaluation tags/environments, and remote config.
+This directory contains examples for using Insights feature flags, evaluation tags/environments, and remote config.
 
 ## Examples
 
@@ -20,7 +20,7 @@ The `evaluation-tags-example.html` provides an interactive web interface to test
 **Option A: Use CDN version (easiest)**
 
 ```bash
-# The HTML file now uses PostHog from CDN by default
+# The HTML file now uses Insights from CDN by default
 npm run serve
 # Then open http://localhost:8080/evaluation-tags-example.html in your browser
 ```
@@ -28,7 +28,7 @@ npm run serve
 **Option B: Use local build**
 
 ```bash
-# First, build PostHog locally from the root directory
+# First, build Insights locally from the root directory
 cd ../.. # Go to repository root
 pnpm build
 
@@ -50,7 +50,7 @@ The `evaluation-tags-example.js` demonstrates what the API would look like once 
 
 - The browser SDK sends `evaluation_environments` in the `/flags/` API call
 - The Node.js SDK doesn't have this implementation yet
-- The feature needs to be added to `@posthog/core` and `posthog-node` packages
+- The feature needs to be added to `@hanzo/core` and `@hanzo/insights-node` packages
 
 **Running the example (shows warning message):**
 
@@ -65,13 +65,13 @@ The `remote-config-example.js` demonstrates how to use the remote config endpoin
 ### Setup
 
 1. Update the API keys in `remote-config-example.js`:
-    - `phc_YOUR_PROJECT_API_KEY_HERE` - Your PostHog project API key
-    - `phx_YOUR_SECURE_FLAGS_API_KEY_HERE` - Your PostHog secure flags API key (or personal API key)
+    - `phc_YOUR_PROJECT_API_KEY_HERE` - Your Insights project API key
+    - `phx_YOUR_SECURE_FLAGS_API_KEY_HERE` - Your Insights secure flags API key (or personal API key)
 
 2. Update the host if needed:
-    - For PostHog Cloud US: `https://us.posthog.com`
-    - For PostHog Cloud EU: `https://eu.posthog.com`
-    - For self-hosted: `http://your-posthog-instance.com`
+    - For Insights Cloud US: `https://us.insights.hanzo.ai`
+    - For Insights Cloud EU: `https://eu.insights.hanzo.ai`
+    - For self-hosted: `http://your-insights-instance.com`
 
 3. Update the feature flag key to match an actual flag in your project that has remote config enabled.
 

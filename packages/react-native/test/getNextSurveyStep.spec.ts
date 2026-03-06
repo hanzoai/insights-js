@@ -316,7 +316,7 @@ describe('getNextSurveyStep', () => {
       let result = getNextSurveyStep(survey, 0, 'invalid')
       expect(result).toBe(1) // Should go to next question
       expect(consoleSpy).toHaveBeenCalledWith(
-        'PostHog Debug: Expected integer response for rating question but received:',
+        'Insights Debug: Expected integer response for rating question but received:',
         'invalid'
       )
 
@@ -324,7 +324,7 @@ describe('getNextSurveyStep', () => {
       result = getNextSurveyStep(survey, 0, 3.5)
       expect(result).toBe(1) // Should go to next question
       expect(consoleSpy).toHaveBeenCalledWith(
-        'PostHog Debug: Expected integer response for rating question but received:',
+        'Insights Debug: Expected integer response for rating question but received:',
         3.5
       )
 
@@ -377,12 +377,12 @@ describe('getNextSurveyStep', () => {
       // Test out-of-range low value
       let result = getNextSurveyStep(survey, 0, 0)
       expect(result).toBe(2) // Should use neutral bucket and go to question 3
-      expect(consoleSpy).toHaveBeenCalledWith('PostHog Debug: Rating response out of range for scale 5:', 0)
+      expect(consoleSpy).toHaveBeenCalledWith('Insights Debug: Rating response out of range for scale 5:', 0)
 
       // Test out-of-range high value
       result = getNextSurveyStep(survey, 0, 6)
       expect(result).toBe(2) // Should use neutral bucket and go to question 3
-      expect(consoleSpy).toHaveBeenCalledWith('PostHog Debug: Rating response out of range for scale 5:', 6)
+      expect(consoleSpy).toHaveBeenCalledWith('Insights Debug: Rating response out of range for scale 5:', 6)
 
       consoleSpy.mockRestore()
     })
@@ -407,7 +407,7 @@ describe('getNextSurveyStep', () => {
 
       const result = getNextSurveyStep(survey, 0, 2)
       expect(result).toBe(SurveyQuestionBranchingType.End) // Should use neutral bucket
-      expect(consoleSpy).toHaveBeenCalledWith('PostHog Debug: Unsupported rating scale:', 4)
+      expect(consoleSpy).toHaveBeenCalledWith('Insights Debug: Unsupported rating scale:', 4)
 
       consoleSpy.mockRestore()
     })

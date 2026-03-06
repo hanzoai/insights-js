@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { hasEvents, matchPropertyFilters, PropertyFilters, SurveyEventWithFilters } from './surveys-utils'
 import { Survey } from '@hanzo/insights-core'
-import { PostHog } from '../posthog-rn'
+import { Insights } from '../insights-rn'
 
 const SURVEY_SHOWN_EVENT_NAME = 'survey shown'
 
@@ -11,7 +11,7 @@ interface EventSurveyConfig {
   propertyFilters?: PropertyFilters
 }
 
-export function useActivatedSurveys(posthog: PostHog, surveys: Survey[]): ReadonlySet<string> {
+export function useActivatedSurveys(insights: Insights, surveys: Survey[]): ReadonlySet<string> {
   const [activatedSurveys, setActivatedSurveys] = useState<ReadonlySet<string>>(new Set())
 
   const eventMap = useMemo(() => {
@@ -31,7 +31,7 @@ export function useActivatedSurveys(posthog: PostHog, surveys: Survey[]): Readon
 
   useEffect(() => {
     if (eventMap.size > 0) {
-      return posthog.on('capture', (payload: { event: string; properties?: Record<string, unknown> }) => {
+      return insights.on('capture', (payload: { event: string; properties?: Record<string, unknown> }) => {
         if (eventMap.has(payload.event)) {
           const configs = eventMap.get(payload.event) ?? []
           const matchingSurveyIds = configs
@@ -56,7 +56,7 @@ export function useActivatedSurveys(posthog: PostHog, surveys: Survey[]): Readon
         }
       })
     }
-  }, [eventMap, posthog])
+  }, [eventMap, insights])
 
   return activatedSurveys
 }

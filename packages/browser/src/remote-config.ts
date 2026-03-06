@@ -1,4 +1,4 @@
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 import { RemoteConfig } from './types'
 
 import { createLogger } from './utils/logger'
@@ -14,15 +14,15 @@ const DEFAULT_REFRESH_INTERVAL = 5 * 60 * 1000
 export class RemoteConfigLoader {
     private _refreshInterval: ReturnType<typeof setInterval> | undefined
 
-    constructor(private readonly _instance: PostHog) {}
+    constructor(private readonly _instance: Insights) {}
 
     get remoteConfig(): RemoteConfig | undefined {
-        return assignableWindow._POSTHOG_REMOTE_CONFIG?.[this._instance.config.token]?.config
+        return assignableWindow._INSIGHTS_REMOTE_CONFIG?.[this._instance.config.token]?.config
     }
 
     private _loadRemoteConfigJs(cb: (config?: RemoteConfig) => void): void {
-        if (assignableWindow.__PosthogExtensions__?.loadExternalDependency) {
-            assignableWindow.__PosthogExtensions__?.loadExternalDependency?.(this._instance, 'remote-config', () => {
+        if (assignableWindow.__InsightsExtensions__?.loadExternalDependency) {
+            assignableWindow.__InsightsExtensions__?.loadExternalDependency?.(this._instance, 'remote-config', () => {
                 return cb(this.remoteConfig)
             })
         } else {
@@ -116,7 +116,7 @@ export class RemoteConfigLoader {
 
     private _onRemoteConfig(config?: RemoteConfig): void {
         if (!config) {
-            logger.error('Failed to fetch remote config from PostHog.')
+            logger.error('Failed to fetch remote config from Insights.')
         }
 
         // Config and flags are loaded separately: config from /array/{token}/config,

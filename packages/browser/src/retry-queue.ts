@@ -3,7 +3,7 @@ import { RetriableRequestWithOptions } from './types'
 import { isPositiveNumber, isUndefined } from '@hanzo/insights-core'
 import { logger } from './utils/logger'
 import { window } from './utils/globals'
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 import { extendURLParams } from './request'
 import { addEventListener } from './utils'
 
@@ -42,7 +42,7 @@ export class RetryQueue {
     private _onlineListener: (() => void) | undefined
     private _offlineListener: (() => void) | undefined
 
-    constructor(private _instance: PostHog) {
+    constructor(private _instance: Insights) {
         this._queue = []
         this._areWeOnline = true
 

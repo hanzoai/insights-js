@@ -1,4 +1,4 @@
-import type { PostHogFeatureFlag, PropertyGroup } from '../../types'
+import type { InsightsFeatureFlag, PropertyGroup } from '../../types'
 
 /**
  * Represents the complete set of feature flag data needed for local evaluation.
@@ -7,7 +7,7 @@ import type { PostHogFeatureFlag, PropertyGroup } from '../../types'
  */
 export interface FlagDefinitionCacheData {
   /** Array of feature flag definitions */
-  flags: PostHogFeatureFlag[]
+  flags: InsightsFeatureFlag[]
   /** Mapping of group type index to group name */
   groupTypeMapping: Record<string, string>
   /** Cohort property groups for local evaluation */
@@ -36,23 +36,23 @@ export interface FlagDefinitionCacheData {
  *   constructor(private redis: Redis, private teamKey: string) { }
  *
  *   async getFlagDefinitions(): Promise<FlagDefinitionCacheData | undefined> {
- *     const cached = await this.redis.get(`posthog:flags:${this.teamKey}`)
+ *     const cached = await this.redis.get(`insights:flags:${this.teamKey}`)
  *     return cached ? JSON.parse(cached) : undefined
  *   }
  *
  *   async shouldFetchFlagDefinitions(): Promise<boolean> {
  *     // Acquire distributed lock - only one worker fetches
- *     const acquired = await this.redis.set(`posthog:flags:${this.teamKey}:lock`, '1', 'EX', 60, 'NX')
+ *     const acquired = await this.redis.set(`insights:flags:${this.teamKey}:lock`, '1', 'EX', 60, 'NX')
  *     return acquired === 'OK'
  *   }
  *
  *   async onFlagDefinitionsReceived(data: FlagDefinitionCacheData): Promise<void> {
- *     await this.redis.set(`posthog:flags:${this.teamKey}`, JSON.stringify(data), 'EX', 300)
- *     await this.redis.del(`posthog:flags:${this.teamKey}:lock`)
+ *     await this.redis.set(`insights:flags:${this.teamKey}`, JSON.stringify(data), 'EX', 300)
+ *     await this.redis.del(`insights:flags:${this.teamKey}:lock`)
  *   }
  *
  *   async shutdown(): Promise<void> {
- *     await this.redis.del(`posthog:flags:${this.teamKey}:lock`)
+ *     await this.redis.del(`insights:flags:${this.teamKey}:lock`)
  *   }
  * }
  * ```
@@ -62,7 +62,7 @@ export interface FlagDefinitionCacheProvider {
    * Retrieve cached flag definitions.
    *
    * Called when the poller is refreshing in-memory flag definitions. If this returns undefined
-   * (or throws an error), the poller will fetch fresh data from the PostHog API if no flag
+   * (or throws an error), the poller will fetch fresh data from the Insights API if no flag
    * definitions are in memory. Otherwise, stale cache data is used until the next poll cycle.
    *
    * @returns cached definitions if available, undefined if cache is empty
@@ -86,7 +86,7 @@ export interface FlagDefinitionCacheProvider {
   shouldFetchFlagDefinitions(): Promise<boolean> | boolean
 
   /**
-   * Called after successfully receiving new flag definitions from PostHog.
+   * Called after successfully receiving new flag definitions from Insights.
    *
    * Store the definitions in your cache backend here. This is called only
    * after a successful API response with valid flag data.
@@ -94,13 +94,13 @@ export interface FlagDefinitionCacheProvider {
    * If this method throws, the error is logged but flag definitions are still
    * stored in memory, ensuring local evaluation can still be performed.
    *
-   * @param data - The complete flag definition data from PostHog
+   * @param data - The complete flag definition data from Insights
    * @throws if storage backend is unavailable (error will be logged)
    */
   onFlagDefinitionsReceived(data: FlagDefinitionCacheData): Promise<void> | void
 
   /**
-   * Called when the PostHog client shuts down.
+   * Called when the Insights client shuts down.
    *
    * Release any held locks, close connections, or clean up resources here.
    *

@@ -1,6 +1,6 @@
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { AllExtensions } from '../extensions/extension-bundles'
 
-PostHog.__defaultExtensionClasses = {
+Insights.__defaultExtensionClasses = {
     ...AllExtensions,
 }

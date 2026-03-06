@@ -10,7 +10,7 @@ export default function Home() {
         <>
             <Head>
                 <title>Redux Todo List</title>
-                <meta name="description" content="Redux Todo List with PostHog integration" />
+                <meta name="description" content="Redux Todo List with Insights integration" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

@@ -1,17 +1,17 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
-import { PostHog } from '@/posthog-core'
+import { Insights } from '@/insights-core'
 
 test.describe('group analytics', () => {
     test('includes group information in all event payloads', async ({ page, context }) => {
         await start(
             {
-                runBeforePostHogInit: async (page) => {
-                    // it's tricky to pass functions as args the way posthog config is passed in playwright
+                runBeforeInsightsInit: async (page) => {
+                    // it's tricky to pass functions as args the way insights config is passed in playwright
                     // so here we set the function on the window object
                     // and then call it in the loaded function during init
                     await page.evaluate(() => {
-                        ;(window as any).__ph_loaded = (ph: PostHog) => {
+                        ;(window as any).__ph_loaded = (ph: Insights) => {
                             ph.group('company', 'id:5')
                         }
                     })

@@ -2,7 +2,7 @@
 
 import '@testing-library/jest-dom'
 
-import { PostHogPersistence } from '../../../posthog-persistence'
+import { InsightsPersistence } from '../../../insights-persistence'
 import {
     CONSOLE_LOG_RECORDING_ENABLED_SERVER_SIDE,
     SESSION_RECORDING_ENABLED_SERVER_SIDE,
@@ -10,17 +10,17 @@ import {
     SESSION_RECORDING_REMOTE_CONFIG,
 } from '../../../constants'
 import { SessionIdManager } from '../../../sessionid'
-import { createMockPostHog, createMockConfig } from '../../helpers/posthog-instance'
+import { createMockInsights, createMockConfig } from '../../helpers/insights-instance'
 import {
     FULL_SNAPSHOT_EVENT_TYPE,
     INCREMENTAL_SNAPSHOT_EVENT_TYPE,
     META_EVENT_TYPE,
 } from '../../../extensions/replay/external/sessionrecording-utils'
-import { PostHog } from '../../../posthog-core'
+import { Insights } from '../../../insights-core'
 import {
     FlagsResponse,
     PerformanceCaptureConfig,
-    PostHogConfig,
+    InsightsConfig,
     Property,
     SessionIdChangedCallback,
     SessionRecordingOptions,
@@ -183,11 +183,11 @@ describe('Lazy SessionRecording', () => {
     const _addCustomEvent = jest.fn()
     const loadScriptMock = jest.fn()
     let _emit: any
-    let posthog: PostHog
+    let insights: Insights
     let sessionRecording: SessionRecording
     let sessionId: string
     let sessionManager: SessionIdManager
-    let config: PostHogConfig
+    let config: InsightsConfig
     let sessionIdGeneratorMock: Mock
     let windowIdGeneratorMock: Mock
     let onFeatureFlagsCallback: ((flags: string[], variants: Record<string, string | boolean>) => void) | null
@@ -195,7 +195,7 @@ describe('Lazy SessionRecording', () => {
     let simpleEventEmitter: SimpleEventEmitter
 
     const addRRwebToWindow = () => {
-        assignableWindow.__PosthogExtensions__.rrweb = {
+        assignableWindow.__InsightsExtensions__.rrweb = {
             record: jest.fn(({ emit }) => {
                 _emit = emit
                 return () => {}
@@ -204,18 +204,18 @@ describe('Lazy SessionRecording', () => {
             wasMaxDepthReached: jest.fn(() => false),
             resetMaxDepthState: jest.fn(),
         }
-        assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot = jest.fn(() => {
+        assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot = jest.fn(() => {
             // we pretend to be rrweb and call emit
             _emit(createFullSnapshot())
         })
-        assignableWindow.__PosthogExtensions__.rrweb.record.addCustomEvent = _addCustomEvent
+        assignableWindow.__InsightsExtensions__.rrweb.record.addCustomEvent = _addCustomEvent
 
-        assignableWindow.__PosthogExtensions__.rrwebPlugins = {
+        assignableWindow.__InsightsExtensions__.rrwebPlugins = {
             getRecordConsolePlugin: jest.fn(),
         }
 
-        assignableWindow.__PosthogExtensions__.initSessionRecording = () => {
-            return new LazyLoadedSessionRecording(posthog)
+        assignableWindow.__InsightsExtensions__.initSessionRecording = () => {
+            return new LazyLoadedSessionRecording(insights)
         }
     }
 
@@ -237,7 +237,7 @@ describe('Lazy SessionRecording', () => {
             persistence: 'memory',
         })
 
-        assignableWindow.__PosthogExtensions__ = {
+        assignableWindow.__InsightsExtensions__ = {
             rrweb: undefined,
             rrwebPlugins: {
                 getRecordConsolePlugin: undefined,
@@ -248,24 +248,24 @@ describe('Lazy SessionRecording', () => {
         sessionIdGeneratorMock = jest.fn().mockImplementation(() => sessionId)
         windowIdGeneratorMock = jest.fn().mockImplementation(() => 'windowId')
 
-        const postHogPersistence = new PostHogPersistence(config)
-        postHogPersistence.clear()
+        const insightsPersistence = new InsightsPersistence(config)
+        insightsPersistence.clear()
 
         sessionManager = new SessionIdManager(
-            createMockPostHog({ config, persistence: postHogPersistence, register: jest.fn() }),
+            createMockInsights({ config, persistence: insightsPersistence, register: jest.fn() }),
             sessionIdGeneratorMock,
             windowIdGeneratorMock
         )
 
         simpleEventEmitter = new SimpleEventEmitter()
-        // TODO we really need to make this a real posthog instance :cry:
-        posthog = {
+        // TODO we really need to make this a real insights instance :cry:
+        insights = {
             get_property: (property_key: string): Property | undefined => {
-                return postHogPersistence?.props[property_key]
+                return insightsPersistence?.props[property_key]
             },
             config: config,
             capture: jest.fn(),
-            persistence: postHogPersistence,
+            persistence: insightsPersistence,
             onFeatureFlags: (
                 cb: (flags: string[], variants: Record<string, string | boolean>) => void
             ): (() => void) => {
@@ -285,23 +285,23 @@ describe('Lazy SessionRecording', () => {
                 const unsubscribe = simpleEventEmitter.on(event, cb)
                 return removePageviewCaptureHookMock.mockImplementation(unsubscribe)
             }),
-        } as Partial<PostHog> as PostHog
+        } as Partial<Insights> as Insights
 
         loadScriptMock.mockImplementation((_ph, _path, callback) => {
             addRRwebToWindow()
             callback()
         })
 
-        assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+        assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
         // defaults
-        posthog.persistence?.register({
+        insights.persistence?.register({
             [SESSION_RECORDING_ENABLED_SERVER_SIDE]: true,
             [CONSOLE_LOG_RECORDING_ENABLED_SERVER_SIDE]: false,
             [SESSION_RECORDING_IS_SAMPLED]: undefined,
         })
 
-        sessionRecording = new SessionRecording(posthog)
+        sessionRecording = new SessionRecording(insights)
     })
 
     afterEach(() => {
@@ -315,7 +315,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('does not load script if disable_session_recording passed', () => {
-            posthog.config.disable_session_recording = true
+            insights.config.disable_session_recording = true
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -346,7 +346,7 @@ describe('Lazy SessionRecording', () => {
             })
 
             it('is disabled if the server is disabled', () => {
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_REMOTE_CONFIG]: {
                         enabled: false,
                     },
@@ -355,7 +355,7 @@ describe('Lazy SessionRecording', () => {
             })
 
             it('is disabled if the client config is disabled', () => {
-                posthog.config.disable_session_recording = true
+                insights.config.disable_session_recording = true
                 expect(sessionRecording['_isRecordingEnabled']).toBe(false)
             })
         })
@@ -383,7 +383,7 @@ describe('Lazy SessionRecording', () => {
                 // stop recording so TTL check is active
                 sessionRecording.stopRecording()
 
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_REMOTE_CONFIG]: persistedConfig,
                 })
 
@@ -393,14 +393,14 @@ describe('Lazy SessionRecording', () => {
                     expect(result?.enabled).toBe(true)
                 } else {
                     expect(result).toBeUndefined()
-                    expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBeUndefined()
+                    expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBeUndefined()
                 }
             })
 
             it('treats legacy config without cache_timestamp as fresh', () => {
                 sessionRecording.stopRecording()
 
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_REMOTE_CONFIG]: { enabled: true, endpoint: '/s/' },
                 })
 
@@ -413,7 +413,7 @@ describe('Lazy SessionRecording', () => {
                 expect(sessionRecording['_lazyLoadedSessionRecording'].isStarted).toBe(true)
 
                 // simulate time passing and config becoming stale
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_REMOTE_CONFIG]: {
                         enabled: true,
                         endpoint: '/s/',
@@ -446,8 +446,8 @@ describe('Lazy SessionRecording', () => {
                     clientSide: boolean | undefined,
                     expected: boolean
                 ) => {
-                    posthog.persistence?.register({ [CONSOLE_LOG_RECORDING_ENABLED_SERVER_SIDE]: serverSide })
-                    posthog.config.enable_recording_console_log = clientSide
+                    insights.persistence?.register({ [CONSOLE_LOG_RECORDING_ENABLED_SERVER_SIDE]: serverSide })
+                    insights.config.enable_recording_console_log = clientSide
                     expect(sessionRecording['_lazyLoadedSessionRecording']['_isConsoleLogCaptureEnabled']).toBe(
                         expected
                     )
@@ -474,13 +474,13 @@ describe('Lazy SessionRecording', () => {
                     clientSide: boolean | undefined,
                     expected: boolean
                 ) => {
-                    posthog.persistence?.register({
+                    insights.persistence?.register({
                         [SESSION_RECORDING_REMOTE_CONFIG]: {
                             cache_timestamp: Date.now(),
                             canvasRecording: { enabled: serverSide, fps: 4, quality: '0.1' },
                         },
                     })
-                    posthog.config.session_recording.captureCanvas = { recordCanvas: clientSide }
+                    insights.config.session_recording.captureCanvas = { recordCanvas: clientSide }
                     expect(sessionRecording['_lazyLoadedSessionRecording']['_canvasRecording']).toMatchObject({
                         enabled: expected,
                         fps: 4,
@@ -506,7 +506,7 @@ describe('Lazy SessionRecording', () => {
                     expectedFps: number,
                     expectedQuality: number
                 ) => {
-                    posthog.persistence?.register({
+                    insights.persistence?.register({
                         [SESSION_RECORDING_REMOTE_CONFIG]: {
                             cache_timestamp: Date.now(),
                             canvasRecording: { enabled: true, fps, quality },
@@ -597,13 +597,13 @@ describe('Lazy SessionRecording', () => {
                     clientSide: boolean | PerformanceCaptureConfig | undefined,
                     expected: boolean | undefined
                 ) => {
-                    posthog.persistence?.register({
+                    insights.persistence?.register({
                         [SESSION_RECORDING_REMOTE_CONFIG]: {
                             cache_timestamp: Date.now(),
                             networkPayloadCapture: { capturePerformance: serverSide },
                         },
                     })
-                    posthog.config.capture_performance = clientSide
+                    insights.config.capture_performance = clientSide
                     expect(
                         sessionRecording['_lazyLoadedSessionRecording']['_networkPayloadCapture']?.recordPerformance
                     ).toBe(expected)
@@ -680,16 +680,16 @@ describe('Lazy SessionRecording', () => {
                         | undefined,
                     expected: { maskAllInputs: boolean; maskTextSelector?: string; blockSelector?: string } | undefined
                 ) => {
-                    posthog.persistence?.register({
+                    insights.persistence?.register({
                         [SESSION_RECORDING_REMOTE_CONFIG]: {
                             cache_timestamp: Date.now(),
                             masking: serverConfig,
                         },
                     })
 
-                    posthog.config.session_recording.maskAllInputs = clientConfig?.maskAllInputs
-                    posthog.config.session_recording.maskTextSelector = clientConfig?.maskTextSelector
-                    posthog.config.session_recording.blockSelector = clientConfig?.blockSelector
+                    insights.config.session_recording.maskAllInputs = clientConfig?.maskAllInputs
+                    insights.config.session_recording.maskTextSelector = clientConfig?.maskTextSelector
+                    insights.config.session_recording.blockSelector = clientConfig?.blockSelector
 
                     expect(sessionRecording['_lazyLoadedSessionRecording']['_masking']).toEqual(expected)
                 }
@@ -750,7 +750,7 @@ describe('Lazy SessionRecording', () => {
                 startingTimestamp = sessionRecording['_lazyLoadedSessionRecording']['_lastActivityTimestamp']
                 expect(startingTimestamp).toBeGreaterThan(0)
 
-                expect(assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot).toHaveBeenCalledTimes(0)
+                expect(assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot).toHaveBeenCalledTimes(0)
 
                 // the buffer starts out empty
                 expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toEqual({
@@ -780,7 +780,7 @@ describe('Lazy SessionRecording', () => {
 
                 _emit(createFullSnapshot({}), 'unknown')
                 expect(sessionRecording['_lazyLoadedSessionRecording']['_isIdle']).toEqual('unknown')
-                expect(posthog.capture).not.toHaveBeenCalled()
+                expect(insights.capture).not.toHaveBeenCalled()
 
                 const d = emitActiveEvent(startingTimestamp + 200)
                 expect(sessionRecording['_lazyLoadedSessionRecording']['_isIdle']).toEqual(false)
@@ -865,7 +865,7 @@ describe('Lazy SessionRecording', () => {
                 // return from idle
 
                 // we did not capture
-                expect(posthog.capture).not.toHaveBeenCalled()
+                expect(insights.capture).not.toHaveBeenCalled()
             })
 
             it('drops full snapshots when idle - so we must make sure not to take them while idle!', () => {
@@ -1031,7 +1031,7 @@ describe('Lazy SessionRecording', () => {
                     size: 0,
                     windowId: expect.any(String),
                 })
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [firstSnapshotEvent, secondSnapshot],
@@ -1131,7 +1131,7 @@ describe('Lazy SessionRecording', () => {
                 })
 
                 // the buffer is flushed on switch to idle
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [firstSnapshotEvent, secondSnapshot],
@@ -1159,7 +1159,7 @@ describe('Lazy SessionRecording', () => {
                 expect(endingSessionId).toEqual(rotatedSessionId)
 
                 // the buffer is flushed, and a full snapshot is taken
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [firstSnapshotEvent, secondSnapshot],
@@ -1275,7 +1275,7 @@ describe('Lazy SessionRecording', () => {
         describe('when pageview capture is disabled', () => {
             beforeEach(() => {
                 jest.spyOn(sessionRecording, 'tryAddCustomEvent')
-                posthog.config.capture_pageview = false
+                insights.config.capture_pageview = false
                 sessionRecording.onRemoteConfig(
                     makeFlagsResponse({
                         sessionRecording: {
@@ -1324,7 +1324,7 @@ describe('Lazy SessionRecording', () => {
 
         describe('when pageview capture is enabled', () => {
             beforeEach(() => {
-                posthog.config.capture_pageview = true
+                insights.config.capture_pageview = true
                 sessionRecording.onRemoteConfig(
                     makeFlagsResponse({
                         sessionRecording: {
@@ -1351,7 +1351,7 @@ describe('Lazy SessionRecording', () => {
             }
 
             beforeEach(() => {
-                posthog.config.session_recording.compress_events = true
+                insights.config.session_recording.compress_events = true
                 sessionRecording.onRemoteConfig(makeFlagsResponse({ sessionRecording: { endpoint: '/s/' } }))
                 sessionRecording.onRemoteConfig(
                     makeFlagsResponse({
@@ -1375,7 +1375,7 @@ describe('Lazy SessionRecording', () => {
                 )
                 sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [
@@ -1399,7 +1399,7 @@ describe('Lazy SessionRecording', () => {
                 _emit(createIncrementalMutationEvent({ texts: [Array(30).fill(uuidv7()).join('')] }))
                 sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [
@@ -1430,7 +1430,7 @@ describe('Lazy SessionRecording', () => {
                 _emit(createIncrementalStyleSheetEvent({ adds: [Array(30).fill(uuidv7()).join('')] }))
                 sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [
@@ -1465,7 +1465,7 @@ describe('Lazy SessionRecording', () => {
                 _emit(mouseEvent)
                 sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [mouseEvent],
@@ -1483,7 +1483,7 @@ describe('Lazy SessionRecording', () => {
                 _emit(createCustomSnapshot(undefined, { tag: 'wat' }))
                 sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [
@@ -1509,7 +1509,7 @@ describe('Lazy SessionRecording', () => {
                 _emit(createMetaSnapshot())
                 sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-                expect(posthog.capture).toHaveBeenCalledWith(
+                expect(insights.capture).toHaveBeenCalledWith(
                     '$snapshot',
                     {
                         $snapshot_data: [
@@ -1543,7 +1543,7 @@ describe('Lazy SessionRecording', () => {
             )
             // maskAllInputs should change from default
             // someUnregisteredProp should not be present
-            expect(assignableWindow.__PosthogExtensions__.rrweb.record).toHaveBeenCalledWith({
+            expect(assignableWindow.__InsightsExtensions__.rrweb.record).toHaveBeenCalledWith({
                 emit: expect.anything(),
                 maskAllInputs: false,
                 blockClass: 'ph-no-capture',
@@ -1572,7 +1572,7 @@ describe('Lazy SessionRecording', () => {
             expect(loadScriptMock).toHaveBeenCalled()
 
             _emit(createIncrementalSnapshot({ data: { source: 1 } }))
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
 
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toEqual({
                 data: [
@@ -1599,8 +1599,8 @@ describe('Lazy SessionRecording', () => {
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data.length).toEqual(0)
 
-            expect(posthog.capture).toHaveBeenCalledTimes(1)
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledTimes(1)
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 {
                     $snapshot_bytes: 60,
@@ -1631,7 +1631,7 @@ describe('Lazy SessionRecording', () => {
                 })
             )
 
-            assignableWindow.__PosthogExtensions__.rrweb.wasMaxDepthReached.mockReturnValue(true)
+            assignableWindow.__InsightsExtensions__.rrweb.wasMaxDepthReached.mockReturnValue(true)
             _emit(createFullSnapshot())
 
             expect(sessionRecording['_lazyLoadedSessionRecording']['_maxDepthExceeded']).toBe(true)
@@ -1657,7 +1657,7 @@ describe('Lazy SessionRecording', () => {
             })
 
             expect(sessionRecording['_lazyLoadedSessionRecording']['_maxDepthExceeded']).toBe(false)
-            expect(assignableWindow.__PosthogExtensions__.rrweb.resetMaxDepthState).toHaveBeenCalled()
+            expect(assignableWindow.__InsightsExtensions__.rrweb.resetMaxDepthState).toHaveBeenCalled()
         })
 
         it('buffers emitted events', () => {
@@ -1674,14 +1674,14 @@ describe('Lazy SessionRecording', () => {
             _emit(createIncrementalSnapshot({ data: { source: 1 } }))
             _emit(createIncrementalSnapshot({ data: { source: 2 } }))
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_flushBufferTimer']).not.toBeUndefined()
 
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_flushBufferTimer']).toBeUndefined()
 
-            expect(posthog.capture).toHaveBeenCalledTimes(1)
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledTimes(1)
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 {
                     $session_id: sessionId,
@@ -1719,12 +1719,12 @@ describe('Lazy SessionRecording', () => {
             _emit(createIncrementalSnapshot({ data: { source: 1, payload: 1 } }))
             _emit(createIncrementalSnapshot({ data: { source: 1, payload: 2 } }))
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toMatchObject({ size: 755101 })
 
             // Another big event means the old data will be flushed
             _emit(createIncrementalSnapshot({ data: { source: 1, payload: bigData } }))
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data.length).toEqual(1) // The new event
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toMatchObject({ size: 755017 })
         })
@@ -1749,14 +1749,14 @@ describe('Lazy SessionRecording', () => {
             _emit(createIncrementalSnapshot({ data: { source: 1, payload: 1 } }))
             _emit(createIncrementalSnapshot({ data: { source: 1, payload: 2 } }))
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toMatchObject({ size: 755101 })
 
             // Another big event means the old data will be flushed
             _emit(createIncrementalSnapshot({ data: { source: 1, payload: bigData } }))
             // but the recording is still buffering
             expect(sessionRecording.status).toBe('buffering')
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data.length).toEqual(4) // + the new event
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toMatchObject({
                 size: 755017 + 755101,
@@ -1777,7 +1777,7 @@ describe('Lazy SessionRecording', () => {
 
             _emit(createIncrementalSnapshot({ emit: 1 }))
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].sessionId).not.toEqual(null)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data).toEqual([
                 { data: { source: 1 }, emit: 1, type: 3 },
@@ -1789,7 +1789,7 @@ describe('Lazy SessionRecording', () => {
             sessionRecording['_lazyLoadedSessionRecording']['_buffer']!.sessionId = 'otherSessionId'
             _emit(createIncrementalSnapshot({ emit: 2 }))
 
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 {
                     $session_id: 'otherSessionId',
@@ -1939,13 +1939,13 @@ describe('Lazy SessionRecording', () => {
 
                 beforeEach(() => {
                     sessionManager = new SessionIdManager(
-                        createMockPostHog({
+                        createMockInsights({
                             config,
-                            persistence: new PostHogPersistence(config),
+                            persistence: new InsightsPersistence(config),
                             register: jest.fn(),
                         })
                     )
-                    posthog.sessionManager = sessionManager
+                    insights.sessionManager = sessionManager
 
                     mockCallback = jest.fn()
                     unsubscribeCallback = sessionManager.onSessionId(mockCallback)
@@ -2037,13 +2037,13 @@ describe('Lazy SessionRecording', () => {
             describe('with a real session id manager', () => {
                 beforeEach(() => {
                     sessionManager = new SessionIdManager(
-                        createMockPostHog({
+                        createMockInsights({
                             config,
-                            persistence: new PostHogPersistence(config),
+                            persistence: new InsightsPersistence(config),
                             register: jest.fn(),
                         })
                     )
-                    posthog.sessionManager = sessionManager
+                    insights.sessionManager = sessionManager
 
                     sessionRecording.onRemoteConfig(
                         makeFlagsResponse({
@@ -2160,7 +2160,7 @@ describe('Lazy SessionRecording', () => {
             // Simulate URL change to blocked URL
             fakeNavigateTo('https://test.com/blocked')
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
 
             // Verify subsequent events are not captured while on blocked URL
             _emit(createIncrementalSnapshot({ data: { source: 3 } }))
@@ -2235,7 +2235,7 @@ describe('Lazy SessionRecording', () => {
             // check is trigger by rrweb emit, not the navigation per se, so...
             _emit(createFullSnapshot({ data: { source: 1 } }))
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording.status).toBe('paused')
             expect(sessionRecording['_lazyLoadedSessionRecording']['_urlTriggerMatching']['urlBlocked']).toBe(true)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data).toHaveLength(0)
@@ -2348,7 +2348,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('never sends data when sampling is false regardless of event triggers', async () => {
-            // this is a regression test for https://posthoghelp.zendesk.com/agent/tickets/24373
+            // this is a regression test for https://insightshelp.zendesk.com/agent/tickets/24373
             // where the buffered data was sent to capture when the event trigger fired
             // before the sample rate was taken into account
             // and then would immediately stop
@@ -2373,11 +2373,11 @@ describe('Lazy SessionRecording', () => {
 
             simpleEventEmitter.emit('eventCaptured', { event: '$exception' })
             expect(sessionRecording.status).toBe('disabled')
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         })
 
         it('sends data when sampling is false and there is an event triggers in OR mode', async () => {
-            // this is a regression test for https://posthoghelp.zendesk.com/agent/tickets/24373
+            // this is a regression test for https://insightshelp.zendesk.com/agent/tickets/24373
             // where the buffered data was sent to capture when the event trigger fired
             // before the sample rate was taken into account
             // and then would immediately stop
@@ -2402,7 +2402,7 @@ describe('Lazy SessionRecording', () => {
 
             simpleEventEmitter.emit('eventCaptured', { event: '$exception' })
             expect(sessionRecording.status).toBe('active')
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
         })
 
         it('clears buffer but keeps most recent meta event when trigger pending and receiving full snapshot', () => {
@@ -2463,7 +2463,7 @@ describe('Lazy SessionRecording', () => {
             )
 
             expect(sessionRecording['_lazyLoadedSessionRecording']['_removePageViewCaptureHook']).not.toBeUndefined()
-            expect(posthog.on).toHaveBeenCalledTimes(1)
+            expect(insights.on).toHaveBeenCalledTimes(1)
 
             // calling a second time doesn't add another capture hook
             sessionRecording.onRemoteConfig(
@@ -2473,7 +2473,7 @@ describe('Lazy SessionRecording', () => {
                     },
                 })
             )
-            expect(posthog.on).toHaveBeenCalledTimes(1)
+            expect(insights.on).toHaveBeenCalledTimes(1)
         })
 
         it('removes the pageview capture hook on stop', () => {
@@ -2612,7 +2612,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('call stopRecording if its not enabled', () => {
-            posthog.config.disable_session_recording = true
+            insights.config.disable_session_recording = true
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
                     sessionRecording: {
@@ -2634,7 +2634,7 @@ describe('Lazy SessionRecording', () => {
             expect(sessionRecording.status).toBe('disabled')
 
             _emit(createIncrementalSnapshot({ data: { source: 1 } }))
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
             expect(sessionRecording.status).toBe('disabled')
         })
 
@@ -2660,7 +2660,7 @@ describe('Lazy SessionRecording', () => {
 
         it('does emit to capture if the sample rate is 1', () => {
             _emit(createIncrementalSnapshot({ data: { source: 1 } }))
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -2676,7 +2676,7 @@ describe('Lazy SessionRecording', () => {
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
             _emit(createIncrementalSnapshot({ data: { source: 1 } }))
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
         })
 
         it('sets emit as expected when sample rate is 0.5', () => {
@@ -2711,7 +2711,7 @@ describe('Lazy SessionRecording', () => {
                 makeFlagsResponse({ sessionRecording: { endpoint: '/s/', sampleRate: '0.00' } })
             )
             // then check that a session is sampled (i.e. storage is false not true or null)
-            expect(posthog.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(false)
+            expect(insights.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(false)
             expect(sessionRecording.status).toBe('disabled')
 
             // then turn sample rate to null
@@ -2720,7 +2720,7 @@ describe('Lazy SessionRecording', () => {
             )
 
             // then check that a session is no longer sampled out (i.e. storage is cleared not false)
-            expect(posthog.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(undefined)
+            expect(insights.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(undefined)
             expect(sessionRecording.status).toBe('active')
         })
 
@@ -2732,24 +2732,24 @@ describe('Lazy SessionRecording', () => {
                 'clears legacy true and makes fresh sampling decision with %s',
                 (_name, sampleRate, expectedStatus) => {
                     // simulate legacy SDK having stored boolean true
-                    posthog.persistence?.register({
+                    insights.persistence?.register({
                         [SESSION_RECORDING_IS_SAMPLED]: true,
                     })
-                    expect(posthog.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(true)
+                    expect(insights.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(true)
 
                     sessionRecording.onRemoteConfig(
                         makeFlagsResponse({ sessionRecording: { endpoint: '/s/', sampleRate } })
                     )
 
                     // legacy true should be treated as unknown and a fresh decision made
-                    expect(posthog.get_property(SESSION_RECORDING_IS_SAMPLED)).not.toBe(true)
+                    expect(insights.get_property(SESSION_RECORDING_IS_SAMPLED)).not.toBe(true)
                     expect(sessionRecording.status).toBe(expectedStatus)
                 }
             )
 
             it('legacy true with 0% sample rate does not record even if session has not changed', () => {
                 // simulate legacy SDK having stored boolean true
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_IS_SAMPLED]: true,
                 })
 
@@ -2759,14 +2759,14 @@ describe('Lazy SessionRecording', () => {
 
                 // should be disabled despite legacy true, because 0% sample rate
                 expect(sessionRecording.status).toBe('disabled')
-                expect(posthog.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(false)
+                expect(insights.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(false)
 
                 _emit(createIncrementalSnapshot({ data: { source: 1 } }))
-                expect(posthog.capture).not.toHaveBeenCalled()
+                expect(insights.capture).not.toHaveBeenCalled()
             })
 
             it('preserves false from persistence (not legacy, still valid format)', () => {
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_IS_SAMPLED]: false,
                 })
 
@@ -2776,14 +2776,14 @@ describe('Lazy SessionRecording', () => {
 
                 // false is still valid format, should remain disabled
                 expect(sessionRecording.status).toBe('disabled')
-                expect(posthog.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(false)
+                expect(insights.get_property(SESSION_RECORDING_IS_SAMPLED)).toBe(false)
             })
         })
     })
 
     describe('masking', () => {
         it('passes remote masking options to rrweb', () => {
-            posthog.config.session_recording.maskAllInputs = undefined
+            insights.config.session_recording.maskAllInputs = undefined
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -2796,7 +2796,7 @@ describe('Lazy SessionRecording', () => {
 
             sessionRecording['_onScriptLoaded']()
 
-            expect(assignableWindow.__PosthogExtensions__.rrweb.record).toHaveBeenCalledWith(
+            expect(assignableWindow.__InsightsExtensions__.rrweb.record).toHaveBeenCalledWith(
                 expect.objectContaining({
                     maskAllInputs: true,
                     maskTextSelector: '*',
@@ -2812,7 +2812,7 @@ describe('Lazy SessionRecording', () => {
                 ['password set to true', { maskInputOptions: { password: true } } as SessionRecordingOptions, true],
                 ['password set to false', { maskInputOptions: { password: false } } as SessionRecordingOptions, false],
             ])('%s', (_name: string, session_recording: SessionRecordingOptions, expected: boolean) => {
-                posthog.config.session_recording = session_recording
+                insights.config.session_recording = session_recording
                 sessionRecording.onRemoteConfig(
                     makeFlagsResponse({
                         sessionRecording: {
@@ -2820,7 +2820,7 @@ describe('Lazy SessionRecording', () => {
                         },
                     })
                 )
-                expect(assignableWindow.__PosthogExtensions__.rrweb.record).toHaveBeenCalledWith(
+                expect(assignableWindow.__InsightsExtensions__.rrweb.record).toHaveBeenCalledWith(
                     expect.objectContaining({
                         maskInputOptions: expect.objectContaining({ password: expected }),
                     })
@@ -2831,7 +2831,7 @@ describe('Lazy SessionRecording', () => {
 
     describe('console logs', () => {
         it('if not enabled, plugin is not used', () => {
-            posthog.config.enable_recording_console_log = false
+            insights.config.enable_recording_console_log = false
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -2841,11 +2841,11 @@ describe('Lazy SessionRecording', () => {
                 })
             )
 
-            expect(assignableWindow.__PosthogExtensions__.rrwebPlugins.getRecordConsolePlugin).not.toHaveBeenCalled()
+            expect(assignableWindow.__InsightsExtensions__.rrwebPlugins.getRecordConsolePlugin).not.toHaveBeenCalled()
         })
 
         it('if enabled, plugin is used', () => {
-            posthog.config.enable_recording_console_log = true
+            insights.config.enable_recording_console_log = true
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -2855,7 +2855,7 @@ describe('Lazy SessionRecording', () => {
                 })
             )
 
-            expect(assignableWindow.__PosthogExtensions__.rrwebPlugins.getRecordConsolePlugin).toHaveBeenCalled()
+            expect(assignableWindow.__InsightsExtensions__.rrwebPlugins.getRecordConsolePlugin).toHaveBeenCalled()
         })
     })
 
@@ -3039,7 +3039,7 @@ describe('Lazy SessionRecording', () => {
             expect(sessionRecording['_lazyLoadedSessionRecording']['_queuedRRWebEvents']).toEqual([])
 
             // fake rrweb being unavailable
-            assignableWindow.__PosthogExtensions__.rrweb.record = null
+            assignableWindow.__InsightsExtensions__.rrweb.record = null
         })
 
         it('queues events', () => {
@@ -3074,16 +3074,16 @@ describe('Lazy SessionRecording', () => {
     describe('when rrweb record() returns undefined', () => {
         it('does not report recording as started', () => {
             loadScriptMock.mockImplementation((_ph: any, _path: any, callback: any) => {
-                assignableWindow.__PosthogExtensions__.rrweb = {
+                assignableWindow.__InsightsExtensions__.rrweb = {
                     record: jest.fn(() => undefined),
                     version: 'fake',
                     wasMaxDepthReached: jest.fn(() => false),
                     resetMaxDepthState: jest.fn(),
                 }
-                assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot = jest.fn()
-                assignableWindow.__PosthogExtensions__.rrweb.record.addCustomEvent = jest.fn()
-                assignableWindow.__PosthogExtensions__.initSessionRecording = () => {
-                    return new LazyLoadedSessionRecording(posthog)
+                assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot = jest.fn()
+                assignableWindow.__InsightsExtensions__.rrweb.record.addCustomEvent = jest.fn()
+                assignableWindow.__InsightsExtensions__.initSessionRecording = () => {
+                    return new LazyLoadedSessionRecording(insights)
                 }
                 callback()
             })
@@ -3103,7 +3103,7 @@ describe('Lazy SessionRecording', () => {
         it('recovers when rrweb starts successfully on retry', () => {
             let recordCallCount = 0
             loadScriptMock.mockImplementation((_ph: any, _path: any, callback: any) => {
-                assignableWindow.__PosthogExtensions__.rrweb = {
+                assignableWindow.__InsightsExtensions__.rrweb = {
                     record: jest.fn(({ emit }) => {
                         recordCallCount++
                         if (recordCallCount === 1) {
@@ -3116,12 +3116,12 @@ describe('Lazy SessionRecording', () => {
                     wasMaxDepthReached: jest.fn(() => false),
                     resetMaxDepthState: jest.fn(),
                 }
-                assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot = jest.fn(() => {
+                assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot = jest.fn(() => {
                     _emit(createFullSnapshot())
                 })
-                assignableWindow.__PosthogExtensions__.rrweb.record.addCustomEvent = jest.fn()
-                assignableWindow.__PosthogExtensions__.initSessionRecording = () => {
-                    return new LazyLoadedSessionRecording(posthog)
+                assignableWindow.__InsightsExtensions__.rrweb.record.addCustomEvent = jest.fn()
+                assignableWindow.__InsightsExtensions__.initSessionRecording = () => {
+                    return new LazyLoadedSessionRecording(insights)
                 }
                 callback()
             })
@@ -3220,7 +3220,7 @@ describe('Lazy SessionRecording', () => {
             // call the private method to avoid waiting for the timer
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         })
 
         it('does flush if session duration is negative', () => {
@@ -3245,7 +3245,7 @@ describe('Lazy SessionRecording', () => {
             // call the private method to avoid waiting for the timer
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
         })
 
         it('does not stay buffering after the minimum duration', () => {
@@ -3265,7 +3265,7 @@ describe('Lazy SessionRecording', () => {
             // call the private method to avoid waiting for the timer
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
 
             _emit(createIncrementalSnapshot({ data: { source: 1 }, timestamp: sessionStartTimestamp + 1501 }))
 
@@ -3273,7 +3273,7 @@ describe('Lazy SessionRecording', () => {
             // call the private method to avoid waiting for the timer
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data.length).toBe(0)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sessionDuration']).toBe(null)
             _emit(createIncrementalSnapshot({ data: { source: 1 }, timestamp: sessionStartTimestamp + 1502 }))
@@ -3282,7 +3282,7 @@ describe('Lazy SessionRecording', () => {
             // call the private method to avoid waiting for the timer
             sessionRecording['_lazyLoadedSessionRecording']['_flushBuffer']()
 
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer'].data.length).toBe(0)
         })
     })
@@ -3301,7 +3301,7 @@ describe('Lazy SessionRecording', () => {
             )
 
             sessionRecording['_onScriptLoaded']()
-            expect(assignableWindow.__PosthogExtensions__.rrweb.record).toHaveBeenCalledWith(
+            expect(assignableWindow.__InsightsExtensions__.rrweb.record).toHaveBeenCalledWith(
                 expect.objectContaining({
                     recordCanvas: true,
                     sampling: { canvas: 6 },
@@ -3335,7 +3335,7 @@ describe('Lazy SessionRecording', () => {
 
             sessionRecording['_onScriptLoaded']()
 
-            const mockParams = assignableWindow.__PosthogExtensions__.rrweb.record.mock.calls[0][0]
+            const mockParams = assignableWindow.__InsightsExtensions__.rrweb.record.mock.calls[0][0]
             expect(mockParams).not.toHaveProperty('recordCanvas')
             expect(mockParams).not.toHaveProperty('canvasFps')
             expect(mockParams).not.toHaveProperty('canvasQuality')
@@ -3568,8 +3568,8 @@ describe('Lazy SessionRecording', () => {
             const newSessionId = 'new-session-id'
             const newWindowId = 'new-window-id'
 
-            // Spy on posthog.capture to verify session IDs
-            const captureSpy = jest.spyOn(posthog, 'capture')
+            // Spy on insights.capture to verify session IDs
+            const captureSpy = jest.spyOn(insights, 'capture')
             captureSpy.mockClear()
 
             // Create a $session_ending event with payload containing session IDs
@@ -3711,7 +3711,7 @@ describe('Lazy SessionRecording', () => {
                 return data
             })
 
-            posthog.config.session_recording.maskCapturedNetworkRequestFn = maskFn
+            insights.config.session_recording.maskCapturedNetworkRequestFn = maskFn
 
             addRRwebToWindow()
             sessionRecording.onRemoteConfig(
@@ -3737,7 +3737,7 @@ describe('Lazy SessionRecording', () => {
             )
 
             // Verify the URL was masked in the captured snapshot
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 expect.objectContaining({
                     $snapshot_data: [
@@ -3760,7 +3760,7 @@ describe('Lazy SessionRecording', () => {
                 return data
             })
 
-            posthog.config.session_recording.maskNetworkRequestFn = deprecatedMaskFn
+            insights.config.session_recording.maskNetworkRequestFn = deprecatedMaskFn
 
             addRRwebToWindow()
             sessionRecording.onRemoteConfig(
@@ -3786,7 +3786,7 @@ describe('Lazy SessionRecording', () => {
             )
 
             // Verify the URL was masked
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 expect.objectContaining({
                     $snapshot_data: [
@@ -3805,8 +3805,8 @@ describe('Lazy SessionRecording', () => {
             const newMaskFn = jest.fn((data) => ({ ...data, name: 'masked-by-new' }))
             const deprecatedMaskFn = jest.fn((data) => ({ ...data, url: 'masked-by-deprecated' }))
 
-            posthog.config.session_recording.maskCapturedNetworkRequestFn = newMaskFn
-            posthog.config.session_recording.maskNetworkRequestFn = deprecatedMaskFn
+            insights.config.session_recording.maskCapturedNetworkRequestFn = newMaskFn
+            insights.config.session_recording.maskNetworkRequestFn = deprecatedMaskFn
 
             addRRwebToWindow()
             sessionRecording.onRemoteConfig(
@@ -3828,7 +3828,7 @@ describe('Lazy SessionRecording', () => {
             expect(deprecatedMaskFn).not.toHaveBeenCalled()
 
             // Should use the result from the new function
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 expect.objectContaining({
                     $snapshot_data: [
@@ -3852,7 +3852,7 @@ describe('Lazy SessionRecording', () => {
                 return data
             })
 
-            posthog.config.session_recording.maskCapturedNetworkRequestFn = maskFn
+            insights.config.session_recording.maskCapturedNetworkRequestFn = maskFn
 
             addRRwebToWindow()
             sessionRecording.onRemoteConfig(
@@ -3877,7 +3877,7 @@ describe('Lazy SessionRecording', () => {
             )
 
             // Should still work even though user returned 'url' instead of 'name'
-            expect(posthog.capture).toHaveBeenCalledWith(
+            expect(insights.capture).toHaveBeenCalledWith(
                 '$snapshot',
                 expect.objectContaining({
                     $snapshot_data: [
@@ -3899,7 +3899,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('does not start recording until fresh config arrives', () => {
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -3942,7 +3942,7 @@ describe('Lazy SessionRecording', () => {
             expect(sessionRecording.started).toBe(false)
 
             // Simulate time passing - config becomes stale
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -3983,7 +3983,7 @@ describe('Lazy SessionRecording', () => {
             expect(sessionRecording.started).toBe(false)
 
             // Simulate time passing - config becomes stale
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -4072,7 +4072,7 @@ describe('Lazy SessionRecording', () => {
 
             // Verify trigger activated successfully
             expect(sessionRecording.status).toBe('active')
-            expect(posthog.capture).toHaveBeenCalled()
+            expect(insights.capture).toHaveBeenCalled()
         })
     })
 })

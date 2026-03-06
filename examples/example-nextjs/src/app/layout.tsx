@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import PHProvider from './posthog'
+import PHProvider from './insights'
 
 export const metadata: Metadata = {
     title: 'Create Next App',

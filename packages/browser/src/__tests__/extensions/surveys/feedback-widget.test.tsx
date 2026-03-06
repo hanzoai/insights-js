@@ -2,17 +2,17 @@
 import '@testing-library/jest-dom'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/preact'
 import { FeedbackWidget } from '../../../extensions/surveys'
-import { Survey, SurveyQuestionType, SurveyType, SurveyWidgetType } from '../../../posthog-surveys-types'
-import { createMockPostHog } from '../../helpers/posthog-instance'
-import { PostHogFeatureFlags } from '../../../posthog-featureflags'
+import { Survey, SurveyQuestionType, SurveyType, SurveyWidgetType } from '../../../insights-surveys-types'
+import { createMockInsights } from '../../helpers/insights-instance'
+import { InsightsFeatureFlags } from '../../../insights-featureflags'
 
-// Mock PostHog instance
-const mockPosthog = createMockPostHog({
+// Mock Insights instance
+const mockInsights = createMockInsights({
     capture: jest.fn(),
     getActiveMatchingSurveys: jest.fn(),
     featureFlags: {
         isFeatureEnabled: jest.fn().mockReturnValue(true),
-    } as Partial<PostHogFeatureFlags> as unknown as PostHogFeatureFlags,
+    } as Partial<InsightsFeatureFlags> as unknown as InsightsFeatureFlags,
     get_session_replay_url: jest.fn().mockReturnValue('http://example.com/replay'),
 })
 
@@ -103,21 +103,21 @@ describe('FeedbackWidget', () => {
     })
 
     const expectSurveyShowEvent = (surveyId: string) => {
-        expect(mockPosthog.capture).toHaveBeenCalledWith(
+        expect(mockInsights.capture).toHaveBeenCalledWith(
             'survey shown',
             expect.objectContaining({ $survey_id: surveyId })
         )
     }
 
     const expectSurveySentEvent = (surveyId: string, response: Record<string, string>) => {
-        expect(mockPosthog.capture).toHaveBeenLastCalledWith(
+        expect(mockInsights.capture).toHaveBeenLastCalledWith(
             'survey sent',
             expect.objectContaining({ $survey_id: surveyId, ...response })
         )
     }
 
     test('renders feedback tab and opens survey on click', () => {
-        render(<FeedbackWidget survey={baseWidgetSurvey} posthog={mockPosthog} />)
+        render(<FeedbackWidget survey={baseWidgetSurvey} insights={mockInsights} />)
 
         // Check if the tab is visible
         const tab = screen.getByText('Feedback')
@@ -135,7 +135,7 @@ describe('FeedbackWidget', () => {
     })
 
     test('submits survey response and shows thank you message', async () => {
-        render(<FeedbackWidget survey={baseWidgetSurvey} posthog={mockPosthog} />)
+        render(<FeedbackWidget survey={baseWidgetSurvey} insights={mockInsights} />)
 
         // Open the survey
         const tab = screen.getByText('Feedback')
@@ -181,7 +181,7 @@ describe('FeedbackWidget', () => {
             writable: true,
         })
 
-        render(<FeedbackWidget survey={urlConditionWidgetSurvey} posthog={mockPosthog} />)
+        render(<FeedbackWidget survey={urlConditionWidgetSurvey} insights={mockInsights} />)
 
         // Initially, the tab should be visible because the URL matches
         expect(screen.getByText('Feedback')).toBeVisible()
@@ -231,7 +231,7 @@ describe('FeedbackWidget', () => {
     })
 
     test('does not render tab for selector widget type initially', () => {
-        render(<FeedbackWidget survey={selectorWidgetSurvey} posthog={mockPosthog} />)
+        render(<FeedbackWidget survey={selectorWidgetSurvey} insights={mockInsights} />)
 
         // Selector type should not render the tab or the form initially
         expect(screen.queryByText('Feedback')).not.toBeInTheDocument()
@@ -240,7 +240,7 @@ describe('FeedbackWidget', () => {
     })
 
     test('shows survey popup for selector widget when event is dispatched', async () => {
-        render(<FeedbackWidget survey={selectorWidgetSurvey} posthog={mockPosthog} />)
+        render(<FeedbackWidget survey={selectorWidgetSurvey} insights={mockInsights} />)
 
         // Initially, no survey form
         expect(screen.queryByRole('form')).not.toBeInTheDocument()
@@ -275,7 +275,7 @@ describe('FeedbackWidget', () => {
     })
 
     test('closes survey popup when cancel button is clicked', async () => {
-        render(<FeedbackWidget survey={baseWidgetSurvey} posthog={mockPosthog} />)
+        render(<FeedbackWidget survey={baseWidgetSurvey} insights={mockInsights} />)
 
         // Open the survey
         fireEvent.click(screen.getByText('Feedback'))
@@ -290,7 +290,7 @@ describe('FeedbackWidget', () => {
             expect(screen.queryByRole('form')).not.toBeInTheDocument()
         })
 
-        expect(mockPosthog.capture).toHaveBeenCalledWith(
+        expect(mockInsights.capture).toHaveBeenCalledWith(
             'survey dismissed',
             expect.objectContaining({
                 $survey_id: baseWidgetSurvey.id,

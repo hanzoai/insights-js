@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import posthog, { CaptureResult } from 'posthog-js'
-import { PostHogProvider } from '@posthog/react'
+import insights, { CaptureResult } from '@hanzo/insights'
+import { InsightsProvider } from '@insights/react'
 import { EventDisplay } from './EventDisplay'
 
 export function PHProvider({ children }: { children: React.ReactNode }) {
@@ -8,9 +8,9 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
     const [events, setEvents] = useState<CaptureResult[]>([])
 
     useEffect(() => {
-        posthog.init('phc_test_key_for_playground', {
+        insights.init('phc_test_key_for_playground', {
             api_host: '/ph-relay-xyz123',
-            ui_host: 'https://us.posthog.com',
+            ui_host: 'https://us.insights.com',
             defaults: '2025-11-30',
             before_send: (cr) => {
                 setEvents((prev) => [cr!, ...prev].slice(0, 10))
@@ -23,9 +23,9 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
 
     if (!hydrated) return <>{children}</>
     return (
-        <PostHogProvider client={posthog}>
+        <InsightsProvider client={insights}>
             <EventDisplay events={events} />
             {children}
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }

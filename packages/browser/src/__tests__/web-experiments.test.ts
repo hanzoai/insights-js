@@ -1,15 +1,15 @@
 import { WebExperiments } from '../web-experiments'
-import { PostHog } from '../posthog-core'
-import { PostHogPersistence } from '../posthog-persistence'
+import { Insights } from '../insights-core'
+import { InsightsPersistence } from '../insights-persistence'
 import { WebExperiment } from '../web-experiments-types'
 import { RequestRouter } from '../utils/request-router'
 import { ConsentManager } from '../consent'
-import { createMockPostHog, createMockConfig, createMockPersistence } from './helpers/posthog-instance'
+import { createMockInsights, createMockConfig, createMockPersistence } from './helpers/insights-instance'
 
 describe('Web Experimentation', () => {
     let webExperiment: WebExperiments
-    let posthog: PostHog
-    let persistence: PostHogPersistence
+    let insights: Insights
+    let persistence: InsightsPersistence
     let experimentsResponse: { status?: number; experiments?: WebExperiment[] }
 
     const signupButtonWebExperimentWithFeatureFlag = {
@@ -110,7 +110,7 @@ describe('Web Experimentation', () => {
     beforeEach(() => {
         let cachedFlags = {}
         persistence = createMockPersistence({ props: {}, register: jest.fn() })
-        posthog = makePostHog({
+        insights = makeInsights({
             config: createMockConfig({
                 disable_web_experiments: false,
                 api_host: 'https://test.com',
@@ -136,8 +136,8 @@ describe('Web Experimentation', () => {
             webExperiment.onFeatureFlags(Object.keys(flags))
         })
 
-        posthog.requestRouter = new RequestRouter(posthog)
-        webExperiment = new WebExperiments(posthog)
+        insights.requestRouter = new RequestRouter(insights)
+        webExperiment = new WebExperiments(insights)
     })
 
     function createTestDocument() {
@@ -153,7 +153,7 @@ describe('Web Experimentation', () => {
         experimentsResponse = {
             experiments: [buttonWebExperimentWithUrlConditions],
         }
-        const webExperiment = new WebExperiments(posthog)
+        const webExperiment = new WebExperiments(insights)
         const elParent = createTestDocument()
 
         WebExperiments.getWindowLocation = () => {
@@ -167,7 +167,7 @@ describe('Web Experimentation', () => {
 
     function assertElementChanged(variant: string, expectedProperty: string, value: string) {
         const elParent = createTestDocument()
-        webExperiment = new WebExperiments(posthog)
+        webExperiment = new WebExperiments(insights)
 
         simulateFeatureFlags({
             'signup-button-test': variant,
@@ -188,7 +188,7 @@ describe('Web Experimentation', () => {
             experimentsResponse = {
                 experiments: [buttonWebExperimentWithUrlConditions],
             }
-            const webExperiment = new WebExperiments(posthog)
+            const webExperiment = new WebExperiments(insights)
             webExperiment._is_bot = () => true
             const elParent = createTestDocument()
 
@@ -246,7 +246,7 @@ describe('Web Experimentation', () => {
             const expResponse = {
                 experiments: [signupButtonWebExperimentWithFeatureFlag],
             }
-            const disabledPostHog = makePostHog({
+            const disabledInsights = makeInsights({
                 config: createMockConfig({
                     api_host: 'https://test.com',
                     token: 'testtoken',
@@ -263,8 +263,8 @@ describe('Web Experimentation', () => {
                 onFeatureFlags: jest.fn(),
             })
 
-            posthog.requestRouter = new RequestRouter(disabledPostHog)
-            webExperiment = new WebExperiments(disabledPostHog)
+            insights.requestRouter = new RequestRouter(disabledInsights)
+            webExperiment = new WebExperiments(disabledInsights)
             assertElementChanged('control', 'innerHTML', 'original')
         })
 
@@ -274,7 +274,7 @@ describe('Web Experimentation', () => {
             }
             // control => do nothing
             assertElementChanged('control', 'innerHTML', 'original')
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         })
 
         it('can render previews based on URL params', () => {
@@ -282,7 +282,7 @@ describe('Web Experimentation', () => {
                 experiments: [buttonWebExperimentWithUrlConditions],
             }
 
-            const webExperiment = new WebExperiments(posthog)
+            const webExperiment = new WebExperiments(insights)
             const elParent = createTestDocument()
             const original = WebExperiments.getWindowLocation
 
@@ -298,7 +298,7 @@ describe('Web Experimentation', () => {
 
             WebExperiments.getWindowLocation = original
             expect(elParent.innerHTML).toEqual('Sign me up')
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         })
 
         it('can set text of a <span> element', async () => {
@@ -307,7 +307,7 @@ describe('Web Experimentation', () => {
             }
             // 'variant-sign-up' => "Sign me up"
             assertElementChanged('variant-sign-up', 'innerHTML', 'Sign me up')
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         })
 
         it('can set child element of a <span> element', async () => {
@@ -327,8 +327,8 @@ describe('Web Experimentation', () => {
         })
     })
 
-    function makePostHog(ph: Partial<PostHog>): PostHog {
-        return createMockPostHog({
+    function makeInsights(ph: Partial<Insights>): Insights {
+        return createMockInsights({
             get_distinct_id() {
                 return 'distinctid'
             },

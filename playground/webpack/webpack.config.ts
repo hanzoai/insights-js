@@ -1,6 +1,6 @@
 import path from 'node:path'
 import webpack from 'webpack'
-import { PosthogWebpackPlugin } from '@posthog/webpack-plugin'
+import { InsightsWebpackPlugin } from '@insights/webpack-plugin'
 import packageJson from './package.json'
 
 const config: webpack.Configuration = {
@@ -23,12 +23,12 @@ const config: webpack.Configuration = {
         extensions: ['.tsx', '.ts', '.js'],
     },
     plugins: [
-        new PosthogWebpackPlugin({
-            personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY,
-            projectId: process.env.POSTHOG_PROJECT_ID,
-            host: process.env.POSTHOG_API_HOST,
+        new InsightsWebpackPlugin({
+            personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY,
+            projectId: process.env.INSIGHTS_PROJECT_ID,
+            host: process.env.INSIGHTS_API_HOST,
             logLevel: 'error',
-            cliBinaryPath: process.env.POSTHOG_CLI_PATH,
+            cliBinaryPath: process.env.INSIGHTS_CLI_PATH,
             sourcemaps: {
                 enabled: true,
                 releaseName: packageJson.name,

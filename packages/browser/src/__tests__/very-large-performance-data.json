@@ -1563,7 +1563,7 @@
             "serverTiming": []
         },
         {
-            "name": "https://update.posthog.com/",
+            "name": "https://update.insights.hanzo.ai/",
             "entryType": "resource",
             "startTime": 577.9000000003725,
             "duration": 63.5,
@@ -1707,7 +1707,7 @@
             "serverTiming": []
         },
         {
-            "name": "https://app.posthog.com/e/?ip=0&_=1641815977640&v=0.0.3",
+            "name": "https://app.insights.hanzo.ai/e/?ip=0&_=1641815977640&v=0.0.3",
             "entryType": "resource",
             "startTime": 813.6999999992549,
             "duration": 180.7000000011176,
@@ -1731,7 +1731,7 @@
             "serverTiming": []
         },
         {
-            "name": "https://app.posthog.com/e/?ip=0&_=1641815977642&v=0.0.3",
+            "name": "https://app.insights.hanzo.ai/e/?ip=0&_=1641815977642&v=0.0.3",
             "entryType": "resource",
             "startTime": 814.7999999988824,
             "duration": 179.80000000074506,
@@ -2715,7 +2715,7 @@
             "serverTiming": []
         },
         {
-            "name": "http://localhost:8234/static/assets/posthog-icon-FDVNZJ5Z.svg",
+            "name": "http://localhost:8234/static/assets/insights-icon-FDVNZJ5Z.svg",
             "entryType": "resource",
             "startTime": 50352.199999999255,
             "duration": 5.200000001117587,

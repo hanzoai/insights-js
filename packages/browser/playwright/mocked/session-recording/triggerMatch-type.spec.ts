@@ -1,5 +1,5 @@
 import { RemoteConfig } from '@/types'
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForRemoteConfig } from '../utils/setup'
 import { pollUntilEventCaptured } from '../utils/event-capture-utils'
 
@@ -59,14 +59,14 @@ test.describe('Session recording - trigger match types 0% sampling + event trigg
 
         test('starts recording when example event is captured regardless of sampling', async ({ page }) => {
             await page.evaluate(() => {
-                const ph = (window as WindowWithPostHog).posthog
+                const ph = (window as WindowWithInsights).insights
                 ph?.capture('example')
             })
 
             await page.waitingForNetworkCausedBy({
                 urlPatternsToWaitFor: ['**/ses/*'],
                 action: async () => {
-                    await page.locator('[data-cy-input]').fill('hello posthog!')
+                    await page.locator('[data-cy-input]').fill('hello insights!')
                 },
             })
 
@@ -103,12 +103,12 @@ test.describe('Session recording - trigger match types 0% sampling + event trigg
         test('only starts recording for sampled sessions that see the example event', async ({ page }) => {
             // First, capture the example event
             await page.evaluate(() => {
-                const ph = (window as WindowWithPostHog).posthog
+                const ph = (window as WindowWithInsights).insights
                 ph?.capture('example')
             })
 
             // Try to trigger a recording by interacting
-            await page.locator('[data-cy-input]').fill('hello posthog!')
+            await page.locator('[data-cy-input]').fill('hello insights!')
 
             await page.waitForTimeout(1000)
 
@@ -123,12 +123,12 @@ test.describe('Session recording - trigger match types 0% sampling + event trigg
 
             await page.resetCapturedEvents()
             await page.evaluate(() => {
-                const ph = (window as WindowWithPostHog).posthog
+                const ph = (window as WindowWithInsights).insights
                 ph?.startSessionRecording({ sampling: true })
             })
 
             // Try to trigger a recording by interacting
-            await page.locator('[data-cy-input]').fill('hello posthog!')
+            await page.locator('[data-cy-input]').fill('hello insights!')
 
             // Poll for snapshot event instead of fixed timeout
             await pollUntilEventCaptured(page, '$snapshot')
@@ -181,14 +181,14 @@ test.describe('Session recording - trigger match types 0% sampling + event trigg
 
         test('starts recording when example event is captured regardless of other triggers', async ({ page }) => {
             await page.evaluate(() => {
-                const ph = (window as WindowWithPostHog).posthog
+                const ph = (window as WindowWithInsights).insights
                 ph?.capture('example')
             })
 
             await page.waitingForNetworkCausedBy({
                 urlPatternsToWaitFor: ['**/ses/*'],
                 action: async () => {
-                    await page.locator('[data-cy-input]').fill('hello posthog!')
+                    await page.locator('[data-cy-input]').fill('hello insights!')
                 },
             })
 
@@ -205,7 +205,7 @@ test.describe('Session recording - trigger match types 0% sampling + event trigg
                     await page.evaluate(() => {
                         window.history.pushState({}, '', '/example-path')
                     })
-                    await page.locator('[data-cy-input]').fill('hello posthog!')
+                    await page.locator('[data-cy-input]').fill('hello insights!')
                 },
             })
 
@@ -240,13 +240,13 @@ test.describe('Session recording - trigger match types 0% sampling + event trigg
 
         test('will not start recording regardless of triggers', async ({ page }) => {
             await page.evaluate(async () => {
-                const ph = (window as WindowWithPostHog).posthog
+                const ph = (window as WindowWithInsights).insights
                 ph?.capture('example')
                 // change  the URL without navigating
                 window.history.pushState({}, '', '/example-path')
             })
 
-            await page.locator('[data-cy-input]').fill('hello posthog!')
+            await page.locator('[data-cy-input]').fill('hello insights!')
             await page.waitForTimeout(1000)
 
             // Get all events

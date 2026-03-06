@@ -1,4 +1,4 @@
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { document as _document } from '../../utils/globals'
 import { ProductTourManager } from './product-tours'
 
@@ -7,12 +7,12 @@ export { findElementBySelector, getElementMetadata, getProductTourStylesheet } f
 export { findElement, getElementPath } from './element-inference'
 export type { InferredSelector, AutoData, SelectorGroup } from './element-inference'
 
-export function generateProductTours(posthog: PostHog, isEnabled: boolean): ProductTourManager | undefined {
+export function generateProductTours(insights: Insights, isEnabled: boolean): ProductTourManager | undefined {
     if (!_document) {
         return
     }
 
-    const manager = new ProductTourManager(posthog)
+    const manager = new ProductTourManager(insights)
 
     if (isEnabled) {
         manager.start()

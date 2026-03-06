@@ -1,4 +1,4 @@
-import { test, expect } from '../utils/posthog-playwright-test-base'
+import { test, expect } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 import { Page } from '@playwright/test'
 
@@ -82,8 +82,8 @@ test.beforeEach(async ({ context }) => {
                                 autocapture_opt_out: true,
                             },
                             url: '/playground/cypress/index.html',
-                            runBeforePostHogInit: wrapInPageContext,
-                            runAfterPostHogInit: wrapInPageContext,
+                            runBeforeInsightsInit: wrapInPageContext,
+                            runAfterInsightsInit: wrapInPageContext,
                         },
                         page,
                         context
@@ -92,7 +92,7 @@ test.beforeEach(async ({ context }) => {
             })
             await waitForSessionRecordingToStart(page)
 
-            // also wrap after posthog is loaded
+            // also wrap after insights is loaded
             await page.evaluate((isBadlyBehaved) => {
                 ;(window as any).wrapFetchForTesting({
                     badlyBehaved: isBadlyBehaved,

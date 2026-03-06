@@ -1,6 +1,6 @@
 import '../src/__tests__/helpers/mock-logger'
 
-import { createPosthogInstance } from '../src/__tests__/helpers/posthog-instance'
+import { createInsightsInstance } from '../src/__tests__/helpers/insights-instance'
 import { waitFor } from '@testing-library/dom'
 import { getRequests, resetRequests } from './mock-server'
 import { uuidv7 } from '../src/uuidv7'
@@ -19,13 +19,13 @@ describe('FunctionalTests / Feature Flags', () => {
     })
 
     test('person properties set in identify() with new distinct_id are sent to /flags', async () => {
-        const posthog = await createPosthogInstance(token, { advanced_disable_flags: false, before_send: (cr) => cr })
+        const insights = await createInsightsInstance(token, { advanced_disable_flags: false, before_send: (cr) => cr })
 
-        const anonymousId = posthog.get_distinct_id()
+        const anonymousId = insights.get_distinct_id()
 
         await waitFor(() => {
             expect(getRequests(token)['/flags/']).toEqual([
-                // This is the initial call to the flags endpoint on PostHog init.
+                // This is the initial call to the flags endpoint on Insights init.
                 {
                     $device_id: anonymousId,
                     distinct_id: anonymousId,
@@ -43,7 +43,7 @@ describe('FunctionalTests / Feature Flags', () => {
         await shortWait()
 
         // Person properties set here should also be sent to the flags endpoint.
-        posthog.identify('test-id', {
+        insights.identify('test-id', {
             email: 'test@email.com',
         })
 
@@ -98,13 +98,13 @@ describe('FunctionalTests / Feature Flags', () => {
     })
 
     test('person properties set in identify() with the same distinct_id are sent to flags', async () => {
-        const posthog = await createPosthogInstance(token, { advanced_disable_flags: false, before_send: (cr) => cr })
+        const insights = await createInsightsInstance(token, { advanced_disable_flags: false, before_send: (cr) => cr })
 
-        const anonymousId = posthog.get_distinct_id()
+        const anonymousId = insights.get_distinct_id()
 
         await waitFor(() => {
             expect(getRequests(token)['/flags/']).toEqual([
-                // This is the initial call to the flags endpoint on PostHog init.
+                // This is the initial call to the flags endpoint on Insights init.
                 {
                     $device_id: anonymousId,
                     distinct_id: anonymousId,
@@ -122,7 +122,7 @@ describe('FunctionalTests / Feature Flags', () => {
         await shortWait()
 
         // First we identify with a new distinct_id but with no properties set
-        posthog.identify('test-id')
+        insights.identify('test-id')
 
         // By this point we should have already called `/flags/` twice.
         await waitFor(() => {
@@ -175,7 +175,7 @@ describe('FunctionalTests / Feature Flags', () => {
 
         // Then we identify again, but with the same distinct_id and with some
         // properties set.
-        posthog.identify('test-id', { email: 'test@email.com' })
+        insights.identify('test-id', { email: 'test@email.com' })
 
         await waitFor(() => {
             expect(getRequests(token)['/flags/']).toEqual([
@@ -223,13 +223,13 @@ describe('FunctionalTests / Feature Flags', () => {
     })
 
     test('identify() triggers new request in queue after first request', async () => {
-        const posthog = await createPosthogInstance(token, { advanced_disable_flags: false, before_send: (cr) => cr })
+        const insights = await createInsightsInstance(token, { advanced_disable_flags: false, before_send: (cr) => cr })
 
-        const anonymousId = posthog.get_distinct_id()
+        const anonymousId = insights.get_distinct_id()
 
         await waitFor(() => {
             expect(getRequests(token)['/flags/']).toEqual([
-                // This is the initial call to the flags endpoint on PostHog init.
+                // This is the initial call to the flags endpoint on Insights init.
                 {
                     $device_id: anonymousId,
                     distinct_id: anonymousId,
@@ -244,7 +244,7 @@ describe('FunctionalTests / Feature Flags', () => {
         resetRequests(token)
 
         // don't wait for flags callback
-        posthog.identify('test-id', {
+        insights.identify('test-id', {
             email: 'test2@email.com',
         })
 
@@ -303,7 +303,7 @@ describe('FunctionalTests / Feature Flags', () => {
     })
 
     test('identify() does not trigger new request in queue after first request for loaded callback', async () => {
-        await createPosthogInstance(token, {
+        await createInsightsInstance(token, {
             advanced_disable_flags: false,
             bootstrap: { distinctID: 'anon-id' },
             before_send: (cr) => cr,
@@ -315,7 +315,7 @@ describe('FunctionalTests / Feature Flags', () => {
 
         await waitFor(() => {
             expect(getRequests(token)['/flags/']).toEqual([
-                // This is the initial call to the flags endpoint on PostHog init, with all info added from `loaded`.
+                // This is the initial call to the flags endpoint on Insights init, with all info added from `loaded`.
                 {
                     $anon_distinct_id: 'anon-id',
                     $device_id: 'anon-id',
@@ -374,7 +374,7 @@ describe('feature flags v2', () => {
     })
 
     it('should call flags endpoint when eligible', async () => {
-        const posthog = await createPosthogInstance(token, {
+        const insights = await createInsightsInstance(token, {
             __preview_flags_v2: true,
             advanced_disable_flags: false,
             before_send: (cr) => cr,
@@ -384,14 +384,14 @@ describe('feature flags v2', () => {
             expect(getRequests(token)['/flags/']).toEqual([
                 expect.objectContaining({
                     token,
-                    distinct_id: posthog.get_distinct_id(),
+                    distinct_id: insights.get_distinct_id(),
                 }),
             ])
         })
     })
 
     it('should call flags endpoint when not eligible', async () => {
-        const posthog = await createPosthogInstance(token, {
+        const insights = await createInsightsInstance(token, {
             __preview_flags_v2: false,
             advanced_disable_flags: false,
             before_send: (cr) => cr,
@@ -401,7 +401,7 @@ describe('feature flags v2', () => {
             expect(getRequests(token)['/flags/']).toEqual([
                 expect.objectContaining({
                     token,
-                    distinct_id: posthog.get_distinct_id(),
+                    distinct_id: insights.get_distinct_id(),
                 }),
             ])
         })

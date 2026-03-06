@@ -1,4 +1,4 @@
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { withPrivacyMode, getModelParams, toContentString } from '../utils'
 import { BaseCallbackHandler } from '@langchain/core/callbacks/base'
 import { version } from '../../package.json'
@@ -42,8 +42,8 @@ type RunMetadata = SpanMetadata | GenerationMetadata
 type RunMetadataStorage = { [runId: string]: RunMetadata }
 
 export class LangChainCallbackHandler extends BaseCallbackHandler {
-  public name = 'PosthogCallbackHandler'
-  private client: PostHog
+  public name = 'InsightsCallbackHandler'
+  private client: Insights
   private distinctId?: string | number
   private traceId?: string | number
   private properties: Record<string, any>
@@ -55,7 +55,7 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
   private parentTree: { [runId: string]: string } = {}
 
   constructor(options: {
-    client: PostHog
+    client: Insights
     distinctId?: string | number
     traceId?: string | number
     properties?: Record<string, any>
@@ -64,7 +64,7 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
     debug?: boolean
   }) {
     if (!options.client) {
-      throw new Error('PostHog client is required')
+      throw new Error('Insights client is required')
     }
     super()
     this.client = options.client
@@ -358,7 +358,7 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
     const eventName = parentRunId ? '$ai_span' : '$ai_trace'
     const latency = run.endTime ? (run.endTime - run.startTime) / 1000 : 0
     const eventProperties: Record<string, any> = {
-      $ai_lib: 'posthog-ai',
+      $ai_lib: 'insights-ai',
       $ai_lib_version: version,
       $ai_trace_id: traceId,
       $ai_input_state: withPrivacyMode(this.client, this.privacyMode, run.input),
@@ -414,7 +414,7 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
   ): void {
     const latency = run.endTime ? (run.endTime - run.startTime) / 1000 : 0
     const eventProperties: Record<string, any> = {
-      $ai_lib: 'posthog-ai',
+      $ai_lib: 'insights-ai',
       $ai_lib_version: version,
       $ai_trace_id: traceId,
       $ai_span_id: runId,

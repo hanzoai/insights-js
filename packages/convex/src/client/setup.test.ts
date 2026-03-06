@@ -14,7 +14,7 @@ export function initConvexTest<Schema extends SchemaDefinition<GenericSchema, bo
   return t
 }
 export const components = componentsGeneric() as unknown as {
-  posthog: ComponentApi
+  insights: ComponentApi
 }
 
 test('setup', () => {})

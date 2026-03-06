@@ -24,7 +24,7 @@ export function patch(
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             wrapped.prototype = wrapped.prototype || {}
             Object.defineProperties(wrapped, {
-                __posthog_wrapped__: {
+                __insights_wrapped__: {
                     enumerable: false,
                     value: true,
                 },

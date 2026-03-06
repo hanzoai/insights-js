@@ -2,10 +2,10 @@ import { sendSurveyEvent } from '../src/surveys/components/Surveys'
 import { Survey, SurveyQuestion } from '@hanzo/insights-core'
 
 describe('sendSurveyEvent', () => {
-  let mockPostHog: any
+  let mockInsights: any
 
   beforeEach(() => {
-    mockPostHog = {
+    mockInsights = {
       capture: jest.fn(),
     }
   })
@@ -39,9 +39,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_question-2': 'Great service!',
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      expect(mockPostHog.capture).toHaveBeenCalledWith('survey sent', {
+      expect(mockInsights.capture).toHaveBeenCalledWith('survey sent', {
         $survey_name: 'Test Survey',
         $survey_id: 'test-survey-id',
         $survey_questions: [
@@ -78,9 +78,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_question-2': 'Great service!',
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      expect(mockPostHog.capture).toHaveBeenCalledWith('survey sent', {
+      expect(mockInsights.capture).toHaveBeenCalledWith('survey sent', {
         $survey_name: 'Test Survey',
         $survey_id: 'test-survey-id',
         $survey_iteration: 2,
@@ -114,9 +114,9 @@ describe('sendSurveyEvent', () => {
       })
       const responses = { '$survey_response_question-1': 3 }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall).not.toHaveProperty('$survey_iteration')
       expect(captureCall).not.toHaveProperty('$survey_iteration_start_date')
       expect(captureCall.$set).toEqual({
@@ -132,9 +132,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_question-2': 'This is a text response',
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$survey_questions[1].response).toBe('This is a text response')
     })
 
@@ -144,9 +144,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_question-1': 5,
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$survey_questions[0].response).toBe(5)
     })
 
@@ -166,9 +166,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_question-multi': originalArray,
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       const responseArray = captureCall.$survey_questions[0].response
 
       expect(responseArray).toEqual(['Option 1', 'Option 3'])
@@ -181,9 +181,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_question-1': null,
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$survey_questions[0].response).toBeNull()
     })
 
@@ -194,9 +194,9 @@ describe('sendSurveyEvent', () => {
         // question-2 has no response
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$survey_questions[0].response).toBe(4)
       expect(captureCall.$survey_questions[1].response).toBeUndefined()
     })
@@ -207,9 +207,9 @@ describe('sendSurveyEvent', () => {
       const survey = createMockSurvey()
       const responses = {}
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$set).toEqual({
         '$survey_responded/test-survey-id': true,
       })
@@ -221,9 +221,9 @@ describe('sendSurveyEvent', () => {
       })
       const responses = {}
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$set).toEqual({
         '$survey_responded/test-survey-id/3': true,
       })
@@ -259,9 +259,9 @@ describe('sendSurveyEvent', () => {
         '$survey_response_text-q': 'Good job!',
       }
 
-      sendSurveyEvent(responses, survey, mockPostHog)
+      sendSurveyEvent(responses, survey, mockInsights)
 
-      const captureCall = mockPostHog.capture.mock.calls[0][1]
+      const captureCall = mockInsights.capture.mock.calls[0][1]
       expect(captureCall.$survey_questions).toEqual([
         {
           id: 'rating-q',

@@ -1,6 +1,6 @@
 import { SessionPropsManager } from '../session-props'
 import { SessionIdManager } from '../sessionid'
-import { createMockPostHog, createMockPersistence } from './helpers/posthog-instance'
+import { createMockInsights, createMockPersistence } from './helpers/insights-instance'
 
 describe('Session Props Manager', () => {
     const createSessionPropsManager = () => {
@@ -14,13 +14,13 @@ describe('Session Props Manager', () => {
             register: persistenceRegister,
             props: {},
         })
-        const posthog = createMockPostHog({
+        const insights = createMockInsights({
             sessionManager: sessionIdManager,
             persistence,
             config: {},
         })
 
-        const sessionPropsManager = new SessionPropsManager(posthog, sessionIdManager, persistence, generateProps)
+        const sessionPropsManager = new SessionPropsManager(insights, sessionIdManager, persistence, generateProps)
 
         return {
             onSessionId,

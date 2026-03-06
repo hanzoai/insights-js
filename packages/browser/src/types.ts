@@ -1,9 +1,9 @@
-import { PostHog } from './posthog-core'
-import { Survey } from './posthog-surveys-types'
-import { ConversationsRemoteConfig } from './posthog-conversations-types'
+import { Insights } from './insights-core'
+import { Survey } from './insights-surveys-types'
+import { ConversationsRemoteConfig } from './insights-conversations-types'
 
 // only importing types here, so won't affect the bundle
-// eslint-disable-next-line posthog-js/no-external-replay-imports
+// eslint-disable-next-line @hanzo/insights/no-external-replay-imports
 import type { SAMPLED } from './extensions/replay/external/triggerMatching'
 
 // Extension class types for __extensionClasses (type-only, no bundle impact)
@@ -15,13 +15,13 @@ import type { TracingHeaders } from './extensions/tracing-headers'
 import type { WebVitalsAutocapture } from './extensions/web-vitals'
 import type { SessionRecording } from './extensions/replay/session-recording'
 import type { Heatmaps } from './heatmaps'
-import type { PostHogProductTours } from './posthog-product-tours'
+import type { InsightsProductTours } from './insights-product-tours'
 import type { SiteApps } from './site-apps'
 
 type Extension<T> = new (...args: any[]) => T
 
 // ============================================================================
-// Re-export public types from @posthog/types
+// Re-export public types from @insights/types
 // ============================================================================
 
 // Common types
@@ -87,12 +87,12 @@ export type {
 // Toolbar types
 export type { ToolbarUserIntent, ToolbarSource, ToolbarVersion, ToolbarParams } from '@hanzo/insights-types'
 
-// Re-export KnownUnsafeEditableEvent from @posthog/core for backwards compatibility
+// Re-export KnownUnsafeEditableEvent from @insights/core for backwards compatibility
 export type { KnownUnsafeEditableEvent } from '@hanzo/insights-core'
 
 // ============================================================================
 // Browser-specific types that depend on local imports
-// These cannot be moved to @posthog/types as they reference browser-specific code
+// These cannot be moved to @insights/types as they reference browser-specific code
 // ============================================================================
 
 // Import types for internal use in this file
@@ -107,23 +107,23 @@ import type {
     SessionRecordingOptions,
     FeatureFlagDetail,
     ToolbarParams,
-    PostHogConfig as BasePostHogConfig,
-    PostHog as BasePostHogInterface,
+    InsightsConfig as BaseInsightsConfig,
+    Insights as BaseInsightsInterface,
     RequestResponse,
 } from '@hanzo/insights-types'
 
-/* Small override from the base class to make it more specific to the browser/src/posthog-core.ts file
- * This guarantees we'll be able to use `PostHogConfig` as implemented in the browser/src/posthog-core.ts file
+/* Small override from the base class to make it more specific to the browser/src/insights-core.ts file
+ * This guarantees we'll be able to use `InsightsConfig` as implemented in the browser/src/insights-core.ts file
  * using the proper `loaded` function signature.
  */
-export type PostHogInterface = Omit<BasePostHogInterface, 'config' | 'init'>
+export type InsightsInterface = Omit<BaseInsightsInterface, 'config' | 'init'>
 
 /*
- * Specify that `loaded` should be using the PostHog instance type
- * as implemented by the browser/src/posthog-core.ts file rather than the @posthog/types type
+ * Specify that `loaded` should be using the Insights instance type
+ * as implemented by the browser/src/insights-core.ts file rather than the @insights/types type
  */
-export type PostHogConfig = Omit<BasePostHogConfig, 'loaded'> & {
-    loaded: (posthog: PostHogInterface) => void
+export type InsightsConfig = Omit<BaseInsightsConfig, 'loaded'> & {
+    loaded: (insights: InsightsInterface) => void
 
     /**
      * Internal: Extension class overrides for tree-shaking support.
@@ -137,7 +137,7 @@ export type PostHogConfig = Omit<BasePostHogConfig, 'loaded'> & {
         siteApps?: Extension<SiteApps>
         sessionRecording?: Extension<SessionRecording>
         autocapture?: Extension<Autocapture>
-        productTours?: Extension<PostHogProductTours>
+        productTours?: Extension<InsightsProductTours>
         heatmaps?: Extension<Heatmaps>
         webVitalsAutocapture?: Extension<WebVitalsAutocapture>
         exceptionObserver?: Extension<ExceptionObserver>
@@ -236,9 +236,9 @@ export type SessionRecordingRemoteConfig = SessionRecordingCanvasOptions & {
 }
 
 /**
- * Remote configuration for the PostHog instance
+ * Remote configuration for the Insights instance
  *
- * All of these settings can be configured directly in your PostHog instance
+ * All of these settings can be configured directly in your Insights instance
  * Any configuration set in the client overrides the information from the server
  */
 export interface RemoteConfig {
@@ -395,7 +395,7 @@ export type SiteAppGlobals = {
 
 export type SiteAppLoader = {
     id: string
-    init: (config: { posthog: PostHog; callback: (success: boolean) => void }) => {
+    init: (config: { insights: Insights; callback: (success: boolean) => void }) => {
         processEvent?: (globals: SiteAppGlobals) => void
     }
 }

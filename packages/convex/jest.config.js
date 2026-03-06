@@ -9,11 +9,11 @@ module.exports = {
   roots: ['<rootDir>/src', '<rootDir>/../../examples/example-convex/convex'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    // Ensure example integration tests resolve @posthog/convex from the
+    // Ensure example integration tests resolve @insights/convex from the
     // workspace source rather than from the example's tarball node_modules.
-    '^@posthog/convex/test$': '<rootDir>/src/test',
-    '^@posthog/convex/convex\\.config(\\.js)?$': '<rootDir>/dist/component/convex.config',
-    '^@posthog/convex$': '<rootDir>/src/client/index',
+    '^@insights/convex/test$': '<rootDir>/src/test',
+    '^@insights/convex/convex\\.config(\\.js)?$': '<rootDir>/dist/component/convex.config',
+    '^@insights/convex$': '<rootDir>/src/client/index',
   },
   transform: {
     // .ts files: keep ESM imports (modules: false) for jest ESM mode

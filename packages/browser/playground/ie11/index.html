@@ -6,8 +6,8 @@
     </script>
 
     <script>
-        posthog.init('BrpS4SctoaCCsyjlnlun3OzyNJAafdlv__jUWaaJWXg', { api_host: 'https://us.posthog.com', debug: true })
-        posthog.capture("e5 event")
+        insights.init('BrpS4SctoaCCsyjlnlun3OzyNJAafdlv__jUWaaJWXg', { api_host: 'https://us.insights.hanzo.ai', debug: true })
+        insights.capture("e5 event")
     </script>
 </head>
 
@@ -17,8 +17,8 @@
         Did it work? Check console
     </div>
     <div>
-        You can also look at `posthog.something` to check if listeners were properly added to the window/document
-        object, such as `posthog.scrollManager.scrollX()`
+        You can also look at `insights.something` to check if listeners were properly added to the window/document
+        object, such as `insights.scrollManager.scrollX()`
     </div>
 </body>
 

@@ -1,3 +1,3 @@
-const { getPostHogExpoConfig } = require('posthog-react-native/metro')
-const config = getPostHogExpoConfig(__dirname)
+const { getInsightsExpoConfig } = require('insights-react-native/metro')
+const config = getInsightsExpoConfig(__dirname)
 module.exports = config

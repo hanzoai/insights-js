@@ -1,5 +1,5 @@
-import { PostHog } from '@/entrypoints/index.node'
-import { PostHogSentryIntegration } from '@/extensions/sentry-integration'
+import { Insights } from '@/entrypoints/index.node'
+import { InsightsSentryIntegration } from '@/extensions/sentry-integration'
 import { waitForPromises } from '../utils'
 
 jest.mock('../../version', () => ({ version: '1.2.3' }))
@@ -37,7 +37,7 @@ const createMockSentryException = (): any => ({
   timestamp: 1704203482.356,
   environment: 'production',
   level: 'error',
-  tags: { posthog_distinct_id: 'EXAMPLE_APP_GLOBAL' },
+  tags: { insights_distinct_id: 'EXAMPLE_APP_GLOBAL' },
   breadcrumbs: [
     {
       timestamp: 1704203481.422,
@@ -50,7 +50,7 @@ const createMockSentryException = (): any => ({
       category: 'console',
       level: 'log',
       message:
-        "PostHog Debug error [ClientError: Your personalApiKey is invalid. Are you sure you're not using your Project API key? More information: https://posthog.com/docs/api/overview]",
+        "Insights Debug error [ClientError: Your personalApiKey is invalid. Are you sure you're not using your Project API key? More information: https://insights.com/docs/api/overview]",
     },
   ],
   sdkProcessingMetadata: {
@@ -58,20 +58,20 @@ const createMockSentryException = (): any => ({
   },
 })
 
-describe('PostHogSentryIntegration', () => {
-  let posthog: PostHog
-  let posthogSentry: PostHogSentryIntegration
+describe('InsightsSentryIntegration', () => {
+  let insights: Insights
+  let insightsSentry: InsightsSentryIntegration
 
   jest.useFakeTimers()
 
   beforeEach(() => {
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       fetchRetryCount: 0,
       disableCompression: true,
     })
 
-    posthogSentry = new PostHogSentryIntegration(posthog)
+    insightsSentry = new InsightsSentryIntegration(insights)
 
     mockedFetch.mockResolvedValue({
       status: 200,
@@ -85,10 +85,10 @@ describe('PostHogSentryIntegration', () => {
 
   afterEach(async () => {
     // ensure clean shutdown & no test interdependencies
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
-  it('should forward sentry exceptions to posthog', async () => {
+  it('should forward sentry exceptions to insights', async () => {
     expect(mockedFetch).toHaveBeenCalledTimes(0)
 
     const mockSentry = {
@@ -101,7 +101,7 @@ describe('PostHogSentryIntegration', () => {
 
     let processorFunction: any
 
-    posthogSentry.setupOnce(
+    insightsSentry.setupOnce(
       (fn) => (processorFunction = fn),
       () => mockSentry
     )
@@ -143,15 +143,15 @@ describe('PostHogSentryIntegration', () => {
           $sentry_exception_message: 'example error',
           $sentry_exception_type: 'Error',
           $sentry_tags: {
-            posthog_distinct_id: 'EXAMPLE_APP_GLOBAL',
-            'PostHog Person URL': 'http://example.com/project/TEST_API_KEY/person/EXAMPLE_APP_GLOBAL',
+            insights_distinct_id: 'EXAMPLE_APP_GLOBAL',
+            'Insights Person URL': 'http://example.com/project/TEST_API_KEY/person/EXAMPLE_APP_GLOBAL',
           },
-          $lib: 'posthog-node',
+          $lib: 'insights-node',
           $lib_version: '1.2.3',
           $geoip_disable: true,
         },
         type: 'capture',
-        library: 'posthog-node',
+        library: 'insights-node',
         library_version: '1.2.3',
         timestamp: expect.any(String),
         uuid: expect.any(String),

@@ -1,7 +1,7 @@
 import { h } from 'preact'
-import { ProductTourStep, ProductTourAppearance, ProductTourStepButton } from '../../../posthog-product-tours-types'
+import { ProductTourStep, ProductTourAppearance, ProductTourStepButton } from '../../../insights-product-tours-types'
 import { getStepHtml, hasElementTarget } from '../product-tours-utils'
-import { IconPosthogLogo, cancelSVG } from '../../surveys/icons'
+import { IconInsightsLogo, cancelSVG } from '../../surveys/icons'
 
 interface TourButtonProps {
     button: ProductTourStepButton
@@ -64,7 +64,7 @@ export function ProductTourTooltipInner({
     const isInteractive = !!(onNext || onPrevious || onDismiss || onButtonClick)
     const cursorStyle = isInteractive ? undefined : { cursor: 'default' }
 
-    const showPostHogBranding = !whiteLabel && isFirstStep
+    const showInsightsBranding = !whiteLabel && isFirstStep
 
     const handleButtonClick = (button: ProductTourStepButton) => {
         if (onButtonClick) {
@@ -130,15 +130,15 @@ export function ProductTourTooltipInner({
                 </div>
             </div>
 
-            {showPostHogBranding && (
+            {showInsightsBranding && (
                 <a
-                    href={isInteractive ? 'https://posthog.com/docs/product-tours' : undefined}
+                    href={isInteractive ? 'https://insights.com/docs/product-tours' : undefined}
                     target={isInteractive ? '_blank' : undefined}
                     rel={isInteractive ? 'noopener noreferrer' : undefined}
                     class="ph-tour-branding"
                     style={isInteractive ? undefined : { cursor: 'default', pointerEvents: 'none' }}
                 >
-                    Tour by {IconPosthogLogo}
+                    Tour by {IconInsightsLogo}
                 </a>
             )}
         </>

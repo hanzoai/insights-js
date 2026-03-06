@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 
 const startOptions = {
@@ -32,7 +32,7 @@ test.describe('Session Recording - Session Linking', () => {
 
     test('emits session linking events when session times out', async ({ page }) => {
         const firstSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
 
@@ -52,7 +52,7 @@ test.describe('Session Recording - Session Linking', () => {
         await page.resetCapturedEvents()
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.sessionManager?.resetSessionId()
         })
 
@@ -64,7 +64,7 @@ test.describe('Session Recording - Session Linking', () => {
         })
 
         const newSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
 
@@ -85,7 +85,7 @@ test.describe('Session Recording - Session Linking', () => {
 
     test('does NOT emit linking events when session changes after reset()', async ({ page }) => {
         const firstSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
 
@@ -99,7 +99,7 @@ test.describe('Session Recording - Session Linking', () => {
         await page.resetCapturedEvents()
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.reset()
         })
 
@@ -112,7 +112,7 @@ test.describe('Session Recording - Session Linking', () => {
         })
 
         const newSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
 

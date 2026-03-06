@@ -1,5 +1,5 @@
-import { PostHogOptions } from '@/types'
-import { PostHog } from '@/entrypoints/index.node'
+import { InsightsOptions } from '@/types'
+import { Insights } from '@/entrypoints/index.node'
 import {
   matchProperty,
   InconclusiveMatchError,
@@ -11,18 +11,18 @@ jest.spyOn(console, 'debug').mockImplementation()
 
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
 
-const posthogImmediateResolveOptions: PostHogOptions = {
+const insightsImmediateResolveOptions: InsightsOptions = {
   fetchRetryCount: 0,
 }
 
 describe('local evaluation', () => {
-  let posthog: PostHog
+  let insights: Insights
 
   jest.useFakeTimers()
 
   afterEach(async () => {
     // ensure clean shutdown & no test interdependencies
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('evaluates person properties with undefined property values', async () => {
@@ -72,14 +72,14 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('person-flag', 'some-distinct-id', {
+      await insights.getFeatureFlag('person-flag', 'some-distinct-id', {
         personProperties: {
           latestBuildVersion: undefined,
           latestBuildVersionMajor: undefined,
@@ -120,17 +120,17 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('person-flag', 'some-distinct-id', { personProperties: { region: 'USA' } })
+      await insights.getFeatureFlag('person-flag', 'some-distinct-id', { personProperties: { region: 'USA' } })
     ).toEqual(true)
     expect(
-      await posthog.getFeatureFlag('person-flag', 'some-distinct-id', { personProperties: { region: 'Canada' } })
+      await insights.getFeatureFlag('person-flag', 'some-distinct-id', { personProperties: { region: 'Canada' } })
     ).toEqual(false)
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
   })
@@ -155,13 +155,13 @@ describe('local evaluation', () => {
       apiImplementation({ localFlags: flags, decideFlags: { 'device-id-flag': 'flags-fallback-value' } })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getFeatureFlag('device-id-flag', 'some-distinct-id')).toEqual('flags-fallback-value')
+    expect(await insights.getFeatureFlag('device-id-flag', 'some-distinct-id')).toEqual('flags-fallback-value')
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
   })
@@ -186,13 +186,13 @@ describe('local evaluation', () => {
       apiImplementation({ localFlags: flags, decideFlags: { 'device-id-flag': 'flags-fallback-value' } })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getFeatureFlag('device-id-flag', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
+    expect(await insights.getFeatureFlag('device-id-flag', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
       undefined
     )
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
@@ -223,13 +223,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('device-id-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('device-id-flag', 'some-distinct-id')
     expect(result).toMatchObject({
       key: 'device-id-flag',
       enabled: true,
@@ -264,13 +264,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('device-id-flag', 'some-distinct-id', {
+    const result = await insights.getFeatureFlagResult('device-id-flag', 'some-distinct-id', {
       onlyEvaluateLocally: true,
     })
     expect(result).toBeUndefined()
@@ -303,13 +303,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const payload = await posthog.getFeatureFlagPayload('device-id-flag', 'some-distinct-id')
+    const payload = await insights.getFeatureFlagPayload('device-id-flag', 'some-distinct-id')
     expect(payload).toEqual('fallback-payload')
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
@@ -340,13 +340,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const payload = await posthog.getFeatureFlagPayload('device-id-flag', 'some-distinct-id', undefined, {
+    const payload = await insights.getFeatureFlagPayload('device-id-flag', 'some-distinct-id', undefined, {
       onlyEvaluateLocally: true,
     })
     expect(payload).toBeUndefined()
@@ -372,22 +372,22 @@ describe('local evaluation', () => {
 
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     const sharedDeviceId = 'some-distinct-id_within_rollout?'
 
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id_within_rollout?', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id_within_rollout?', {
         personProperties: { $device_id: sharedDeviceId },
       })
     ).toEqual(true)
 
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id_outside_rollout?', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id_outside_rollout?', {
         personProperties: { $device_id: sharedDeviceId },
       })
     ).toEqual(true)
@@ -424,14 +424,14 @@ describe('local evaluation', () => {
 
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getFeatureFlag('null-bucketing-identifier-flag', 'some-distinct-id')).toEqual(true)
-    expect(await posthog.getFeatureFlag('empty-bucketing-identifier-flag', 'some-distinct-id')).toEqual(true)
+    expect(await insights.getFeatureFlag('null-bucketing-identifier-flag', 'some-distinct-id')).toEqual(true)
+    expect(await insights.getFeatureFlag('empty-bucketing-identifier-flag', 'some-distinct-id')).toEqual(true)
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
@@ -467,27 +467,27 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # groups not passed in, hence false
     expect(
-      await posthog.getFeatureFlag('group-flag', 'some-distinct-id', {
+      await insights.getFeatureFlag('group-flag', 'some-distinct-id', {
         groupProperties: { company: { name: 'Project Name 1' } },
       })
     ).toEqual(false)
     expect(
-      await posthog.getFeatureFlag('group-flag', 'some-distinct-2', {
+      await insights.getFeatureFlag('group-flag', 'some-distinct-2', {
         groupProperties: { company: { name: 'Project Name 2' } },
       })
     ).toEqual(false)
 
     // # this is good
     expect(
-      await posthog.getFeatureFlag('group-flag', 'some-distinct-2', {
+      await insights.getFeatureFlag('group-flag', 'some-distinct-2', {
         groups: { company: 'amazon_without_rollout' },
         groupProperties: { company: { name: 'Project Name 1' } },
       })
@@ -495,7 +495,7 @@ describe('local evaluation', () => {
 
     // # rollout % not met
     expect(
-      await posthog.getFeatureFlag('group-flag', 'some-distinct-2', {
+      await insights.getFeatureFlag('group-flag', 'some-distinct-2', {
         groups: { company: 'amazon' },
         groupProperties: { company: { name: 'Project Name 1' } },
       })
@@ -503,7 +503,7 @@ describe('local evaluation', () => {
 
     // # property mismatch
     expect(
-      await posthog.getFeatureFlag('group-flag', 'some-distinct-2', {
+      await insights.getFeatureFlag('group-flag', 'some-distinct-2', {
         groups: { company: 'amazon_without_rollout' },
         groupProperties: { company: { name: 'Project Name 2' } },
       })
@@ -547,14 +547,14 @@ describe('local evaluation', () => {
       apiImplementation({ localFlags: flags, decideFlags: { 'group-flag': 'flags-fallback-value' } })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     // # group_type_mappings not present, so fallback to `/flags`
     expect(
-      await posthog.getFeatureFlag('group-flag', 'some-distinct-2', {
+      await insights.getFeatureFlag('group-flag', 'some-distinct-2', {
         groupProperties: {
           company: { name: 'Project Name 1' },
         },
@@ -620,14 +620,14 @@ describe('local evaluation', () => {
       apiImplementation({ localFlags: flags, decideFlags: { 'complex-flag': 'flags-fallback-value' } })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id', {
         personProperties: { region: 'USA', name: 'Aloha' },
       })
     ).toEqual(true)
@@ -635,7 +635,7 @@ describe('local evaluation', () => {
 
     // # this distinctIDs hash is < rollout %
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id_within_rollout?', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id_within_rollout?', {
         personProperties: { region: 'USA', email: 'a@b.com' },
       })
     ).toEqual(true)
@@ -643,7 +643,7 @@ describe('local evaluation', () => {
 
     // # will fall back on `/flags`, as all properties present for second group, but that group resolves to false
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id_outside_rollout?', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id_outside_rollout?', {
         personProperties: { region: 'USA', email: 'a@b.com' },
       })
     ).toEqual('flags-fallback-value')
@@ -669,7 +669,7 @@ describe('local evaluation', () => {
 
     // # same as above
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id', { personProperties: { doesnt_matter: '1' } })
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id', { personProperties: { doesnt_matter: '1' } })
     ).toEqual('flags-fallback-value')
     expect(mockedFetch).toHaveBeenCalledWith(
       'http://example.com/flags/?v=2&config=true',
@@ -688,14 +688,14 @@ describe('local evaluation', () => {
     mockedFetch.mockClear()
 
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id', { personProperties: { region: 'USA' } })
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id', { personProperties: { region: 'USA' } })
     ).toEqual('flags-fallback-value')
     expect(mockedFetch).toHaveBeenCalledTimes(1) // TODO: Check this
     mockedFetch.mockClear()
 
     // # won't need to fallback when all values are present, and resolves to False
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id_outside_rollout?', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id_outside_rollout?', {
         personProperties: { region: 'USA', email: 'a@b.com', name: 'X', doesnt_matter: '1' },
       })
     ).toEqual(false)
@@ -749,19 +749,19 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature fallbacks to flags because property type is unknown
-    expect(await posthog.getFeatureFlag('beta-feature', 'some-distinct-id')).toEqual('alakazam')
+    expect(await insights.getFeatureFlag('beta-feature', 'some-distinct-id')).toEqual('alakazam')
     expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
     mockedFetch.mockClear()
 
     // # beta-feature2 fallbacks to flags because region property not given with call
-    expect(await posthog.getFeatureFlag('beta-feature2', 'some-distinct-id')).toEqual('alakazam2')
+    expect(await insights.getFeatureFlag('beta-feature2', 'some-distinct-id')).toEqual('alakazam2')
     expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -812,28 +812,28 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature should fallback to flags because property type is unknown
     // # but doesn't because only_evaluate_locally is true
-    expect(await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
+    expect(await insights.getFeatureFlag('beta-feature', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
       undefined
     )
-    expect(await posthog.isFeatureEnabled('beta-feature', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
+    expect(await insights.isFeatureEnabled('beta-feature', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
       undefined
     )
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
 
     // # beta-feature2 should fallback to flags because region property not given with call
     // # but doesn't because only_evaluate_locally is true
-    expect(await posthog.getFeatureFlag('beta-feature2', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
+    expect(await insights.getFeatureFlag('beta-feature2', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
       undefined
     )
-    expect(await posthog.isFeatureEnabled('beta-feature2', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
+    expect(await insights.isFeatureEnabled('beta-feature2', 'some-distinct-id', { onlyEvaluateLocally: true })).toEqual(
       undefined
     )
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
@@ -860,20 +860,20 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags, decideFlags: {} }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature resolves to False
-    expect(await posthog.getFeatureFlag('beta-feature', 'some-distinct-id')).toEqual(false)
-    expect(await posthog.isFeatureEnabled('beta-feature', 'some-distinct-id')).toEqual(false)
+    expect(await insights.getFeatureFlag('beta-feature', 'some-distinct-id')).toEqual(false)
+    expect(await insights.isFeatureEnabled('beta-feature', 'some-distinct-id')).toEqual(false)
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
 
     // # beta-feature2 falls back to flags, and whatever flags returns is the value
-    expect(await posthog.getFeatureFlag('beta-feature2', 'some-distinct-id')).toEqual(undefined)
-    expect(await posthog.isFeatureEnabled('beta-feature2', 'some-distinct-id')).toEqual(undefined)
+    expect(await insights.getFeatureFlag('beta-feature2', 'some-distinct-id')).toEqual(undefined)
+    expect(await insights.isFeatureEnabled('beta-feature2', 'some-distinct-id')).toEqual(undefined)
     expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -901,14 +901,14 @@ describe('local evaluation', () => {
       apiImplementation({ localFlags: flags, decideFlags: { 'beta-feature': 'flags-fallback-value' } })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature2 falls back to flags, which on error returns default
-    expect(await posthog.getFeatureFlag('beta-feature', 'some-distinct-id')).toEqual('flags-fallback-value')
+    expect(await insights.getFeatureFlag('beta-feature', 'some-distinct-id')).toEqual('flags-fallback-value')
     expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -967,14 +967,14 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature value overridden by /flags
-    expect(await posthog.getAllFlags('distinct-id')).toEqual({
+    expect(await insights.getAllFlags('distinct-id')).toEqual({
       'beta-feature': 'variant-1',
       'beta-feature2': 'variant-2',
       'disabled-feature': false,
@@ -1048,14 +1048,14 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature value overridden by /flags
-    expect((await posthog.getAllFlagsAndPayloads('distinct-id')).featureFlagPayloads).toEqual({
+    expect((await insights.getAllFlagsAndPayloads('distinct-id')).featureFlagPayloads).toEqual({
       'beta-feature': 100,
       'beta-feature2': 300,
     })
@@ -1118,14 +1118,14 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // # beta-feature2 has no value
-    expect(await posthog.getAllFlags('distinct-id', { onlyEvaluateLocally: true })).toEqual({
+    expect(await insights.getAllFlags('distinct-id', { onlyEvaluateLocally: true })).toEqual({
       'beta-feature': true,
       'disabled-feature': false,
     })
@@ -1197,14 +1197,14 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      (await posthog.getAllFlagsAndPayloads('distinct-id', { onlyEvaluateLocally: true })).featureFlagPayloads
+      (await insights.getAllFlagsAndPayloads('distinct-id', { onlyEvaluateLocally: true })).featureFlagPayloads
     ).toEqual({
       'beta-feature': 'some-payload',
     })
@@ -1222,13 +1222,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getAllFlags('distinct-id')).toEqual({
+    expect(await insights.getAllFlags('distinct-id')).toEqual({
       'beta-feature': 'variant-1',
       'beta-feature2': 'variant-2',
     })
@@ -1248,13 +1248,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect((await posthog.getAllFlagsAndPayloads('distinct-id')).featureFlagPayloads).toEqual({
+    expect((await insights.getAllFlagsAndPayloads('distinct-id')).featureFlagPayloads).toEqual({
       'beta-feature': 100,
       'beta-feature2': 300,
     })
@@ -1303,13 +1303,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getAllFlags('distinct-id')).toEqual({ 'beta-feature': true, 'disabled-feature': false })
+    expect(await insights.getAllFlags('distinct-id')).toEqual({ 'beta-feature': true, 'disabled-feature': false })
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -1360,13 +1360,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect((await posthog.getAllFlagsAndPayloads('distinct-id')).featureFlagPayloads).toEqual({ 'beta-feature': 'new' })
+    expect((await insights.getAllFlagsAndPayloads('distinct-id')).featureFlagPayloads).toEqual({ 'beta-feature': 'new' })
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -1411,13 +1411,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getAllFlags('distinct-id')).toEqual({ 'beta-feature': true, 'disabled-feature': false })
+    expect(await insights.getAllFlags('distinct-id')).toEqual({ 'beta-feature': true, 'disabled-feature': false })
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
 
     //   # Now, after a poll interval, flag 1 is inactive, and flag 2 rollout is set to 100%.
@@ -1457,9 +1457,9 @@ describe('local evaluation', () => {
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags2 }))
 
     // # force reload to simulate poll interval
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
 
-    expect(await posthog.getAllFlags('distinct-id')).toEqual({ 'beta-feature': false, 'disabled-feature': true })
+    expect(await insights.getAllFlags('distinct-id')).toEqual({ 'beta-feature': false, 'disabled-feature': true })
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -1516,20 +1516,20 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', { personProperties: { region: 'UK' } })
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', { personProperties: { region: 'UK' } })
     ).toEqual(false)
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
 
     // # even though 'other' property is not present, the cohort should still match since it's an OR condition
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', {
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', {
         personProperties: { region: 'USA', nation: 'UK' },
       })
     ).toEqual(true)
@@ -1537,7 +1537,7 @@ describe('local evaluation', () => {
 
     // # even though 'other' property is not present, the cohort should still match since it's an OR condition
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', {
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', {
         personProperties: { region: 'USA', other: 'thing' },
       })
     ).toEqual(true)
@@ -1597,20 +1597,20 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', { personProperties: { region: 'UK' } })
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', { personProperties: { region: 'UK' } })
     ).toEqual(false)
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
 
     // # even though 'other' property is not present, the cohort should still match since it's an OR condition
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', {
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', {
         personProperties: { region: 'USA', nation: 'UK' },
       })
     ).toEqual(true)
@@ -1618,7 +1618,7 @@ describe('local evaluation', () => {
 
     // # since 'other' is negated, we return False. Since 'nation' is not present, we can't tell whether the flag should be true or false, so go to flags
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', {
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', {
         personProperties: { region: 'USA', other: 'thing' },
       })
     ).toEqual(undefined)
@@ -1627,7 +1627,7 @@ describe('local evaluation', () => {
     mockedFetch.mockClear()
 
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'some-distinct-id', {
+      await insights.getFeatureFlag('beta-feature', 'some-distinct-id', {
         personProperties: { region: 'USA', other: 'thing2' },
       })
     ).toEqual(true)
@@ -1649,7 +1649,7 @@ describe('local evaluation', () => {
                   {
                     key: 'email',
                     operator: 'exact',
-                    value: 'test@posthog.com',
+                    value: 'test@insights.com',
                     type: 'person',
                   },
                 ],
@@ -1686,16 +1686,16 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'test_id', { personProperties: { email: 'test@posthog.com' } })
+      await insights.getFeatureFlag('beta-feature', 'test_id', { personProperties: { email: 'test@insights.com' } })
     ).toEqual('second-variant')
-    expect(await posthog.getFeatureFlag('beta-feature', 'example_id')).toEqual('first-variant')
+    expect(await insights.getFeatureFlag('beta-feature', 'example_id')).toEqual('first-variant')
 
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     // flags not called
@@ -1717,7 +1717,7 @@ describe('local evaluation', () => {
                   {
                     key: 'email',
                     operator: 'exact',
-                    value: 'test@posthog.com',
+                    value: 'test@insights.com',
                     type: 'person',
                   },
                 ],
@@ -1730,7 +1730,7 @@ describe('local evaluation', () => {
                   {
                     key: 'email',
                     operator: 'exact',
-                    value: 'test@posthog.com',
+                    value: 'test@insights.com',
                     type: 'person',
                   },
                 ],
@@ -1767,19 +1767,19 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'test_id', { personProperties: { email: 'test@posthog.com' } })
+      await insights.getFeatureFlag('beta-feature', 'test_id', { personProperties: { email: 'test@insights.com' } })
     ).toEqual('second-variant')
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'example_id', { personProperties: { email: 'test@posthog.com' } })
+      await insights.getFeatureFlag('beta-feature', 'example_id', { personProperties: { email: 'test@insights.com' } })
     ).toEqual('second-variant')
-    expect(await posthog.getFeatureFlag('beta-feature', 'example_id')).toEqual('first-variant')
+    expect(await insights.getFeatureFlag('beta-feature', 'example_id')).toEqual('first-variant')
 
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     // flags not called
@@ -1801,7 +1801,7 @@ describe('local evaluation', () => {
                   {
                     key: 'email',
                     operator: 'exact',
-                    value: 'test@posthog.com',
+                    value: 'test@insights.com',
                     type: 'person',
                   },
                 ],
@@ -1838,16 +1838,16 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('beta-feature', 'test_id', { personProperties: { email: 'test@posthog.com' } })
+      await insights.getFeatureFlag('beta-feature', 'test_id', { personProperties: { email: 'test@insights.com' } })
     ).toEqual('third-variant')
-    expect(await posthog.getFeatureFlag('beta-feature', 'example_id')).toEqual('second-variant')
+    expect(await insights.getFeatureFlag('beta-feature', 'example_id')).toEqual('second-variant')
 
     expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     // flags not called
@@ -1900,15 +1900,15 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Even though the person has the email that would trigger the override variant,
     // they should get the result from the first matching condition (which matches everyone)
-    const result = await posthog.getFeatureFlag('test-feature', 'test_id', {
+    const result = await insights.getFeatureFlag('test-feature', 'test_id', {
       personProperties: { email: 'override@example.com' },
     })
 
@@ -1950,21 +1950,21 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlagPayload('person-flag', 'some-distinct-id', true, {
+      await insights.getFeatureFlagPayload('person-flag', 'some-distinct-id', true, {
         personProperties: { region: 'USA' },
       })
     ).toEqual({
       log: 'all',
     })
     expect(
-      await posthog.getFeatureFlagPayload('person-flag', 'some-distinct-id', undefined, {
+      await insights.getFeatureFlagPayload('person-flag', 'some-distinct-id', undefined, {
         personProperties: { region: 'USA' },
       })
     ).toEqual({
@@ -1990,7 +1990,7 @@ describe('local evaluation', () => {
                   {
                     key: 'email',
                     operator: 'exact',
-                    value: 'test@posthog.com',
+                    value: 'test@insights.com',
                     type: 'person',
                   },
                 ],
@@ -2030,15 +2030,15 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlagPayload('beta-feature', 'test_id', 'second-variant', {
-        personProperties: { email: 'test@posthog.com' },
+      await insights.getFeatureFlagPayload('beta-feature', 'test_id', 'second-variant', {
+        personProperties: { email: 'test@insights.com' },
       })
     ).toEqual(2500)
 
@@ -2049,32 +2049,32 @@ describe('local evaluation', () => {
 
   describe('isLocalEvaluationReady', () => {
     it('returns false when featureFlagsPoller is undefined', () => {
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
-      expect(posthog.isLocalEvaluationReady()).toBe(false)
+      expect(insights.isLocalEvaluationReady()).toBe(false)
     })
 
     it('returns false when featureFlagsPoller has not loaded successfully', () => {
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
-      expect(posthog.isLocalEvaluationReady()).toBe(false)
+      expect(insights.isLocalEvaluationReady()).toBe(false)
     })
 
     it('returns false when featureFlagsPoller has no flags', async () => {
       const flags = { flags: [] }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
-      await posthog.reloadFeatureFlags()
-      expect(posthog.isLocalEvaluationReady()).toBe(false)
+      await insights.reloadFeatureFlags()
+      expect(insights.isLocalEvaluationReady()).toBe(false)
     })
 
     it('returns true when featureFlagsPoller has loaded flags successfully', async () => {
@@ -2097,13 +2097,13 @@ describe('local evaluation', () => {
         ],
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
-      await posthog.reloadFeatureFlags()
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      await insights.reloadFeatureFlags()
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
   })
 
@@ -2123,35 +2123,35 @@ describe('local evaluation', () => {
         ],
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
-      expect(await posthog.waitForLocalEvaluationReady()).toBe(true)
+      expect(await insights.waitForLocalEvaluationReady()).toBe(true)
     })
 
     it('returns false when local evaluation endpoint returns empty flags', async () => {
       const flags = { flags: [] }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
-      expect(await posthog.waitForLocalEvaluationReady()).toBe(false)
+      expect(await insights.waitForLocalEvaluationReady()).toBe(false)
     })
 
     it('returns false when local evaluation is not enabled', async () => {
       const flags = { flags: [] }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: undefined,
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
-      expect(await posthog.waitForLocalEvaluationReady()).toBe(false)
+      expect(await insights.waitForLocalEvaluationReady()).toBe(false)
     })
   })
 
@@ -2190,14 +2190,14 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     const eventHandler = jest.fn()
-    posthog.on('localEvaluationFlagsLoaded', eventHandler)
+    insights.on('localEvaluationFlagsLoaded', eventHandler)
 
     // Wait for initial load
     await waitForPromises()
@@ -2210,14 +2210,14 @@ describe('local evaluation', () => {
       throw new Error('Failed to load flags')
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     const eventHandler = jest.fn()
-    posthog.on('localEvaluationFlagsLoaded', eventHandler)
+    insights.on('localEvaluationFlagsLoaded', eventHandler)
 
     // Wait for initial load
     await waitForPromises()
@@ -2246,21 +2246,21 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     const eventHandler = jest.fn()
-    posthog.on('localEvaluationFlagsLoaded', eventHandler)
+    insights.on('localEvaluationFlagsLoaded', eventHandler)
 
     // Wait for initial load
     await waitForPromises()
     eventHandler.mockClear() // Clear initial call
 
     // Reload flags
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
 
     expect(eventHandler).toHaveBeenCalledWith(1) // Should be called with number of flags loaded
   })
@@ -2328,13 +2328,13 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlag('default-pinned-mini-apps', 'test-distinct-id', {
+    const result = await insights.getFeatureFlag('default-pinned-mini-apps', 'test-distinct-id', {
       personProperties: {
         $geoip_country_code: 'DE',
       },
@@ -2386,14 +2386,14 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Call WITHOUT matchValue - should evaluate the flag and throw RequiresServerEvaluation
-    const result = await posthog.getFeatureFlagPayload('default-pinned-mini-apps', 'test-distinct-id', undefined, {
+    const result = await insights.getFeatureFlagPayload('default-pinned-mini-apps', 'test-distinct-id', undefined, {
       personProperties: {},
     })
 
@@ -2442,14 +2442,14 @@ describe('local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Call WITH matchValue - should use it to look up local payload
-    const result = await posthog.getFeatureFlagPayload('test-flag', 'test-distinct-id', 'variant-a')
+    const result = await insights.getFeatureFlagPayload('test-flag', 'test-distinct-id', 'variant-a')
 
     // Should return local payload
     expect(result).toEqual('local-payload-a')
@@ -2495,18 +2495,18 @@ describe('getFeatureFlag', () => {
       ],
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
     expect(
-      await posthog.getFeatureFlag('complex-flag', 'some-distinct-id', {
+      await insights.getFeatureFlag('complex-flag', 'some-distinct-id', {
         personProperties: {
           region: 'USA',
         } as unknown as Record<string, string>,
@@ -2518,15 +2518,15 @@ describe('getFeatureFlag', () => {
     expect(capturedMessage).toMatchObject({
       distinct_id: 'some-distinct-id',
       event: '$feature_flag_called',
-      library: posthog.getLibraryId(),
-      library_version: posthog.getLibraryVersion(),
+      library: insights.getLibraryId(),
+      library_version: insights.getLibraryVersion(),
       properties: {
         '$feature/complex-flag': true,
         $feature_flag: 'complex-flag',
         $feature_flag_response: true,
         $groups: undefined,
-        $lib: posthog.getLibraryId(),
-        $lib_version: posthog.getLibraryVersion(),
+        $lib: insights.getLibraryId(),
+        $lib_version: insights.getLibraryVersion(),
         locally_evaluated: true,
       },
     })
@@ -2550,17 +2550,17 @@ describe('getFeatureFlag', () => {
       ],
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    await posthog.getFeatureFlag('test-flag', 'some-distinct-id')
+    await insights.getFeatureFlag('test-flag', 'some-distinct-id')
     await waitForPromises()
 
     expect(capturedMessage).toMatchObject({
@@ -2574,7 +2574,7 @@ describe('getFeatureFlag', () => {
       },
     })
 
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 })
 
@@ -2936,11 +2936,11 @@ describe('match properties', () => {
     expect(matchProperty(property_b, { key: undefined })).toBe(false)
     expect(matchProperty(property_b, { key: 'null' })).toBe(true)
 
-    const property_c = { key: 'key', value: 'app.posthog.com', operator: 'icontains' }
+    const property_c = { key: 'key', value: 'app.insights.com', operator: 'icontains' }
     expect(matchProperty(property_c, { key: null })).toBe(false)
     expect(matchProperty(property_c, { key: undefined })).toBe(false)
     expect(matchProperty(property_c, { key: 'lol' })).toBe(false)
-    expect(matchProperty(property_c, { key: 'https://app.posthog.com' })).toBe(true)
+    expect(matchProperty(property_c, { key: 'https://app.insights.com' })).toBe(true)
 
     const property_d = { key: 'key', value: '.+', operator: 'regex' }
     expect(matchProperty(property_d, { key: null })).toBe(false)
@@ -3088,15 +3088,15 @@ describe('relative date parsing', () => {
 
 describe('consistency tests', () => {
   // # These tests are the same across all libraries
-  // # See https://github.com/PostHog/posthog/blob/master/posthog/test/test_feature_flag.py#L627
+  // # See https://github.com/Insights/insights/blob/master/insights/test/test_feature_flag.py#L627
   // # where this test has directly been copied from.
   // # They ensure that the server and library hash calculations are in sync.
 
-  let posthog: PostHog
+  let insights: Insights
   jest.useFakeTimers()
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('is consistent for simple flags', () => {
@@ -3116,10 +3116,10 @@ describe('consistency tests', () => {
 
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags, decideFlags: {}, flagsStatus: 400 }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     const results = [
@@ -4127,7 +4127,7 @@ describe('consistency tests', () => {
 
     results.forEach(async (result, index) => {
       const distinctId = `distinct_id_${index}`
-      const value = await posthog.isFeatureEnabled('simple-flag', distinctId)
+      const value = await insights.isFeatureEnabled('simple-flag', distinctId)
       expect(value).toBe(result)
     })
   })
@@ -4158,10 +4158,10 @@ describe('consistency tests', () => {
 
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags, decideFlags: {}, flagsStatus: 400 }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     const results = [
@@ -5169,7 +5169,7 @@ describe('consistency tests', () => {
 
     results.forEach(async (result, index) => {
       const distinctId = `distinct_id_${index}`
-      const value = await posthog.getFeatureFlag('multivariate-flag', distinctId)
+      const value = await insights.getFeatureFlag('multivariate-flag', distinctId)
       expect(value).toBe(result)
     })
   })
@@ -5185,26 +5185,26 @@ describe('quota limiting', () => {
       })
     )
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Enable debug mode to see the messages
-    posthog.debug(true)
+    insights.debug(true)
 
     // Force a reload and wait for it to complete
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
 
     // locally evaluate the flags
-    const res = await posthog.getAllFlagsAndPayloads('distinct-id', { onlyEvaluateLocally: true })
+    const res = await insights.getAllFlagsAndPayloads('distinct-id', { onlyEvaluateLocally: true })
 
     // expect the flags to be cleared and for the debug message to be logged
     expect(res.featureFlags).toEqual({})
     expect(res.featureFlagPayloads).toEqual({})
     expect(consoleSpy).toHaveBeenCalledWith(
-      '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://posthog.com/docs/billing/limits-alerts'
+      '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://insights.com/docs/billing/limits-alerts'
     )
 
     consoleSpy.mockRestore()
@@ -5226,26 +5226,26 @@ describe('fetch context handling', () => {
       )
     })
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     expect(mockFetch).toHaveBeenCalled()
     expect(fetchContext).toBeUndefined()
   })
 })
 
 describe('ETag support for local evaluation polling', () => {
-  let posthog: PostHog
+  let insights: Insights
 
   jest.useFakeTimers()
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('stores ETag from response and sends it on subsequent requests', async () => {
@@ -5269,11 +5269,11 @@ describe('ETag support for local evaluation polling', () => {
       })
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Wait for initial load
@@ -5283,7 +5283,7 @@ describe('ETag support for local evaluation polling', () => {
     expect(fetchCalls[0].options.headers['If-None-Match']).toBeUndefined()
 
     // Trigger a reload
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
 
     // Second call should have If-None-Match header with the ETag
@@ -5335,11 +5335,11 @@ describe('ETag support for local evaluation polling', () => {
       }
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Wait for initial load
@@ -5349,18 +5349,18 @@ describe('ETag support for local evaluation polling', () => {
     expect(fetchCalls[0].options.headers['If-None-Match']).toBeUndefined()
 
     // Verify flags were loaded
-    const flag1 = await posthog.getFeatureFlag('test-flag', 'user-1')
+    const flag1 = await insights.getFeatureFlag('test-flag', 'user-1')
     expect(flag1).toBe(true)
 
     // Trigger a reload (should get 304)
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
 
     // Verify the request that triggered 304 included the If-None-Match header
     expect(fetchCalls[1].options.headers['If-None-Match']).toBe('"test-etag"')
 
     // Verify flags are still available after 304
-    const flag2 = await posthog.getFeatureFlag('test-flag', 'user-1')
+    const flag2 = await insights.getFeatureFlag('test-flag', 'user-1')
     expect(flag2).toBe(true)
 
     // Verify fetch was called twice
@@ -5392,11 +5392,11 @@ describe('ETag support for local evaluation polling', () => {
       return mockFetch()
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: wrappedFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
@@ -5405,12 +5405,12 @@ describe('ETag support for local evaluation polling', () => {
     expect(fetchCalls[0].options.headers['If-None-Match']).toBeUndefined()
 
     // Second call
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCalls[1].options.headers['If-None-Match']).toBe('"etag-v1"')
 
     // Third call
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCalls[2].options.headers['If-None-Match']).toBe('"etag-v2"')
   })
@@ -5441,22 +5441,22 @@ describe('ETag support for local evaluation polling', () => {
       return mockFetch()
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: wrappedFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
 
     // Second call should have the ETag from first response
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCalls[1].options.headers['If-None-Match']).toBe('"initial-etag"')
 
     // Third call should not have ETag (server stopped sending it)
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCalls[2].options.headers['If-None-Match']).toBeUndefined()
   })
@@ -5502,25 +5502,25 @@ describe('ETag support for local evaluation polling', () => {
       }
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
 
     // Multiple 304 responses should not cause any issues
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
 
     expect(mockFetch).toHaveBeenCalledTimes(3)
 
     // Flags should still work
-    const flag = await posthog.getFeatureFlag('test-flag', 'user-1')
+    const flag = await insights.getFeatureFlag('test-flag', 'user-1')
     expect(flag).toBe(true)
   })
 
@@ -5568,11 +5568,11 @@ describe('ETag support for local evaluation polling', () => {
       }
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
@@ -5581,24 +5581,24 @@ describe('ETag support for local evaluation polling', () => {
     expect(fetchCalls[0].options.headers['If-None-Match']).toBeUndefined()
 
     // Second call uses initial ETag
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCalls[1].options.headers['If-None-Match']).toBe('"etag-v1"')
 
     // Third call should use the updated ETag from the 304 response
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCalls[2].options.headers['If-None-Match']).toBe('"etag-v2"')
   })
 })
 
 describe('error handling and backoff', () => {
-  let posthog: PostHog
+  let insights: Insights
 
   jest.useFakeTimers()
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   /**
@@ -5639,23 +5639,23 @@ describe('error handling and backoff', () => {
   it('should block on-demand fetches during backoff period after 401', async () => {
     const mockFetch = createMockFetch(401)
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 30000,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
     expect(mockFetch.callCount).toBe(1)
 
     // On-demand fetches should be blocked during backoff
-    await posthog.getFeatureFlag('test-flag', 'user-1')
+    await insights.getFeatureFlag('test-flag', 'user-1')
     await waitForPromises()
-    await posthog.getFeatureFlag('test-flag', 'user-2')
+    await insights.getFeatureFlag('test-flag', 'user-2')
     await waitForPromises()
-    await posthog.getFeatureFlag('test-flag', 'user-3')
+    await insights.getFeatureFlag('test-flag', 'user-3')
     await waitForPromises()
 
     expect(mockFetch.callCount).toBe(1)
@@ -5664,21 +5664,21 @@ describe('error handling and backoff', () => {
   it('should block on-demand fetches during backoff period after 403', async () => {
     const mockFetch = createMockFetch(403)
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 30000,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
     expect(mockFetch.callCount).toBe(1)
 
     // On-demand fetches should be blocked during backoff
-    await posthog.getFeatureFlag('test-flag', 'user-1')
+    await insights.getFeatureFlag('test-flag', 'user-1')
     await waitForPromises()
-    await posthog.getFeatureFlag('test-flag', 'user-2')
+    await insights.getFeatureFlag('test-flag', 'user-2')
     await waitForPromises()
 
     expect(mockFetch.callCount).toBe(1)
@@ -5687,21 +5687,21 @@ describe('error handling and backoff', () => {
   it('should block on-demand fetches during backoff period after 429', async () => {
     const mockFetch = createMockFetch(429)
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 30000,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
     expect(mockFetch.callCount).toBe(1)
 
     // On-demand fetches should be blocked during backoff
-    await posthog.getFeatureFlag('test-flag', 'user-1')
+    await insights.getFeatureFlag('test-flag', 'user-1')
     await waitForPromises()
-    await posthog.getFeatureFlag('test-flag', 'user-2')
+    await insights.getFeatureFlag('test-flag', 'user-2')
     await waitForPromises()
 
     expect(mockFetch.callCount).toBe(1)
@@ -5737,12 +5737,12 @@ describe('error handling and backoff', () => {
       })
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 1000, // Use small interval for faster test
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Wait for initial fetch with a short delay
@@ -5750,7 +5750,7 @@ describe('error handling and backoff', () => {
     expect(fetchCallCount).toBe(1)
 
     // On-demand fetch should be blocked during backoff
-    await posthog.getFeatureFlag('test-flag', 'user-1')
+    await insights.getFeatureFlag('test-flag', 'user-1')
     expect(fetchCallCount).toBe(1)
 
     // Advance mock time past the exponential backoff period
@@ -5758,7 +5758,7 @@ describe('error handling and backoff', () => {
     mockTime += 2001
 
     // Now on-demand fetch should be allowed (backoff expired based on Date.now())
-    await posthog.getFeatureFlag('test-flag', 'user-2')
+    await insights.getFeatureFlag('test-flag', 'user-2')
 
     // fetchCallCount should be 2 (on-demand fetch was allowed after backoff expired)
     expect(fetchCallCount).toBe(2)
@@ -5791,12 +5791,12 @@ describe('error handling and backoff', () => {
       return Promise.resolve({ status: 200, text: () => Promise.resolve('ok'), json: () => Promise.resolve({}) })
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 1000,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await new Promise((r) => setTimeout(r, 50))
@@ -5804,27 +5804,27 @@ describe('error handling and backoff', () => {
 
     // Advance past 2s backoff, trigger second error
     mockTime += 2001
-    await posthog.getFeatureFlag('test', 'user')
+    await insights.getFeatureFlag('test', 'user')
     expect(fetchCallCount).toBe(2) // backoff now = 4s
 
     // 2s is NOT enough anymore
     mockTime += 2001
-    await posthog.getFeatureFlag('test', 'user')
+    await insights.getFeatureFlag('test', 'user')
     expect(fetchCallCount).toBe(2) // Still blocked
 
     // 4s total is enough
     mockTime += 2000
-    await posthog.getFeatureFlag('test', 'user')
+    await insights.getFeatureFlag('test', 'user')
     expect(fetchCallCount).toBe(3) // backoff now = 8s
 
     // 4s is NOT enough anymore
     mockTime += 4001
-    await posthog.getFeatureFlag('test', 'user')
+    await insights.getFeatureFlag('test', 'user')
     expect(fetchCallCount).toBe(3) // Still blocked
 
     // 8s total is enough
     mockTime += 4000
-    await posthog.getFeatureFlag('test', 'user')
+    await insights.getFeatureFlag('test', 'user')
     expect(fetchCallCount).toBe(4) // Exponential backoff verified!
 
     Date.now = originalDateNow
@@ -5869,24 +5869,24 @@ describe('error handling and backoff', () => {
       })
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 30000,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
     expect(fetchCallCount).toBe(1) // Initial 401
 
     // Use reloadFeatureFlags to trigger a retry (uses forceReload=true, bypasses backoff)
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
     expect(fetchCallCount).toBe(2) // Retry succeeded with 200
 
     // Now on-demand fetch should work immediately (backoff cleared by 200 response)
-    await posthog.getFeatureFlag('test-flag', 'user-1')
+    await insights.getFeatureFlag('test-flag', 'user-1')
     await waitForPromises()
 
     // The getFeatureFlag call should not trigger another fetch because
@@ -5917,38 +5917,38 @@ describe('error handling and backoff', () => {
       })
     })
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       fetch: mockFetch,
       featureFlagsPollingInterval: 30000,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await waitForPromises()
     expect(fetchCallCount).toBe(1) // Initial fetch
 
     // On-demand fetch should be blocked
-    await posthog.getFeatureFlag('test-flag', 'user-1')
+    await insights.getFeatureFlag('test-flag', 'user-1')
     await waitForPromises()
     expect(fetchCallCount).toBe(1) // Still blocked
 
     // reloadFeatureFlags uses forceReload=true internally, should bypass backoff
-    await posthog.reloadFeatureFlags()
+    await insights.reloadFeatureFlags()
     await waitForPromises()
 
     // reloadFeatureFlags should have bypassed backoff and made a new fetch
     expect(fetchCallCount).toBe(2)
 
     // On-demand fetch should still be blocked (new backoff started after 401)
-    await posthog.getFeatureFlag('test-flag', 'user-2')
+    await insights.getFeatureFlag('test-flag', 'user-2')
     await waitForPromises()
     expect(fetchCallCount).toBe(2) // Still blocked
   })
 })
 
 describe('experience continuity warning', () => {
-  let posthog: PostHog
+  let insights: Insights
   let warnSpy: jest.SpyInstance
 
   jest.useFakeTimers()
@@ -5960,7 +5960,7 @@ describe('experience continuity warning', () => {
 
   afterEach(async () => {
     warnSpy.mockRestore()
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('emits warning when experience continuity flags are detected', async () => {
@@ -5990,10 +5990,10 @@ describe('experience continuity warning', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await jest.runOnlyPendingTimersAsync()
@@ -6020,10 +6020,10 @@ describe('experience continuity warning', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await jest.runOnlyPendingTimersAsync()
@@ -6058,10 +6058,10 @@ describe('experience continuity warning', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await jest.runOnlyPendingTimersAsync()
@@ -6088,11 +6088,11 @@ describe('experience continuity warning', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       strictLocalEvaluation: true,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await jest.runOnlyPendingTimersAsync()
@@ -6103,7 +6103,7 @@ describe('experience continuity warning', () => {
 })
 
 describe('strictLocalEvaluation option', () => {
-  let posthog: PostHog
+  let insights: Insights
   let warnSpy: jest.SpyInstance
 
   jest.useFakeTimers()
@@ -6115,7 +6115,7 @@ describe('strictLocalEvaluation option', () => {
 
   afterEach(async () => {
     warnSpy.mockRestore()
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('prevents server fallback for flags that cannot be evaluated locally', async () => {
@@ -6136,11 +6136,11 @@ describe('strictLocalEvaluation option', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       strictLocalEvaluation: true,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await jest.runOnlyPendingTimersAsync()
@@ -6150,7 +6150,7 @@ describe('strictLocalEvaluation option', () => {
 
     // This flag has experience continuity enabled, so local evaluation will throw InconclusiveMatchError
     // With strictLocalEvaluation: true, it should return undefined without calling the server
-    const result = await posthog.getFeatureFlag('exp-cont-flag', 'user-123')
+    const result = await insights.getFeatureFlag('exp-cont-flag', 'user-123')
 
     expect(result).toBeUndefined()
 
@@ -6182,18 +6182,18 @@ describe('strictLocalEvaluation option', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       strictLocalEvaluation: true,
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     await jest.runOnlyPendingTimersAsync()
     mockedFetch.mockClear()
 
     // Override per-call to allow server fallback
-    const result = await posthog.getFeatureFlag('exp-cont-flag', 'user-123', {
+    const result = await insights.getFeatureFlag('exp-cont-flag', 'user-123', {
       onlyEvaluateLocally: false,
     })
 
@@ -6224,30 +6224,30 @@ describe('strictLocalEvaluation option', () => {
 
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Wait for flags to load
     await jest.runOnlyPendingTimersAsync()
 
     // Verify flag definitions loaded timestamp is available
-    const flagDefinitionsLoadedAt = posthog.featureFlagsPoller?.getFlagDefinitionsLoadedAt()
+    const flagDefinitionsLoadedAt = insights.featureFlagsPoller?.getFlagDefinitionsLoadedAt()
     expect(flagDefinitionsLoadedAt).toBeDefined()
     expect(typeof flagDefinitionsLoadedAt).toBe('number')
     expect(flagDefinitionsLoadedAt).toBeGreaterThan(0)
 
     // Test that locally evaluated flags include evaluation timestamps
     const capturedEvents: any[] = []
-    posthog.capture = jest.fn().mockImplementation((event) => {
+    insights.capture = jest.fn().mockImplementation((event) => {
       capturedEvents.push(event)
     })
 
     // Call getFeatureFlag which should trigger local evaluation and send a $feature_flag_called event
     const beforeCall = Date.now()
-    const result = await posthog.getFeatureFlag('simple-flag', 'user-123')
+    const result = await insights.getFeatureFlag('simple-flag', 'user-123')
     const afterCall = Date.now()
 
     expect(result).toBe(true)
@@ -6278,18 +6278,18 @@ describe('strictLocalEvaluation option', () => {
 
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
       sendFeatureFlagEvent: true, // Explicitly enable feature flag events
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Wait for flags to load
     await jest.runOnlyPendingTimersAsync()
 
     // Check that flag definitions loaded timestamp is available
-    const flagDefinitionsLoadedAt = posthog.featureFlagsPoller?.getFlagDefinitionsLoadedAt()
+    const flagDefinitionsLoadedAt = insights.featureFlagsPoller?.getFlagDefinitionsLoadedAt()
     expect(flagDefinitionsLoadedAt).toBeDefined()
     expect(typeof flagDefinitionsLoadedAt).toBe('number')
     expect(flagDefinitionsLoadedAt).toBeGreaterThan(0)

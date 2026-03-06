@@ -1,7 +1,7 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { Request } from '@playwright/test'
 import { start } from './utils/setup'
-import { PostHog } from '@/posthog-core'
+import { Insights } from '@/insights-core'
 import { pollUntilCondition } from './utils/event-capture-utils'
 
 function getBase64EncodedPayloadFromBody(body: unknown): Record<string, any> {
@@ -43,12 +43,12 @@ test.describe('flags', () => {
                 options: {
                     ...startOptions.options,
                 },
-                runBeforePostHogInit: async (page) => {
-                    // it's tricky to pass functions as args the way posthog config is passed in playwright
+                runBeforeInsightsInit: async (page) => {
+                    // it's tricky to pass functions as args the way insights config is passed in playwright
                     // so here we set the function on the window object
                     // and then call it in the loaded function during init
                     await page.evaluate(() => {
-                        ;(window as any).__ph_loaded = (ph: PostHog) => {
+                        ;(window as any).__ph_loaded = (ph: Insights) => {
                             ph.identify('new-id')
                             ph.group('company', 'id:5', { id: 5, company_name: 'Awesome Inc' })
                             ph.group('playlist', 'id:77', { length: 8 })
@@ -120,7 +120,7 @@ test.describe('flags', () => {
             urlPatternsToWaitFor: ['**/flags/**'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as any).posthog
+                    const ph = (window as any).insights
                     ph.group('company', 'id:6')
                     ph.group('playlist', 'id:77')
                     ph.group('anothergroup', 'id:99')

@@ -16,8 +16,8 @@ RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
 
 # Build the core and node packages
-RUN pnpm --filter @posthog/core build
-RUN pnpm --filter posthog-node build
+RUN pnpm --filter @hanzo/core build
+RUN pnpm --filter @hanzo/insights-node build
 
 # Set up adapter in separate directory
 WORKDIR /app/adapter

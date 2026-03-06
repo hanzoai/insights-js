@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PostHog Time-Based Version Detection Test</title>
+    <title>Insights Time-Based Version Detection Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -109,7 +109,7 @@
         <div class="scenario-title">📚 Select SDK to Test</div>
         <select id="sdkSelector" onchange="changeSdk()"
             style="padding: 8px; font-size: 16px; margin: 10px 0; background-color: #2a2a2a; color: #e0e0e0; border: 1px solid #404040;">
-            <option value="web">🌐 Web SDK (posthog-js)</option>
+            <option value="web">🌐 Web SDK (@hanzo/insights)</option>
             <option value="python">🐍 Python SDK</option>
             <option value="node">📗 Node.js SDK</option>
             <option value="react-native">📱 React Native SDK</option>
@@ -132,7 +132,7 @@
             <div class="scenario-group">
                 <div class="scenario-title">📱 Real Version Tests (GitHub API Integration)</div>
                 <div class="scenario-description">
-                    Tests with actual PostHog-js versions from CDN and real GitHub release dates.
+                    Tests with actual Insights-js versions from CDN and real GitHub release dates.
                 </div>
                 <div id="real-version-info" class="version-info">Loading real version data...</div>
 
@@ -259,7 +259,7 @@
         <div id="goTests" class="sdk-tests" style="display: none;">
             <div class="scenario-group">
                 <div class="scenario-title">🔷 Go SDK Real Version Tests</div>
-                <div class="scenario-description">Tests for PostHog Go SDK time-based detection using real release data.
+                <div class="scenario-description">Tests for Insights Go SDK time-based detection using real release data.
                 </div>
 
                 <p><strong>Expected Badge Results:</strong></p>
@@ -346,8 +346,8 @@
     <div id="log"></div>
 
     <script>
-        const API_KEY = 'YOUR_POSTHOG_PROJECT_API_KEY'; // Replace with your PostHog project API key (format: phc_...)
-        const HOST = 'http://localhost:8010'; // Replace with your PostHog instance URL 
+        const API_KEY = 'YOUR_INSIGHTS_PROJECT_API_KEY'; // Replace with your Insights project API key (format: phc_...)
+        const HOST = 'http://localhost:8010'; // Replace with your Insights instance URL 
         let currentApiKey = API_KEY;
         let distinctId = `test-time-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         let currentTest = null;
@@ -369,7 +369,7 @@
         async function fetchVersionData() {
             try {
                 log('🔍 Fetching JS SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-js/main/packages/browser/CHANGELOG.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/@hanzo/insights/main/packages/browser/CHANGELOG.md', {
                     cache: 'no-cache'
                 });
 
@@ -456,18 +456,18 @@
 
             // Update SDK description
             const descriptions = {
-                web: 'Testing PostHog Web SDK (posthog-js) with real CDN versions + GitHub API release dates and mock edge cases.',
-                python: 'Testing PostHog Python SDK with simulated version events. Python events use the $lib: "posthog-python" property.',
-                node: 'Testing PostHog Node.js SDK with simulated version events. Node.js events use the $lib: "posthog-node" property.',
-                'react-native': 'Testing PostHog React Native SDK with real CHANGELOG.md versions + GitHub API release dates. React Native events use the $lib: "posthog-react-native" property.',
-                flutter: 'Testing PostHog Flutter SDK with real CHANGELOG.md versions + GitHub API release dates. Flutter events use the $lib: "posthog-flutter" property.',
-                ios: 'Testing PostHog iOS SDK with real CHANGELOG.md versions + GitHub API release dates. iOS events use the $lib: "posthog-ios" property.',
-                android: 'Testing PostHog Android SDK with real CHANGELOG.md versions + GitHub API release dates. Android events use the $lib: "posthog-android" property.',
-                go: 'Testing PostHog Go SDK with real CHANGELOG.md versions + GitHub API release dates. Go events use the $lib: "posthog-go" property.',
-                php: 'Testing PostHog PHP SDK with simplified logic (no time-based detection). PHP events use the $lib: "posthog-php" property.',
-                ruby: 'Testing PostHog Ruby SDK with real CHANGELOG.md versions + GitHub API release dates. Ruby events use the $lib: "posthog-ruby" property and include framework: "Rails".',
-                elixir: 'Testing PostHog Elixir SDK with simplified logic (no time-based detection). Elixir events use the $lib: "posthog-elixir" property and include framework: "Phoenix".',
-                dotnet: 'Testing PostHog .NET SDK with simplified logic (no time-based detection). .NET events use the $lib: "posthog-dotnet" property.'
+                web: 'Testing Insights Web SDK (@hanzo/insights) with real CDN versions + GitHub API release dates and mock edge cases.',
+                python: 'Testing Insights Python SDK with simulated version events. Python events use the $lib: "insights-python" property.',
+                node: 'Testing Insights Node.js SDK with simulated version events. Node.js events use the $lib: "@hanzo/insights-node" property.',
+                'react-native': 'Testing Insights React Native SDK with real CHANGELOG.md versions + GitHub API release dates. React Native events use the $lib: "@hanzo/insights-react-native" property.',
+                flutter: 'Testing Insights Flutter SDK with real CHANGELOG.md versions + GitHub API release dates. Flutter events use the $lib: "insights-flutter" property.',
+                ios: 'Testing Insights iOS SDK with real CHANGELOG.md versions + GitHub API release dates. iOS events use the $lib: "insights-ios" property.',
+                android: 'Testing Insights Android SDK with real CHANGELOG.md versions + GitHub API release dates. Android events use the $lib: "insights-android" property.',
+                go: 'Testing Insights Go SDK with real CHANGELOG.md versions + GitHub API release dates. Go events use the $lib: "insights-go" property.',
+                php: 'Testing Insights PHP SDK with simplified logic (no time-based detection). PHP events use the $lib: "insights-php" property.',
+                ruby: 'Testing Insights Ruby SDK with real CHANGELOG.md versions + GitHub API release dates. Ruby events use the $lib: "insights-ruby" property and include framework: "Rails".',
+                elixir: 'Testing Insights Elixir SDK with simplified logic (no time-based detection). Elixir events use the $lib: "insights-elixir" property and include framework: "Phoenix".',
+                dotnet: 'Testing Insights .NET SDK with simplified logic (no time-based detection). .NET events use the $lib: "insights-dotnet" property.'
             };
 
             document.getElementById('sdkDescription').innerHTML = `<p><em>${descriptions[newSdk]}</em></p>`;
@@ -523,7 +523,7 @@
         async function fetchPythonVersionData() {
             try {
                 log('🐍 Fetching Python SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-python/master/CHANGELOG.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-python/master/CHANGELOG.md', {
                     cache: 'no-cache'
                 });
 
@@ -618,16 +618,16 @@
             logElement.scrollTop = logElement.scrollHeight;
         }
 
-        // Initialize PostHog with latest version from CDN
-        async function initPostHog() {
-            if (window.posthog) {
-                window.posthog.reset();
+        // Initialize Insights with latest version from CDN
+        async function initInsights() {
+            if (window.insights) {
+                window.insights.reset();
             }
 
-            // Load PostHog from local server for SDK testing
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+            // Load Insights from local server for SDK testing
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
-            posthog.init(currentApiKey, {
+            insights.init(currentApiKey, {
                 api_host: 'http://localhost:8010',
                 debug: true,
                 capture_pageview: false,
@@ -635,8 +635,8 @@
                 autocapture: false
             });
 
-            posthog.identify(distinctId);
-            log(`PostHog initialized from local server for Web SDK testing`, 'info');
+            insights.identify(distinctId);
+            log(`Insights initialized from local server for Web SDK testing`, 'info');
         }
 
         // Send test events with specific version
@@ -644,7 +644,7 @@
             try {
                 const releaseAge = versionDates[version] ? Math.round((Date.now() - versionDates[version].getTime()) / (1000 * 60 * 60)) : 'unknown';
 
-                posthog.capture('test_time_based_detection', {
+                insights.capture('test_time_based_detection', {
                     $lib: 'web',
                     $lib_version: version,
                     test_scenario: scenario,
@@ -671,19 +671,19 @@
         function clearEvents() {
             distinctId = `test-time-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
             currentTest = null;
-            initPostHog();
+            initInsights();
             log('🧹 Events cleared (new distinct ID generated)', 'info');
         }
 
         // ========== PYTHON SDK TESTING FUNCTIONS ==========
-        function initPostHogForPython() {
-            if (window.posthog) {
-                window.posthog.reset();
+        function initInsightsForPython() {
+            if (window.insights) {
+                window.insights.reset();
             }
 
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
-            posthog.init(currentApiKey, {
+            insights.init(currentApiKey, {
                 api_host: 'http://localhost:8010',
                 debug: true,
                 capture_pageview: false,
@@ -691,7 +691,7 @@
                 autocapture: false
             });
 
-            posthog.identify(distinctId);
+            insights.identify(distinctId);
         }
 
         // Send Python SDK test events
@@ -700,8 +700,8 @@
                 const releaseAge = pythonVersionData.versionDates[version] ?
                     Math.round((Date.now() - pythonVersionData.versionDates[version].getTime()) / (1000 * 60 * 60)) : 'unknown';
 
-                posthog.capture('test_python_time_based_detection', {
-                    $lib: 'posthog-python',
+                insights.capture('test_python_time_based_detection', {
+                    $lib: 'insights-python',
                     $lib_version: version,
                     test_scenario: scenario,
                     test_event_index: eventIndex,
@@ -731,7 +731,7 @@
             currentTest = 'python_real_current';
 
             log('✅ Testing REAL Python Current Version...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.latest;
             for (let i = 0; i < 16; i++) {
@@ -755,7 +755,7 @@
             currentTest = 'python_real_close_enough';
 
             log('🟡 Testing REAL Python Close Enough Version...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
@@ -779,7 +779,7 @@
             currentTest = 'python_real_outdated';
 
             log('🔴 Testing REAL Python Outdated Version...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -802,7 +802,7 @@
             log('📡 Using REAL GitHub API data - no mocks!', 'info');
 
             await fetchPythonVersionData(); // Ensure we have version data
-            initPostHogForPython();
+            initInsightsForPython();
 
             const testVersion = '6.7.2'; // Real version 3 releases behind
 
@@ -842,7 +842,7 @@
         async function testPythonRealCurrentVersionInternal() {
             if (!pythonVersionData) return;
             log('✅ Testing REAL Python Current (internal)...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.latest;
             for (let i = 0; i < 16; i++) {
@@ -854,7 +854,7 @@
         async function testPythonRealCloseEnoughInternal() {
             if (!pythonVersionData) return;
             log('🟡 Testing REAL Python Close Enough (internal)...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
@@ -866,7 +866,7 @@
         async function testPythonRealOutdatedInternal() {
             if (!pythonVersionData) return;
             log('🔴 Testing REAL Python Outdated (internal)...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -885,7 +885,7 @@
 
             log('🎯 Testing PYTHON Mock Dual Check - Recent 2+ Releases Behind...', 'info');
             await fetchPythonVersionData();
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.versions[2]; // 2 releases behind, but released recently
             const ageHours = Math.round((Date.now() - pythonVersionData.versionDates[version].getTime()) / (1000 * 60 * 60));
@@ -909,7 +909,7 @@
 
             log('🔴 Testing PYTHON Mock Dual Check - Old 2+ Releases Behind...', 'info');
             await fetchPythonVersionData();
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.versions[3]; // 3 releases behind and old
             const ageHours = Math.round((Date.now() - pythonVersionData.versionDates[version].getTime()) / (1000 * 60 * 60));
@@ -932,15 +932,15 @@
             currentTest = 'python_mock_extreme';
 
             log('⚠️ Testing PYTHON Mock Extreme Edge Case...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             // Create an extreme edge case for Python - exactly 2 releases behind and exactly 48h old
             const extremeVersion = '6.999.0';
 
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_python_mock_extreme_edge_case', {
-                        $lib: 'posthog-python',
+                    insights.capture('test_python_mock_extreme_edge_case', {
+                        $lib: 'insights-python',
                         $lib_version: extremeVersion,
                         test_scenario: 'python_mock_extreme_edge_case',
                         test_event_index: i,
@@ -989,7 +989,7 @@
         async function testPythonMockDualCheckRecentInternal() {
             log('🎯 PYTHON Mock Dual Check Recent (internal)...', 'info');
             await fetchPythonVersionData();
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.versions[2];
             for (let i = 0; i < 16; i++) {
@@ -1001,7 +1001,7 @@
         async function testPythonMockDualCheckOldInternal() {
             log('🔴 PYTHON Mock Dual Check Old (internal)...', 'info');
             await fetchPythonVersionData();
-            initPostHogForPython();
+            initInsightsForPython();
 
             const version = pythonVersionData.versions[3];
             for (let i = 0; i < 16; i++) {
@@ -1012,12 +1012,12 @@
 
         async function testPythonMockExtremeInternal() {
             log('⚠️ PYTHON Mock Extreme Edge Case (internal)...', 'info');
-            initPostHogForPython();
+            initInsightsForPython();
 
             const extremeVersion = '6.999.0';
             for (let i = 0; i < 16; i++) {
-                posthog.capture('test_python_mock_extreme_internal', {
-                    $lib: 'posthog-python',
+                insights.capture('test_python_mock_extreme_internal', {
+                    $lib: 'insights-python',
                     $lib_version: extremeVersion,
                     test_scenario: 'python_mock_extreme_internal',
                     test_event_index: i,
@@ -1042,7 +1042,7 @@
             log('📅 Real release date: Sept 3, 2025 (13 days ago)', 'info');
             log('🎯 Expected: Should show "Close enough" with 15-day threshold, "Outdated" with 48h threshold', 'info');
 
-            initPostHogForPython();
+            initInsightsForPython();
 
             // Use real Python version 6.7.2 (released Sept 3, 2025 - 13 days ago)
             // This is 3 releases behind 6.7.5 and 13 days old
@@ -1050,8 +1050,8 @@
 
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_python_real_time_based_detection', {
-                        $lib: 'posthog-python',
+                    insights.capture('test_python_real_time_based_detection', {
+                        $lib: 'insights-python',
                         $lib_version: realTestVersion,
                         test_scenario: 'python_real_time_based_detection',
                         test_event_index: i,
@@ -1081,7 +1081,7 @@
         async function fetchReactNativeVersionData() {
             try {
                 log('📱 Fetching React Native SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-js/main/packages/react-native/CHANGELOG.md');
+                const response = await fetch('https://raw.githubusercontent.com/Insights/@hanzo/insights/main/packages/react-native/CHANGELOG.md');
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1163,15 +1163,15 @@
             }
         }
 
-        function initPostHogForReactNative() {
-            if (window.posthog) {
-                window.posthog.reset();
+        function initInsightsForReactNative() {
+            if (window.insights) {
+                window.insights.reset();
             }
 
-            // Initialize PostHog normally (we'll simulate React Native events)
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+            // Initialize Insights normally (we'll simulate React Native events)
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
-            posthog.init(currentApiKey, {
+            insights.init(currentApiKey, {
                 api_host: HOST,
                 debug: true,
                 capture_pageview: false,
@@ -1179,7 +1179,7 @@
                 autocapture: false
             });
 
-            posthog.identify(distinctId);
+            insights.identify(distinctId);
         }
 
         // Send React Native SDK test events
@@ -1189,7 +1189,7 @@
                     Math.round((Date.now() - reactNativeVersionData.versionDates[version].getTime()) / (1000 * 60 * 60)) : 'unknown';
 
                 const eventData = {
-                    $lib: 'posthog-react-native',
+                    $lib: '@hanzo/insights-react-native',
                     $lib_version: version,
                     test_scenario: scenario,
                     test_event_index: eventIndex,
@@ -1201,7 +1201,7 @@
                 };
 
                 console.log(`[React Native Test] Event ${eventIndex}: $lib_version = "${version}"`, eventData);
-                posthog.capture('test_react_native_time_based_detection', eventData);
+                insights.capture('test_react_native_time_based_detection', eventData);
 
                 log(`📤 Sent: React Native v${version} (${releaseAge}h old) - ${scenario}`, 'info');
             } catch (error) {
@@ -1218,7 +1218,7 @@
             currentTest = 'react_native_current';
 
             await fetchReactNativeVersionData();
-            initPostHogForReactNative();
+            initInsightsForReactNative();
 
             const version = reactNativeVersionData.latest;
             for (let i = 0; i < 16; i++) {
@@ -1235,7 +1235,7 @@
             currentTest = 'react_native_close_enough';
 
             await fetchReactNativeVersionData();
-            initPostHogForReactNative();
+            initInsightsForReactNative();
 
             const version = reactNativeVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
@@ -1252,7 +1252,7 @@
             currentTest = 'react_native_outdated';
 
             await fetchReactNativeVersionData();
-            initPostHogForReactNative();
+            initInsightsForReactNative();
 
             const version = reactNativeVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -1269,7 +1269,7 @@
             currentTest = 'react_native_edge_443';
             log('🎯 Testing REACT NATIVE Edge Case: v4.4.3 (3 Behind, 20 Days)...', 'info');
             log('⏰ This version should show "Close enough" with adjusted threshold, "Outdated" with 48h threshold', 'info');
-            initPostHogForReactNative();
+            initInsightsForReactNative();
             const version = '4.4.3';
             for (let i = 0; i < 16; i++) {
                 await sendReactNativeTestEvent(version, 'react_native_edge_443', i);
@@ -1330,7 +1330,7 @@
             log('📅 Real release date: Aug 27, 2025 (20 days ago)', 'info');
             log('🎯 Expected: Should show "Close enough" with 25-day threshold, "Outdated" with 48h threshold', 'info');
 
-            initPostHogForReactNative();
+            initInsightsForReactNative();
 
             // Use real React Native version 4.5.0 (released Aug 27, 2025 - 20 days ago)
             // This is 1 release behind 4.5.1 and 20 days old - good for testing
@@ -1338,8 +1338,8 @@
 
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_react_native_real_time_based_detection', {
-                        $lib: 'posthog-react-native',
+                    insights.capture('test_react_native_real_time_based_detection', {
+                        $lib: '@hanzo/insights-react-native',
                         $lib_version: realTestVersion,
                         test_scenario: 'react_native_real_time_based_detection',
                         test_event_index: i,
@@ -1369,7 +1369,7 @@
         async function fetchFlutterVersionData() {
             try {
                 log('🦋 Fetching Flutter SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-flutter/main/CHANGELOG.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-flutter/main/CHANGELOG.md', {
                     cache: 'no-cache'
                 });
 
@@ -1436,15 +1436,15 @@
             `;
         }
 
-        // Initialize PostHog for Flutter testing
-        function initPostHogForFlutter() {
-            if (window.posthog) {
-                window.posthog.reset();
+        // Initialize Insights for Flutter testing
+        function initInsightsForFlutter() {
+            if (window.insights) {
+                window.insights.reset();
             }
 
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
-            posthog.init(currentApiKey, {
+            insights.init(currentApiKey, {
                 api_host: 'http://localhost:8010',
                 ui_host: 'http://localhost:8010'
             });
@@ -1456,8 +1456,8 @@
                 const releaseAge = flutterVersionData.versionDates[version] ?
                     Math.round((Date.now() - flutterVersionData.versionDates[version].getTime()) / (1000 * 60 * 60)) : 'unknown';
 
-                posthog.capture('flutter_test_event', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_test_event', {
+                    $lib: 'insights-flutter',
                     $lib_version: version,
                     test_scenario: scenario,
                     event_index: eventIndex,
@@ -1481,19 +1481,19 @@
             currentTest = 'flutter_current';
 
             if (!realVersionData) {
-                alert('Real PostHog-js version data not loaded yet. Please wait a moment and try again.');
+                alert('Real Insights-js version data not loaded yet. Please wait a moment and try again.');
                 return;
             }
 
             await fetchFlutterVersionData();
 
-            // Use current posthog-js version like Web SDK tests
-            loadPostHogVersion('latest', async (error) => {
+            // Use current @hanzo/insights version like Web SDK tests
+            loadInsightsVersion('latest', async (error) => {
                 if (error) {
-                    log(`❌ Error loading current PostHog for Flutter tests: ${error.message}`, 'error');
+                    log(`❌ Error loading current Insights for Flutter tests: ${error.message}`, 'error');
                     return;
                 }
-                log(`✅ Flutter tests using current PostHog-js v${realVersionData.latest}`, 'success');
+                log(`✅ Flutter tests using current Insights-js v${realVersionData.latest}`, 'success');
 
                 const version = flutterVersionData.latest;
                 for (let i = 0; i < 16; i++) {
@@ -1514,19 +1514,19 @@
             currentTest = 'flutter_close_enough';
 
             if (!realVersionData) {
-                alert('Real PostHog-js version data not loaded yet. Please wait a moment and try again.');
+                alert('Real Insights-js version data not loaded yet. Please wait a moment and try again.');
                 return;
             }
 
             await fetchFlutterVersionData();
 
-            // Use current posthog-js version like Web SDK tests
-            loadPostHogVersion('latest', async (error) => {
+            // Use current @hanzo/insights version like Web SDK tests
+            loadInsightsVersion('latest', async (error) => {
                 if (error) {
-                    log(`❌ Error loading current PostHog for Flutter tests: ${error.message}`, 'error');
+                    log(`❌ Error loading current Insights for Flutter tests: ${error.message}`, 'error');
                     return;
                 }
-                log(`✅ Flutter tests using current PostHog-js v${realVersionData.latest}`, 'success');
+                log(`✅ Flutter tests using current Insights-js v${realVersionData.latest}`, 'success');
 
                 const version = flutterVersionData.closeEnough;
                 for (let i = 0; i < 16; i++) {
@@ -1547,19 +1547,19 @@
             currentTest = 'flutter_outdated';
 
             if (!realVersionData) {
-                alert('Real PostHog-js version data not loaded yet. Please wait a moment and try again.');
+                alert('Real Insights-js version data not loaded yet. Please wait a moment and try again.');
                 return;
             }
 
             await fetchFlutterVersionData();
 
-            // Use current posthog-js version like Web SDK tests
-            loadPostHogVersion('latest', async (error) => {
+            // Use current @hanzo/insights version like Web SDK tests
+            loadInsightsVersion('latest', async (error) => {
                 if (error) {
-                    log(`❌ Error loading current PostHog for Flutter tests: ${error.message}`, 'error');
+                    log(`❌ Error loading current Insights for Flutter tests: ${error.message}`, 'error');
                     return;
                 }
-                log(`✅ Flutter tests using current PostHog-js v${realVersionData.latest}`, 'success');
+                log(`✅ Flutter tests using current Insights-js v${realVersionData.latest}`, 'success');
 
                 const version = flutterVersionData.outdated;
                 for (let i = 0; i < 16; i++) {
@@ -1596,7 +1596,7 @@
         async function testFlutterCurrentVersionInternal() {
             if (!flutterVersionData) return;
             log('✅ Testing REAL Flutter Current (internal)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const version = flutterVersionData.latest;
             for (let i = 0; i < 16; i++) {
@@ -1608,7 +1608,7 @@
         async function testFlutterCloseEnoughVersionInternal() {
             if (!flutterVersionData) return;
             log('🟡 Testing REAL Flutter Close Enough (internal)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const version = flutterVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
@@ -1620,7 +1620,7 @@
         async function testFlutterOutdatedVersionInternal() {
             if (!flutterVersionData) return;
             log('🔴 Testing REAL Flutter Outdated (internal)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const version = flutterVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -1638,14 +1638,14 @@
             currentTest = 'flutter_mock_dual_recent';
 
             log('🎯 Testing Flutter Mock: 2 Behind + Recent (should be Close enough)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const mockVersion = '5.3.0'; // 2 releases behind
             const recentDate = new Date(Date.now() - (2 * 60 * 60 * 1000)); // 2 hours ago (recent)
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_mock_dual_recent', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_mock_dual_recent', {
+                    $lib: 'insights-flutter',
                     $lib_version: mockVersion,
                     test_scenario: 'flutter_mock_dual_check_recent',
                     event_index: i,
@@ -1667,14 +1667,14 @@
             currentTest = 'flutter_mock_dual_old';
 
             log('🔴 Testing Flutter Mock: 2 Behind + Old (should be Outdated)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const mockVersion = '5.3.0'; // 2 releases behind
             const oldDate = new Date(Date.now() - (4 * 24 * 60 * 60 * 1000)); // 4 days ago (old)
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_mock_dual_old', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_mock_dual_old', {
+                    $lib: 'insights-flutter',
                     $lib_version: mockVersion,
                     test_scenario: 'flutter_mock_dual_check_old',
                     event_index: i,
@@ -1696,14 +1696,14 @@
             currentTest = 'flutter_mock_extreme';
 
             log('⚠️ Testing Flutter Mock: Extreme Edge Case...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const mockVersion = '4.0.0'; // Very old version
             const veryOldDate = new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)); // 30 days ago
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_mock_extreme', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_mock_extreme', {
+                    $lib: 'insights-flutter',
                     $lib_version: mockVersion,
                     test_scenario: 'flutter_mock_extreme_edge_case',
                     event_index: i,
@@ -1725,14 +1725,14 @@
             currentTest = 'flutter_real_time_based';
 
             log('⏰ Testing Flutter Real Time-Based: v5.4.0 (3 Behind, 20 Days Old)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const testVersion = '5.4.0'; // Should be 3+ releases behind current
             const twentyDaysAgo = new Date(Date.now() - (20 * 24 * 60 * 60 * 1000));
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_real_time_based', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_real_time_based', {
+                    $lib: 'insights-flutter',
                     $lib_version: testVersion,
                     test_scenario: 'flutter_real_time_based_detection',
                     event_index: i,
@@ -1757,13 +1757,13 @@
             log('📡 Using REAL GitHub API data - no mocks!', 'info');
 
             await fetchFlutterVersionData(); // Ensure we have real version data
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const testVersion = '5.4.2'; // Real version from Flutter releases
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_real_edge_case_542', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_real_edge_case_542', {
+                    $lib: 'insights-flutter',
                     $lib_version: testVersion,
                     test_scenario: 'flutter_real_edge_case_542',
                     event_index: i,
@@ -1803,12 +1803,12 @@
         // Internal Flutter mock test functions
         async function testFlutterMockDualCheckRecentInternal() {
             log('🎯 Testing Flutter Mock Dual Recent (internal)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const mockVersion = '5.3.0';
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_mock_dual_recent_internal', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_mock_dual_recent_internal', {
+                    $lib: 'insights-flutter',
                     $lib_version: mockVersion,
                     test_scenario: 'flutter_mock_dual_recent_internal',
                     event_index: i,
@@ -1820,12 +1820,12 @@
 
         async function testFlutterMockDualCheckOldInternal() {
             log('🔴 Testing Flutter Mock Dual Old (internal)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const mockVersion = '5.3.0';
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_mock_dual_old_internal', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_mock_dual_old_internal', {
+                    $lib: 'insights-flutter',
                     $lib_version: mockVersion,
                     test_scenario: 'flutter_mock_dual_old_internal',
                     event_index: i,
@@ -1837,12 +1837,12 @@
 
         async function testFlutterMockExtremeInternal() {
             log('⚠️ Testing Flutter Mock Extreme (internal)...', 'info');
-            initPostHogForFlutter();
+            initInsightsForFlutter();
 
             const mockVersion = '4.0.0';
             for (let i = 0; i < 16; i++) {
-                posthog.capture('flutter_mock_extreme_internal', {
-                    $lib: 'posthog-flutter',
+                insights.capture('flutter_mock_extreme_internal', {
+                    $lib: 'insights-flutter',
                     $lib_version: mockVersion,
                     test_scenario: 'flutter_mock_extreme_internal',
                     event_index: i,
@@ -1858,7 +1858,7 @@
         async function fetchiOSVersionData() {
             try {
                 log('📱 Fetching iOS SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-ios/main/CHANGELOG.md');
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-ios/main/CHANGELOG.md');
 
                 if (!response.ok) {
                     throw new Error(`Failed to fetch: ${response.status}`);
@@ -1912,11 +1912,11 @@
 
             log('📱 Testing iOS Current Version...', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_current_version_test', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_current_version_test', {
+                    $lib: 'insights-ios',
                     $lib_version: iosVersionData.latest,
                     test_scenario: 'ios_current',
                     event_index: i,
@@ -1937,11 +1937,11 @@
 
             log('📱 Testing iOS Close Enough Version...', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_close_enough_test', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_close_enough_test', {
+                    $lib: 'insights-ios',
                     $lib_version: iosVersionData.closeEnough,
                     test_scenario: 'ios_close_enough',
                     event_index: i,
@@ -1962,11 +1962,11 @@
 
             log('📱 Testing iOS Outdated Version...', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_outdated_test', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_outdated_test', {
+                    $lib: 'insights-ios',
                     $lib_version: iosVersionData.outdated,
                     test_scenario: 'ios_outdated',
                     event_index: i,
@@ -1988,14 +1988,14 @@
             log('📱 Testing iOS Edge Case: v3.30.0 (2 releases behind, ~54 days old)', 'info');
             log('🔧 To test "Close enough": Temporarily change threshold in sidePanelSdkDoctorLogic.tsx:1946 from "< 2" to "< 60" days', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             // Use v3.30.0 specifically (2 releases behind, published Jul 28, 2025 - about 54 days ago)
             const edgeVersion = '3.30.0';
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_edge_case_test', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_edge_case_test', {
+                    $lib: 'insights-ios',
                     $lib_version: edgeVersion,
                     test_scenario: 'ios_edge_case',
                     event_index: i,
@@ -2031,11 +2031,11 @@
         async function testiOSRealCurrentVersionInternal() {
             log('📱 iOS Current (internal)...', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_current_internal', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_current_internal', {
+                    $lib: 'insights-ios',
                     $lib_version: iosVersionData.latest,
                     test_scenario: 'ios_current_internal',
                     event_index: i,
@@ -2049,11 +2049,11 @@
         async function testiOSRealCloseEnoughInternal() {
             log('📱 iOS Close Enough (internal)...', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_close_enough_internal', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_close_enough_internal', {
+                    $lib: 'insights-ios',
                     $lib_version: iosVersionData.closeEnough,
                     test_scenario: 'ios_close_enough_internal',
                     event_index: i,
@@ -2067,11 +2067,11 @@
         async function testiOSRealOutdatedInternal() {
             log('📱 iOS Outdated (internal)...', 'info');
             await ensureiOSVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('ios_outdated_internal', {
-                    $lib: 'posthog-ios',
+                insights.capture('ios_outdated_internal', {
+                    $lib: 'insights-ios',
                     $lib_version: iosVersionData.outdated,
                     test_scenario: 'ios_outdated_internal',
                     event_index: i,
@@ -2095,7 +2095,7 @@
         async function fetchAndroidVersionData() {
             try {
                 log('🤖 Fetching Android SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-android/main/posthog-android/CHANGELOG.md');
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-android/main/insights-android/CHANGELOG.md');
 
                 if (!response.ok) {
                     throw new Error(`Failed to fetch: ${response.status}`);
@@ -2149,11 +2149,11 @@
 
             log('🤖 Testing Android Current Version...', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_current_version_test', {
-                    $lib: 'posthog-android',
+                insights.capture('android_current_version_test', {
+                    $lib: 'insights-android',
                     $lib_version: androidVersionData.latest,
                     test_scenario: 'android_current',
                     event_index: i,
@@ -2174,11 +2174,11 @@
 
             log('🤖 Testing Android Close Enough Version...', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_close_enough_test', {
-                    $lib: 'posthog-android',
+                insights.capture('android_close_enough_test', {
+                    $lib: 'insights-android',
                     $lib_version: androidVersionData.closeEnough,
                     test_scenario: 'android_close_enough',
                     event_index: i,
@@ -2199,11 +2199,11 @@
 
             log('🤖 Testing Android Outdated Version...', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_outdated_test', {
-                    $lib: 'posthog-android',
+                insights.capture('android_outdated_test', {
+                    $lib: 'insights-android',
                     $lib_version: androidVersionData.outdated,
                     test_scenario: 'android_outdated',
                     event_index: i,
@@ -2225,14 +2225,14 @@
             log('🤖 Testing Android Edge Case: v3.21.0 (3 releases behind, ~25 days old)', 'info');
             log('🔧 To test "Close enough": Temporarily change threshold in sidePanelSdkDoctorLogic.tsx:2046 from "< 2" to "< 30" days', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             // Use v3.21.0 specifically (3 releases behind: 3.21.3 → 3.21.2 → 3.21.1 → 3.21.0, published Aug 26, 2025 - about 25 days ago)
             const edgeVersion = '3.21.0';
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_edge_case_test', {
-                    $lib: 'posthog-android',
+                insights.capture('android_edge_case_test', {
+                    $lib: 'insights-android',
                     $lib_version: edgeVersion,
                     test_scenario: 'android_edge_case',
                     event_index: i,
@@ -2268,11 +2268,11 @@
         async function testAndroidRealCurrentVersionInternal() {
             log('🤖 Android Current (internal)...', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_current_internal', {
-                    $lib: 'posthog-android',
+                insights.capture('android_current_internal', {
+                    $lib: 'insights-android',
                     $lib_version: androidVersionData.latest,
                     test_scenario: 'android_current_internal',
                     event_index: i,
@@ -2286,11 +2286,11 @@
         async function testAndroidRealCloseEnoughInternal() {
             log('🤖 Android Close Enough (internal)...', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_close_enough_internal', {
-                    $lib: 'posthog-android',
+                insights.capture('android_close_enough_internal', {
+                    $lib: 'insights-android',
                     $lib_version: androidVersionData.closeEnough,
                     test_scenario: 'android_close_enough_internal',
                     event_index: i,
@@ -2304,11 +2304,11 @@
         async function testAndroidRealOutdatedInternal() {
             log('🤖 Android Outdated (internal)...', 'info');
             await ensureAndroidVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('android_outdated_internal', {
-                    $lib: 'posthog-android',
+                insights.capture('android_outdated_internal', {
+                    $lib: 'insights-android',
                     $lib_version: androidVersionData.outdated,
                     test_scenario: 'android_outdated_internal',
                     event_index: i,
@@ -2332,7 +2332,7 @@
         async function fetchNodeVersionData() {
             try {
                 log('📗 Fetching Node.js SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-js/main/packages/node/CHANGELOG.md');
+                const response = await fetch('https://raw.githubusercontent.com/Insights/@hanzo/insights/main/packages/node/CHANGELOG.md');
 
                 if (!response.ok) {
                     throw new Error(`Failed to fetch: ${response.status}`);
@@ -2414,15 +2414,15 @@
             }
         }
 
-        function initPostHogForNode() {
-            if (window.posthog) {
-                window.posthog.reset();
+        function initInsightsForNode() {
+            if (window.insights) {
+                window.insights.reset();
             }
 
-            // Initialize PostHog normally (we'll simulate Node.js events)
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+            // Initialize Insights normally (we'll simulate Node.js events)
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
-            posthog.init(currentApiKey, {
+            insights.init(currentApiKey, {
                 api_host: HOST,
                 debug: true,
                 capture_pageview: false,
@@ -2430,7 +2430,7 @@
                 autocapture: false
             });
 
-            posthog.identify(distinctId);
+            insights.identify(distinctId);
         }
 
         // Send Node.js SDK test events
@@ -2440,7 +2440,7 @@
                     Math.round((Date.now() - nodeVersionData.versionDates[version].getTime()) / (1000 * 60 * 60)) : 'unknown';
 
                 const eventData = {
-                    $lib: 'posthog-node',
+                    $lib: '@hanzo/insights-node',
                     $lib_version: version,
                     test_scenario: scenario,
                     test_event_index: eventIndex,
@@ -2452,7 +2452,7 @@
                 };
 
                 console.log(`[Node.js Test] Event ${eventIndex}: $lib_version = "${version}"`, eventData);
-                posthog.capture('test_node_time_based_detection', eventData);
+                insights.capture('test_node_time_based_detection', eventData);
 
                 log(`📤 Sent: Node.js v${version} (${releaseAge}h old) - ${scenario}`, 'info');
             } catch (error) {
@@ -2473,7 +2473,7 @@
             currentTest = 'node_real_current';
 
             log('✅ Testing REAL Node.js Current Version...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.latest;
             log(`🎯 Sending Node.js events with version: ${version}`, 'info');
@@ -2498,7 +2498,7 @@
             currentTest = 'node_real_close_enough';
 
             log('🟡 Testing REAL Node.js Close Enough Version...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
@@ -2522,7 +2522,7 @@
             currentTest = 'node_real_outdated';
 
             log('🔴 Testing REAL Node.js Outdated Version...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -2542,7 +2542,7 @@
             currentTest = 'node_edge_581';
             log('🎯 Testing NODE.JS Edge Case: v5.8.1 (3 Behind, 20 Days)...', 'info');
             log('⏰ This version should show "Close enough" with adjusted threshold, "Outdated" with 48h threshold', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
             const version = '5.8.1';
             for (let i = 0; i < 16; i++) {
                 await sendNodeTestEvent(version, 'node_edge_581', i);
@@ -2578,7 +2578,7 @@
         async function testNodeRealCurrentVersionInternal() {
             if (!nodeVersionData) return;
             log('✅ Testing REAL Node.js Current (internal)...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.latest;
             for (let i = 0; i < 16; i++) {
@@ -2590,7 +2590,7 @@
         async function testNodeRealCloseEnoughInternal() {
             if (!nodeVersionData) return;
             log('🟡 Testing REAL Node.js Close Enough (internal)...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
@@ -2602,7 +2602,7 @@
         async function testNodeRealOutdatedInternal() {
             if (!nodeVersionData) return;
             log('🔴 Testing REAL Node.js Outdated (internal)...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -2621,7 +2621,7 @@
 
             log('🎯 Testing NODE.JS Mock Dual Check - Recent 2+ Releases Behind...', 'info');
             await fetchNodeVersionData();
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.versions[2]; // 2 releases behind, but released recently
             const ageHours = Math.round((Date.now() - nodeVersionData.versionDates[version].getTime()) / (1000 * 60 * 60));
@@ -2645,7 +2645,7 @@
 
             log('🔴 Testing NODE.JS Mock Dual Check - Old 2+ Releases Behind...', 'info');
             await fetchNodeVersionData();
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.versions[3]; // 3 releases behind and old
             const ageHours = Math.round((Date.now() - nodeVersionData.versionDates[version].getTime()) / (1000 * 60 * 60));
@@ -2668,14 +2668,14 @@
             currentTest = 'node_mock_extreme';
 
             log('⚠️ Testing NODE.JS Mock Extreme Edge Case...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             // Create an extreme edge case for Node.js - exactly 2 releases behind and exactly 48h old
             const extremeVersion = '5.3.0';
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_node_mock_extreme_edge_case', {
-                        $lib: 'posthog-node',
+                    insights.capture('test_node_mock_extreme_edge_case', {
+                        $lib: '@hanzo/insights-node',
                         $lib_version: extremeVersion,
                         test_scenario: 'node_mock_extreme_edge_case',
                         test_event_index: i,
@@ -2709,9 +2709,9 @@
             currentTest = 'node_mock_multiple_releases_one_day';
 
             log('🚀 Testing NODE.JS Mock: Multiple Releases in One Day (4 Behind + 24h)...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
-            // Simulate a realistic PostHog scenario:
+            // Simulate a realistic Insights scenario:
             // - Current version is 5.8.4 (latest)
             // - We're testing version 5.8.0 (4 releases behind)
             // - But version 5.8.0 was released only 24 hours ago (fast release cycle)
@@ -2721,8 +2721,8 @@
 
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_node_mock_multiple_releases_one_day', {
-                        $lib: 'posthog-node',
+                    insights.capture('test_node_mock_multiple_releases_one_day', {
+                        $lib: '@hanzo/insights-node',
                         $lib_version: testVersion,
                         test_scenario: 'node_mock_multiple_releases_one_day',
                         test_event_index: i,
@@ -2745,7 +2745,7 @@
 
             log(`✅ Node.js Fast Release test complete! Sent 16 events with v${testVersion} (${hoursSinceRelease}h old, 4 releases behind)`, 'success');
             log('🔍 Expected: "Close enough" badge (because <48h despite 4+ releases behind)', 'info');
-            log('📊 This tests PostHog\'s fast release cycle where multiple releases happen daily', 'info');
+            log('📊 This tests Insights\'s fast release cycle where multiple releases happen daily', 'info');
         }
 
         // Test Node.js SDK with real version 5.8.2 for time-based detection
@@ -2760,7 +2760,7 @@
             log('📅 Real release date: Aug 27, 2025 (20 days ago)', 'info');
             log('🎯 This is 3 releases behind - tests the "3+ releases behind" part of dual-check logic', 'info');
 
-            initPostHogForNode();
+            initInsightsForNode();
 
             // Use real Node.js version 5.8.1 (released Aug 27, 2025 - 20 days ago)
             // This is 3 releases behind 5.8.4 and 20 days old
@@ -2768,8 +2768,8 @@
 
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_node_real_time_based_detection', {
-                        $lib: 'posthog-node',
+                    insights.capture('test_node_real_time_based_detection', {
+                        $lib: '@hanzo/insights-node',
                         $lib_version: realTestVersion,
                         test_scenario: 'node_real_time_based_detection',
                         test_event_index: i,
@@ -2821,7 +2821,7 @@
         async function testNodeMockDualCheckRecentInternal() {
             log('🎯 NODE.JS Mock Dual Check Recent (internal)...', 'info');
             await fetchNodeVersionData();
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.versions[2];
             for (let i = 0; i < 16; i++) {
@@ -2833,7 +2833,7 @@
         async function testNodeMockDualCheckOldInternal() {
             log('🔴 NODE.JS Mock Dual Check Old (internal)...', 'info');
             await fetchNodeVersionData();
-            initPostHogForNode();
+            initInsightsForNode();
 
             const version = nodeVersionData.versions[3];
             for (let i = 0; i < 16; i++) {
@@ -2844,12 +2844,12 @@
 
         async function testNodeMockExtremeInternal() {
             log('⚠️ NODE.JS Mock Extreme (internal)...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const extremeVersion = '5.3.0';
             for (let i = 0; i < 16; i++) {
-                posthog.capture('test_node_mock_extreme_internal', {
-                    $lib: 'posthog-node',
+                insights.capture('test_node_mock_extreme_internal', {
+                    $lib: '@hanzo/insights-node',
                     $lib_version: extremeVersion,
                     test_scenario: 'node_mock_extreme_internal',
                     test_event_index: i,
@@ -2867,14 +2867,14 @@
 
         async function testNodeMockMultipleReleasesOneDayInternal() {
             log('🚀 NODE.JS Mock Multiple Releases One Day (internal)...', 'info');
-            initPostHogForNode();
+            initInsightsForNode();
 
             const testVersion = '5.8.0'; // 4 releases behind 5.8.4
             const hoursSinceRelease = 24; // 24 hours ago
 
             for (let i = 0; i < 16; i++) {
-                posthog.capture('test_node_mock_multiple_releases_internal', {
-                    $lib: 'posthog-node',
+                insights.capture('test_node_mock_multiple_releases_internal', {
+                    $lib: '@hanzo/insights-node',
                     $lib_version: testVersion,
                     test_scenario: 'node_mock_multiple_releases_internal',
                     test_event_index: i,
@@ -2896,7 +2896,7 @@
         // Fetch real versions for CDN testing (similar to simple-time-test.html)
         async function fetchRealVersions() {
             try {
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-js/main/packages/browser/CHANGELOG.md');
+                const response = await fetch('https://raw.githubusercontent.com/Insights/@hanzo/insights/main/packages/browser/CHANGELOG.md');
                 const text = await response.text();
 
                 const versionRegex = /^## (\d+\.\d+\.\d+)$/gm;
@@ -2922,17 +2922,17 @@
             throw error;
         }
 
-        function loadPostHogVersion(version, callback) {
-            // Clear any existing PostHog
-            if (window.posthog) {
-                window.posthog = undefined;
+        function loadInsightsVersion(version, callback) {
+            // Clear any existing Insights
+            if (window.insights) {
+                window.insights = undefined;
             }
 
-            // Initialize PostHog directly with snippet (bypasses CORS)
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
+            // Initialize Insights directly with snippet (bypasses CORS)
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
 
-            // Initialize with local PostHog
-            posthog.init(currentApiKey, {
+            // Initialize with local Insights
+            insights.init(currentApiKey, {
                 api_host: 'http://localhost:8010',
                 debug: true,
                 capture_pageview: false,
@@ -2942,18 +2942,18 @@
 
             // Override the version to simulate different versions
             setTimeout(() => {
-                if (window.posthog && window.posthog.config) {
+                if (window.insights && window.insights.config) {
                     if (version === 'latest') {
-                        // Will use whatever version is loaded from your local PostHog
+                        // Will use whatever version is loaded from your local Insights
                         callback();
                     } else {
                         // Override the library version to simulate older versions
-                        if (window.posthog._) {
-                            window.posthog._.config.lib_version = version;
+                        if (window.insights._) {
+                            window.insights._.config.lib_version = version;
                         }
                         // Also override any version reporting
-                        const originalCapture = window.posthog.capture;
-                        window.posthog.capture = function (...args) {
+                        const originalCapture = window.insights.capture;
+                        window.insights.capture = function (...args) {
                             if (args[1] && typeof args[1] === 'object') {
                                 args[1].$lib_version = version;
                             }
@@ -2962,20 +2962,20 @@
                         callback();
                     }
                 } else {
-                    callback(new Error('PostHog failed to initialize'));
+                    callback(new Error('Insights failed to initialize'));
                 }
             }, 2000); // Give more time for init
         }
 
         function sendRealTestEvents(version, testName, count = 16) {
             const testDistinctId = `real-test-${testName}-${Date.now()}`;
-            posthog.identify(testDistinctId);
+            insights.identify(testDistinctId);
 
             log(`📤 Sending ${count} events with REAL version ${version}...`, 'info');
 
             for (let i = 0; i < count; i++) {
                 setTimeout(() => {
-                    posthog.capture('test_real_time_based_detection', {
+                    insights.capture('test_real_time_based_detection', {
                         $lib: 'web',
                         $lib_version: version,  // Override the version to test specific versions
                         test_version: version,
@@ -3006,12 +3006,12 @@
             currentTest = 'real_current';
 
             log('✅ Testing REAL Current Version...', 'info');
-            loadPostHogVersion('latest', (error) => {
+            loadInsightsVersion('latest', (error) => {
                 if (error) {
                     log(`❌ Error: ${error.message}`, 'error');
                     return;
                 }
-                log(`✅ REAL Latest PostHog loaded (v${realVersionData.latest})`, 'success');
+                log(`✅ REAL Latest Insights loaded (v${realVersionData.latest})`, 'success');
                 sendRealTestEvents(realVersionData.latest, 'real_current_version');
             });
         }
@@ -3029,7 +3029,7 @@
 
             const version = realVersionData.closeEnough;
             log(`🟡 Testing REAL Close Enough Version (v${version})...`, 'info');
-            loadPostHogVersion(version, (error) => {
+            loadInsightsVersion(version, (error) => {
                 if (error) {
                     log(`❌ Error: ${error.message}`, 'error');
                     return;
@@ -3052,7 +3052,7 @@
 
             const version = realVersionData.outdated;
             log(`🔴 Testing REAL Outdated Version (v${version})...`, 'info');
-            loadPostHogVersion(version, (error) => {
+            loadInsightsVersion(version, (error) => {
                 if (error) {
                     log(`❌ Error: ${error.message}`, 'error');
                     return;
@@ -3074,8 +3074,8 @@
 
             const testVersion = '1.264.2'; // Real version 3+ releases behind
 
-            // Load the specific version via PostHog CDN
-            loadPostHogVersion(testVersion, (error) => {
+            // Load the specific version via Insights CDN
+            loadInsightsVersion(testVersion, (error) => {
                 if (error) {
                     log(`❌ Error loading v${testVersion}: ${error.message}`, 'error');
                     return;
@@ -3084,7 +3084,7 @@
 
                 // Send 16 test events
                 for (let i = 0; i < 16; i++) {
-                    posthog.capture('web_edge_case_1264', {
+                    insights.capture('web_edge_case_1264', {
                         test_scenario: 'web_edge_case_1264',
                         event_index: i,
                         event_id: `web_edge_${i}_${Date.now()}`,
@@ -3127,7 +3127,7 @@
             if (!realVersionData) return;
             const version = realVersionData.latest;
             log(`✅ Testing REAL Current Version (v${version})...`, 'info');
-            loadPostHogVersion('latest', (error) => {
+            loadInsightsVersion('latest', (error) => {
                 if (!error) {
                     sendRealTestEvents(version, 'real_current_internal');
                 }
@@ -3138,7 +3138,7 @@
             if (!realVersionData) return;
             const version = realVersionData.closeEnough;
             log(`🟡 Testing REAL Close Enough (v${version})...`, 'info');
-            loadPostHogVersion(version, (error) => {
+            loadInsightsVersion(version, (error) => {
                 if (!error) {
                     sendRealTestEvents(version, 'real_close_enough_internal');
                 }
@@ -3149,7 +3149,7 @@
             if (!realVersionData) return;
             const version = realVersionData.outdated;
             log(`🔴 Testing REAL Outdated (v${version})...`, 'info');
-            loadPostHogVersion(version, (error) => {
+            loadInsightsVersion(version, (error) => {
                 if (!error) {
                     sendRealTestEvents(version, 'real_outdated_internal');
                 }
@@ -3166,7 +3166,7 @@
 
             log('🎯 Testing MOCK Dual Check - Recent 2+ Releases Behind...', 'info');
             await ensureVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             const version = versions[2]; // 2 releases behind, but released recently
             const ageHours = Math.round((Date.now() - versionDates[version].getTime()) / (1000 * 60 * 60));
@@ -3190,7 +3190,7 @@
 
             log('🔴 Testing MOCK Dual Check - Old 2+ Releases Behind...', 'info');
             await ensureVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             const version = versions[3]; // 3 releases behind and old
             const ageHours = Math.round((Date.now() - versionDates[version].getTime()) / (1000 * 60 * 60));
@@ -3213,7 +3213,7 @@
             currentTest = 'mock_extreme';
 
             log('⚠️ Testing MOCK Extreme Edge Case...', 'info');
-            initPostHog();
+            initInsights();
 
             // Create an extreme edge case - exactly 2 releases behind and exactly 48h old
             const extremeVersion = '1.999.0';
@@ -3221,7 +3221,7 @@
 
             for (let i = 0; i < 16; i++) {
                 try {
-                    posthog.capture('test_mock_extreme_edge_case', {
+                    insights.capture('test_mock_extreme_edge_case', {
                         $lib: 'web',
                         $lib_version: extremeVersion,
                         test_scenario: 'mock_extreme_edge_case',
@@ -3271,7 +3271,7 @@
         async function testMockDualCheckRecentInternal() {
             log('🎯 MOCK Dual Check Recent (internal)...', 'info');
             await ensureVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             const version = versions[2];
             for (let i = 0; i < 16; i++) {
@@ -3283,7 +3283,7 @@
         async function testMockDualCheckOldInternal() {
             log('🔴 MOCK Dual Check Old (internal)...', 'info');
             await ensureVersionsLoaded();
-            initPostHog();
+            initInsights();
 
             const version = versions[3];
             for (let i = 0; i < 16; i++) {
@@ -3294,11 +3294,11 @@
 
         async function testMockExtremeInternal() {
             log('⚠️ MOCK Extreme Edge Case (internal)...', 'info');
-            initPostHog();
+            initInsights();
 
             const extremeVersion = '1.999.0';
             for (let i = 0; i < 16; i++) {
-                posthog.capture('test_mock_extreme_internal', {
+                insights.capture('test_mock_extreme_internal', {
                     $lib: 'web',
                     $lib_version: extremeVersion,
                     test_scenario: 'mock_extreme_internal',
@@ -3321,7 +3321,7 @@
         async function fetchGoVersionData() {
             try {
                 log('🔷 Fetching Go SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-go/master/CHANGELOG.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-go/master/CHANGELOG.md', {
                     cache: 'no-cache'
                 });
                 if (!response.ok) {
@@ -3397,27 +3397,27 @@
             return goVersionData ? Promise.resolve() : fetchGoVersionData();
         }
 
-        // Initialize PostHog for Go SDK testing
-        function initPostHogForGo() {
-            if (window.posthog) {
-                window.posthog.reset();
+        // Initialize Insights for Go SDK testing
+        function initInsightsForGo() {
+            if (window.insights) {
+                window.insights.reset();
             }
-            !function (t, e) { var o, n, p, r; e.__SV || (window.posthog = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "posthog", u.people = u.people || [], u.toString = function (t) { var e = "posthog"; return "posthog" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.posthog || []);
-            posthog.init(currentApiKey, {
+            !function (t, e) { var o, n, p, r; e.__SV || (window.insights = e, e._i = [], e.init = function (i, s, a) { function g(t, e) { var o = e.split("."); 2 == o.length && (t = t[o[0]], e = o[1]); t[e] = function () { t.push([e].concat(Array.prototype.slice.call(arguments, 0))) } } (p = t.createElement("script")).type = "text/javascript", p.async = !0, p.src = s.api_host + "/static/array.js", (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(p, r); var u = e; for (void 0 !== a ? u = e[a] = [] : a = "insights", u.people = u.people || [], u.toString = function (t) { var e = "insights"; return "insights" !== a && (e += "." + a), t || (e += " (stub)"), e }, u.people.toString = function () { return u.toString(1) + ".people (stub)" }, o = "capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "), n = 0; n < o.length; n++)g(u, o[n]); e._i.push([i, s, a]) }, e.__SV = 1) }(document, window.insights || []);
+            insights.init(currentApiKey, {
                 api_host: 'http://localhost:8010',
                 debug: true,
                 capture_pageview: false,
                 disable_session_recording: true,
                 autocapture: false
             });
-            posthog.identify(distinctId);
+            insights.identify(distinctId);
         }
 
         // Send Go SDK test events
         async function sendGoTestEvent(version, scenario, eventIndex) {
             try {
-                posthog.capture('test_go_time_based_detection', {
-                    $lib: 'posthog-go',
+                insights.capture('test_go_time_based_detection', {
+                    $lib: 'insights-go',
                     $lib_version: version,
                     test_scenario: scenario,
                     event_index: eventIndex,
@@ -3444,7 +3444,7 @@
             }
             currentTest = 'go_real_current';
             log('✅ Testing REAL Go Current Version...', 'info');
-            initPostHogForGo();
+            initInsightsForGo();
             const version = goVersionData.latest;
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(version, 'go_real_current_version', i);
@@ -3465,7 +3465,7 @@
             }
             currentTest = 'go_real_close_enough';
             log('🟡 Testing REAL Go Close Enough Version...', 'info');
-            initPostHogForGo();
+            initInsightsForGo();
             const version = goVersionData.closeEnough;
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(version, 'go_real_close_enough', i);
@@ -3486,7 +3486,7 @@
             }
             currentTest = 'go_real_outdated';
             log('🔴 Testing REAL Go Outdated Version...', 'info');
-            initPostHogForGo();
+            initInsightsForGo();
             const version = goVersionData.outdated;
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(version, 'go_real_outdated', i);
@@ -3515,7 +3515,7 @@
             log(`🎯 Go SDK Exception: Shows "Close enough" for 1-2 releases behind (no time check)`, 'warning');
             log(`🔍 Expected: "Close enough" badge due to Go SDK infrequent release pattern`, 'info');
 
-            initPostHogForGo();
+            initInsightsForGo();
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(edgeVersion, 'go_edge_case_simplified', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3542,7 +3542,7 @@
         async function testGoRealCurrentVersionInternal() {
             log('🤖 Go Current (internal)...', 'info');
             await ensureGoVersionsLoaded();
-            initPostHogForGo();
+            initInsightsForGo();
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(goVersionData.latest, 'go_current_internal', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3552,7 +3552,7 @@
         async function testGoRealCloseEnoughInternal() {
             log('🤖 Go Close Enough (internal)...', 'info');
             await ensureGoVersionsLoaded();
-            initPostHogForGo();
+            initInsightsForGo();
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(goVersionData.closeEnough, 'go_close_enough_internal', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3562,7 +3562,7 @@
         async function testGoRealOutdatedInternal() {
             log('🤖 Go Outdated (internal)...', 'info');
             await ensureGoVersionsLoaded();
-            initPostHogForGo();
+            initInsightsForGo();
             for (let i = 0; i < 16; i++) {
                 await sendGoTestEvent(goVersionData.outdated, 'go_outdated_internal', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3604,7 +3604,7 @@
         async function fetchPhpVersionData() {
             try {
                 log('🐘 Fetching PHP SDK version data from History.md...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-php/master/History.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-php/master/History.md', {
                     cache: 'no-cache'
                 });
                 const text = await response.text();
@@ -3650,8 +3650,8 @@
         }
 
         async function sendPhpTestEvent(version, scenario, eventIndex) {
-            posthog.capture('php_test_event', {
-                $lib: 'posthog-php',
+            insights.capture('php_test_event', {
+                $lib: 'insights-php',
                 $lib_version: version,
                 test_scenario: scenario,
                 event_index: eventIndex,
@@ -3674,7 +3674,7 @@
                 alert('PHP version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendPhpTestEvent(phpVersionData.latest, 'php_current', i);
@@ -3698,7 +3698,7 @@
                 alert('PHP version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendPhpTestEvent(phpVersionData.closeEnough, 'php_close_enough', i);
@@ -3722,7 +3722,7 @@
                 alert('PHP version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendPhpTestEvent(phpVersionData.twoReleasesBehind, 'php_two_behind', i);
@@ -3746,7 +3746,7 @@
                 alert('PHP version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendPhpTestEvent(phpVersionData.outdated, 'php_outdated', i);
@@ -3772,7 +3772,7 @@
             }
 
             // Test all PHP versions in sequence
-            initPostHog();
+            initInsights();
 
             // Current
             for (let i = 0; i < 16; i++) {
@@ -3809,7 +3809,7 @@
         async function fetchRubyVersionData() {
             try {
                 log('💎 Fetching Ruby SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-ruby/main/CHANGELOG.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-ruby/main/CHANGELOG.md', {
                     cache: 'no-cache'
                 });
 
@@ -3887,8 +3887,8 @@
         // Send Ruby SDK test events
         async function sendRubyTestEvent(version, scenario, eventIndex) {
             try {
-                posthog.capture('test_ruby_time_based_detection', {
-                    $lib: 'posthog-ruby',
+                insights.capture('test_ruby_time_based_detection', {
+                    $lib: 'insights-ruby',
                     $lib_version: version,
                     test_scenario: scenario,
                     event_index: eventIndex,
@@ -3909,7 +3909,7 @@
             currentTest = 'ruby_current';
             log('💎 Testing Ruby Current Version...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendRubyTestEvent(rubyVersionData.latest, 'ruby_current', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3926,7 +3926,7 @@
             currentTest = 'ruby_close_enough';
             log('💎 Testing Ruby Close Enough Version...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendRubyTestEvent(rubyVersionData.closeEnough, 'ruby_close_enough', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3943,7 +3943,7 @@
             currentTest = 'ruby_outdated';
             log('💎 Testing Ruby Outdated Version...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendRubyTestEvent(rubyVersionData.outdated, 'ruby_outdated', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -3960,7 +3960,7 @@
             currentTest = 'ruby_edge_case';
             log('💎 Testing Ruby Edge Case...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             // Use outdated version for edge case testing
             const edgeVersion = rubyVersionData.outdated;
             for (let i = 0; i < 16; i++) {
@@ -3990,7 +3990,7 @@
         async function testRubyRealCurrentVersionInternal() {
             log('💎 Ruby Current (internal)...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendRubyTestEvent(rubyVersionData.latest, 'ruby_current_internal', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4000,7 +4000,7 @@
         async function testRubyRealCloseEnoughInternal() {
             log('💎 Ruby Close Enough (internal)...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendRubyTestEvent(rubyVersionData.closeEnough, 'ruby_close_enough_internal', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4010,7 +4010,7 @@
         async function testRubyRealOutdatedInternal() {
             log('💎 Ruby Outdated (internal)...', 'info');
             await ensureRubyVersionsLoaded();
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendRubyTestEvent(rubyVersionData.outdated, 'ruby_outdated_internal', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4024,7 +4024,7 @@
         async function fetchElixirVersionData() {
             try {
                 log('⚗️ Fetching Elixir SDK version data from CHANGELOG...', 'info');
-                const response = await fetch('https://raw.githubusercontent.com/PostHog/posthog-elixir/master/CHANGELOG.md', {
+                const response = await fetch('https://raw.githubusercontent.com/Insights/insights-elixir/master/CHANGELOG.md', {
                     cache: 'no-cache'
                 });
                 const text = await response.text();
@@ -4070,8 +4070,8 @@
         }
 
         async function sendElixirTestEvent(version, scenario, eventIndex) {
-            posthog.capture('elixir_test_event', {
-                $lib: 'posthog-elixir',
+            insights.capture('elixir_test_event', {
+                $lib: 'insights-elixir',
                 $lib_version: version,
                 test_scenario: scenario,
                 event_index: eventIndex,
@@ -4094,7 +4094,7 @@
                 alert('Elixir version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendElixirTestEvent(elixirVersionData.latest, 'elixir_current', i);
@@ -4118,7 +4118,7 @@
                 alert('Elixir version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendElixirTestEvent(elixirVersionData.closeEnough, 'elixir_close_enough', i);
@@ -4142,7 +4142,7 @@
                 alert('Elixir version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendElixirTestEvent(elixirVersionData.twoReleasesBehind, 'elixir_two_behind', i);
@@ -4166,7 +4166,7 @@
                 alert('Elixir version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
 
             for (let i = 0; i < 16; i++) {
                 await sendElixirTestEvent(elixirVersionData.outdated, 'elixir_outdated', i);
@@ -4192,7 +4192,7 @@
             }
 
             // Test all Elixir versions in sequence
-            initPostHog();
+            initInsights();
 
             // Current
             for (let i = 0; i < 16; i++) {
@@ -4228,7 +4228,7 @@
         async function fetchDotnetVersionData() {
             try {
                 log('🔷 Fetching .NET SDK version data from GitHub Releases...', 'info');
-                const response = await fetch('https://api.github.com/repos/PostHog/posthog-dotnet/releases', {
+                const response = await fetch('https://api.github.com/repos/Insights/insights-dotnet/releases', {
                     cache: 'no-cache'
                 });
                 const releases = await response.json();
@@ -4268,8 +4268,8 @@
         }
 
         async function sendDotnetTestEvent(version, scenario, eventIndex) {
-            posthog.capture('dotnet_test_event', {
-                $lib: 'posthog-dotnet',
+            insights.capture('dotnet_test_event', {
+                $lib: 'insights-dotnet',
                 $lib_version: version,
                 test_scenario: scenario,
                 test_event_index: eventIndex,
@@ -4291,7 +4291,7 @@
                 alert('.NET version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendDotnetTestEvent(dotnetVersionData.latest, 'dotnet_current', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4313,7 +4313,7 @@
                 alert('.NET version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendDotnetTestEvent(dotnetVersionData.closeEnough, 'dotnet_close_enough', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4335,7 +4335,7 @@
                 alert('.NET version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendDotnetTestEvent(dotnetVersionData.twoReleasesBehind, 'dotnet_two_behind', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4357,7 +4357,7 @@
                 alert('.NET version data could not be loaded. Please try again.');
                 return;
             }
-            initPostHog();
+            initInsights();
             for (let i = 0; i < 16; i++) {
                 await sendDotnetTestEvent(dotnetVersionData.outdated, 'dotnet_outdated', i);
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -4380,7 +4380,7 @@
                 return;
             }
             // Test all .NET versions in sequence
-            initPostHog();
+            initInsights();
             // Current
             for (let i = 0; i < 16; i++) {
                 await sendDotnetTestEvent(dotnetVersionData.latest, 'dotnet_all_current', i);

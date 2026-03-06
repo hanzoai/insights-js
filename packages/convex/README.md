@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="@hanzo/insights-convex" src="https://raw.githubusercontent.com/PostHog/posthog/master/frontend/public/hedgehog/heart-hog.png" width="200">
+  <img alt="@hanzo/insights-convex" src="https://raw.githubusercontent.com/Insights/insights/master/frontend/public/hedgehog/heart-hog.png" width="200">
 </p>
 
 <h1 align="center">@hanzo/insights-convex</h1>
@@ -32,10 +32,10 @@ Register the component in your `convex/convex.config.ts`:
 ```ts
 // convex/convex.config.ts
 import { defineApp } from "convex/server";
-import posthog from "@hanzo/insights-convex/convex.config.js";
+import insights from "@hanzo/insights-convex/convex.config.js";
 
 const app = defineApp();
-app.use(posthog);
+app.use(insights);
 
 export default app;
 ```
@@ -43,36 +43,36 @@ export default app;
 Set your Hanzo Insights API key and host:
 
 ```sh
-npx convex env set POSTHOG_API_KEY phc_your_project_api_key
-npx convex env set POSTHOG_HOST https://us.i.posthog.com
+npx convex env set INSIGHTS_API_KEY phc_your_project_api_key
+npx convex env set INSIGHTS_HOST https://us.i.insights.hanzo.ai
 ```
 
-Create a `convex/posthog.ts` file to initialize the client:
+Create a `convex/insights.ts` file to initialize the client:
 
 ```ts
-// convex/posthog.ts
-import { PostHog } from "@hanzo/insights-convex";
+// convex/insights.ts
+import { Insights } from "@hanzo/insights-convex";
 import { components } from "./_generated/api";
 
-export const posthog = new PostHog(components.posthog);
+export const insights = new Insights(components.insights);
 ```
 
 You can also pass the API key and host explicitly:
 
 ```ts
-export const posthog = new PostHog(components.posthog, {
+export const insights = new Insights(components.insights, {
   apiKey: "phc_...",
-  host: "https://eu.i.posthog.com",
+  host: "https://eu.i.insights.hanzo.ai",
 });
 ```
 
 ## Capturing Events
 
-Import `posthog` from your setup file and call methods directly:
+Import `insights` from your setup file and call methods directly:
 
 ```ts
 // convex/myFunctions.ts
-import { posthog } from "./posthog";
+import { insights } from "./insights";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -81,7 +81,7 @@ export const createUser = mutation({
   handler: async (ctx, args) => {
     const userId = await ctx.db.insert("users", { email: args.email });
 
-    await posthog.capture(ctx, {
+    await insights.capture(ctx, {
       distinctId: userId,
       event: "user_created",
       properties: { email: args.email },

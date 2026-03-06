@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-require-imports, no-undef, no-console */
 /**
- * Simple test script for PostHog remote config endpoint.
+ * Simple test script for Insights remote config endpoint.
  */
 
-const { PostHog } = require('../../packages/node/lib/node')
+const { Insights } = require('../../packages/node/lib/node')
 
-// Initialize PostHog client
-const posthog = new PostHog('phc_...', {
+// Initialize Insights client
+const insights = new Insights('phc_...', {
     personalApiKey: 'phx_...', // or 'phx_...'
-    host: 'http://localhost:8000', // or 'https://us.posthog.com'
+    host: 'http://localhost:8000', // or 'https://us.insights.com'
     debug: true,
 })
 
@@ -21,13 +21,13 @@ async function testRemoteConfig() {
 
     try {
         // Get remote config payload
-        const payload = await posthog.getRemoteConfigPayload(flagKey)
+        const payload = await insights.getRemoteConfigPayload(flagKey)
         console.log(`✅ Success! Remote config payload for '${flagKey}':`, payload)
     } catch (error) {
         console.error(`❌ Error getting remote config:`, error.message)
     } finally {
         // Clean shutdown
-        await posthog.shutdown()
+        await insights.shutdown()
     }
 }
 

@@ -1,10 +1,10 @@
 import type {
-  PostHogCoreOptions,
+  InsightsCoreOptions,
   FeatureFlagValue,
   JsonType,
-  PostHogFetchOptions,
-  PostHogFetchResponse,
-  PostHogFlagsAndPayloadsResponse,
+  InsightsFetchOptions,
+  InsightsFetchResponse,
+  InsightsFlagsAndPayloadsResponse,
 } from '@hanzo/insights-core'
 import { ContextData, ContextOptions } from './extensions/context/types'
 
@@ -118,7 +118,7 @@ export type FeatureFlagBucketingIdentifier = 'distinct_id' | 'device_id' | '' | 
 
 export type BeforeSendFn = (event: EventMessage | null) => EventMessage | null
 
-export type PostHogOptions = Omit<PostHogCoreOptions, 'before_send'> & {
+export type InsightsOptions = Omit<InsightsCoreOptions, 'before_send'> & {
   persistence?: 'memory'
   personalApiKey?: string
   privacyMode?: boolean
@@ -127,7 +127,7 @@ export type PostHogOptions = Omit<PostHogCoreOptions, 'before_send'> & {
   featureFlagsPollingInterval?: number
   // Maximum size of cache that deduplicates $feature_flag_called calls per user.
   maxCacheSize?: number
-  fetch?: (url: string, options: PostHogFetchOptions) => Promise<PostHogFetchResponse>
+  fetch?: (url: string, options: InsightsFetchOptions) => Promise<InsightsFetchResponse>
   // Whether to enable feature flag polling for local evaluation by default. Defaults to true when personalApiKey is provided.
   // We recommend setting this to false if you are only using the personalApiKey for evaluating remote config payloads via `getRemoteConfigPayload` and not using local evaluation.
   enableLocalEvaluation?: boolean
@@ -150,7 +150,7 @@ export type PostHogOptions = Omit<PostHogCoreOptions, 'before_send'> & {
    *   // ... implementation
    * }
    *
-   * const client = new PostHog('api-key', {
+   * const client = new Insights('api-key', {
    *   personalApiKey: 'personal-key',
    *   flagDefinitionCacheProvider: new RedisCacheProvider(redis)
    * })
@@ -158,7 +158,7 @@ export type PostHogOptions = Omit<PostHogCoreOptions, 'before_send'> & {
    */
   flagDefinitionCacheProvider?: FlagDefinitionCacheProvider
   /**
-   * Allows modification or dropping of events before they're sent to PostHog.
+   * Allows modification or dropping of events before they're sent to Insights.
    * If an array is provided, the functions are run in order.
    * If a function returns null, the event will be dropped.
    */
@@ -217,7 +217,7 @@ export type PostHogOptions = Omit<PostHogCoreOptions, 'before_send'> & {
   strictLocalEvaluation?: boolean
 }
 
-export type PostHogFeatureFlag = {
+export type InsightsFeatureFlag = {
   id: number
   name: string
   key: string
@@ -272,10 +272,10 @@ export type FeatureFlagResult = {
   payload: JsonType | undefined
 }
 
-export interface IPostHog {
+export interface IInsights {
   /**
    * @description Capture allows you to capture anything a user does within your system,
-   * which you can later use in PostHog to find patterns in usage,
+   * which you can later use in Insights to find patterns in usage,
    * work out which features to improve or where people are giving up.
    * A capture call requires:
    * @param distinctId which uniquely identifies your user
@@ -297,7 +297,7 @@ export interface IPostHog {
   captureImmediate({ distinctId, event, properties, groups, sendFeatureFlags }: EventMessage): Promise<void>
 
   /**
-   * @description Identify lets you add metadata on your users so you can more easily identify who they are in PostHog,
+   * @description Identify lets you add metadata on your users so you can more easily identify who they are in Insights,
    * and even do things like segment users by these properties.
    * An identify call requires:
    * @param distinctId which uniquely identifies your user
@@ -306,7 +306,7 @@ export interface IPostHog {
   identify({ distinctId, properties }: IdentifyMessage): void
 
   /**
-   * @description Identify lets you add metadata on your users so you can more easily identify who they are in PostHog.
+   * @description Identify lets you add metadata on your users so you can more easily identify who they are in Insights.
    * Useful for edge environments where the usual queue-based sending is not preferable. Do not mix immediate and non-immediate calls.
    * @param distinctId which uniquely identifies your user
    * @param properties with a dict with any key: value pairs
@@ -319,7 +319,7 @@ export interface IPostHog {
    * or "What do users do on our website before signing up?"
    * In a purely back-end implementation, this means whenever an anonymous user does something, you'll want to send a session ID with the capture call.
    * Then, when that users signs up, you want to do an alias call with the session ID and the newly created user ID.
-   * The same concept applies for when a user logs in. If you're using PostHog in the front-end and back-end,
+   * The same concept applies for when a user logs in. If you're using Insights in the front-end and back-end,
    *  doing the identify call in the frontend will be enough.:
    * @param distinctId the current unique id
    * @param alias the unique ID of the user before
@@ -335,8 +335,8 @@ export interface IPostHog {
   aliasImmediate(data: { distinctId: string; alias: string }): Promise<void>
 
   /**
-   * @description PostHog feature flags (https://posthog.com/docs/features/feature-flags)
-   * allow you to safely deploy and roll back new features. Once you've created a feature flag in PostHog,
+   * @description Insights feature flags (https://insights.com/docs/features/feature-flags)
+   * allow you to safely deploy and roll back new features. Once you've created a feature flag in Insights,
    * you can use this method to check if the flag is on for a given user, allowing you to create logic to turn
    * features on and off for different user groups or individual users.
    * @param key the unique key of your feature flag
@@ -363,8 +363,8 @@ export interface IPostHog {
   ): Promise<boolean | undefined>
 
   /**
-   * @description PostHog feature flags (https://posthog.com/docs/features/feature-flags)
-   * allow you to safely deploy and roll back new features. Once you've created a feature flag in PostHog,
+   * @description Insights feature flags (https://insights.com/docs/features/feature-flags)
+   * allow you to safely deploy and roll back new features. Once you've created a feature flag in Insights,
    * you can use this method to check if the flag is on for a given user, allowing you to create logic to turn
    * features on and off for different user groups or individual users.
    * @param key the unique key of your feature flag
@@ -395,7 +395,7 @@ export interface IPostHog {
    *
    * IMPORTANT: The `matchValue` parameter should be the value you previously obtained from `getFeatureFlag()`.
    * If matchValue isn't passed (or is undefined), this method will automatically call `getFeatureFlag()`
-   * internally to fetch the flag value, which could result in a network call to the PostHog server if this flag can
+   * internally to fetch the flag value, which could result in a network call to the Insights server if this flag can
    * not be evaluated locally. This means that omitting `matchValue` will potentially:
    * - Bypass local evaluation
    * - Count as an additional flag evaluation against your quota
@@ -442,7 +442,7 @@ export interface IPostHog {
   /**
    * @description Get all feature flag values and payloads using distinctId from withContext().
    */
-  getAllFlagsAndPayloads(options?: AllFlagsOptions): Promise<PostHogFlagsAndPayloadsResponse>
+  getAllFlagsAndPayloads(options?: AllFlagsOptions): Promise<InsightsFlagsAndPayloadsResponse>
 
   /**
    * @description Get all feature flag values and payloads for a specific user.
@@ -451,7 +451,7 @@ export interface IPostHog {
    * @param options - Optional configuration for flag evaluation
    * @returns Promise that resolves to flags and payloads
    */
-  getAllFlagsAndPayloads(distinctId: string, options?: AllFlagsOptions): Promise<PostHogFlagsAndPayloadsResponse>
+  getAllFlagsAndPayloads(distinctId: string, options?: AllFlagsOptions): Promise<InsightsFlagsAndPayloadsResponse>
 
   /**
    * @description Get a feature flag result using distinctId from withContext().
@@ -485,7 +485,7 @@ export interface IPostHog {
 
   /**
    * @description Sets a groups properties, which allows asking questions like "Who are the most active companies"
-   * using my product in PostHog.
+   * using my product in Insights.
    *
    * @param groupType Type of group (ex: 'company'). Limited to 5 per project
    * @param groupKey Unique identifier for that type of group (ex: 'id:5')
@@ -506,16 +506,16 @@ export interface IPostHog {
    * @example
    * ```ts
    * // Clear all overrides
-   * posthog.overrideFeatureFlags(false)
+   * insights.overrideFeatureFlags(false)
    *
    * // Enable a list of flags (sets them to true)
-   * posthog.overrideFeatureFlags(['flag-a', 'flag-b'])
+   * insights.overrideFeatureFlags(['flag-a', 'flag-b'])
    *
    * // Set specific flag values/variants
-   * posthog.overrideFeatureFlags({ 'my-flag': 'variant-a', 'other-flag': true })
+   * insights.overrideFeatureFlags({ 'my-flag': 'variant-a', 'other-flag': true })
    *
    * // Set both flags and payloads
-   * posthog.overrideFeatureFlags({
+   * insights.overrideFeatureFlags({
    *   flags: { 'my-flag': 'variant-a' },
    *   payloads: { 'my-flag': { discount: 20 } }
    * })
@@ -536,7 +536,7 @@ export interface IPostHog {
 
   /**
    * @description Set context without a callback wrapper. Must be called in the same
-   * async scope that makes PostHog calls. Prefer `withContext()` when you can wrap
+   * async scope that makes Insights calls. Prefer `withContext()` when you can wrap
    * code in a callback.
    * @param data Context data to apply (distinctId, sessionId, properties)
    * @param options Context options (fresh)

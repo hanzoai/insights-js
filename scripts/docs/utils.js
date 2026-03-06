@@ -236,7 +236,7 @@ const formatParameterList = (params) =>
  * @returns {string} - Generated example code
  */
 const generateExampleCode = (methodName, paramList) =>
-  `// Generated example for ${methodName}\nposthog.${methodName}(${paramList});`;
+  `// Generated example for ${methodName}\ninsights.${methodName}(${paramList});`;
 
 /**
  * to check if array has items

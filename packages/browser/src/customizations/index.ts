@@ -1,8 +1,8 @@
 export * from './setAllPersonProfilePropertiesAsPersonPropertiesForFlags'
 export * from './before-send'
 export {
-    posthogReduxLogger,
-    posthogKeaLogger,
-    sessionRecordingLoggerForPostHogInstance,
+    insightsReduxLogger,
+    insightsKeaLogger,
+    sessionRecordingLoggerForInsightsInstance,
     browserConsoleLogger,
-} from './posthogReduxLogger'
+} from './insightsReduxLogger'

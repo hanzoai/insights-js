@@ -2,7 +2,7 @@
 import { test } from '@jest/globals'
 import { convexTest } from 'convex-test'
 import schema from './schema.js'
-import component from '@posthog/convex/test'
+import component from '@insights/convex/test'
 
 const modules = import.meta.glob('./**/*.*s')
 // When users want to write tests that use your component, they need to

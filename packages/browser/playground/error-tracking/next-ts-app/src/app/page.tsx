@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import posthog from '@hanzo/insights'
+import insights from '@hanzo/insights'
 
 export default function Home() {
     return (
@@ -10,7 +10,7 @@ export default function Home() {
                 <Link href="./error?messsage=Rendering%20Error">
                     <button>Generate rendering error</button>
                 </Link>
-                <button onClick={() => posthog.captureException(new Error('Programming error'))}>Send error</button>
+                <button onClick={() => insights.captureException(new Error('Programming error'))}>Send error</button>
             </main>
         </div>
     )

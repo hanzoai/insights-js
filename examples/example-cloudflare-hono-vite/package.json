@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "hono": "^4.11.7",
-    "posthog-node": "*"
+    "@hanzo/insights-node": "*"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.2.3",
-    "@posthog/rollup-plugin": "*",
+    "@hanzo/rollup-plugin": "*",
     "vite": "^6.3.5",
     "wrangler": "^4.17.0"
   }

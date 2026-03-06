@@ -8,7 +8,7 @@ export let OptionalExpoFileSystemLegacy: typeof FileSystem | undefined = undefin
 
 try {
   // do not try to load expo-file-system on web and macos, otherwise it will throw an error
-  // See https://github.com/PostHog/posthog-js-lite/issues/140
+  // See https://github.com/Insights/@hanzo/insights-lite/issues/140
   // Once expo-file-system is supported on web/macos, we can remove this try/catch block
   // For now, use the react-native-async-storage/async-storage package instead
   OptionalExpoFileSystemLegacy = Platform.select({

@@ -29,7 +29,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@posthog/cli": "catalog:",
+    "@hanzo/cli": "catalog:",
     "@nuxt/kit": ">=3.7.0",
     "@hanzo/insights-node": "workspace:*",
     "@hanzo/insights-core": "workspace:*",

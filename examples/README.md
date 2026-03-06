@@ -8,7 +8,7 @@ pnpm package:watch
 ```
 This will watch for file changes across all workspace members and export packages as tarballs inside the target folder.
 
-Note: It takes dependencies into account, if you change @posthog/core, it will reexport all packages that depend on it.
+Note: It takes dependencies into account, if you change @hanzo/core, it will reexport all packages that depend on it.
 
 ### Install dependencies
 

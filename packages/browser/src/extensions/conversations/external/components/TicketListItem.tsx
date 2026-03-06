@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h, FunctionComponent } from 'preact'
-import { Ticket, TicketStatus } from '../../../../posthog-conversations-types'
+import { Ticket, TicketStatus } from '../../../../insights-conversations-types'
 import { getStyles } from './styles'
 import { formatRelativeTime, truncateText, stripMarkdown } from './utils'
 
@@ -12,7 +12,7 @@ interface TicketListItemProps {
 
 /**
  * Get a human-readable status label
- * Matches the display logic in PostHog main app
+ * Matches the display logic in Insights main app
  */
 function getStatusLabel(status: TicketStatus): string {
     if (status === 'on_hold') {

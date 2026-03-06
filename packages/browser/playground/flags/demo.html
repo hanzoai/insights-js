@@ -2,13 +2,13 @@
 <head>
     <script src="../../dist/array.js"></script>
     <script>
-        posthog.init('sTMFPsFhdP1Ssg', {
+        insights.init('sTMFPsFhdP1Ssg', {
             api_host: 'http://127.0.0.1:8000',
             debug: true,
             persistence: 'memory',
             advanced_disable_feature_flags_on_first_load: true,
-            loaded: function(posthog) {
-                //posthog.identify('test')
+            loaded: function(insights) {
+                //insights.identify('test')
             }
         })
     </script>
@@ -32,7 +32,7 @@
     <div class='asdlfkjj asdlfkj asdflkj asdflkj asdf'>
     <div class='asdlfkjj asdlfkj asdflkj asdflkj asdf'>
     <div class='asdlfkjj asdlfkj asdflkj asdflkj asdf'>
-        <a href='https://posthog.com'>Here's a link to the outside world</a>
+        <a href='https://insights.hanzo.ai'>Here's a link to the outside world</a>
     </div>
     <div id="shadow" ></div>
 
@@ -44,10 +44,10 @@
         document.body.appendChild(header)
 
 
-        console.log(posthog.isFeatureEnabled('beta-feature'))
-        posthog.onFeatureFlags(function(featureFlags) {
+        console.log(insights.isFeatureEnabled('beta-feature'))
+        insights.onFeatureFlags(function(featureFlags) {
             console.log(featureFlags)
-            if(posthog.isFeatureEnabled('beta-feature')) {
+            if(insights.isFeatureEnabled('beta-feature')) {
                 console.log('beta-feature enabled!')
                 document.getElementById('feature').style.display = 'block'
             }

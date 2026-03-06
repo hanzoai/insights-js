@@ -3,13 +3,13 @@
 import {
     filterActiveFeatureFlags,
     parseFlagsResponse,
-    PostHogFeatureFlags,
+    InsightsFeatureFlags,
     FeatureFlagError,
-} from '../posthog-featureflags'
-import { PostHogPersistence } from '../posthog-persistence'
+} from '../insights-featureflags'
+import { InsightsPersistence } from '../insights-persistence'
 import { RequestRouter } from '../utils/request-router'
-import { PostHogConfig } from '../types'
-import { createMockPostHog, createPosthogInstance } from './helpers/posthog-instance'
+import { InsightsConfig } from '../types'
+import { createMockInsights, createInsightsInstance } from './helpers/insights-instance'
 import { SimpleEventEmitter } from '../utils/simple-event-emitter'
 
 jest.useFakeTimers()
@@ -22,8 +22,8 @@ describe('featureflags', () => {
     const config = {
         token: 'random fake token',
         persistence: 'memory',
-        api_host: 'https://app.posthog.com',
-    } as PostHogConfig
+        api_host: 'https://app.insights.com',
+    } as InsightsConfig
 
     let mockWarn
 
@@ -33,7 +33,7 @@ describe('featureflags', () => {
             config: { ...config },
             get_distinct_id: () => 'blah id',
             getGroups: () => {},
-            persistence: new PostHogPersistence(config),
+            persistence: new InsightsPersistence(config),
             requestRouter: new RequestRouter({ config } as any),
             register: (props) => instance.persistence.register(props),
             unregister: (key) => instance.persistence.unregister(key),
@@ -54,7 +54,7 @@ describe('featureflags', () => {
             on: (event: string, cb: (...args: any[]) => void) => internalEventEmitter.on(event, cb),
         }
 
-        featureFlags = new PostHogFeatureFlags(instance)
+        featureFlags = new InsightsFeatureFlags(instance)
 
         jest.spyOn(instance, 'capture').mockReturnValue(undefined)
         mockWarn = jest.spyOn(window.console, 'warn').mockImplementation()
@@ -136,7 +136,7 @@ describe('featureflags', () => {
     })
 
     it('should warn if /flags endpoint was not hit and no flags exist', () => {
-        ;(window as any).POSTHOG_DEBUG = true
+        ;(window as any).INSIGHTS_DEBUG = true
         featureFlags._hasLoadedFlags = false
         instance.persistence.unregister('$enabled_feature_flags')
         instance.persistence.unregister('$active_feature_flags')
@@ -144,7 +144,7 @@ describe('featureflags', () => {
         expect(featureFlags.getFlags()).toEqual([])
         expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(undefined)
         expect(window.console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] [FeatureFlags]',
+            '[Insights.js] [FeatureFlags]',
             'isFeatureEnabled for key "beta-feature" failed. Feature flags didn\'t load in time.'
         )
 
@@ -152,7 +152,7 @@ describe('featureflags', () => {
 
         expect(featureFlags.getFeatureFlag('beta-feature')).toEqual(undefined)
         expect(window.console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] [FeatureFlags]',
+            '[Insights.js] [FeatureFlags]',
             'getFeatureFlag for key "beta-feature" failed. Feature flags didn\'t load in time.'
         )
     })
@@ -505,7 +505,7 @@ describe('featureflags', () => {
                     'alpha-feature-2': true,
                 })
                 expect(window.console.warn).toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flags!',
                     expect.any(Object)
                 )
@@ -520,7 +520,7 @@ describe('featureflags', () => {
                 )
 
                 expect(window.console.warn).not.toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flags!'
                 )
                 expect(featureFlags.getFlagVariants()).toEqual({
@@ -532,7 +532,7 @@ describe('featureflags', () => {
             it('shows deprecation warning', () => {
                 featureFlags.override({ 'beta-feature': false })
                 expect(window.console.warn).toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     'override is deprecated. Please use overrideFeatureFlags instead.'
                 )
             })
@@ -552,7 +552,7 @@ describe('featureflags', () => {
                     'alpha-feature-2': true,
                 })
                 expect(window.console.warn).toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flags!',
                     expect.any(Object)
                 )
@@ -567,7 +567,7 @@ describe('featureflags', () => {
                 })
 
                 expect(window.console.warn).not.toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flags!'
                 )
                 expect(featureFlags.getFlagVariants()).toEqual({
@@ -621,7 +621,7 @@ describe('featureflags', () => {
                     metadata: undefined,
                 })
                 expect(window.console.warn).toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flags!',
                     expect.any(Object)
                 )
@@ -636,7 +636,7 @@ describe('featureflags', () => {
                 })
 
                 expect(window.console.warn).not.toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flags!'
                 )
                 expect(featureFlags.getFeatureFlagDetails('alpha-feature-2')).toEqual({
@@ -665,7 +665,7 @@ describe('featureflags', () => {
                 })
 
                 expect(window.console.warn).not.toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flag payloads!'
                 )
 
@@ -682,7 +682,7 @@ describe('featureflags', () => {
                     'alpha-feature-2': 123,
                 })
                 expect(window.console.warn).toHaveBeenCalledWith(
-                    '[PostHog.js] [FeatureFlags]',
+                    '[Insights.js] [FeatureFlags]',
                     ' Overriding feature flag payloads!',
                     expect.any(Object)
                 )
@@ -1187,7 +1187,7 @@ describe('featureflags', () => {
             })
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://us.i.posthog.com/api/early_access_features/?token=random fake token',
+                url: 'https://us.i.insights.com/api/early_access_features/?token=random fake token',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -1217,7 +1217,7 @@ describe('featureflags', () => {
             })
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://us.i.posthog.com/api/early_access_features/?token=random fake token',
+                url: 'https://us.i.insights.com/api/early_access_features/?token=random fake token',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -1251,7 +1251,7 @@ describe('featureflags', () => {
             )
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://us.i.posthog.com/api/early_access_features/?token=random fake token&stage=concept&stage=beta',
+                url: 'https://us.i.insights.com/api/early_access_features/?token=random fake token&stage=concept&stage=beta',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -2471,8 +2471,8 @@ describe('parseFlagsResponse', () => {
             $feature_flag_details: {},
         })
         expect(window.console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] [FeatureFlags]',
-            'Using an older version of the feature flags endpoint. Please upgrade your PostHog server to the latest version'
+            '[Insights.js] [FeatureFlags]',
+            'Using an older version of the feature flags endpoint. Please upgrade your Insights server to the latest version'
         )
     })
 
@@ -2506,8 +2506,8 @@ describe('parseFlagsResponse', () => {
             $feature_flag_details: {},
         })
         expect(window.console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] [FeatureFlags]',
-            'Using an older version of the feature flags endpoint. Please upgrade your PostHog server to the latest version'
+            '[Insights.js] [FeatureFlags]',
+            'Using an older version of the feature flags endpoint. Please upgrade your Insights server to the latest version'
         )
     })
 
@@ -2676,7 +2676,7 @@ describe('parseFlagsResponse', () => {
             $enabled_feature_flags: { 'beta-feature': true, 'alpha-feature-2': true },
         })
         expect(window.console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] [FeatureFlags]',
+            '[Insights.js] [FeatureFlags]',
             'v1 of the feature flags endpoint is deprecated. Please use the latest version.'
         )
     })
@@ -2706,8 +2706,8 @@ describe('parseFlagsResponse', () => {
             $feature_flag_request_id: 'test-request-id-123',
         })
         expect(window.console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] [FeatureFlags]',
-            'Using an older version of the feature flags endpoint. Please upgrade your PostHog server to the latest version'
+            '[Insights.js] [FeatureFlags]',
+            'Using an older version of the feature flags endpoint. Please upgrade your Insights server to the latest version'
         )
     })
 
@@ -2787,15 +2787,15 @@ describe('filterActiveFeatureFlags', () => {
 })
 
 describe('getRemoteConfigPayload', () => {
-    let instance: PostHog
-    let featureFlags: PostHogFeatureFlags
+    let instance: Insights
+    let featureFlags: InsightsFeatureFlags
 
     beforeEach(() => {
-        instance = createMockPostHog({
+        instance = createMockInsights({
             config: {
                 token: 'test-token',
                 api_host: 'https://test.com',
-            } as PostHogConfig,
+            } as InsightsConfig,
             get_distinct_id: () => 'test-distinct-id',
             _send_request: jest.fn(),
             requestRouter: {
@@ -2803,7 +2803,7 @@ describe('getRemoteConfigPayload', () => {
             },
         })
 
-        featureFlags = new PostHogFeatureFlags(instance)
+        featureFlags = new InsightsFeatureFlags(instance)
     })
 
     it('should include evaluation_contexts when configured', () => {
@@ -2896,20 +2896,20 @@ describe('getRemoteConfigPayload', () => {
     describe('flags_api_host configuration', () => {
         it('should use flags_api_host when configured', () => {
             const apiConfig = {
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 flags_api_host: 'https://example.com/feature-flags',
             }
-            const customInstance = createMockPostHog({
+            const customInstance = createMockInsights({
                 config: {
                     token: 'test-token',
                     ...apiConfig,
-                } as PostHogConfig,
+                } as InsightsConfig,
                 get_distinct_id: () => 'test-distinct-id',
                 _send_request: jest.fn(),
                 requestRouter: new RequestRouter({ config: apiConfig } as any),
             })
 
-            const customFeatureFlags = new PostHogFeatureFlags(customInstance)
+            const customFeatureFlags = new InsightsFeatureFlags(customInstance)
             const callback = jest.fn()
             customFeatureFlags.getRemoteConfigPayload('test-flag', callback)
 
@@ -2922,28 +2922,28 @@ describe('getRemoteConfigPayload', () => {
         })
 
         it('should fall back to api_host when flags_api_host is not configured', () => {
-            const customInstance = createMockPostHog({
+            const customInstance = createMockInsights({
                 config: {
                     token: 'test-token',
-                    api_host: 'https://app.posthog.com',
-                } as PostHogConfig,
+                    api_host: 'https://app.insights.com',
+                } as InsightsConfig,
                 get_distinct_id: () => 'test-distinct-id',
                 _send_request: jest.fn(),
                 requestRouter: new RequestRouter({
                     config: {
-                        api_host: 'https://app.posthog.com',
+                        api_host: 'https://app.insights.com',
                     },
                 } as any),
             })
 
-            const customFeatureFlags = new PostHogFeatureFlags(customInstance)
+            const customFeatureFlags = new InsightsFeatureFlags(customInstance)
             const callback = jest.fn()
             customFeatureFlags.getRemoteConfigPayload('test-flag', callback)
 
             expect(customInstance._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     method: 'POST',
-                    url: 'https://us.i.posthog.com/flags/?v=2',
+                    url: 'https://us.i.insights.com/flags/?v=2',
                 })
             )
         })
@@ -2956,35 +2956,35 @@ describe('updateFlags', () => {
     })
 
     it('should update feature flags without making a network request', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
-        posthog.updateFlags({
+        insights.updateFlags({
             'test-flag': true,
             'variant-flag': 'control',
         })
 
-        expect(posthog.getFeatureFlag('test-flag')).toBe(true)
-        expect(posthog.getFeatureFlag('variant-flag')).toBe('control')
-        expect(posthog.isFeatureEnabled('test-flag')).toBe(true)
+        expect(insights.getFeatureFlag('test-flag')).toBe(true)
+        expect(insights.getFeatureFlag('variant-flag')).toBe('control')
+        expect(insights.isFeatureEnabled('test-flag')).toBe(true)
     })
 
     it('should update feature flags with payloads', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
-        posthog.updateFlags({ 'test-flag': true }, { 'test-flag': { some: 'payload' } })
+        insights.updateFlags({ 'test-flag': true }, { 'test-flag': { some: 'payload' } })
 
-        expect(posthog.getFeatureFlagPayload('test-flag')).toEqual({ some: 'payload' })
+        expect(insights.getFeatureFlagPayload('test-flag')).toEqual({ some: 'payload' })
     })
 
     it('should return flag result with value and payload via getFeatureFlagResult', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
-        posthog.updateFlags(
+        insights.updateFlags(
             { 'boolean-flag': true, 'variant-flag': 'control', 'disabled-flag': false },
             { 'boolean-flag': { discount: 10 }, 'variant-flag': { version: 'a' } }
         )
 
-        const booleanResult = posthog.getFeatureFlagResult('boolean-flag', { send_event: false })
+        const booleanResult = insights.getFeatureFlagResult('boolean-flag', { send_event: false })
         expect(booleanResult).toEqual({
             key: 'boolean-flag',
             enabled: true,
@@ -2992,7 +2992,7 @@ describe('updateFlags', () => {
             payload: { discount: 10 },
         })
 
-        const variantResult = posthog.getFeatureFlagResult('variant-flag', { send_event: false })
+        const variantResult = insights.getFeatureFlagResult('variant-flag', { send_event: false })
         expect(variantResult).toEqual({
             key: 'variant-flag',
             enabled: true,
@@ -3000,7 +3000,7 @@ describe('updateFlags', () => {
             payload: { version: 'a' },
         })
 
-        const disabledResult = posthog.getFeatureFlagResult('disabled-flag', { send_event: false })
+        const disabledResult = insights.getFeatureFlagResult('disabled-flag', { send_event: false })
         expect(disabledResult).toEqual({
             key: 'disabled-flag',
             enabled: false,
@@ -3008,7 +3008,7 @@ describe('updateFlags', () => {
             payload: undefined,
         })
 
-        const missingResult = posthog.getFeatureFlagResult('non-existent', { send_event: false })
+        const missingResult = insights.getFeatureFlagResult('non-existent', { send_event: false })
         expect(missingResult).toBeUndefined()
     })
 
@@ -3016,131 +3016,131 @@ describe('updateFlags', () => {
     // This is consistent with existing SDK behavior for all feature flag payloads
 
     it('should fire onFeatureFlags callbacks when flags are updated', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
         const callback = jest.fn()
-        posthog.onFeatureFlags(callback)
+        insights.onFeatureFlags(callback)
 
-        posthog.updateFlags({ 'new-flag': true })
+        insights.updateFlags({ 'new-flag': true })
 
         expect(callback).toHaveBeenCalledWith(['new-flag'], { 'new-flag': true }, { errorsLoading: undefined })
     })
 
     it('should replace existing flags by default', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
         // Set initial flags
-        posthog.updateFlags({ 'flag-a': true, 'flag-b': true })
+        insights.updateFlags({ 'flag-a': true, 'flag-b': true })
 
-        expect(posthog.getFeatureFlag('flag-a')).toBe(true)
-        expect(posthog.getFeatureFlag('flag-b')).toBe(true)
+        expect(insights.getFeatureFlag('flag-a')).toBe(true)
+        expect(insights.getFeatureFlag('flag-b')).toBe(true)
 
         // Update without merge - should replace
-        posthog.updateFlags({ 'flag-c': true })
+        insights.updateFlags({ 'flag-c': true })
 
-        expect(posthog.getFeatureFlag('flag-c')).toBe(true)
-        expect(posthog.getFeatureFlag('flag-a')).toBe(undefined)
-        expect(posthog.getFeatureFlag('flag-b')).toBe(undefined)
+        expect(insights.getFeatureFlag('flag-c')).toBe(true)
+        expect(insights.getFeatureFlag('flag-a')).toBe(undefined)
+        expect(insights.getFeatureFlag('flag-b')).toBe(undefined)
     })
 
     it('should merge flags when merge option is true', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
         // Set initial flags
-        posthog.updateFlags({ 'flag-a': true, 'flag-b': true })
+        insights.updateFlags({ 'flag-a': true, 'flag-b': true })
 
-        expect(posthog.getFeatureFlag('flag-a')).toBe(true)
-        expect(posthog.getFeatureFlag('flag-b')).toBe(true)
+        expect(insights.getFeatureFlag('flag-a')).toBe(true)
+        expect(insights.getFeatureFlag('flag-b')).toBe(true)
 
         // Update with merge - should keep existing flags
-        posthog.updateFlags({ 'flag-c': true }, undefined, { merge: true })
+        insights.updateFlags({ 'flag-c': true }, undefined, { merge: true })
 
-        expect(posthog.getFeatureFlag('flag-a')).toBe(true)
-        expect(posthog.getFeatureFlag('flag-b')).toBe(true)
-        expect(posthog.getFeatureFlag('flag-c')).toBe(true)
+        expect(insights.getFeatureFlag('flag-a')).toBe(true)
+        expect(insights.getFeatureFlag('flag-b')).toBe(true)
+        expect(insights.getFeatureFlag('flag-c')).toBe(true)
     })
 
     it('should merge payloads when merge option is true', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
         // Set initial flags with payloads
-        posthog.updateFlags({ 'flag-a': true, 'flag-b': true }, { 'flag-a': { data: 'a' }, 'flag-b': { data: 'b' } })
+        insights.updateFlags({ 'flag-a': true, 'flag-b': true }, { 'flag-a': { data: 'a' }, 'flag-b': { data: 'b' } })
 
-        expect(posthog.getFeatureFlagPayload('flag-a')).toEqual({ data: 'a' })
-        expect(posthog.getFeatureFlagPayload('flag-b')).toEqual({ data: 'b' })
+        expect(insights.getFeatureFlagPayload('flag-a')).toEqual({ data: 'a' })
+        expect(insights.getFeatureFlagPayload('flag-b')).toEqual({ data: 'b' })
 
         // Update with merge - should keep existing payloads
-        posthog.updateFlags({ 'flag-c': true }, { 'flag-c': { data: 'c' } }, { merge: true })
+        insights.updateFlags({ 'flag-c': true }, { 'flag-c': { data: 'c' } }, { merge: true })
 
-        expect(posthog.getFeatureFlagPayload('flag-a')).toEqual({ data: 'a' })
-        expect(posthog.getFeatureFlagPayload('flag-b')).toEqual({ data: 'b' })
-        expect(posthog.getFeatureFlagPayload('flag-c')).toEqual({ data: 'c' })
+        expect(insights.getFeatureFlagPayload('flag-a')).toEqual({ data: 'a' })
+        expect(insights.getFeatureFlagPayload('flag-b')).toEqual({ data: 'b' })
+        expect(insights.getFeatureFlagPayload('flag-c')).toEqual({ data: 'c' })
     })
 
     it('should override existing flag values when merging', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
         // Set initial flags
-        posthog.updateFlags({ 'flag-a': true, 'flag-b': 'variant-1' })
+        insights.updateFlags({ 'flag-a': true, 'flag-b': 'variant-1' })
 
         // Update flag-a with merge - should override just flag-a
-        posthog.updateFlags({ 'flag-a': false }, undefined, { merge: true })
+        insights.updateFlags({ 'flag-a': false }, undefined, { merge: true })
 
-        expect(posthog.getFeatureFlag('flag-a')).toBe(false)
-        expect(posthog.getFeatureFlag('flag-b')).toBe('variant-1')
+        expect(insights.getFeatureFlag('flag-a')).toBe(false)
+        expect(insights.getFeatureFlag('flag-b')).toBe('variant-1')
     })
 
     it('should mark flags as loaded after update', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
-        posthog.updateFlags({ 'test-flag': true })
+        insights.updateFlags({ 'test-flag': true })
 
-        expect(posthog.featureFlags._hasLoadedFlags).toBe(true)
+        expect(insights.featureFlags._hasLoadedFlags).toBe(true)
     })
 
     it('should work with advanced_disable_flags enabled', async () => {
-        const posthog = await createPosthogInstance(undefined, {
+        const insights = await createInsightsInstance(undefined, {
             advanced_disable_flags: true,
         })
 
-        posthog.updateFlags({ 'test-flag': true })
+        insights.updateFlags({ 'test-flag': true })
 
-        expect(posthog.isFeatureEnabled('test-flag')).toBe(true)
+        expect(insights.isFeatureEnabled('test-flag')).toBe(true)
     })
 
     it('should not make any network requests', async () => {
-        const posthog = await createPosthogInstance()
-        const sendRequestSpy = jest.spyOn(posthog, '_send_request')
+        const insights = await createInsightsInstance()
+        const sendRequestSpy = jest.spyOn(insights, '_send_request')
 
-        posthog.updateFlags({ 'test-flag': true })
+        insights.updateFlags({ 'test-flag': true })
 
         expect(sendRequestSpy).not.toHaveBeenCalled()
     })
 
     it('should handle empty flags object', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
         // Set initial flags
-        posthog.updateFlags({ 'flag-a': true, 'flag-b': 'variant-1' })
-        expect(posthog.getFeatureFlag('flag-a')).toBe(true)
+        insights.updateFlags({ 'flag-a': true, 'flag-b': 'variant-1' })
+        expect(insights.getFeatureFlag('flag-a')).toBe(true)
 
         // Update with empty object - should clear all flags
-        posthog.updateFlags({})
+        insights.updateFlags({})
 
-        expect(posthog.getFeatureFlag('flag-a')).toBe(undefined)
-        expect(posthog.getFeatureFlag('flag-b')).toBe(undefined)
-        expect(posthog.featureFlags.getFlags()).toEqual([])
+        expect(insights.getFeatureFlag('flag-a')).toBe(undefined)
+        expect(insights.getFeatureFlag('flag-b')).toBe(undefined)
+        expect(insights.featureFlags.getFlags()).toEqual([])
     })
 
     it('should persist flags to storage', async () => {
-        const posthog = await createPosthogInstance()
+        const insights = await createInsightsInstance()
 
-        posthog.updateFlags(
+        insights.updateFlags(
             { 'persisted-flag': true, 'variant-flag': 'control' },
             { 'persisted-flag': { data: 'test' } }
         )
 
         // Verify persistence was updated with correct data
-        expect(posthog.persistence?.props.$feature_flag_details).toEqual({
+        expect(insights.persistence?.props.$feature_flag_details).toEqual({
             'persisted-flag': {
                 key: 'persisted-flag',
                 enabled: true,
@@ -3161,24 +3161,24 @@ describe('updateFlags', () => {
                 metadata: undefined,
             },
         })
-        expect(posthog.persistence?.props.$enabled_feature_flags).toEqual({
+        expect(insights.persistence?.props.$enabled_feature_flags).toEqual({
             'persisted-flag': true,
             'variant-flag': 'control',
         })
-        expect(posthog.persistence?.props.$active_feature_flags).toEqual(['persisted-flag', 'variant-flag'])
+        expect(insights.persistence?.props.$active_feature_flags).toEqual(['persisted-flag', 'variant-flag'])
     })
 })
 
 describe('$feature_flag_error tracking', () => {
     let instance: any
-    let featureFlags: PostHogFeatureFlags
+    let featureFlags: InsightsFeatureFlags
     let mockWarn: jest.SpyInstance
 
     const config = {
         token: 'random fake token',
         persistence: 'memory',
-        api_host: 'https://app.posthog.com',
-    } as PostHogConfig
+        api_host: 'https://app.insights.com',
+    } as InsightsConfig
 
     beforeEach(() => {
         const internalEventEmitter = new SimpleEventEmitter()
@@ -3186,7 +3186,7 @@ describe('$feature_flag_error tracking', () => {
             config: { ...config },
             get_distinct_id: () => 'blah id',
             getGroups: () => {},
-            persistence: new PostHogPersistence(config),
+            persistence: new InsightsPersistence(config),
             requestRouter: new RequestRouter({ config } as any),
             register: (props: any) => instance.persistence.register(props),
             unregister: (key: string) => instance.persistence.unregister(key),
@@ -3200,7 +3200,7 @@ describe('$feature_flag_error tracking', () => {
             on: (event: string, cb: (...args: any[]) => void) => internalEventEmitter.on(event, cb),
         }
 
-        featureFlags = new PostHogFeatureFlags(instance)
+        featureFlags = new InsightsFeatureFlags(instance)
         mockWarn = jest.spyOn(window.console, 'warn').mockImplementation()
         instance.persistence.unregister('$flag_call_reported')
         instance.persistence.unregister('$feature_flag_errors')
@@ -3504,7 +3504,7 @@ describe('$feature_flag_error tracking', () => {
         jest.advanceTimersByTime(10)
 
         // Simulate reload - new FeatureFlags instance with same persistence
-        const newFeatureFlags = new PostHogFeatureFlags(instance)
+        const newFeatureFlags = new InsightsFeatureFlags(instance)
 
         // Getting flag should include persisted error
         newFeatureFlags.getFeatureFlag('test-flag')
@@ -3544,7 +3544,7 @@ describe('$feature_flag_error tracking', () => {
 
             expect(featureFlags.getFeatureFlag('beta-feature')).toBeUndefined()
             expect(mockWarn).toHaveBeenCalledWith(
-                '[PostHog.js] [FeatureFlags]',
+                '[Insights.js] [FeatureFlags]',
                 expect.stringContaining('Feature flag cache is stale')
             )
         })
@@ -3607,7 +3607,7 @@ describe('$feature_flag_error tracking', () => {
 
             expect(featureFlags.getFeatureFlag('beta-feature')).toBeUndefined()
             expect(mockWarn).toHaveBeenCalledWith(
-                '[PostHog.js] [FeatureFlags]',
+                '[Insights.js] [FeatureFlags]',
                 expect.stringContaining('Feature flag cache is stale')
             )
         })

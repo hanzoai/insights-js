@@ -6,39 +6,39 @@ const PORT = 8080
 
 const removeTrailingSlash = (str) => str.replace(/\/$/, '')
 
-if (!process.env.POSTHOG_PROJECT_API_KEY || !process.env.POSTHOG_API_HOST) {
-    throw new Error('POSTHOG_PROJECT_API_KEY and POSTHOG_API_HOST must be set')
+if (!process.env.INSIGHTS_PROJECT_API_KEY || !process.env.INSIGHTS_API_HOST) {
+    throw new Error('INSIGHTS_PROJECT_API_KEY and INSIGHTS_API_HOST must be set')
 }
 
 // UPDATE YOUR TOKEN!!!
-const POSTHOG_PROJECT_API_KEY = process.env.POSTHOG_PROJECT_API_KEY
-const POSTHOG_API_HOST = removeTrailingSlash(process.env.POSTHOG_API_HOST)
-const POSTHOG_UI_HOST = removeTrailingSlash(process.env.POSTHOG_UI_HOST || POSTHOG_API_HOST)
-const POSTHOG_USE_SNIPPET = process.env.POSTHOG_USE_SNIPPET === 'true' || process.env.POSTHOG_USE_SNIPPET === '1'
+const INSIGHTS_PROJECT_API_KEY = process.env.INSIGHTS_PROJECT_API_KEY
+const INSIGHTS_API_HOST = removeTrailingSlash(process.env.INSIGHTS_API_HOST)
+const INSIGHTS_UI_HOST = removeTrailingSlash(process.env.INSIGHTS_UI_HOST || INSIGHTS_API_HOST)
+const INSIGHTS_USE_SNIPPET = process.env.INSIGHTS_USE_SNIPPET === 'true' || process.env.INSIGHTS_USE_SNIPPET === '1'
 
-const POSTHOG_SCRIPT = POSTHOG_USE_SNIPPET
+const INSIGHTS_SCRIPT = INSIGHTS_USE_SNIPPET
     ? `<script>
-    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init bs ws ge fs capture De calculateEventProperties $s register register_once register_for_session unregister unregister_for_session Is getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty xs Ss createPersonProfile Es gs opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing ys debug ks getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-    posthog.init("${POSTHOG_PROJECT_API_KEY}", {
-        api_host: "${POSTHOG_API_HOST}",
-        ui_host: "${POSTHOG_UI_HOST}",
+    !function(t,e){var o,n,p,r;e.__SV||(window.hi=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.insights.com","-assets.i.insights.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="insights",u.people=u.people||[],u.toString=function(t){var e="insights";return"insights"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init bs ws ge fs capture De calculateEventProperties $s register register_once register_for_session unregister unregister_for_session Is getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty xs Ss createPersonProfile Es gs opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing ys debug ks getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.hi||[]);
+    insights.init("${INSIGHTS_PROJECT_API_KEY}", {
+        api_host: "${INSIGHTS_API_HOST}",
+        ui_host: "${INSIGHTS_UI_HOST}",
     })
 </script>`
-    : `<script src="/dist/posthog.js"></script>`
+    : `<script src="/dist/insights.js"></script>`
 
-const CSP_REPORT_URI = `${POSTHOG_API_HOST}/report/?token=${POSTHOG_PROJECT_API_KEY}`
-const USE_REPORT_TO = POSTHOG_API_HOST.startsWith('https://')
+const CSP_REPORT_URI = `${INSIGHTS_API_HOST}/report/?token=${INSIGHTS_PROJECT_API_KEY}`
+const USE_REPORT_TO = INSIGHTS_API_HOST.startsWith('https://')
 
 const CSP_RULES = {
     'default-src': "'self'",
-    'script-src': `'self' ${POSTHOG_API_HOST} ${POSTHOG_USE_SNIPPET ? "'unsafe-inline'" : "'nonce-123'"}`,
-    'connect-src': `'self' ${POSTHOG_API_HOST} ${POSTHOG_UI_HOST} https://*.posthog.com`,
+    'script-src': `'self' ${INSIGHTS_API_HOST} ${INSIGHTS_USE_SNIPPET ? "'unsafe-inline'" : "'nonce-123'"}`,
+    'connect-src': `'self' ${INSIGHTS_API_HOST} ${INSIGHTS_UI_HOST} https://*.insights.com`,
     'img-src': "'self' data:",
-    'style-src': `'self' ${POSTHOG_UI_HOST}`,
+    'style-src': `'self' ${INSIGHTS_UI_HOST}`,
     'report-uri': CSP_REPORT_URI + '&type=report-uri',
     ...(USE_REPORT_TO
         ? {
-              'report-to': 'posthog', // easier to debug with report-uri
+              'report-to': 'insights', // easier to debug with report-uri
           }
         : {}),
 }
@@ -46,7 +46,7 @@ const CSP_RULES = {
 const CSP_HEADER = Object.entries(CSP_RULES)
     .map(([key, value]) => `${key} ${value}`)
     .join('; ')
-const REPORTING_HEADER = `posthog="${CSP_REPORT_URI}&type=report-to"`
+const REPORTING_HEADER = `insights="${CSP_REPORT_URI}&type=report-to"`
 
 app.use('/dist', express.static(path.join(__dirname, 'dist')))
 app.use('/static', express.static(path.join(__dirname, 'static')))
@@ -71,7 +71,7 @@ app.get('/', (req, res) => {
       <title>CSP Violation Playground</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>CSP Violation Playground</h1>
@@ -124,7 +124,7 @@ app.get('/inline-script', (req, res) => {
       <title>Inline Script Violation</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Inline Script Violation</h1>
@@ -153,7 +153,7 @@ app.get('/external-script', (req, res) => {
       <title>External Script Violation</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
       <!-- This external script violates CSP -->
       <script src="https://example.com/script.js"></script>
     </head>
@@ -179,7 +179,7 @@ app.get('/external-img', (req, res) => {
       <title>External Image Violation</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>External Image Violation</h1>
@@ -205,7 +205,7 @@ app.get('/external-style', (req, res) => {
       <title>External Style Violation</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
       <!-- This external stylesheet violates CSP -->
       <link rel="stylesheet" href="https://example.com/styles.css">
     </head>
@@ -231,7 +231,7 @@ app.get('/xhr-violation', (req, res) => {
       <title>XHR Violation</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>XHR Violation</h1>
@@ -267,7 +267,7 @@ app.get('/eval', (req, res) => {
       <title>Eval Violation</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>XHR Violation</h1>
@@ -301,7 +301,7 @@ app.get('/debug-enabled', (req, res) => {
 
     res.setHeader('Content-Security-Policy-Report-Only', debugCSPHeader)
     if (USE_REPORT_TO) {
-        res.setHeader('Reporting-Endpoints', `posthog="${CSP_REPORT_URI}&type=report-to&debug=true"`)
+        res.setHeader('Reporting-Endpoints', `insights="${CSP_REPORT_URI}&type=report-to&debug=true"`)
     }
 
     res.send(`
@@ -313,7 +313,7 @@ app.get('/debug-enabled', (req, res) => {
       <title>Debug Enabled Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Debug Enabled Test</h1>
@@ -342,7 +342,7 @@ app.get('/debug-case-insensitive', (req, res) => {
 
     res.setHeader('Content-Security-Policy-Report-Only', debugCSPHeader)
     if (USE_REPORT_TO) {
-        res.setHeader('Reporting-Endpoints', `posthog="${CSP_REPORT_URI}&type=report-to&DEBUG=true"`)
+        res.setHeader('Reporting-Endpoints', `insights="${CSP_REPORT_URI}&type=report-to&DEBUG=true"`)
     }
 
     res.send(`
@@ -354,7 +354,7 @@ app.get('/debug-case-insensitive', (req, res) => {
       <title>Debug Case Insensitive Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Debug Case Insensitive Test</h1>
@@ -381,7 +381,7 @@ app.get('/invalid-content-type', (req, res) => {
       <title>Invalid Content Type Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Invalid Content Type Test</h1>
@@ -422,10 +422,10 @@ app.get('/invalid-content-type', (req, res) => {
 app.get('/report-uri-only', (req, res) => {
     const reportUriOnlyRules = {
         'default-src': "'self'",
-        'script-src': `'self' ${POSTHOG_API_HOST} 'nonce-123'`,
-        'connect-src': `'self' ${POSTHOG_API_HOST} ${POSTHOG_UI_HOST} https://*.posthog.com`,
+        'script-src': `'self' ${INSIGHTS_API_HOST} 'nonce-123'`,
+        'connect-src': `'self' ${INSIGHTS_API_HOST} ${INSIGHTS_UI_HOST} https://*.insights.com`,
         'img-src': "'self' data:",
-        'style-src': `'self' ${POSTHOG_UI_HOST}`,
+        'style-src': `'self' ${INSIGHTS_UI_HOST}`,
         'report-uri': CSP_REPORT_URI + '&type=report-uri-only&debug=true',
     }
     const reportUriHeader = Object.entries(reportUriOnlyRules)
@@ -444,7 +444,7 @@ app.get('/report-uri-only', (req, res) => {
       <title>Report-URI Only Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Report-URI Only Test</h1>
@@ -465,18 +465,18 @@ app.get('/report-uri-only', (req, res) => {
 app.get('/report-to-only', (req, res) => {
     const reportToOnlyRules = {
         'default-src': "'self'",
-        'script-src': `'self' ${POSTHOG_API_HOST} 'nonce-123'`,
-        'connect-src': `'self' ${POSTHOG_API_HOST} ${POSTHOG_UI_HOST} https://*.posthog.com`,
+        'script-src': `'self' ${INSIGHTS_API_HOST} 'nonce-123'`,
+        'connect-src': `'self' ${INSIGHTS_API_HOST} ${INSIGHTS_UI_HOST} https://*.insights.com`,
         'img-src': "'self' data:",
-        'style-src': `'self' ${POSTHOG_UI_HOST}`,
-        'report-to': 'posthog-debug',
+        'style-src': `'self' ${INSIGHTS_UI_HOST}`,
+        'report-to': 'insights-debug',
     }
     const reportToHeader = Object.entries(reportToOnlyRules)
         .map(([key, value]) => `${key} ${value}`)
         .join('; ')
 
     res.setHeader('Content-Security-Policy-Report-Only', reportToHeader)
-    res.setHeader('Reporting-Endpoints', `posthog-debug="${CSP_REPORT_URI}&type=report-to-only&debug=true"`)
+    res.setHeader('Reporting-Endpoints', `insights-debug="${CSP_REPORT_URI}&type=report-to-only&debug=true"`)
 
     res.send(`
     <!DOCTYPE html>
@@ -487,14 +487,14 @@ app.get('/report-to-only', (req, res) => {
       <title>Report-To Only Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Report-To Only Test</h1>
       <div class="card">
         <p>This page uses only report-to directive (no report-uri).</p>
         <p>CSP Policy: <code>${reportToHeader}</code></p>
-        <p>Reporting Endpoints: <code>posthog-debug="${CSP_REPORT_URI}&type=report-to-only&debug=true"</code></p>
+        <p>Reporting Endpoints: <code>insights-debug="${CSP_REPORT_URI}&type=report-to-only&debug=true"</code></p>
         <p><a href="/">Back to Home</a></p>
       </div>
       <!-- This inline script violates CSP -->
@@ -509,19 +509,19 @@ app.get('/report-to-only', (req, res) => {
 app.get('/both-report-directives', (req, res) => {
     const bothReportRules = {
         'default-src': "'self'",
-        'script-src': `'self' ${POSTHOG_API_HOST} 'nonce-123'`,
-        'connect-src': `'self' ${POSTHOG_API_HOST} ${POSTHOG_UI_HOST} https://*.posthog.com`,
+        'script-src': `'self' ${INSIGHTS_API_HOST} 'nonce-123'`,
+        'connect-src': `'self' ${INSIGHTS_API_HOST} ${INSIGHTS_UI_HOST} https://*.insights.com`,
         'img-src': "'self' data:",
-        'style-src': `'self' ${POSTHOG_UI_HOST}`,
+        'style-src': `'self' ${INSIGHTS_UI_HOST}`,
         'report-uri': CSP_REPORT_URI + '&type=both-report-uri&debug=true',
-        'report-to': 'posthog-both',
+        'report-to': 'insights-both',
     }
     const bothReportHeader = Object.entries(bothReportRules)
         .map(([key, value]) => `${key} ${value}`)
         .join('; ')
 
     res.setHeader('Content-Security-Policy-Report-Only', bothReportHeader)
-    res.setHeader('Reporting-Endpoints', `posthog-both="${CSP_REPORT_URI}&type=both-report-to&debug=true"`)
+    res.setHeader('Reporting-Endpoints', `insights-both="${CSP_REPORT_URI}&type=both-report-to&debug=true"`)
 
     res.send(`
     <!DOCTYPE html>
@@ -532,14 +532,14 @@ app.get('/both-report-directives', (req, res) => {
       <title>Both Report Directives Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Both Report Directives Test</h1>
       <div class="card">
         <p>This page uses both report-uri and report-to directives.</p>
         <p>CSP Policy: <code>${bothReportHeader}</code></p>
-        <p>Reporting Endpoints: <code>posthog-both="${CSP_REPORT_URI}&type=both-report-to&debug=true"</code></p>
+        <p>Reporting Endpoints: <code>insights-both="${CSP_REPORT_URI}&type=both-report-to&debug=true"</code></p>
         <p><a href="/">Back to Home</a></p>
       </div>
       <!-- This inline script violates CSP -->
@@ -554,10 +554,10 @@ app.get('/both-report-directives', (req, res) => {
 app.get('/malformed-reporting-endpoints', (req, res) => {
     const malformedRules = {
         'default-src': "'self'",
-        'script-src': `'self' ${POSTHOG_API_HOST} 'nonce-123'`,
-        'connect-src': `'self' ${POSTHOG_API_HOST} ${POSTHOG_UI_HOST} https://*.posthog.com`,
+        'script-src': `'self' ${INSIGHTS_API_HOST} 'nonce-123'`,
+        'connect-src': `'self' ${INSIGHTS_API_HOST} ${INSIGHTS_UI_HOST} https://*.insights.com`,
         'img-src': "'self' data:",
-        'style-src': `'self' ${POSTHOG_UI_HOST}`,
+        'style-src': `'self' ${INSIGHTS_UI_HOST}`,
         'report-to': 'malformed-endpoint',
     }
     const malformedHeader = Object.entries(malformedRules)
@@ -580,7 +580,7 @@ app.get('/malformed-reporting-endpoints', (req, res) => {
       <title>Malformed Reporting Endpoints Test</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Malformed Reporting Endpoints Test</h1>
@@ -615,7 +615,7 @@ app.get('/sampling-test/:path?', (req, res) => {
       <title>Sampling Test - ${testPath}</title>
       <link href="/static/styles.css" rel="stylesheet">
       <script src="/dist/main.js"></script>
-      ${POSTHOG_SCRIPT}
+      ${INSIGHTS_SCRIPT}
     </head>
     <body>
       <h1>Sampling Test - ${testPath}</h1>

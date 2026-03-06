@@ -38,11 +38,11 @@ These dependencies are marked as optional to reduce installation size for users 
 Testing on IE11 requires a bit more setup. TestCafe tests will use the
 playground application to test the locally built array.full.js bundle. It will
 also verify that the events emitted during the testing of playground are loaded
-into the PostHog app. By default it uses https://us.i.posthog.com and the
+into the Insights app. By default it uses https://us.i.insights.hanzo.ai and the
 project with ID 11213. See the testcafe tests to see how to override these if
-needed. For PostHog internal users ask @benjackwhite or @hazzadous to invite you
-to the Project. You'll need to set `POSTHOG_PERSONAL_API_KEY` to your personal API key (Personal API keys), and
-`POSTHOG_PROJECT_API_KEY` to the key for the project you are using (Project API key).
+needed. For Insights internal users ask @benjackwhite or @hazzadous to invite you
+to the Project. You'll need to set `INSIGHTS_PERSONAL_API_KEY` to your personal API key (Personal API keys), and
+`INSIGHTS_PROJECT_API_KEY` to the key for the project you are using (Project API key).
 
 You'll also need to sign up to [BrowserStack](https://www.browserstack.com/).
 Note that if you are using CodeSpaces, these variables will already be available
@@ -56,20 +56,20 @@ After all this, you'll be able to run through the below steps:
 
 ### Running local create react app example
 
-You can use the create react app setup in `packages/browser/playground/nextjs` to test posthog-js as an npm module in a Nextjs application.
+You can use the create react app setup in `packages/browser/playground/nextjs` to test @hanzo/insights as an npm module in a Nextjs application.
 
-1. Run `posthog` locally on port 8000 (`DEBUG=1 TEST=1 ./bin/start`).
-1. Run `python manage.py setup_dev --no-data` on posthog repo, which sets up a demo account.
+1. Run `insights` locally on port 8000 (`DEBUG=1 TEST=1 ./bin/start`).
+1. Run `python manage.py setup_dev --no-data` on insights repo, which sets up a demo account.
 1. Copy Project API key found in `http://localhost:8000/project/settings` and save it for the last step.
 1. Run `cd packages/browser/playground/nextjs`.
 1. Run `pnpm install-deps` to install dependencies.
-1. Run `NEXT_PUBLIC_POSTHOG_KEY='<your-local-api-key>' NEXT_PUBLIC_POSTHOG_HOST='http://localhost:8000' pnpm dev` to start the application.
+1. Run `NEXT_PUBLIC_INSIGHTS_KEY='<your-local-api-key>' NEXT_PUBLIC_INSIGHTS_HOST='http://localhost:8000' pnpm dev` to start the application.
 
 ### Tiers of testing
 
 1. Unit tests - this verifies the behavior of the library in bite-sized chunks. Keep this coverage close to 100%, test corner cases and internal behavior here
 2. Browser tests - run in real browsers and so capable of testing timing, browser requests, etc. Useful for testing high-level library behavior, ordering and verifying requests. We shouldn't aim for 100% coverage here as it's impossible to test all possible combinations.
-3. TestCafe E2E tests - integrates with a real posthog instance sends data to it. Hardest to write and maintain - keep these very high level
+3. TestCafe E2E tests - integrates with a real insights instance sends data to it. Hardest to write and maintain - keep these very high level
 
 ## Developing together with another project
 

@@ -1,10 +1,10 @@
 import { window } from '../../../utils/globals'
 
-import { SurveyAppearance } from '../../../posthog-surveys-types'
+import { SurveyAppearance } from '../../../insights-surveys-types'
 
 import { useContext } from 'preact/hooks'
 import { SurveyContext } from '../surveys-extension-utils'
-import { PostHogLogo } from './PostHogLogo'
+import { InsightsLogo } from './InsightsLogo'
 
 export function BottomSection({
     text,
@@ -46,7 +46,7 @@ export function BottomSection({
                     {text}
                 </button>
             )}
-            {!appearance.whiteLabel && <PostHogLogo urlParams={{ utm_source: 'survey-footer' }} />}
+            {!appearance.whiteLabel && <InsightsLogo urlParams={{ utm_source: 'survey-footer' }} />}
         </div>
     )
 }

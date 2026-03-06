@@ -20,26 +20,26 @@ Sends events to tests SDK Doctor's ability to detect feature flags called events
 
 ## Usage
 
-1. **Configure your PostHog API key:**
+1. **Configure your Insights API key:**
 
     - Open the HTML file in a text editor
     - Find the `API_KEY` constant near the top of the `<script>` section
-    - Replace `'YOUR_POSTHOG_PROJECT_API_KEY'` with your PostHog project API key (`phc_...`)
-    - Update the `HOST` value with your PostHog instance URL (e.g., `http://localhost:8010`)
+    - Replace `'YOUR_INSIGHTS_PROJECT_API_KEY'` with your Insights project API key (`phc_...`)
+    - Update the `HOST` value with your Insights instance URL (e.g., `http://localhost:8010`)
 
 2. **Open the HTML file** in your web browser (Chrome, Firefox, Safari, etc.)
 
 3. **Run tests:**
     - Click any test button to simulate different scenarios
     - Watch the log output for event details
-    - Open your PostHog instance's activity page to see the events sent.
+    - Open your Insights instance's activity page to see the events sent.
 
 ## Requirements
 
 - A text editor
 - A web browser (no build tools or dependencies needed)
-- A PostHog instance (local/dev or self-hosted)
-- A PostHog project API key
+- A Insights instance (local/dev or self-hosted)
+- A Insights project API key
 - A tolerance for vibe-coded stuff
 
 ## Development

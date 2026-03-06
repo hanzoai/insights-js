@@ -1,4 +1,4 @@
-import { test, expect } from '../utils/posthog-playwright-test-base'
+import { test, expect } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 import { Page } from '@playwright/test'
 import { CaptureResult } from '@/types'
@@ -27,7 +27,7 @@ const startOptions = (masking: Record<string, any>) => ({
 })
 
 async function interactWithThePage(page: Page) {
-    await page.locator('[data-cy-input]').type('hello posthog!')
+    await page.locator('[data-cy-input]').type('hello insights!')
 
     await expect(page.locator(remoteMaskingTextSelector).first()).toBeVisible()
     // there's nothing to wait for... so, just wait a bit
@@ -75,7 +75,7 @@ test.describe('Session recording - masking', () => {
         const snapshotData = snapshotEvents.map((e) => JSON.stringify(e.properties?.['$snapshot_data']))
 
         const snapshotsThatIncludeMaskedContent = snapshotData.filter((data) => {
-            const includesMaskedInput = !!data?.includes('hello posthog!')
+            const includesMaskedInput = !!data?.includes('hello insights!')
 
             const includesMaskedText = !!data?.includes('just some text')
 
@@ -105,7 +105,7 @@ test.describe('Session recording - masking', () => {
         const snapshotData = snapshotEvents.map((e) => JSON.stringify(e.properties?.['$snapshot_data']))
 
         const snapshotsThatIncludeMaskedContent = snapshotData.filter((data) => {
-            const includesMaskedInput = !!data?.includes('hello posthog!')
+            const includesMaskedInput = !!data?.includes('hello insights!')
 
             const includesMaskedText = !!data?.includes('just some text')
 

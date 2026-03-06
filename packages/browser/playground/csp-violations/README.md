@@ -1,6 +1,6 @@
 # CSP Violations Playground
 
-A development playground for testing CSP violation reports with PostHog.
+A development playground for testing CSP violation reports with Insights.
 
 ## Setup
 
@@ -9,10 +9,10 @@ Before running the playground, make sure to update the required env variables fo
 Create a `.env` file in the root directory with the following variables:
 
 ```bash
-POSTHOG_PROJECT_API_KEY=your_posthog_token
-POSTHOG_API_HOST=your_posthog_api_host  # e.g., https://app.posthog.com
-POSTHOG_UI_HOST=your_posthog_ui_host    # e.g., https://app.posthog.com
-POSTHOG_USE_SNIPPET=true                # if you want to include the posthog snippet on the playground pages to track pageviews, etc.
+INSIGHTS_PROJECT_API_KEY=your_insights_token
+INSIGHTS_API_HOST=your_insights_api_host  # e.g., https://app.insights.hanzo.ai
+INSIGHTS_UI_HOST=your_insights_ui_host    # e.g., https://app.insights.hanzo.ai
+INSIGHTS_USE_SNIPPET=true                # if you want to include the insights snippet on the playground pages to track pageviews, etc.
 ```
 
 These environment variables are required for the playground to work correctly. The server will fail to start if they are not properly configured.
@@ -54,7 +54,7 @@ The playground includes examples for different types of CSP violations:
 
 ### Report-To Debug Cases
 
-These test cases are specifically designed to debug report-to directive issues and test the logging functionality added in [PR #32868](https://github.com/PostHog/posthog/pull/32868):
+These test cases are specifically designed to debug report-to directive issues and test the logging functionality added in [PR #32868](https://github.com/hanzoai/insights/pull/32868):
 
 1. **Debug Enabled** - Tests CSP reports with `debug=true` parameter for verbose logging
 2. **Invalid Content Type** - Tests CSP reports sent with incorrect content type to trigger error logging
@@ -70,4 +70,4 @@ Each example will automatically trigger a CSP violation when the page loads, whi
 
 The server sets a Content Security Policy header that restricts what resources can be loaded. When a resource violates this policy, the browser will send a report to the specified `report-uri` endpoint.
 
-This playground is useful for testing how CSP violation reports are processed by your PostHog instance.
+This playground is useful for testing how CSP violation reports are processed by your Insights instance.

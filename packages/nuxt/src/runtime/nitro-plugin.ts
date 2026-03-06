@@ -1,26 +1,26 @@
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { uuidv7 } from '@hanzo/insights-core/vendor/uuidv7'
 import { defineNitroPlugin } from 'nitropack/runtime'
 import { useRuntimeConfig } from '#imports'
-import type { PostHogCommon, PostHogServerConfig } from '../module'
+import type { InsightsCommon, InsightsServerConfig } from '../module'
 import type { JsonType } from '@hanzo/insights-core'
 
 export default defineNitroPlugin((nitroApp) => {
   const runtimeConfig = useRuntimeConfig()
-  const posthogCommon = runtimeConfig.public.posthog as PostHogCommon
-  const posthogServerConfig = runtimeConfig.posthogServerConfig as PostHogServerConfig
-  const debug = posthogCommon.debug as boolean
+  const insightsCommon = runtimeConfig.public.insights as InsightsCommon
+  const insightsServerConfig = runtimeConfig.insightsServerConfig as InsightsServerConfig
+  const debug = insightsCommon.debug as boolean
 
-  const client = new PostHog(posthogCommon.publicKey, {
-    host: posthogCommon.host,
-    ...posthogServerConfig,
+  const client = new Insights(insightsCommon.publicKey, {
+    host: insightsCommon.host,
+    ...insightsServerConfig,
   })
 
   if (debug) {
     client.debug(true)
   }
 
-  if (posthogServerConfig.enableExceptionAutocapture) {
+  if (insightsServerConfig.enableExceptionAutocapture) {
     nitroApp.hooks.hook('error', (error, { event }) => {
       const props: JsonType = {
         $process_person_profile: false,

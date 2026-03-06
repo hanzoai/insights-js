@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /* eslint-disable no-undef */
 /**
- * PostHog Node.js library example
+ * Insights Node.js library example
  *
- * This script demonstrates various PostHog Node.js SDK capabilities including:
+ * This script demonstrates various Insights Node.js SDK capabilities including:
  * - Basic event capture and user identification
  * - Feature flag local evaluation
  * - Feature flag payloads
  * - Context management
  *
  * Setup:
- * 1. Copy .env.example to .env and fill in your PostHog credentials
+ * 1. Copy .env.example to .env and fill in your Insights credentials
  * 2. Run this script: node example.mjs
  */
 
@@ -57,32 +57,32 @@ function loadEnvFile() {
 loadEnvFile()
 
 // Get configuration
-const projectKey = process.env.POSTHOG_PROJECT_API_KEY || ''
-const personalApiKey = process.env.POSTHOG_PERSONAL_API_KEY || ''
-const host = process.env.POSTHOG_HOST || 'http://localhost:8000'
+const projectKey = process.env.INSIGHTS_PROJECT_API_KEY || ''
+const personalApiKey = process.env.INSIGHTS_PERSONAL_API_KEY || ''
+const host = process.env.INSIGHTS_HOST || 'http://localhost:8000'
 
 // Check if project key is provided (required)
 if (!projectKey) {
-  console.error('❌ Missing PostHog project API key!')
-  console.error('   Please set POSTHOG_PROJECT_API_KEY environment variable')
+  console.error('❌ Missing Insights project API key!')
+  console.error('   Please set INSIGHTS_PROJECT_API_KEY environment variable')
   console.error('   or copy .env.example to .env and fill in your values')
   process.exit(1)
 }
 
-// Import PostHog from the built output
-const { PostHog } = await import('./dist/entrypoints/index.node.mjs')
+// Import Insights from the built output
+const { Insights } = await import('./dist/entrypoints/index.node.mjs')
 
 // Check if personal API key is available for local evaluation
 const localEvalAvailable = Boolean(personalApiKey)
 
-// Initialize PostHog client
-const posthog = new PostHog(projectKey, {
+// Initialize Insights client
+const insights = new Insights(projectKey, {
   host,
   personalApiKey: personalApiKey || undefined,
   featureFlagsPollingInterval: 10000,
 })
 
-console.log('🔑 PostHog Configuration:')
+console.log('🔑 Insights Configuration:')
 console.log(`   Project API Key: ${projectKey.slice(0, 9)}...`)
 if (localEvalAvailable) {
   console.log('   Personal API Key: [SET]')
@@ -107,7 +107,7 @@ function prompt(question) {
 }
 
 // Display menu and get user choice
-console.log('🚀 PostHog Node.js SDK Demo - Choose an example to run:\n')
+console.log('🚀 Insights Node.js SDK Demo - Choose an example to run:\n')
 console.log('1. Identify and capture examples')
 const localEvalNote = localEvalAvailable ? '' : ' [requires personal API key]'
 console.log(`2. Feature flag local evaluation examples${localEvalNote}`)
@@ -125,11 +125,11 @@ if (choice === '1') {
   console.log('IDENTIFY AND CAPTURE EXAMPLES')
   console.log('='.repeat(60))
 
-  posthog.debug(true)
+  insights.debug(true)
 
   // Capture an event
   console.log('📊 Capturing events...')
-  posthog.capture({
+  insights.capture({
     distinctId: 'distinct_id',
     event: 'event',
     properties: { property1: 'value', property2: 'value' },
@@ -138,15 +138,15 @@ if (choice === '1') {
 
   // Alias a previous distinct id with a new one
   console.log('🔗 Creating alias...')
-  posthog.alias({ distinctId: 'distinct_id', alias: 'new_distinct_id' })
+  insights.alias({ distinctId: 'distinct_id', alias: 'new_distinct_id' })
 
-  posthog.capture({
+  insights.capture({
     distinctId: 'new_distinct_id',
     event: 'event2',
     properties: { property1: 'value', property2: 'value' },
   })
 
-  posthog.capture({
+  insights.capture({
     distinctId: 'new_distinct_id',
     event: 'event-with-groups',
     properties: { property1: 'value', property2: 'value' },
@@ -155,14 +155,14 @@ if (choice === '1') {
 
   // Add properties to the person
   console.log('👤 Identifying user...')
-  posthog.identify({
+  insights.identify({
     distinctId: 'new_distinct_id',
     properties: { email: 'something@something.com' },
   })
 
   // Add properties to a group
   console.log('🏢 Identifying group...')
-  posthog.groupIdentify({
+  insights.groupIdentify({
     groupType: 'company',
     groupKey: 'id:5',
     properties: { employees: 11 },
@@ -170,31 +170,31 @@ if (choice === '1') {
 
   // Properties set only once to the person
   console.log('🔒 Setting properties once...')
-  posthog.identify({
+  insights.identify({
     distinctId: 'new_distinct_id',
     properties: { $set_once: { self_serve_signup: true } },
   })
 
   // This will not change the property (because it was already set)
-  posthog.identify({
+  insights.identify({
     distinctId: 'new_distinct_id',
     properties: { $set_once: { self_serve_signup: false } },
   })
 
   console.log('🔄 Updating properties...')
-  posthog.identify({
+  insights.identify({
     distinctId: 'new_distinct_id',
     properties: { current_browser: 'Chrome' },
   })
-  posthog.identify({
+  insights.identify({
     distinctId: 'new_distinct_id',
     properties: { current_browser: 'Firefox' },
   })
 } else if (choice === '2') {
   if (!localEvalAvailable) {
     console.log('\n❌ This example requires a personal API key for local evaluation.')
-    console.log('   Set POSTHOG_PERSONAL_API_KEY environment variable to run this example.')
-    await posthog.shutdown()
+    console.log('   Set INSIGHTS_PERSONAL_API_KEY environment variable to run this example.')
+    await insights.shutdown()
     process.exit(1)
   }
 
@@ -202,11 +202,11 @@ if (choice === '1') {
   console.log('FEATURE FLAG LOCAL EVALUATION EXAMPLES')
   console.log('='.repeat(60))
 
-  posthog.debug(true)
+  insights.debug(true)
 
   // Wait for local evaluation to be ready
   console.log('⏳ Waiting for local evaluation to be ready...')
-  const isReady = await posthog.waitForLocalEvaluationReady(10000)
+  const isReady = await insights.waitForLocalEvaluationReady(10000)
   if (!isReady) {
     console.log('⚠️  Local evaluation timed out, falling back to remote evaluation')
   } else {
@@ -214,40 +214,40 @@ if (choice === '1') {
   }
 
   console.log('🏁 Testing basic feature flags...')
-  const flag1 = await posthog.isFeatureEnabled('beta-feature', 'distinct_id')
+  const flag1 = await insights.isFeatureEnabled('beta-feature', 'distinct_id')
   console.log(`beta-feature for 'distinct_id': ${flag1}`)
 
-  const flag2 = await posthog.isFeatureEnabled('beta-feature', 'new_distinct_id')
+  const flag2 = await insights.isFeatureEnabled('beta-feature', 'new_distinct_id')
   console.log(`beta-feature for 'new_distinct_id': ${flag2}`)
 
-  const flag3 = await posthog.isFeatureEnabled('beta-feature-groups', 'distinct_id', {
+  const flag3 = await insights.isFeatureEnabled('beta-feature-groups', 'distinct_id', {
     groups: { company: 'id:5' },
   })
   console.log(`beta-feature with groups: ${flag3}`)
 
   console.log('\n🌍 Testing location-based flags...')
   // Assume test-flag has `City Name = Sydney` as a person property set
-  const sydneyFlag = await posthog.isFeatureEnabled('test-flag', 'random_id_12345', {
+  const sydneyFlag = await insights.isFeatureEnabled('test-flag', 'random_id_12345', {
     personProperties: { $geoip_city_name: 'Sydney' },
   })
   console.log(`Sydney user: ${sydneyFlag}`)
 
-  const sydneyFlagLocal = await posthog.isFeatureEnabled('test-flag', 'distinct_id_random_22', {
+  const sydneyFlagLocal = await insights.isFeatureEnabled('test-flag', 'distinct_id_random_22', {
     personProperties: { $geoip_city_name: 'Sydney' },
     onlyEvaluateLocally: true,
   })
   console.log(`Sydney user (local only): ${sydneyFlagLocal}`)
 
   console.log('\n📋 Getting all flags...')
-  const allFlags = await posthog.getAllFlags('distinct_id_random_22')
+  const allFlags = await insights.getAllFlags('distinct_id_random_22')
   console.log(`All flags: ${JSON.stringify(allFlags)}`)
 
-  const allFlagsLocal = await posthog.getAllFlags('distinct_id_random_22', {
+  const allFlagsLocal = await insights.getAllFlags('distinct_id_random_22', {
     onlyEvaluateLocally: true,
   })
   console.log(`All flags (local): ${JSON.stringify(allFlagsLocal)}`)
 
-  const allFlagsWithProps = await posthog.getAllFlags('distinct_id_random_22', {
+  const allFlagsWithProps = await insights.getAllFlags('distinct_id_random_22', {
     personProperties: { $geoip_city_name: 'Sydney' },
     onlyEvaluateLocally: true,
   })
@@ -257,18 +257,18 @@ if (choice === '1') {
   console.log('FEATURE FLAG PAYLOAD EXAMPLES')
   console.log('='.repeat(60))
 
-  posthog.debug(true)
+  insights.debug(true)
 
   // Note: beta-feature requires email containing @example.com, so we pass person properties
   console.log('📦 Testing feature flag payloads...')
   console.log('   (Passing personProperties with @example.com email to match flag conditions)\n')
 
-  const payload = await posthog.getFeatureFlagPayload('beta-feature', 'payload_user', true, {
+  const payload = await insights.getFeatureFlagPayload('beta-feature', 'payload_user', true, {
     personProperties: { email: 'test@example.com' },
   })
   console.log(`beta-feature payload: ${JSON.stringify(payload)}`)
 
-  const allFlagsAndPayloads = await posthog.getAllFlagsAndPayloads('payload_user', {
+  const allFlagsAndPayloads = await insights.getAllFlagsAndPayloads('payload_user', {
     personProperties: { email: 'test@example.com' },
     groups: { company: 'id:5' },
   })
@@ -276,7 +276,7 @@ if (choice === '1') {
 
   if (localEvalAvailable) {
     try {
-      const remotePayload = await posthog.getRemoteConfigPayload('encrypted_payload_flag_key')
+      const remotePayload = await insights.getRemoteConfigPayload('encrypted_payload_flag_key')
       console.log(`\nRemote config payload: ${JSON.stringify(remotePayload)}`)
     } catch (e) {
       console.log(`\nRemote config payload: (error: ${e.message})`)
@@ -285,7 +285,7 @@ if (choice === '1') {
 
   // Get feature flag result with all details (enabled, variant, payload, key)
   console.log('\n🔍 Getting detailed flag result...')
-  const result = await posthog.getFeatureFlagResult('beta-feature', 'payload_user_2', {
+  const result = await insights.getFeatureFlagResult('beta-feature', 'payload_user_2', {
     personProperties: { email: 'test@example.com' },
   })
   if (result) {
@@ -299,8 +299,8 @@ if (choice === '1') {
 } else if (choice === '4') {
   if (!localEvalAvailable) {
     console.log('\n❌ This example requires a personal API key for local evaluation.')
-    console.log('   Set POSTHOG_PERSONAL_API_KEY environment variable to run this example.')
-    await posthog.shutdown()
+    console.log('   Set INSIGHTS_PERSONAL_API_KEY environment variable to run this example.')
+    await insights.shutdown()
     process.exit(1)
   }
 
@@ -319,31 +319,31 @@ if (choice === '1') {
   console.log('      - Rollout: 100%')
   console.log('')
 
-  posthog.debug(true)
+  insights.debug(true)
 
   // Wait for local evaluation to be ready
-  await posthog.waitForLocalEvaluationReady(10000)
+  await insights.waitForLocalEvaluationReady(10000)
 
   // Test @example.com user (should satisfy dependency if flags exist)
-  const result1 = await posthog.isFeatureEnabled('test-flag-dependency', 'example_user', {
+  const result1 = await insights.isFeatureEnabled('test-flag-dependency', 'example_user', {
     personProperties: { email: 'user@example.com' },
     onlyEvaluateLocally: true,
   })
   console.log(`✅ @example.com user (test-flag-dependency): ${result1}`)
 
   // Test non-example.com user (dependency should not be satisfied)
-  const result2 = await posthog.isFeatureEnabled('test-flag-dependency', 'regular_user', {
+  const result2 = await insights.isFeatureEnabled('test-flag-dependency', 'regular_user', {
     personProperties: { email: 'user@other.com' },
     onlyEvaluateLocally: true,
   })
   console.log(`❌ Regular user (test-flag-dependency): ${result2}`)
 
   // Test beta-feature directly for comparison
-  const beta1 = await posthog.isFeatureEnabled('beta-feature', 'example_user', {
+  const beta1 = await insights.isFeatureEnabled('beta-feature', 'example_user', {
     personProperties: { email: 'user@example.com' },
     onlyEvaluateLocally: true,
   })
-  const beta2 = await posthog.isFeatureEnabled('beta-feature', 'regular_user', {
+  const beta2 = await insights.isFeatureEnabled('beta-feature', 'regular_user', {
     personProperties: { email: 'user@other.com' },
     onlyEvaluateLocally: true,
   })
@@ -373,7 +373,7 @@ if (choice === '1') {
   console.log('')
 
   // Test pineapple -> blue -> breaking-bad chain
-  const dependentResult3 = await posthog.getFeatureFlag('multivariate-root-flag', 'regular_user', {
+  const dependentResult3 = await insights.getFeatureFlag('multivariate-root-flag', 'regular_user', {
     personProperties: { email: 'pineapple@example.com' },
     onlyEvaluateLocally: true,
   })
@@ -386,7 +386,7 @@ if (choice === '1') {
   }
 
   // Test mango -> red -> the-wire chain
-  const dependentResult4 = await posthog.getFeatureFlag('multivariate-root-flag', 'regular_user', {
+  const dependentResult4 = await insights.getFeatureFlag('multivariate-root-flag', 'regular_user', {
     personProperties: { email: 'mango@example.com' },
     onlyEvaluateLocally: true,
   })
@@ -406,15 +406,15 @@ if (choice === '1') {
   ]
 
   for (const { email, expectedChain } of testCases) {
-    const leaf = await posthog.getFeatureFlag('multivariate-leaf-flag', 'regular_user', {
+    const leaf = await insights.getFeatureFlag('multivariate-leaf-flag', 'regular_user', {
       personProperties: { email },
       onlyEvaluateLocally: true,
     })
-    const intermediate = await posthog.getFeatureFlag('multivariate-intermediate-flag', 'regular_user', {
+    const intermediate = await insights.getFeatureFlag('multivariate-intermediate-flag', 'regular_user', {
       personProperties: { email },
       onlyEvaluateLocally: true,
     })
-    const root = await posthog.getFeatureFlag('multivariate-root-flag', 'regular_user', {
+    const root = await insights.getFeatureFlag('multivariate-root-flag', 'regular_user', {
       personProperties: { email },
       onlyEvaluateLocally: true,
     })
@@ -437,7 +437,7 @@ if (choice === '1') {
   console.log('CONTEXT MANAGEMENT EXAMPLES')
   console.log('='.repeat(60))
 
-  posthog.debug(true)
+  insights.debug(true)
 
   console.log('🏷️ Testing context management...')
   console.log(
@@ -445,41 +445,41 @@ if (choice === '1') {
   )
 
   // Use withContext to set context that applies to all events in the callback
-  posthog.withContext({ distinctId: 'user_123', properties: { transaction_id: 'abc123' } }, () => {
+  insights.withContext({ distinctId: 'user_123', properties: { transaction_id: 'abc123' } }, () => {
     // This event will be captured with the context set above
-    posthog.capture({ event: 'order_processed' })
+    insights.capture({ event: 'order_processed' })
     console.log('✅ Event captured with context (distinctId and transaction_id)')
   })
 
   // Use fresh: true to start with a clean context (no inherited context)
-  posthog.withContext(
+  insights.withContext(
     { distinctId: 'session_user', properties: { session_id: 'xyz789' } },
     () => {
       // Only session_id will be present, no inherited context
-      posthog.capture({ event: 'session_event' })
+      insights.capture({ event: 'session_event' })
       console.log('✅ Event captured with fresh context (session_id only)')
     },
     { fresh: true }
   )
 
   // Nested context example
-  posthog.withContext({ distinctId: 'outer_user', properties: { outer_prop: 'outer_value' } }, () => {
+  insights.withContext({ distinctId: 'outer_user', properties: { outer_prop: 'outer_value' } }, () => {
     console.log('\n📦 Nested context example:')
 
     // Inner context inherits from outer by default
-    posthog.withContext({ properties: { inner_prop: 'inner_value' } }, () => {
-      const context = posthog.getContext()
+    insights.withContext({ properties: { inner_prop: 'inner_value' } }, () => {
+      const context = insights.getContext()
       console.log(`   Inner context (inherited): ${JSON.stringify(context)}`)
-      posthog.capture({ event: 'nested_event' })
+      insights.capture({ event: 'nested_event' })
     })
 
     // Inner context with fresh: true doesn't inherit
-    posthog.withContext(
+    insights.withContext(
       { distinctId: 'fresh_user', properties: { fresh_prop: 'fresh_value' } },
       () => {
-        const context = posthog.getContext()
+        const context = insights.getContext()
         console.log(`   Fresh inner context: ${JSON.stringify(context)}`)
-        posthog.capture({ event: 'fresh_nested_event' })
+        insights.capture({ event: 'fresh_nested_event' })
       },
       { fresh: true }
     )
@@ -494,7 +494,7 @@ if (choice === '1') {
   console.log('   so all flag evaluations go through the /decide endpoint.\n')
 
   // Create a separate client without personal API key for remote evaluation
-  const remoteClient = new PostHog(projectKey, {
+  const remoteClient = new Insights(projectKey, {
     host,
     // No personalApiKey - forces remote evaluation
   })
@@ -585,10 +585,10 @@ if (choice === '1') {
 
   // Run example 1 - Identify and Capture
   console.log(`\n${'🔸'.repeat(10)} IDENTIFY AND CAPTURE ${'🔸'.repeat(10)}`)
-  posthog.debug(true)
+  insights.debug(true)
 
   console.log('📊 Capturing events...')
-  posthog.capture({
+  insights.capture({
     distinctId: 'distinct_id',
     event: 'event',
     properties: { property1: 'value', property2: 'value' },
@@ -596,10 +596,10 @@ if (choice === '1') {
   })
 
   console.log('🔗 Creating alias...')
-  posthog.alias({ distinctId: 'distinct_id', alias: 'new_distinct_id' })
+  insights.alias({ distinctId: 'distinct_id', alias: 'new_distinct_id' })
 
   console.log('👤 Identifying user...')
-  posthog.identify({
+  insights.identify({
     distinctId: 'new_distinct_id',
     properties: { email: 'something@something.com' },
   })
@@ -609,13 +609,13 @@ if (choice === '1') {
     console.log(`\n${'🔸'.repeat(10)} FEATURE FLAGS ${'🔸'.repeat(10)}`)
 
     // Wait for local evaluation
-    await posthog.waitForLocalEvaluationReady(10000)
+    await insights.waitForLocalEvaluationReady(10000)
 
     console.log('🏁 Testing basic feature flags...')
-    const flagValue = await posthog.isFeatureEnabled('beta-feature', 'distinct_id')
+    const flagValue = await insights.isFeatureEnabled('beta-feature', 'distinct_id')
     console.log(`beta-feature: ${flagValue}`)
 
-    const sydneyFlag = await posthog.isFeatureEnabled('test-flag', 'random_id_12345', {
+    const sydneyFlag = await insights.isFeatureEnabled('test-flag', 'random_id_12345', {
       personProperties: { $geoip_city_name: 'Sydney' },
     })
     console.log(`Sydney user: ${sydneyFlag}`)
@@ -624,7 +624,7 @@ if (choice === '1') {
   // Run example 3 - Payloads
   console.log(`\n${'🔸'.repeat(10)} PAYLOADS ${'🔸'.repeat(10)}`)
   console.log('📦 Testing payloads...')
-  const payload = await posthog.getFeatureFlagPayload('beta-feature', 'payload_user', true, {
+  const payload = await insights.getFeatureFlagPayload('beta-feature', 'payload_user', true, {
     personProperties: { email: 'test@example.com' },
   })
   console.log(`Payload: ${JSON.stringify(payload)}`)
@@ -634,11 +634,11 @@ if (choice === '1') {
     console.log(`\n${'🔸'.repeat(10)} FLAG DEPENDENCIES ${'🔸'.repeat(10)}`)
     console.log('🔗 Testing flag dependencies...')
 
-    const result1 = await posthog.isFeatureEnabled('test-flag-dependency', 'demo_user', {
+    const result1 = await insights.isFeatureEnabled('test-flag-dependency', 'demo_user', {
       personProperties: { email: 'user@example.com' },
       onlyEvaluateLocally: true,
     })
-    const result2 = await posthog.isFeatureEnabled('test-flag-dependency', 'demo_user2', {
+    const result2 = await insights.isFeatureEnabled('test-flag-dependency', 'demo_user2', {
       personProperties: { email: 'user@other.com' },
       onlyEvaluateLocally: true,
     })
@@ -649,8 +649,8 @@ if (choice === '1') {
   console.log(`\n${'🔸'.repeat(10)} CONTEXT MANAGEMENT ${'🔸'.repeat(10)}`)
   console.log('🏷️ Testing context management...')
 
-  posthog.withContext({ distinctId: 'demo_user', properties: { demo_run: 'all_examples' } }, () => {
-    posthog.capture({ event: 'demo_completed' })
+  insights.withContext({ distinctId: 'demo_user', properties: { demo_run: 'all_examples' } }, () => {
+    insights.capture({ event: 'demo_completed' })
     console.log('✅ Demo completed with context')
   })
 
@@ -658,7 +658,7 @@ if (choice === '1') {
   console.log(`\n${'🔸'.repeat(10)} REMOTE EVALUATION ${'🔸'.repeat(10)}`)
   console.log('🌐 Testing remote evaluation (separate client without personal API key)...')
 
-  const remoteClient = new PostHog(projectKey, { host })
+  const remoteClient = new Insights(projectKey, { host })
   const remoteFlag = await remoteClient.isFeatureEnabled('beta-feature', 'remote_demo_user', {
     personProperties: { email: 'demo@example.com' },
   })
@@ -666,11 +666,11 @@ if (choice === '1') {
   await remoteClient.shutdown()
 } else if (choice === '8') {
   console.log('👋 Goodbye!')
-  await posthog.shutdown()
+  await insights.shutdown()
   process.exit(0)
 } else {
   console.log('❌ Invalid choice. Please run again and select 1-8.')
-  await posthog.shutdown()
+  await insights.shutdown()
   process.exit(1)
 }
 
@@ -678,4 +678,4 @@ console.log('\n' + '='.repeat(60))
 console.log('✅ Example completed!')
 console.log('='.repeat(60))
 
-await posthog.shutdown()
+await insights.shutdown()

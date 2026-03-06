@@ -1,13 +1,13 @@
-This is a Next.js example project using the [`@posthog/nextjs-config`](../../posthog-nextjs-config) package.
+This is a Next.js example project using the [`@hanzo/nextjs-config`](../../@hanzo/insights-nextjs-config) package.
 
 ## Error Tracking
 
-Check full documentation for error tracking [here](https://posthog.com/docs/error-tracking).
+Check full documentation for error tracking [here](https://insights.hanzo.ai/docs/error-tracking).
 
 ### Installation
 
 ```
-npm install @posthog/nextjs-config
+npm install @hanzo/nextjs-config
 ```
 
 ### Sourcemap upload
@@ -16,4 +16,4 @@ Check [next.config.ts](./next.config.ts) to see a configuration example.
 
 ## Questions?
 
-### [Check out our community page.](https://posthog.com/posts)
+### [Check out our community page.](https://insights.hanzo.ai/posts)

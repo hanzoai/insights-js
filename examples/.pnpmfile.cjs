@@ -1,15 +1,15 @@
 /** @type {import('pnpm').Hooks} */
-// Overrides posthog dependencies to local versions
+// Overrides insights dependencies to local versions
 module.exports = {
     hooks: {
         readPackage(pkg) {
             function rewriteLocalDeps(deps) {
                 if (deps) {
                     for (const dep in deps) {
-                        if (['@posthog/cli', 'posthog-react-native-session-replay'].includes(dep)) {
+                        if (['@hanzo/cli', '@hanzo/insights-react-native-session-replay'].includes(dep)) {
                             continue
                         }
-                        if (dep.startsWith('posthog') || dep.startsWith('@posthog')) {
+                        if (dep.startsWith('insights') || dep.startsWith('@insights')) {
                             const tarballName = dep.replace('@', '').replace('/', '-')
                             deps[dep] = `file:../../target/${tarballName}.tgz`
                         }
@@ -30,8 +30,8 @@ module.exports = {
                 preferFrozenLockfile: false,
                 verifyDepsBeforeRun: true,
                 minimumReleaseAge: 4320,
-                minimumReleaseAgeExclude: ['node-forge@1.3.2', '@posthog/cli'],
-                onlyBuiltDependencies: ['@posthog/cli'],
+                minimumReleaseAgeExclude: ['node-forge@1.3.2', '@hanzo/cli'],
+                onlyBuiltDependencies: ['@hanzo/cli'],
             })
         },
     },

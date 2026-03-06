@@ -1,15 +1,15 @@
 import { OpenAI as OpenAIOrignal, ClientOptions } from 'openai'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import {
   formatResponseOpenAI,
   MonitoringParams,
-  sendEventToPosthog,
+  sendEventToInsights,
   extractAvailableToolCalls,
   withPrivacyMode,
   AIEvent,
   formatOpenAIResponsesInput,
   calculateWebSearchCount,
-  sendEventWithErrorToPosthog,
+  sendEventWithErrorToInsights,
 } from '../utils'
 import type { APIPromise } from 'openai'
 import type { Stream } from 'openai/streaming'
@@ -17,7 +17,7 @@ import type { ParsedResponse } from 'openai/resources/responses/responses'
 import type { ResponseCreateParamsWithTools, ExtractParsedContentFromParams } from 'openai/lib/ResponsesParser'
 import type { FormattedMessage, FormattedContent, FormattedFunctionCall } from '../types'
 import { sanitizeOpenAI, sanitizeOpenAIResponse } from '../sanitization'
-import { extractPosthogParams } from '../utils'
+import { extractInsightsParams } from '../utils'
 import { isResponseTokenChunk } from './utils'
 
 const Chat = OpenAIOrignal.Chat
@@ -40,23 +40,23 @@ type EmbeddingCreateParams = OpenAIOrignal.EmbeddingCreateParams
 
 interface MonitoringOpenAIConfig extends ClientOptions {
   apiKey: string
-  posthog: PostHog
+  insights: Insights
   baseURL?: string
 }
 
 type RequestOptions = Record<string, unknown>
 
-export class PostHogOpenAI extends OpenAIOrignal {
-  private readonly phClient: PostHog
+export class InsightsOpenAI extends OpenAIOrignal {
+  private readonly phClient: Insights
   public chat: WrappedChat
   public responses: WrappedResponses
   public embeddings: WrappedEmbeddings
   public audio: WrappedAudio
 
   constructor(config: MonitoringOpenAIConfig) {
-    const { posthog, ...openAIConfig } = config
+    const { insights, ...openAIConfig } = config
     super(openAIConfig)
-    this.phClient = posthog
+    this.phClient = insights
     this.chat = new WrappedChat(this, this.phClient)
     this.responses = new WrappedResponses(this, this.phClient)
     this.embeddings = new WrappedEmbeddings(this, this.phClient)
@@ -65,7 +65,7 @@ export class PostHogOpenAI extends OpenAIOrignal {
 }
 
 export class WrappedChat extends Chat {
-  constructor(parentClient: PostHogOpenAI, phClient: PostHog) {
+  constructor(parentClient: InsightsOpenAI, phClient: Insights) {
     super(parentClient)
     this.completions = new WrappedCompletions(parentClient, phClient)
   }
@@ -74,10 +74,10 @@ export class WrappedChat extends Chat {
 }
 
 export class WrappedCompletions extends Completions {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: OpenAIOrignal, phClient: PostHog) {
+  constructor(client: OpenAIOrignal, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -106,7 +106,7 @@ export class WrappedCompletions extends Completions {
     body: ChatCompletionCreateParamsBase & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<ChatCompletion | Stream<ChatCompletionChunk>> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(openAIParams, options)
@@ -253,9 +253,9 @@ export class WrappedCompletions extends Completions {
               const latency = (Date.now() - startTime) / 1000
               const timeToFirstToken = firstTokenTime !== undefined ? (firstTokenTime - startTime) / 1000 : undefined
               const availableTools = extractAvailableToolCalls('openai', openAIParams)
-              await sendEventToPosthog({
+              await sendEventToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model ?? modelFromResponse,
                 provider: 'openai',
                 input: sanitizeOpenAI(openAIParams.messages),
@@ -276,9 +276,9 @@ export class WrappedCompletions extends Completions {
                 tools: availableTools,
               })
             } catch (error: unknown) {
-              const enrichedError = await sendEventWithErrorToPosthog({
+              const enrichedError = await sendEventWithErrorToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model,
                 provider: 'openai',
                 input: sanitizeOpenAI(openAIParams.messages),
@@ -305,9 +305,9 @@ export class WrappedCompletions extends Completions {
             const latency = (Date.now() - startTime) / 1000
             const availableTools = extractAvailableToolCalls('openai', openAIParams)
             const formattedOutput = formatResponseOpenAI(result)
-            await sendEventToPosthog({
+            await sendEventToInsights({
               client: this.phClient,
-              ...posthogParams,
+              ...insightsParams,
               model: openAIParams.model ?? result.model,
               provider: 'openai',
               input: sanitizeOpenAI(openAIParams.messages),
@@ -335,9 +335,9 @@ export class WrappedCompletions extends Completions {
               ? ((error as { status?: number }).status ?? 500)
               : 500
 
-          await sendEventToPosthog({
+          await sendEventToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model,
             provider: 'openai',
             input: sanitizeOpenAI(openAIParams.messages),
@@ -362,10 +362,10 @@ export class WrappedCompletions extends Completions {
 }
 
 export class WrappedResponses extends Responses {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: OpenAIOrignal, phClient: PostHog) {
+  constructor(client: OpenAIOrignal, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -394,7 +394,7 @@ export class WrappedResponses extends Responses {
     body: ResponsesCreateParamsBase & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<OpenAIOrignal.Responses.Response | Stream<OpenAIOrignal.Responses.ResponseStreamEvent>> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(openAIParams, options)
@@ -462,9 +462,9 @@ export class WrappedResponses extends Responses {
               const latency = (Date.now() - startTime) / 1000
               const timeToFirstToken = firstTokenTime !== undefined ? (firstTokenTime - startTime) / 1000 : undefined
               const availableTools = extractAvailableToolCalls('openai', openAIParams)
-              await sendEventToPosthog({
+              await sendEventToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model ?? modelFromResponse,
                 provider: 'openai',
                 input: formatOpenAIResponsesInput(
@@ -488,9 +488,9 @@ export class WrappedResponses extends Responses {
                 tools: availableTools,
               })
             } catch (error: unknown) {
-              const enrichedError = await sendEventWithErrorToPosthog({
+              const enrichedError = await sendEventWithErrorToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model,
                 provider: 'openai',
                 input: formatOpenAIResponsesInput(
@@ -519,9 +519,9 @@ export class WrappedResponses extends Responses {
             const latency = (Date.now() - startTime) / 1000
             const availableTools = extractAvailableToolCalls('openai', openAIParams)
             const formattedOutput = formatResponseOpenAI({ output: result.output })
-            await sendEventToPosthog({
+            await sendEventToInsights({
               client: this.phClient,
-              ...posthogParams,
+              ...insightsParams,
               model: openAIParams.model ?? result.model,
               provider: 'openai',
               input: formatOpenAIResponsesInput(sanitizeOpenAIResponse(openAIParams.input), openAIParams.instructions),
@@ -549,9 +549,9 @@ export class WrappedResponses extends Responses {
               ? ((error as { status?: number }).status ?? 500)
               : 500
 
-          await sendEventToPosthog({
+          await sendEventToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model,
             provider: 'openai',
             input: formatOpenAIResponsesInput(sanitizeOpenAIResponse(openAIParams.input), openAIParams.instructions),
@@ -578,7 +578,7 @@ export class WrappedResponses extends Responses {
     body: Params & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<ParsedResponse<ParsedT>> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const originalCreate = super.create.bind(this)
@@ -592,9 +592,9 @@ export class WrappedResponses extends Responses {
       const wrappedPromise = parentPromise.then(
         async (result) => {
           const latency = (Date.now() - startTime) / 1000
-          await sendEventToPosthog({
+          await sendEventToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model ?? result.model,
             provider: 'openai',
             input: formatOpenAIResponsesInput(sanitizeOpenAIResponse(openAIParams.input), openAIParams.instructions),
@@ -614,9 +614,9 @@ export class WrappedResponses extends Responses {
           return result
         },
         async (error: Error) => {
-          const enrichedError = await sendEventWithErrorToPosthog({
+          const enrichedError = await sendEventWithErrorToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model,
             provider: 'openai',
             input: formatOpenAIResponsesInput(sanitizeOpenAIResponse(openAIParams.input), openAIParams.instructions),
@@ -643,10 +643,10 @@ export class WrappedResponses extends Responses {
 }
 
 export class WrappedEmbeddings extends Embeddings {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: OpenAIOrignal, phClient: PostHog) {
+  constructor(client: OpenAIOrignal, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -656,7 +656,7 @@ export class WrappedEmbeddings extends Embeddings {
     body: EmbeddingCreateParams & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<CreateEmbeddingResponse> {
-    const { providerParams: openAIParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: openAIParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(openAIParams, options)
@@ -664,13 +664,13 @@ export class WrappedEmbeddings extends Embeddings {
     const wrappedPromise = parentPromise.then(
       async (result) => {
         const latency = (Date.now() - startTime) / 1000
-        await sendEventToPosthog({
+        await sendEventToInsights({
           client: this.phClient,
-          ...posthogParams,
+          ...insightsParams,
           eventType: AIEvent.Embedding,
           model: openAIParams.model,
           provider: 'openai',
-          input: withPrivacyMode(this.phClient, posthogParams.privacyMode, openAIParams.input),
+          input: withPrivacyMode(this.phClient, insightsParams.privacyMode, openAIParams.input),
           output: null, // Embeddings don't have output content
           latency,
           baseURL: this.baseURL,
@@ -687,13 +687,13 @@ export class WrappedEmbeddings extends Embeddings {
         const httpStatus =
           error && typeof error === 'object' && 'status' in error ? ((error as { status?: number }).status ?? 500) : 500
 
-        await sendEventToPosthog({
+        await sendEventToInsights({
           client: this.phClient,
           eventType: AIEvent.Embedding,
-          ...posthogParams,
+          ...insightsParams,
           model: openAIParams.model,
           provider: 'openai',
-          input: withPrivacyMode(this.phClient, posthogParams.privacyMode, openAIParams.input),
+          input: withPrivacyMode(this.phClient, insightsParams.privacyMode, openAIParams.input),
           output: null, // Embeddings don't have output content
           latency: 0,
           baseURL: this.baseURL,
@@ -713,7 +713,7 @@ export class WrappedEmbeddings extends Embeddings {
 }
 
 export class WrappedAudio extends Audio {
-  constructor(parentClient: PostHogOpenAI, phClient: PostHog) {
+  constructor(parentClient: InsightsOpenAI, phClient: Insights) {
     super(parentClient)
     this.transcriptions = new WrappedTranscriptions(parentClient, phClient)
   }
@@ -722,10 +722,10 @@ export class WrappedAudio extends Audio {
 }
 
 export class WrappedTranscriptions extends Transcriptions {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(client: OpenAIOrignal, phClient: PostHog) {
+  constructor(client: OpenAIOrignal, phClient: Insights) {
     super(client)
     this.phClient = phClient
     this.baseURL = client.baseURL
@@ -792,8 +792,8 @@ export class WrappedTranscriptions extends Transcriptions {
     | string
     | Stream<OpenAIOrignal.Audio.Transcriptions.TranscriptionStreamEvent>
   > {
-    const { providerParams: openAIParams, posthogParams } =
-      extractPosthogParams<OpenAIOrignal.Audio.Transcriptions.TranscriptionCreateParams>(body)
+    const { providerParams: openAIParams, insightsParams } =
+      extractInsightsParams<OpenAIOrignal.Audio.Transcriptions.TranscriptionCreateParams>(body)
     const startTime = Date.now()
 
     const parentPromise = openAIParams.stream
@@ -840,9 +840,9 @@ export class WrappedTranscriptions extends Transcriptions {
               const latency = (Date.now() - startTime) / 1000
               const timeToFirstToken = firstTokenTime !== undefined ? (firstTokenTime - startTime) / 1000 : undefined
               const availableTools = extractAvailableToolCalls('openai', openAIParams)
-              await sendEventToPosthog({
+              await sendEventToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model,
                 provider: 'openai',
                 input: openAIParams.prompt,
@@ -856,9 +856,9 @@ export class WrappedTranscriptions extends Transcriptions {
                 tools: availableTools,
               })
             } catch (error: unknown) {
-              const enrichedError = await sendEventWithErrorToPosthog({
+              const enrichedError = await sendEventWithErrorToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: openAIParams.model,
                 provider: 'openai',
                 input: openAIParams.prompt,
@@ -882,9 +882,9 @@ export class WrappedTranscriptions extends Transcriptions {
         async (result) => {
           if ('text' in result) {
             const latency = (Date.now() - startTime) / 1000
-            await sendEventToPosthog({
+            await sendEventToInsights({
               client: this.phClient,
-              ...posthogParams,
+              ...insightsParams,
               model: openAIParams.model,
               provider: 'openai',
               input: openAIParams.prompt,
@@ -903,9 +903,9 @@ export class WrappedTranscriptions extends Transcriptions {
           }
         },
         async (error: unknown) => {
-          const enrichedError = await sendEventWithErrorToPosthog({
+          const enrichedError = await sendEventWithErrorToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: openAIParams.model,
             provider: 'openai',
             input: openAIParams.prompt,
@@ -928,6 +928,6 @@ export class WrappedTranscriptions extends Transcriptions {
   }
 }
 
-export default PostHogOpenAI
+export default InsightsOpenAI
 
-export { PostHogOpenAI as OpenAI }
+export { InsightsOpenAI as OpenAI }

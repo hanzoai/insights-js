@@ -7,7 +7,7 @@ import {
     ProductTourStep,
     DEFAULT_PRODUCT_TOUR_APPEARANCE,
     ProductTourWaitPeriod,
-} from '../../posthog-product-tours-types'
+} from '../../insights-product-tours-types'
 import { findElement } from './element-inference'
 import { prepareStylesheet } from '../utils/stylesheet-loader'
 import { document as _document, window as _window } from '../../utils/globals'

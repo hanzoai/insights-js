@@ -1,7 +1,7 @@
 import { AIEvent, truncate } from '../../utils'
 import { redactBase64DataUrl } from '../../sanitization'
 import type { ReadableSpan } from '@opentelemetry/sdk-trace-base'
-import type { PostHogSpanMapper, PostHogSpanMapperResult, UsageData } from '../types'
+import type { InsightsSpanMapper, InsightsSpanMapperResult, UsageData } from '../types'
 
 const OTEL_STATUS_ERROR = 2
 const AI_TELEMETRY_METADATA_PREFIX = 'ai.telemetry.metadata.'
@@ -705,7 +705,7 @@ function getAiSdkFrameworkVersion(span: ReadableSpan): string | undefined {
   return majorVersionMatch ? majorVersionMatch[1] : rawVersion
 }
 
-function buildPosthogProperties(attributes: Record<string, unknown>, operationId: string): Record<string, unknown> {
+function buildInsightsProperties(attributes: Record<string, unknown>, operationId: string): Record<string, unknown> {
   const telemetryMetadata = extractAiSdkTelemetryMetadata(attributes)
   const finishReasons = toStringArray(parseJsonValue(attributes['gen_ai.response.finish_reasons']))
   const finishReason = toStringValue(attributes['ai.response.finishReason']) || finishReasons[0]
@@ -753,7 +753,7 @@ function buildPosthogProperties(attributes: Record<string, unknown>, operationId
   }
 }
 
-function buildAiSdkMapperResult(span: ReadableSpan): PostHogSpanMapperResult | null {
+function buildAiSdkMapperResult(span: ReadableSpan): InsightsSpanMapperResult | null {
   const attributes = span.attributes || {}
   const operationId = getOperationId(span)
   const providerMetadata = extractProviderMetadata(attributes)
@@ -791,18 +791,18 @@ function buildAiSdkMapperResult(span: ReadableSpan): PostHogSpanMapperResult | n
     usage,
     tools,
     modelParams,
-    posthogProperties: {
-      ...buildPosthogProperties(attributes, operationId),
+    insightsProperties: {
+      ...buildInsightsProperties(attributes, operationId),
       ...(frameworkVersion ? { $ai_framework_version: frameworkVersion } : {}),
     },
     error,
   }
 }
 
-export const aiSdkSpanMapper: PostHogSpanMapper = {
+export const aiSdkSpanMapper: InsightsSpanMapper = {
   name: 'ai-sdk',
   canMap: shouldMapAiSdkSpan,
-  map: (span: ReadableSpan): PostHogSpanMapperResult | null => {
+  map: (span: ReadableSpan): InsightsSpanMapperResult | null => {
     return buildAiSdkMapperResult(span)
   },
 }

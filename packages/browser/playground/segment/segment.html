@@ -9,7 +9,7 @@
                 analytics.load("GOEDfA21zZTtR7clsBuDvmBKAtAdZ6Np");
 
                 analytics.ready(() => {
-                    posthog.init('phc_lPwXKkvW2VtByfTsibDzFKAxn02rdVgMUiHWkZ5kW31', {
+                    insights.init('phc_lPwXKkvW2VtByfTsibDzFKAxn02rdVgMUiHWkZ5kW31', {
                         api_host: "http://localhost:8000",
                         capture_pageview: false,
                         autocapture: false,
@@ -26,7 +26,7 @@
 
 
 <body>
-    <h2>This page loads PostHog via Segment</h2>
+    <h2>This page loads Insights via Segment</h2>
 
     <button data-cy-button>Some button</button>
 
@@ -53,7 +53,7 @@
 
     <br />
 
-    <button data-cy-feature-flag-button onclick="console.log(posthog.isFeatureEnabled('some-feature'))">
+    <button data-cy-feature-flag-button onclick="console.log(insights.isFeatureEnabled('some-feature'))">
         Test a feature flag
     </button>
 
@@ -92,9 +92,9 @@
     <script>
 
         setInterval(() => {
-            document.getElementById("current-distinct-id").innerHTML = posthog.get_distinct_id()
-            document.getElementById("current-session-id").innerHTML = posthog.sessionRecording.sessionId
-            document.getElementById("current-window-id").innerHTML = posthog.sessionRecording.windowId
+            document.getElementById("current-distinct-id").innerHTML = insights.get_distinct_id()
+            document.getElementById("current-session-id").innerHTML = insights.sessionRecording.sessionId
+            document.getElementById("current-window-id").innerHTML = insights.sessionRecording.windowId
         }, 1000)
     </script>
 </body>

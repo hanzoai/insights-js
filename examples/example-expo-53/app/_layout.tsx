@@ -4,10 +4,10 @@ import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import 'react-native-reanimated'
 
-import { PostHogProvider, PostHogSurveyProvider } from 'posthog-react-native'
+import { InsightsProvider, InsightsSurveyProvider } from 'insights-react-native'
 
 import { useColorScheme } from '@/hooks/useColorScheme'
-import { posthog } from './posthog'
+import { insights } from './insights'
 
 export default function RootLayout() {
     const colorScheme = useColorScheme()
@@ -22,8 +22,8 @@ export default function RootLayout() {
     }
 
     return (
-        <PostHogProvider
-            client={posthog}
+        <InsightsProvider
+            client={insights}
             autocapture={{
                 captureScreens: false, // expo-router requires this to be false and capture screens manually
                 captureTouches: true,
@@ -31,7 +31,7 @@ export default function RootLayout() {
             }}
             debug={true}
         >
-            <PostHogSurveyProvider client={posthog}>
+            <InsightsSurveyProvider client={insights}>
                 <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                     <Stack>
                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -39,7 +39,7 @@ export default function RootLayout() {
                     </Stack>
                     <StatusBar style="auto" />
                 </ThemeProvider>
-            </PostHogSurveyProvider>
-        </PostHogProvider>
+            </InsightsSurveyProvider>
+        </InsightsProvider>
     )
 }

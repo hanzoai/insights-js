@@ -43,9 +43,9 @@ module.exports = {
         {
             files: './playwright/**/*',
             rules: {
-                'posthog-js/no-direct-array-check': 'off',
-                'posthog-js/no-direct-undefined-check': 'off',
-                'posthog-js/no-direct-null-check': 'off',
+                '@hanzo/insights/no-direct-array-check': 'off',
+                '@hanzo/insights/no-direct-undefined-check': 'off',
+                '@hanzo/insights/no-direct-null-check': 'off',
                 '@typescript-eslint/naming-convention': 'off',
                 'compat/compat': 'off',
                 '@typescript-eslint/no-unsafe-function-type': 'off',
@@ -79,9 +79,9 @@ module.exports = {
                 'no-console': 'off',
                 '@typescript-eslint/no-require-imports': 'off',
                 'no-undef': 'off',
-                'posthog-js/no-direct-array-check': 'off',
-                'posthog-js/no-direct-undefined-check': 'off',
-                'posthog-js/no-direct-null-check': 'off',
+                '@hanzo/insights/no-direct-array-check': 'off',
+                '@hanzo/insights/no-direct-undefined-check': 'off',
+                '@hanzo/insights/no-direct-null-check': 'off',
             },
             env: {
                 node: true,
