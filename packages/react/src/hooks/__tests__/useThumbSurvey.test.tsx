@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { renderHook, act } from '@testing-library/react'
-import { PostHogProvider, PostHog } from '../../context'
+import { InsightsProvider, Insights } from '../../context'
 import { useThumbSurvey } from '../useThumbSurvey'
 import { SurveyEventName, SurveyEventProperties } from '@hanzo/insights'
 import { isUndefined } from '../../utils/type-utils'
@@ -8,7 +8,7 @@ import { isUndefined } from '../../utils/type-utils'
 jest.useFakeTimers()
 
 describe('useThumbSurvey hook', () => {
-    let posthog: PostHog
+    let insights: Insights
     let captureMock: jest.Mock
     let displaySurveyMock: jest.Mock
     let wrapper: React.FC<{ children: React.ReactNode }>
@@ -17,13 +17,13 @@ describe('useThumbSurvey hook', () => {
         captureMock = jest.fn()
         displaySurveyMock = jest.fn()
 
-        posthog = {
+        insights = {
             capture: captureMock,
-            get_session_replay_url: () => 'https://app.posthog.com/replay/123',
+            get_session_replay_url: () => 'https://app.insights.hanzo.ai/replay/123',
             surveys: { displaySurvey: displaySurveyMock },
-        } as unknown as PostHog
+        } as unknown as Insights
 
-        wrapper = ({ children }) => <PostHogProvider client={posthog}>{children}</PostHogProvider>
+        wrapper = ({ children }) => <InsightsProvider client={insights}>{children}</InsightsProvider>
     })
 
     describe('survey shown tracking', () => {
@@ -57,7 +57,7 @@ describe('useThumbSurvey hook', () => {
             expect(captureMock).toHaveBeenCalledTimes(1)
             expect(captureMock).toHaveBeenCalledWith(SurveyEventName.SHOWN, {
                 [SurveyEventProperties.SURVEY_ID]: 'test-survey',
-                sessionRecordingUrl: 'https://app.posthog.com/replay/123',
+                sessionRecordingUrl: 'https://app.insights.hanzo.ai/replay/123',
             })
         })
     })

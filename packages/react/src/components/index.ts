@@ -1,7 +1,7 @@
-export * from './PostHogFeature'
-export * from './PostHogCaptureOnViewed'
+export * from './InsightsFeature'
+export * from './InsightsCaptureOnViewed'
 export {
-    PostHogErrorBoundary,
-    PostHogErrorBoundaryProps,
-    PostHogErrorBoundaryFallbackProps,
-} from './PostHogErrorBoundary'
+    InsightsErrorBoundary,
+    InsightsErrorBoundaryProps,
+    InsightsErrorBoundaryFallbackProps,
+} from './InsightsErrorBoundary'

@@ -1,9 +1,9 @@
 import { JsonType } from '@hanzo/insights'
 import { useContext, useEffect, useState } from 'react'
-import { PostHogContext } from '../context'
+import { InsightsContext } from '../context'
 
 export function useFeatureFlagPayload(flag: string): JsonType {
-    const { client, bootstrap } = useContext(PostHogContext)
+    const { client, bootstrap } = useContext(InsightsContext)
 
     const [featureFlagPayload, setFeatureFlagPayload] = useState<JsonType>(() => client.getFeatureFlagPayload(flag))
 

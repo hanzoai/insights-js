@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
-import { PostHogContext } from '../context'
+import { InsightsContext } from '../context'
 
 export function useActiveFeatureFlags(): string[] {
-    const { client, bootstrap } = useContext(PostHogContext)
+    const { client, bootstrap } = useContext(InsightsContext)
 
     const [featureFlags, setFeatureFlags] = useState<string[]>(() => client.featureFlags.getFlags())
 
