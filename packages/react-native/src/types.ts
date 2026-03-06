@@ -1,4 +1,4 @@
-export type PostHogAutocaptureNavigationTrackerOptions = {
+export type InsightsAutocaptureNavigationTrackerOptions = {
   routeToName?: (name: string, params: any) => string
   routeToProperties?: (name: string, params: any) => Record<string, any>
 }
@@ -6,13 +6,13 @@ export type PostHogAutocaptureNavigationTrackerOptions = {
 /**
  * @deprecated
  */
-export type PostHogNavigationRef = {
+export type InsightsNavigationRef = {
   getCurrentRoute(): any | undefined
   isReady: () => boolean
-  current?: PostHogNavigationRef | any | undefined
+  current?: InsightsNavigationRef | any | undefined
 }
 
-export type PostHogAutocaptureOptions = {
+export type InsightsAutocaptureOptions = {
   // Touches
   captureTouches?: boolean
   customLabelProp?: string
@@ -27,22 +27,22 @@ export type PostHogAutocaptureOptions = {
    * Only used for expo-router, @react-navigation/native and react-native-navigation
    *
    * For react-native-navigation, you need to call initReactNativeNavigation before using this option
-   *  See example: https://posthog.com/docs/libraries/react-native#with-react-native-navigation-and-autocapture
+   *  See example: https://insights.com/docs/libraries/react-native#with-react-native-navigation-and-autocapture
    *
-   * For @react-navigation/native v6 and below, you need to wrap the PostHogProvider within the NavigationContainer
-   *  See example: https://posthog.com/docs/libraries/react-native#with-react-navigationnative-and-autocapture
+   * For @react-navigation/native v6 and below, you need to wrap the InsightsProvider within the NavigationContainer
+   *  See example: https://insights.com/docs/libraries/react-native#with-react-navigationnative-and-autocapture
    *
    * For @react-navigation/native v7 and above, because of a library change, you'll need to capture the screens manually and disable this option
    *  You can use the onStateChange callback from the NavigationContainer to capture the screens automatically using the screen capture method
-   *  You can use the 'usePostHog()' hook or your own posthog instance to capture the screens
+   *  You can use the 'useInsights()' hook or your own insights instance to capture the screens
    *  Since captureScreens is disabled, you don't need to pass the navigationRef, the navigation mutation object is also ignored
-   *  See example: https://reactnavigation.org/docs/screen-tracking/ and https://posthog.com/docs/libraries/react-native#manually-capturing-screen-capture-events
+   *  See example: https://reactnavigation.org/docs/screen-tracking/ and https://insights.com/docs/libraries/react-native#manually-capturing-screen-capture-events
    *
    * For expo-router, expo-router uses @react-navigation/native, but does not expose the NavigationContainer, you'll need to capture the screens manually and disable this option
    *  expo-router always has access to a URL, you can use the URL to capture the screens automatically using the screen capture method
-   *  You can use the 'usePostHog()' hook or your own posthog instance to capture the screens
+   *  You can use the 'useInsights()' hook or your own insights instance to capture the screens
    *  Since captureScreens is disabled, you don't need to pass the navigationRef, the navigation mutation object is also ignored
-   *  See example: https://docs.expo.dev/router/reference/screen-tracking/ and https://posthog.com/docs/libraries/react-native#manually-capturing-screen-capture-events
+   *  See example: https://docs.expo.dev/router/reference/screen-tracking/ and https://insights.com/docs/libraries/react-native#manually-capturing-screen-capture-events
    *
    * @default true
    */
@@ -53,22 +53,22 @@ export type PostHogAutocaptureOptions = {
    *
    * @default Default to the route name and params
    */
-  navigation?: PostHogAutocaptureNavigationTrackerOptions
+  navigation?: InsightsAutocaptureNavigationTrackerOptions
   /**
    * If you create a navigation ref with createNavigationContainerRef, you need to pass the navigation ref
    * Only used for expo-router and @react-navigation/native if captureScreens is true
    *
    * @deprecated this is deprecated since it didn't work as expected, check out the `captureScreens` comments for capturing screen views semi-automatically
    */
-  navigationRef?: PostHogNavigationRef
+  navigationRef?: InsightsNavigationRef
 }
 
-export interface PostHogCustomAppProperties {
+export interface InsightsCustomAppProperties {
   /** Build number like "1.2.2" or "122" */
   $app_build?: string | null
-  /** Name of the app as displayed below the icon like "PostHog" */
+  /** Name of the app as displayed below the icon like "Insights" */
   $app_name?: string | null
-  /** Namespace of the app usually like "com.posthog.app" */
+  /** Namespace of the app usually like "com.insights.app" */
   $app_namespace?: string | null
   /** Human friendly app version like what a user would see in the app store like "1.2.2" */
   $app_version?: string | null
@@ -90,7 +90,7 @@ export interface PostHogCustomAppProperties {
   $timezone?: string | null
 }
 
-export type PostHogSessionReplayConfig = {
+export type InsightsSessionReplayConfig = {
   /**
    * Enable masking of all text and text input fields
    * Default: true
@@ -156,7 +156,7 @@ export type PostHogSessionReplayConfig = {
   sampleRate?: number
 }
 
-export interface PostHogCustomStorage {
+export interface InsightsCustomStorage {
   getItem: (key: string) => string | null | Promise<string | null>
   setItem: (key: string, value: string) => void | Promise<void>
 }

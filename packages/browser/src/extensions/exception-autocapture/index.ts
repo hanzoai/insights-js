@@ -1,5 +1,5 @@
 import { assignableWindow, window } from '../../utils/globals'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { ExceptionAutoCaptureConfig, RemoteConfig } from '../../types'
 
 import { createLogger } from '../../utils/logger'
@@ -10,7 +10,7 @@ import { ErrorTracking } from '@hanzo/insights-core'
 const logger = createLogger('[ExceptionAutocapture]')
 
 export class ExceptionObserver {
-    private _instance: PostHog
+    private _instance: Insights
     private _rateLimiter: BucketedRateLimiter<string>
     private _remoteEnabled: boolean | undefined
     private _config: Required<ExceptionAutoCaptureConfig>
@@ -18,7 +18,7 @@ export class ExceptionObserver {
     private _unwrapUnhandledRejection: (() => void) | undefined
     private _unwrapConsoleError: (() => void) | undefined
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this._instance = instance
         this._remoteEnabled = !!this._instance.persistence?.props[EXCEPTION_CAPTURE_ENABLED_SERVER_SIDE]
 
@@ -72,12 +72,12 @@ export class ExceptionObserver {
     }
 
     private _loadScript(cb: () => void): void {
-        if (assignableWindow.__PosthogExtensions__?.errorWrappingFunctions) {
+        if (assignableWindow.__InsightsExtensions__?.errorWrappingFunctions) {
             // already loaded
             cb()
         }
 
-        assignableWindow.__PosthogExtensions__?.loadExternalDependency?.(
+        assignableWindow.__InsightsExtensions__?.loadExternalDependency?.(
             this._instance,
             'exception-autocapture',
             (err) => {
@@ -90,14 +90,14 @@ export class ExceptionObserver {
     }
 
     private _startCapturing = () => {
-        if (!window || !this.isEnabled || !assignableWindow.__PosthogExtensions__?.errorWrappingFunctions) {
+        if (!window || !this.isEnabled || !assignableWindow.__InsightsExtensions__?.errorWrappingFunctions) {
             return
         }
 
-        const wrapOnError = assignableWindow.__PosthogExtensions__.errorWrappingFunctions.wrapOnError
+        const wrapOnError = assignableWindow.__InsightsExtensions__.errorWrappingFunctions.wrapOnError
         const wrapUnhandledRejection =
-            assignableWindow.__PosthogExtensions__.errorWrappingFunctions.wrapUnhandledRejection
-        const wrapConsoleError = assignableWindow.__PosthogExtensions__.errorWrappingFunctions.wrapConsoleError
+            assignableWindow.__InsightsExtensions__.errorWrappingFunctions.wrapUnhandledRejection
+        const wrapConsoleError = assignableWindow.__InsightsExtensions__.errorWrappingFunctions.wrapConsoleError
 
         try {
             if (!this._unwrapOnError && this._config.capture_unhandled_errors) {

@@ -117,7 +117,7 @@
                             },
                             "return": {
                               "elementType": {
-                                "name": "PostHogDemoScreen"
+                                "name": "InsightsDemoScreen"
                               },
                               "memoizedProps": {},
                               "return": {
@@ -728,7 +728,7 @@
                                                                                                                                                                                           "return": {
                                                                                                                                                                                             "elementType": {},
                                                                                                                                                                                             "memoizedProps": {
-                                                                                                                                                                                              "ph-label": "PostHogProvider",
+                                                                                                                                                                                              "ph-label": "InsightsProvider",
                                                                                                                                                                                               "style": {
                                                                                                                                                                                                 "flex": 1
                                                                                                                                                                                               }
@@ -743,14 +743,14 @@
                                                                                                                                                                                                   "displayName": "View"
                                                                                                                                                                                                 },
                                                                                                                                                                                                 "memoizedProps": {
-                                                                                                                                                                                                  "ph-label": "PostHogProvider",
+                                                                                                                                                                                                  "ph-label": "InsightsProvider",
                                                                                                                                                                                                   "style": {
                                                                                                                                                                                                     "flex": 1
                                                                                                                                                                                                   }
                                                                                                                                                                                                 },
                                                                                                                                                                                                 "return": {
                                                                                                                                                                                                   "elementType": {
-                                                                                                                                                                                                    "name": "PostHogProvider"
+                                                                                                                                                                                                    "name": "InsightsProvider"
                                                                                                                                                                                                   },
                                                                                                                                                                                                   "memoizedProps": {
                                                                                                                                                                                                     "apiKey": "phc_FzKQvNvps9ZUTxF5KJR9jIKdGb4bq4HNBa9SRyAHi0C",

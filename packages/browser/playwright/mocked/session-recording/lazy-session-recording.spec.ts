@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 import { Page } from '@playwright/test'
 import { isUndefined } from '@hanzo/insights-core'
@@ -6,7 +6,7 @@ import { isUndefined } from '@hanzo/insights-core'
 async function ensureRecordingIsStopped(page: Page) {
     await page.resetCapturedEvents()
 
-    await page.locator('[data-cy-input]').type('hello posthog!')
+    await page.locator('[data-cy-input]').type('hello insights!')
     // wait a little since we can't wait for the absence of a call to /ses/*
     await page.waitForTimeout(250)
 
@@ -18,7 +18,7 @@ async function ensureActivitySendsSnapshots(page: Page, expectedCustomTags: stri
     await page.resetCapturedEvents()
 
     const responsePromise = page.waitForResponse('**/ses/*')
-    await page.locator('[data-cy-input]').type('hello posthog!')
+    await page.locator('[data-cy-input]').type('hello insights!')
     await responsePromise
 
     const capturedEvents = await page.capturedEvents()
@@ -58,7 +58,7 @@ function getSnapshotTimestamp(snapshot: any, position: 'first' | 'last'): number
 
 async function simulateSessionExpiry(page: Page): Promise<void> {
     await page.evaluate(() => {
-        const ph = (window as WindowWithPostHog).posthog
+        const ph = (window as WindowWithInsights).insights
         const activityTs = ph?.sessionManager?.['_sessionActivityTimestamp']
         const startTs = ph?.sessionManager?.['_sessionStartTimestamp']
         const sessionId = ph?.sessionManager?.['_sessionId']
@@ -106,38 +106,38 @@ test.describe('Session recording - array.js', () => {
 
     test('captures session events', async ({ page }) => {
         const startingSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         await ensureActivitySendsSnapshots(page, [
             '$remote_config_received',
             '$session_options',
-            '$posthog_config',
+            '$insights_config',
             '$recording_started',
         ])
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.stopSessionRecording()
         })
 
         await ensureRecordingIsStopped(page)
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.startSessionRecording()
         })
 
         await ensureActivitySendsSnapshots(page, [
             '$remote_config_received',
             '$session_options',
-            '$posthog_config',
+            '$insights_config',
             '$recording_started',
         ])
 
         // the session id is not rotated by stopping and starting the recording
         const finishingSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         expect(startingSessionId).toEqual(finishingSessionId)
@@ -148,7 +148,7 @@ test.describe('Session recording - array.js', () => {
         await ensureActivitySendsSnapshots(page, [
             '$remote_config_received',
             '$session_options',
-            '$posthog_config',
+            '$insights_config',
             '$recording_started',
         ])
         // Explicitly wait for recording to be fully started before timing-sensitive operations
@@ -189,12 +189,12 @@ test.describe('Session recording - array.js', () => {
         await page.waitingForNetworkCausedBy({
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
-                await page.locator('[data-cy-input]').fill('hello posthog!')
+                await page.locator('[data-cy-input]').fill('hello insights!')
             },
         })
 
         const firstSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         const capturedEvents = await page.capturedEvents()
@@ -219,7 +219,7 @@ test.describe('Session recording - array.js', () => {
         await page.waitingForNetworkCausedBy({
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
-                await page.locator('[data-cy-input]').type('hello posthog!')
+                await page.locator('[data-cy-input]').type('hello insights!')
             },
         })
 
@@ -228,7 +228,7 @@ test.describe('Session recording - array.js', () => {
         expect(capturedAfterActivity[0]['properties']['$session_id']).toEqual(firstSessionId)
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('some_custom_event')
         })
         await page.expectCapturedEventsToBe(['$snapshot', 'some_custom_event'])
@@ -241,7 +241,7 @@ test.describe('Session recording - array.js', () => {
     test('starts a new recording after calling reset', async ({ page }) => {
         await page.resetCapturedEvents()
         const startingSessionId = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.get_session_id()
         })
         expect(startingSessionId).not.toBeNull()
@@ -249,13 +249,13 @@ test.describe('Session recording - array.js', () => {
         await ensureActivitySendsSnapshots(page, [
             '$remote_config_received',
             '$session_options',
-            '$posthog_config',
+            '$insights_config',
             '$recording_started',
         ])
 
         await page.resetCapturedEvents()
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.reset()
         })
 
@@ -263,7 +263,7 @@ test.describe('Session recording - array.js', () => {
         await page.waitingForNetworkCausedBy({
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
-                await page.locator('[data-cy-input]').fill('hello posthog!')
+                await page.locator('[data-cy-input]').fill('hello insights!')
             },
         })
 
@@ -294,7 +294,7 @@ test.describe('Session recording - array.js', () => {
             { sessionId: 'starting', tags: [] },
             {
                 sessionId: 'new',
-                tags: ['$remote_config_received', '$session_options', '$posthog_config', '$session_id_change'],
+                tags: ['$remote_config_received', '$session_options', '$insights_config', '$session_id_change'],
             },
         ])
     })
@@ -303,12 +303,12 @@ test.describe('Session recording - array.js', () => {
         await page.waitingForNetworkCausedBy({
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
-                await page.locator('[data-cy-input]').fill('hello posthog!')
+                await page.locator('[data-cy-input]').fill('hello insights!')
             },
         })
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('test_registered_property')
         })
 
@@ -329,14 +329,14 @@ test.describe('Session recording - array.js', () => {
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
                 // using fill here means the session id doesn't rotate, must need some kind of user interaction
-                await page.locator('[data-cy-input]').type('hello posthog!')
+                await page.locator('[data-cy-input]').type('hello insights!')
             },
         })
 
         const timestampAfterRotation = await page.evaluate(() => Date.now())
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('test_registered_property')
         })
 
@@ -362,12 +362,12 @@ test.describe('Session recording - array.js', () => {
         await ensureActivitySendsSnapshots(page, [
             '$remote_config_received',
             '$session_options',
-            '$posthog_config',
+            '$insights_config',
             '$recording_started',
         ])
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph!.capture('an_event')
         })
         const capturedEvents = await page.capturedEvents()

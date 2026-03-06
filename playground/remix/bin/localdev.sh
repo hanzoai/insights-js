@@ -13,7 +13,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PLAYGROUND_DIR="$( cd "$SCRIPT_DIR/.." && pwd )"
 REPO_ROOT="$( cd "$PLAYGROUND_DIR/../.." && pwd )"
 
-echo -e "${BLUE}🚀 PostHog JS Remix Playground Local Development Setup${NC}"
+echo -e "${BLUE}🚀 Insights JS Remix Playground Local Development Setup${NC}"
 echo ""
 
 # Step 1: Build packages
@@ -44,7 +44,7 @@ pnpm install
 # Step 5: Run dev server
 echo ""
 echo -e "${GREEN}5. Starting dev server...${NC}"
-echo -e "${YELLOW}Tip: Open localhost:5173?__posthog_debug=true to see debug logs${NC}"
+echo -e "${YELLOW}Tip: Open localhost:5173?__insights_debug=true to see debug logs${NC}"
 echo ""
 
 # Pass through all environment variables and run dev

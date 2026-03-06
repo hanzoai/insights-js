@@ -22,13 +22,13 @@ export type FeatureFlagResult = {
   payload: unknown
 }
 
-export type PostHogEvent = {
+export type InsightsEvent = {
   event: string
   distinctId: string
   properties?: Record<string, unknown>
 }
 
-export type BeforeSendFn = (event: PostHogEvent) => PostHogEvent | null
+export type BeforeSendFn = (event: InsightsEvent) => InsightsEvent | null
 
 export type IdentifyFn = (ctx: any) => Promise<{ distinctId: string } | null>
 
@@ -63,7 +63,7 @@ export function normalizeError(error: unknown): {
   return { message: String(error) }
 }
 
-export class PostHog {
+export class Insights {
   private apiKey: string
   private host: string
   private beforeSend?: BeforeSendFn | BeforeSendFn[]
@@ -78,8 +78,8 @@ export class PostHog {
       identify?: IdentifyFn
     }
   ) {
-    this.apiKey = options?.apiKey ?? process.env.POSTHOG_API_KEY ?? ''
-    this.host = options?.host ?? process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com'
+    this.apiKey = options?.apiKey ?? process.env.INSIGHTS_API_KEY ?? ''
+    this.host = options?.host ?? process.env.INSIGHTS_HOST ?? 'https://us.i.insights.com'
     this.beforeSend = options?.beforeSend
     this.identifyFn = options?.identify
   }
@@ -91,15 +91,15 @@ export class PostHog {
     }
     if (argsDistinctId) return argsDistinctId
     throw new Error(
-      'PostHog: Could not resolve distinctId. Either configure an identify callback ' +
-        'in the PostHog constructor or pass distinctId explicitly.'
+      'Insights: Could not resolve distinctId. Either configure an identify callback ' +
+        'in the Insights constructor or pass distinctId explicitly.'
     )
   }
 
-  private runBeforeSend(event: PostHogEvent): PostHogEvent | null {
+  private runBeforeSend(event: InsightsEvent): InsightsEvent | null {
     if (!this.beforeSend) return event
     const fns = Array.isArray(this.beforeSend) ? this.beforeSend : [this.beforeSend]
-    let result: PostHogEvent | null = event
+    let result: InsightsEvent | null = event
     for (const fn of fns) {
       result = fn(result)
       if (!result) return null

@@ -1,4 +1,4 @@
-import { expect } from '../utils/posthog-playwright-test-base'
+import { expect } from '../utils/insights-playwright-test-base'
 import { test } from '../../fixtures'
 
 test.describe('ErrorTracking chunkIds', () => {
@@ -6,17 +6,17 @@ test.describe('ErrorTracking chunkIds', () => {
         url: '/playground/cypress/index.html',
     })
 
-    test('chunk ids are added to frames when present', async ({ events, page, posthog }) => {
-        await posthog.init()
+    test('chunk ids are added to frames when present', async ({ events, page, insights }) => {
+        await insights.init()
         const chunkId = '1234'
         await page.route(`https://errortracking.com/script.js`, async (route) => {
             await route.fulfill({
                 headers: { loaded: 'using relative path by playwright' },
                 contentType: 'application/javascript',
                 body: `
-                !function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._posthogChunkIds=e._posthogChunkIds||{},e._posthogChunkIds[n]="${chunkId}")}catch(e){}}();
+                !function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._insightsChunkIds=e._insightsChunkIds||{},e._insightsChunkIds[n]="${chunkId}")}catch(e){}}();
                 const error = new Error('this is an error')
-                window.posthog.captureException(error)
+                window.insights.captureException(error)
                 `,
             })
         })

@@ -1,11 +1,11 @@
 import { Toolbar } from '../../extensions/toolbar'
 import { isString, isUndefined } from '@hanzo/insights-core'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { ToolbarParams } from '../../types'
 import { assignableWindow, window } from '../../utils/globals'
 import { RequestRouter } from '../../utils/request-router'
 import { TOOLBAR_ID } from '../../constants'
-import { createMockPostHog, createMockConfig } from '../helpers/posthog-instance'
+import { createMockInsights, createMockConfig } from '../helpers/insights-instance'
 
 const makeToolbarParams = (overrides: Partial<ToolbarParams>): ToolbarParams => ({
     token: 'test_token',
@@ -14,11 +14,11 @@ const makeToolbarParams = (overrides: Partial<ToolbarParams>): ToolbarParams => 
 
 describe('Toolbar', () => {
     let toolbar: Toolbar
-    let instance: PostHog
+    let instance: Insights
     const toolbarParams = makeToolbarParams({})
 
     beforeEach(() => {
-        instance = createMockPostHog({
+        instance = createMockInsights({
             config: createMockConfig({
                 api_host: 'http://api.example.com',
                 token: 'test_token',
@@ -27,7 +27,7 @@ describe('Toolbar', () => {
         })
         instance.requestRouter = new RequestRouter(instance)
 
-        assignableWindow.__PosthogExtensions__ = {
+        assignableWindow.__InsightsExtensions__ = {
             loadExternalDependency: jest.fn((_ph, _path: any, callback: any) => callback()),
         }
 
@@ -137,9 +137,9 @@ describe('Toolbar', () => {
             expect(toolbar.loadToolbar).not.toHaveBeenCalled()
         })
 
-        it('should work if calling toolbar params `__posthog`', () => {
+        it('should work if calling toolbar params `__insights`', () => {
             toolbar.maybeLoadToolbar(
-                aLocation(withHash(withHashParamsFrom(defaultHashState, '__posthog'))),
+                aLocation(withHash(withHashParamsFrom(defaultHashState, '__insights'))),
                 storage,
                 history
             )
@@ -165,7 +165,7 @@ describe('Toolbar', () => {
     describe('load and close toolbar', () => {
         it('should persist for next time', () => {
             expect(toolbar.loadToolbar(toolbarParams)).toBe(true)
-            expect(JSON.parse(window.localStorage.getItem('_postHogToolbarParams') ?? '')).toEqual({
+            expect(JSON.parse(window.localStorage.getItem('_insightsToolbarParams') ?? '')).toEqual({
                 ...toolbarParams,
                 apiURL: 'http://api.example.com',
             })

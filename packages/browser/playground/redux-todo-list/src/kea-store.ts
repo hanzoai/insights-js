@@ -1,10 +1,10 @@
 import { resetContext, getContext } from 'kea'
-import { posthogKeaLogger } from 'posthog-js/lib/src/customizations'
+import { insightsKeaLogger } from '@hanzo/insights/lib/src/customizations'
 
-// Initialize Kea with PostHog logging plugin
+// Initialize Kea with Insights logging plugin
 resetContext({
     plugins: [
-        posthogKeaLogger({
+        insightsKeaLogger({
             // Example: mask sensitive data
             // maskState: (state) => {
             //     // Remove sensitive fields from state logging

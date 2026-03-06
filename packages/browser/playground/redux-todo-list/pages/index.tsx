@@ -4,22 +4,22 @@ export default function Home() {
     return (
         <>
             <Head>
-                <title>PostHog State Management Examples</title>
-                <meta name="description" content="Compare PostHog logging with Redux vs Kea" />
+                <title>Insights State Management Examples</title>
+                <meta name="description" content="Compare Insights logging with Redux vs Kea" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
             <div className="container">
-                <h1>PostHog State Management Examples</h1>
+                <h1>Insights State Management Examples</h1>
                 <p style={{ textAlign: 'center', color: '#666', marginBottom: '2rem' }}>
-                    Compare PostHog logging with different state management libraries
+                    Compare Insights logging with different state management libraries
                 </p>
 
                 <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <div className="example-card">
                         <h3>Redux Example</h3>
                         <p>
-                            Todo list with Redux Toolkit and <code>posthogReduxLogger</code>
+                            Todo list with Redux Toolkit and <code>insightsReduxLogger</code>
                         </p>
                         <ul style={{ textAlign: 'left', margin: '1rem 0' }}>
                             <li>Redux Toolkit store</li>
@@ -36,7 +36,7 @@ export default function Home() {
                     <div className="example-card">
                         <h3>Kea Example</h3>
                         <p>
-                            Todo list with Kea and <code>posthogKeaLogger</code>
+                            Todo list with Kea and <code>insightsKeaLogger</code>
                         </p>
                         <ul style={{ textAlign: 'left', margin: '1rem 0' }}>
                             <li>Kea logic stores</li>
@@ -63,7 +63,7 @@ export default function Home() {
                     <h4 style={{ marginBottom: '1rem', color: '#333' }}>🧑‍💻 Developer Notes</h4>
                     <ul style={{ textAlign: 'left', color: '#666' }}>
                         <li>
-                            <strong>Console Logging:</strong> Open browser dev tools to see PostHog action logging
+                            <strong>Console Logging:</strong> Open browser dev tools to see Insights action logging
                         </li>
                         <li>
                             <strong>API Comparison:</strong> Redux uses <code>maskReduxAction</code>/

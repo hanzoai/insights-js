@@ -1,12 +1,12 @@
-# PostHog Remix Playground
+# Insights Remix Playground
 
-This is a basic Remix application demonstrating PostHog integration following the [official PostHog Remix documentation](https://posthog.com/docs/libraries/remix).
+This is a basic Remix application demonstrating Insights integration following the [official Insights Remix documentation](https://insights.hanzo.ai/docs/libraries/remix).
 
 ## Features
 
 - Automatic pageview tracking with `capture_pageview: 'history_change'`
-- Custom event capture using PostHog React hooks
-- PostHog React Provider integration
+- Custom event capture using Insights React hooks
+- Insights React Provider integration
 - Proper Vite configuration for SSR support
 - Navigation header for multi-page testing
 - Media page with base64 images for replay testing
@@ -23,7 +23,7 @@ Run the automated setup script:
 
 This will:
 
-1. Build the PostHog packages from the repo root
+1. Build the Insights packages from the repo root
 2. Create tarballs in the target directory
 3. Set up symlinks
 4. Install dependencies
@@ -31,7 +31,7 @@ This will:
 
 ### Manual Setup
 
-1. Build and package PostHog libraries from the repo root:
+1. Build and package Insights libraries from the repo root:
 
 ```bash
 cd ../..
@@ -61,7 +61,7 @@ pnpm dev
 
 ## Additional Resources
 
-- [PostHog Remix Documentation](https://posthog.com/docs/libraries/remix)
-- [Remix Analytics Tutorial](https://posthog.com/tutorials/remix-analytics)
-- [Remix A/B Testing](https://posthog.com/tutorials/remix-ab-tests)
-- [Remix Surveys](https://posthog.com/tutorials/remix-surveys)
+- [Insights Remix Documentation](https://insights.hanzo.ai/docs/libraries/remix)
+- [Remix Analytics Tutorial](https://insights.hanzo.ai/tutorials/remix-analytics)
+- [Remix A/B Testing](https://insights.hanzo.ai/tutorials/remix-ab-tests)
+- [Remix Surveys](https://insights.hanzo.ai/tutorials/remix-surveys)

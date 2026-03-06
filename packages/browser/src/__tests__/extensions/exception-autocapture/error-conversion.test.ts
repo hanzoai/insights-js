@@ -2,7 +2,7 @@
 
 import { isNull, ErrorTracking } from '@hanzo/insights-core'
 import { expect } from '@jest/globals'
-import { buildErrorPropertiesBuilder } from '../../../posthog-exceptions'
+import { buildErrorPropertiesBuilder } from '../../../insights-exceptions'
 
 // ugh, jest
 // can't reference PromiseRejectionEvent to construct it 🤷

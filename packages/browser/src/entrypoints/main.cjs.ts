@@ -1,10 +1,10 @@
 import './default-extensions'
 import './external-scripts-loader'
-import { init_as_module } from '../posthog-core'
-export { PostHog } from '../posthog-core'
+import { init_as_module } from '../insights-core'
+export { Insights } from '../insights-core'
 export * from '../types'
-export * from '../posthog-surveys-types'
-export * from '../posthog-product-tours-types'
-export * from '../posthog-conversations-types'
-export const posthog = init_as_module()
-export default posthog
+export * from '../insights-surveys-types'
+export * from '../insights-product-tours-types'
+export * from '../insights-conversations-types'
+export const insights = init_as_module()
+export default insights

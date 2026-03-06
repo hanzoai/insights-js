@@ -71,18 +71,18 @@ function firstBatchEvent(): Record<string, unknown> {
 
 describe('capture', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
-  test('sends event to PostHog API with correct distinct_id and event name', async () => {
+  test('sends event to Insights API with correct distinct_id and event name', async () => {
     global.fetch = mockFetch()
     const t = initConvexTest()
 
@@ -191,14 +191,14 @@ describe('capture', () => {
 
 describe('identify', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -234,7 +234,7 @@ describe('identify', () => {
     await t.finishInProgressScheduledFunctions()
 
     const event = firstBatchEvent()
-    // posthog-node puts properties into $set inside event.properties
+    // insights-node puts properties into $set inside event.properties
     const props = event.properties as Record<string, unknown>
     const $set = props.$set as Record<string, unknown>
     expect($set.name).toBe('Test User')
@@ -259,14 +259,14 @@ describe('identify', () => {
 
 describe('groupIdentify', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -326,14 +326,14 @@ describe('groupIdentify', () => {
 
 describe('alias', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -376,14 +376,14 @@ describe('alias', () => {
 
 describe('captureException', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -403,7 +403,7 @@ describe('captureException', () => {
     const event = firstBatchEvent()
     expect(event.event).toBe('$exception')
     const props = event.properties as Record<string, unknown>
-    // posthog-node v5 uses $exception_list instead of $exception_message
+    // insights-node v5 uses $exception_list instead of $exception_message
     const exceptionList = props.$exception_list as Array<{
       value: string
       type: string
@@ -487,14 +487,14 @@ const flagsResponse = (flags: Record<string, unknown> = {}, payloads: Record<str
 
 describe('getFeatureFlag', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -562,14 +562,14 @@ describe('getFeatureFlag', () => {
 
 describe('isFeatureEnabled', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -612,14 +612,14 @@ describe('isFeatureEnabled', () => {
 
 describe('getFeatureFlagPayload', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -667,14 +667,14 @@ describe('getFeatureFlagPayload', () => {
 
 describe('getFeatureFlagResult', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -710,14 +710,14 @@ describe('getFeatureFlagResult', () => {
 
 describe('getAllFlags', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 
@@ -774,14 +774,14 @@ describe('getAllFlags', () => {
 
 describe('getAllFlagsAndPayloads', () => {
   beforeEach(() => {
-    process.env.POSTHOG_API_KEY = 'phc_test_key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'phc_test_key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
   })
 
   afterEach(() => {
     global.fetch = originalFetch
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
     fetchCalls = []
   })
 

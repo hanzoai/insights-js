@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>PostHog JS Snippet test</title>
+    <title>Insights JS Snippet test</title>
 </head>
 <body>
     <button data-cy-button>Some button</button>
@@ -11,13 +11,13 @@
 
     <br />
 
-    <button data-cy-custom-event-button onclick="posthog.capture('custom-event', { foo: 2 })">
+    <button data-cy-custom-event-button onclick="insights.capture('custom-event', { foo: 2 })">
         Send custom event
     </button>
 
     <br />
 
-    <button data-cy-feature-flag-button onclick="console.log(posthog.isFeatureEnabled('some-feature'))">
+    <button data-cy-feature-flag-button onclick="console.log(insights.isFeatureEnabled('some-feature'))">
         Test a feature flag
     </button>
 
@@ -36,11 +36,11 @@
         Sensitive attributes!
     </button>
 
-    <button data-cy-exception-button onclick="posthog.captureException(new Error('wat even am I'), { extra_prop: 2 })">
+    <button data-cy-exception-button onclick="insights.captureException(new Error('wat even am I'), { extra_prop: 2 })">
         Send an exception
     </button>
 
-    <button data-cy-exception-string-button onclick="posthog.captureException('I am a plain old string', { extra_prop: 2 })">
+    <button data-cy-exception-string-button onclick="insights.captureException('I am a plain old string', { extra_prop: 2 })">
         Capture as string
     </button>
 
@@ -53,7 +53,7 @@
     </div>
 
     <script>
-        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"/static/array.full.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getSurveys getActiveMatchingSurveys captureException".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        !function(t,e){var o,n,p,r;e.__SV||(window.insights=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host+"/static/array.full.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="insights",u.people=u.people||[],u.toString=function(t){var e="insights";return"insights"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getSurveys getActiveMatchingSurveys captureException".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.insights||[]);
     </script>
 </body>
 </html>

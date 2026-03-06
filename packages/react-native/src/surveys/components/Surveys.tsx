@@ -11,8 +11,8 @@ import {
   isUndefined,
 } from '@hanzo/insights-core'
 import { LinkQuestion, MultipleChoiceQuestion, OpenTextQuestion, RatingQuestion } from './QuestionTypes'
-import { PostHog } from '../../posthog-rn'
-import { usePostHog } from '../../hooks/usePostHog'
+import { Insights } from '../../insights-rn'
+import { useInsights } from '../../hooks/useInsights'
 
 const getSurveyInteractionProperty = (survey: Survey, action: string): string => {
   let surveyProperty = `$survey_${action}/${survey.id}`
@@ -23,8 +23,8 @@ const getSurveyInteractionProperty = (survey: Survey, action: string): string =>
   return surveyProperty
 }
 
-export const sendSurveyShownEvent = (survey: Survey, posthog: PostHog): void => {
-  posthog.capture('survey shown', {
+export const sendSurveyShownEvent = (survey: Survey, insights: Insights): void => {
+  insights.capture('survey shown', {
     $survey_name: survey.name,
     $survey_id: survey.id,
     ...maybeAdd('$survey_iteration', survey.current_iteration),
@@ -54,7 +54,7 @@ const getSurveyResponseValue = (responses: Record<string, string | number | stri
 export const sendSurveyEvent = (
   responses: Record<string, string | number | string[] | null> = {},
   survey: Survey,
-  posthog: PostHog
+  insights: Insights
 ): void => {
   // map question ids also to the old format for back compatibility
   const oldFormatResponses: Record<string, string | number | string[] | null> = {}
@@ -70,7 +70,7 @@ export const sendSurveyEvent = (
     ...oldFormatResponses,
   }
 
-  posthog.capture('survey sent', {
+  insights.capture('survey sent', {
     $survey_name: survey.name,
     $survey_id: survey.id,
     ...maybeAdd('$survey_iteration', survey.current_iteration),
@@ -87,8 +87,8 @@ export const sendSurveyEvent = (
   })
 }
 
-export const dismissedSurveyEvent = (survey: Survey, posthog: PostHog): void => {
-  posthog.capture('survey dismissed', {
+export const dismissedSurveyEvent = (survey: Survey, insights: Insights): void => {
+  insights.capture('survey dismissed', {
     $survey_name: survey.name,
     $survey_id: survey.id,
     ...maybeAdd('$survey_iteration', survey.current_iteration),
@@ -113,7 +113,7 @@ export function Questions({
   const [questionsResponses, setQuestionsResponses] = useState({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const surveyQuestions = useMemo(() => getDisplayOrderQuestions(survey), [survey])
-  const posthog = usePostHog()
+  const insights = useInsights()
 
   const onNextButtonClick = ({
     res,
@@ -139,7 +139,7 @@ export function Questions({
 
     if (nextStep === SurveyQuestionBranchingType.End) {
       // End the survey
-      sendSurveyEvent(allResponses, survey, posthog)
+      sendSurveyEvent(allResponses, survey, insights)
       onSubmit()
     } else {
       // Move to the next question

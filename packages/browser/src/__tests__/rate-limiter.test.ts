@@ -6,7 +6,7 @@ describe('Rate Limiter', () => {
     let rateLimiter: RateLimiter
     let systemTime: number
     let persistedBucket = {}
-    let mockPostHog: any
+    let mockInsights: any
 
     const moveTimeForward = (milliseconds: number) => {
         systemTime += milliseconds
@@ -25,7 +25,7 @@ describe('Rate Limiter', () => {
 
         persistedBucket = {}
 
-        mockPostHog = {
+        mockInsights = {
             config: {
                 rate_limiting: {
                     events_per_second: 10,
@@ -41,7 +41,7 @@ describe('Rate Limiter', () => {
             capture: jest.fn(),
         }
 
-        rateLimiter = new RateLimiter(mockPostHog as any)
+        rateLimiter = new RateLimiter(mockInsights as any)
 
         clearLoggerMocks()
     })
@@ -120,12 +120,12 @@ describe('Rate Limiter', () => {
                 rateLimiter.clientRateLimitContext()
             })
 
-            expect(mockPostHog.capture).toBeCalledTimes(1)
-            expect(mockPostHog.capture).toHaveBeenCalledWith(
+            expect(mockInsights.capture).toBeCalledTimes(1)
+            expect(mockInsights.capture).toHaveBeenCalledWith(
                 '$$client_ingestion_warning',
                 {
                     $$client_ingestion_warning_message:
-                        'posthog-js client rate limited. Config is set to 10 events per second and 100 events burst limit.',
+                        '@hanzo/insights client rate limited. Config is set to 10 events per second and 100 events burst limit.',
                 },
                 {
                     skip_client_rate_limiting: true,
@@ -138,23 +138,23 @@ describe('Rate Limiter', () => {
                 rateLimiter.clientRateLimitContext()
             })
 
-            expect(mockPostHog.capture).toBeCalledTimes(1)
-            mockPostHog.capture.mockClear()
+            expect(mockInsights.capture).toBeCalledTimes(1)
+            mockInsights.capture.mockClear()
 
-            const newRateLimiter = new RateLimiter(mockPostHog as any)
+            const newRateLimiter = new RateLimiter(mockInsights as any)
 
             range(200).forEach(() => {
                 newRateLimiter.clientRateLimitContext()
             })
 
-            expect(mockPostHog.capture).toBeCalledTimes(0)
+            expect(mockInsights.capture).toBeCalledTimes(0)
         })
 
         it('respects config changes after initialization', () => {
             expect(rateLimiter.captureEventsPerSecond).toBe(10)
             expect(rateLimiter.captureEventsBurstLimit).toBe(100)
 
-            mockPostHog.config.rate_limiting = {
+            mockInsights.config.rate_limiting = {
                 events_per_second: 5,
                 events_burst_limit: 50,
             }
@@ -164,14 +164,14 @@ describe('Rate Limiter', () => {
         })
 
         it('uses defaults when config is not set', () => {
-            mockPostHog.config.rate_limiting = undefined
+            mockInsights.config.rate_limiting = undefined
 
             expect(rateLimiter.captureEventsPerSecond).toBe(10)
             expect(rateLimiter.captureEventsBurstLimit).toBe(100)
         })
 
         it('computes burst limit from events_per_second when only events_per_second is configured', () => {
-            mockPostHog.config.rate_limiting = {
+            mockInsights.config.rate_limiting = {
                 events_per_second: 20,
             }
 
@@ -180,7 +180,7 @@ describe('Rate Limiter', () => {
         })
 
         it('ensures burst limit is at least events_per_second', () => {
-            mockPostHog.config.rate_limiting = {
+            mockInsights.config.rate_limiting = {
                 events_per_second: 50,
                 events_burst_limit: 10,
             }

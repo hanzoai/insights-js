@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { posthog } from './posthog'
+import { insights } from './insights'
 
 const GLOBAL_EVENTS: { event: string; payload: any }[] = []
-export const usePostHogDebugEvents = () => {
+export const useInsightsDebugEvents = () => {
   const [localEvents, setLocalEvents] = useState(GLOBAL_EVENTS)
 
   useEffect(() => {
@@ -17,12 +17,12 @@ export const usePostHogDebugEvents = () => {
     }
 
     const listeners = [
-      posthog.on('capture', (e) => onEvent('capture', e)),
-      posthog.on('identify', (e) => onEvent('identify', e)),
-      posthog.on('screen', (e) => onEvent('screen', e)),
-      posthog.on('autocapture', (e) => onEvent('autocapture', e)),
-      posthog.on('featureflags', (e) => onEvent('featureflags', e)),
-      posthog.on('flush', (e) => onEvent('flush', e)),
+      insights.on('capture', (e) => onEvent('capture', e)),
+      insights.on('identify', (e) => onEvent('identify', e)),
+      insights.on('screen', (e) => onEvent('screen', e)),
+      insights.on('autocapture', (e) => onEvent('autocapture', e)),
+      insights.on('featureflags', (e) => onEvent('featureflags', e)),
+      insights.on('flush', (e) => onEvent('flush', e)),
     ]
 
     return () => {
@@ -34,7 +34,7 @@ export const usePostHogDebugEvents = () => {
 }
 
 const DebugEvents = (): JSX.Element => {
-  const events = usePostHogDebugEvents()
+  const events = useInsightsDebugEvents()
 
   return (
     <div className="Debugger">
@@ -55,11 +55,11 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <p>This is an example app for testing the posthog-js-lite lib</p>
-        <button className="Button" onClick={() => posthog.capture('random event', { random: Math.random() })}>
+        <p>This is an example app for testing the @hanzo/insights-lite lib</p>
+        <button className="Button" onClick={() => insights.capture('random event', { random: Math.random() })}>
           Track Event
         </button>
-        <button className="Button" onClick={() => posthog.identify('user-123')}>
+        <button className="Button" onClick={() => insights.identify('user-123')}>
           Identify
         </button>
       </header>

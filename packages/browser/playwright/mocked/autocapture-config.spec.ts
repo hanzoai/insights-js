@@ -1,4 +1,4 @@
-import { test } from './utils/posthog-playwright-test-base'
+import { test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 
 const startOptions = {
@@ -33,7 +33,7 @@ test.describe('autocapture config', () => {
         // no autocapture event from click
         await page.expectCapturedEventsToBe(['custom-event'])
 
-        await page.locator('[data-cy-input]').fill('hello posthog!')
+        await page.locator('[data-cy-input]').fill('hello insights!')
         // blur the input
         await page.locator('body').click()
         await page.expectCapturedEventsToBe(['custom-event', '$autocapture'])
@@ -52,7 +52,7 @@ test.describe('autocapture config', () => {
         await page.locator('[data-cy-custom-event-button]').click()
         await page.expectCapturedEventsToBe(['$pageview', '$autocapture', 'custom-event'])
 
-        await page.locator('[data-cy-input]').fill('hello posthog!')
+        await page.locator('[data-cy-input]').fill('hello insights!')
         // blur the input
         await page.locator('body').click()
         // no change autocapture event

@@ -1,12 +1,12 @@
-import { PostHog } from '@hanzo/insights-node'
-import { PostHogAzureOpenAI } from '../src/openai/azure'
+import { Insights } from '@hanzo/insights-node'
+import { InsightsAzureOpenAI } from '../src/openai/azure'
 import openaiModule from 'openai'
 
 let mockAzureEmbeddingResponse: any = {}
 
 jest.mock('@hanzo/insights-node', () => {
   return {
-    PostHog: jest.fn().mockImplementation(() => {
+    Insights: jest.fn().mockImplementation(() => {
       return {
         capture: jest.fn(),
         captureImmediate: jest.fn(),
@@ -89,9 +89,9 @@ jest.mock('openai', () => {
   }
 })
 
-describe('PostHogAzureOpenAI - Embeddings test suite', () => {
-  let mockPostHogClient: PostHog
-  let client: PostHogAzureOpenAI
+describe('InsightsAzureOpenAI - Embeddings test suite', () => {
+  let mockInsightsClient: Insights
+  let client: InsightsAzureOpenAI
 
   beforeAll(() => {
     if (!process.env.AZURE_OPENAI_API_KEY) {
@@ -108,10 +108,10 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     jest.clearAllMocks()
 
     // Reset the default mocks
-    mockPostHogClient = new (PostHog as any)()
-    client = new PostHogAzureOpenAI({
+    mockInsightsClient = new (Insights as any)()
+    client = new InsightsAzureOpenAI({
       apiKey: process.env.AZURE_OPENAI_API_KEY || '',
-      posthog: mockPostHogClient as any,
+      insights: mockInsightsClient as any,
     })
 
     // Default embeddings response
@@ -171,14 +171,14 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     const response = await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogDistinctId: 'test-id',
-      posthogProperties: { foo: 'bar' },
+      insightsDistinctId: 'test-id',
+      insightsProperties: { foo: 'bar' },
     })
 
     expect(response).toEqual(mockAzureChatResponse)
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
 
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { distinctId, event, properties } = captureArgs[0]
 
     expect(distinctId).toBe('test-id')
@@ -235,12 +235,12 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogDistinctId: 'test-id',
-      posthogGroups: { company: 'test_company' },
+      insightsDistinctId: 'test-id',
+      insightsGroups: { company: 'test_company' },
     })
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { groups } = captureArgs[0]
     expect(groups).toEqual({ company: 'test_company' })
   })
@@ -276,12 +276,12 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogDistinctId: 'test-id',
-      posthogPrivacyMode: true,
+      insightsDistinctId: 'test-id',
+      insightsPrivacyMode: true,
     })
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { properties } = captureArgs[0]
     expect(properties['$ai_input']).toBeNull()
     expect(properties['$ai_output_choices']).toBeNull()
@@ -289,7 +289,7 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
 
   conditionalTest('privacy mode global', async () => {
     // override mock to appear globally in privacy mode
-    ;(mockPostHogClient as any).privacy_mode = true
+    ;(mockInsightsClient as any).privacy_mode = true
 
     const mockAzureChatResponse = {
       id: 'test-response-id',
@@ -321,13 +321,13 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogDistinctId: 'test-id',
+      insightsDistinctId: 'test-id',
       // we attempt to override locally, but it should still be null if global is true
-      posthogPrivacyMode: false,
+      insightsPrivacyMode: false,
     })
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { properties } = captureArgs[0]
     expect(properties['$ai_input']).toBeNull()
     expect(properties['$ai_output_choices']).toBeNull()
@@ -364,13 +364,13 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogDistinctId: 'test-id',
-      posthogCaptureImmediate: true,
+      insightsDistinctId: 'test-id',
+      insightsCaptureImmediate: true,
     })
 
     // captureImmediate should be called once, and capture should not be called
-    expect(mockPostHogClient.captureImmediate).toHaveBeenCalledTimes(1)
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(0)
+    expect(mockInsightsClient.captureImmediate).toHaveBeenCalledTimes(1)
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(0)
   })
 
   conditionalTest('anonymous user - $process_person_profile set to false', async () => {
@@ -404,11 +404,11 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogTraceId: 'trace-123',
+      insightsTraceId: 'trace-123',
     })
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { distinctId, properties } = captureArgs[0]
 
     expect(distinctId).toBe('trace-123')
@@ -446,12 +446,12 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [{ role: 'user', content: 'Hello' }],
-      posthogDistinctId: 'user-456',
-      posthogTraceId: 'trace-123',
+      insightsDistinctId: 'user-456',
+      insightsTraceId: 'trace-123',
     })
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { distinctId, properties } = captureArgs[0]
 
     expect(distinctId).toBe('user-456')
@@ -492,11 +492,11 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
         { role: 'system', content: 'You are a helpful geography assistant.' },
         { role: 'user', content: 'What is the capital of France?' },
       ],
-      posthogDistinctId: 'test-system-prompt',
+      insightsDistinctId: 'test-system-prompt',
     })
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const { distinctId, properties } = captureArgs[0]
 
     expect(distinctId).toBe('test-system-prompt')
@@ -513,14 +513,14 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
       const response = await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: 'Hello world',
-        posthogDistinctId: 'test-id',
-        posthogProperties: { test: 'embeddings' },
+        insightsDistinctId: 'test-id',
+        insightsProperties: { test: 'embeddings' },
       })
 
       expect(response).toEqual(mockAzureEmbeddingResponse)
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { distinctId, event, properties } = captureArgs[0]
 
       expect(distinctId).toBe('test-id')
@@ -570,13 +570,13 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
       const response = await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: arrayInput,
-        posthogDistinctId: 'test-array-id',
+        insightsDistinctId: 'test-array-id',
       })
 
       expect(response).toEqual(mockAzureEmbeddingResponse)
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { properties } = captureArgs[0]
 
       expect(properties['$ai_input']).toEqual(arrayInput)
@@ -589,12 +589,12 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
       await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: 'Sensitive data',
-        posthogDistinctId: 'test-id',
-        posthogPrivacyMode: true,
+        insightsDistinctId: 'test-id',
+        insightsPrivacyMode: true,
       })
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { properties } = captureArgs[0]
 
       expect(properties['$ai_input']).toBeNull()
@@ -611,13 +611,13 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
         client.embeddings.create({
           model: 'text-embedding-3-small',
           input: 'Test input',
-          posthogDistinctId: 'error-user',
+          insightsDistinctId: 'error-user',
         })
       ).rejects.toThrow('API Error')
 
       // Verify error was captured
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { properties } = captureArgs[0]
 
       expect(properties['$ai_http_status']).toBe(400)
@@ -629,24 +629,24 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
       await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: 'Test input',
-        posthogDistinctId: 'test-id',
-        posthogCaptureImmediate: true,
+        insightsDistinctId: 'test-id',
+        insightsCaptureImmediate: true,
       })
 
       // captureImmediate should be called once, and capture should not be called
-      expect(mockPostHogClient.captureImmediate).toHaveBeenCalledTimes(1)
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(0)
+      expect(mockInsightsClient.captureImmediate).toHaveBeenCalledTimes(1)
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(0)
     })
 
     conditionalTest('embeddings with default trace ID', async () => {
       await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: 'Test input',
-        posthogDistinctId: 'test-id',
+        insightsDistinctId: 'test-id',
       })
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { properties } = captureArgs[0]
 
       // Should have a generated trace ID
@@ -660,12 +660,12 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
       await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: 'Test input',
-        posthogDistinctId: 'test-id',
-        posthogTraceId: customTraceId,
+        insightsDistinctId: 'test-id',
+        insightsTraceId: customTraceId,
       })
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { properties } = captureArgs[0]
 
       expect(properties['$ai_trace_id']).toBe(customTraceId)
@@ -677,19 +677,19 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
       await client.embeddings.create({
         model: 'text-embedding-3-small',
         input: 'Test input',
-        posthogDistinctId: 'test-id',
-        posthogGroups: testGroups,
+        insightsDistinctId: 'test-id',
+        insightsGroups: testGroups,
       })
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { groups } = captureArgs[0]
 
       expect(groups).toEqual(testGroups)
     })
   })
 
-  conditionalTest('posthogProperties are not sent to Azure OpenAI', async () => {
+  conditionalTest('insightsProperties are not sent to Azure OpenAI', async () => {
     const ChatMock: any = openaiModule.Chat
     const mockCreate = jest.fn().mockResolvedValue({})
     const originalCreate = (ChatMock.Completions as any).prototype.create
@@ -698,17 +698,17 @@ describe('PostHogAzureOpenAI - Embeddings test suite', () => {
     await client.chat.completions.create({
       model: 'gpt-4',
       messages: [],
-      posthogDistinctId: 'test-id',
-      posthogProperties: { key: 'value' },
-      posthogGroups: { team: 'test' },
-      posthogPrivacyMode: true,
-      posthogCaptureImmediate: true,
-      posthogTraceId: 'trace-123',
+      insightsDistinctId: 'test-id',
+      insightsProperties: { key: 'value' },
+      insightsGroups: { team: 'test' },
+      insightsPrivacyMode: true,
+      insightsCaptureImmediate: true,
+      insightsTraceId: 'trace-123',
     })
 
     const [actualParams] = mockCreate.mock.calls[0]
-    const posthogParams = Object.keys(actualParams).filter((key) => key.startsWith('posthog'))
-    expect(posthogParams).toEqual([])
+    const insightsParams = Object.keys(actualParams).filter((key) => key.startsWith('insights'))
+    expect(insightsParams).toEqual([])
     ;(ChatMock.Completions as any).prototype.create = originalCreate
   })
 })

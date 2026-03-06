@@ -1,4 +1,4 @@
-// An MSW server that handles requests to https://app.posthog.com/e/ and stores
+// An MSW server that handles requests to https://app.insights.com/e/ and stores
 
 import { ResponseComposition, rest } from 'msw'
 import { setupServer } from 'msw/node'

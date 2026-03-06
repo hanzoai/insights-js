@@ -1,5 +1,5 @@
 import { aiSdkSpanMapper } from './aiSdk'
-import type { PostHogSpanMapper } from '../types'
+import type { InsightsSpanMapper } from '../types'
 
-export const defaultSpanMappers: PostHogSpanMapper[] = [aiSdkSpanMapper]
+export const defaultSpanMappers: InsightsSpanMapper[] = [aiSdkSpanMapper]
 export { aiSdkSpanMapper }

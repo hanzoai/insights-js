@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Heap Snapshot Helper for PostHog Memory Leak Analysis
+ * Heap Snapshot Helper for Insights Memory Leak Analysis
  *
  * This script takes heap snapshots before/after operations to help
  * identify what objects are being retained in memory.
@@ -15,7 +15,7 @@
  * node --expose-gc heap-snapshot-helper.js
  */
 
-const { PostHog } = require('../../../packages/node/dist/node/index.cjs')
+const { Insights } = require('../../../packages/node/dist/node/index.cjs')
 const { readFileSync, existsSync, writeFileSync, mkdirSync } = require('fs')
 const { join } = require('path')
 const v8 = require('v8')
@@ -40,10 +40,10 @@ function loadEnvFile() {
 loadEnvFile()
 
 const CONFIG = {
-    PROJECT_API_KEY: process.env.POSTHOG_PROJECT_API_KEY || '',
-    PERSONAL_API_KEY: process.env.POSTHOG_PERSONAL_API_KEY || '',
-    HOST: process.env.POSTHOG_HOST || 'https://app.posthog.com',
-    FLAG_KEY: process.env.POSTHOG_TEST_FLAG_KEY || 'beta-feature',
+    PROJECT_API_KEY: process.env.INSIGHTS_PROJECT_API_KEY || '',
+    PERSONAL_API_KEY: process.env.INSIGHTS_PERSONAL_API_KEY || '',
+    HOST: process.env.INSIGHTS_HOST || 'https://app.insights.com',
+    FLAG_KEY: process.env.INSIGHTS_TEST_FLAG_KEY || 'beta-feature',
 }
 
 class HeapSnapshotHelper {
@@ -51,7 +51,7 @@ class HeapSnapshotHelper {
         this.snapshotDir = join(__dirname, 'heap-snapshots')
         this.ensureSnapshotDir()
 
-        this.posthog = new PostHog(CONFIG.PROJECT_API_KEY, {
+        this.insights = new Insights(CONFIG.PROJECT_API_KEY, {
             personalApiKey: CONFIG.PERSONAL_API_KEY,
             host: CONFIG.HOST,
             maxCacheSize: 1000,
@@ -101,7 +101,7 @@ class HeapSnapshotHelper {
     }
 
     async runSnapshotAnalysis() {
-        console.log('📸 Starting Heap Snapshot Analysis for PostHog Memory Leaks')
+        console.log('📸 Starting Heap Snapshot Analysis for Insights Memory Leaks')
         console.log('Configuration:', {
             flagKey: CONFIG.FLAG_KEY,
             snapshotDir: this.snapshotDir,
@@ -109,7 +109,7 @@ class HeapSnapshotHelper {
 
         if (CONFIG.PERSONAL_API_KEY) {
             console.log('\n⏳ Waiting for local evaluation to be ready...')
-            await this.posthog.waitForLocalEvaluationReady(10000)
+            await this.insights.waitForLocalEvaluationReady(10000)
         }
 
         await this.forceGC()
@@ -146,7 +146,7 @@ class HeapSnapshotHelper {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.getFeatureFlagPayload(CONFIG.FLAG_KEY, distinctId, undefined, {
+                await this.insights.getFeatureFlagPayload(CONFIG.FLAG_KEY, distinctId, undefined, {
                     personProperties: personProps,
                     onlyEvaluateLocally: true,
                 })
@@ -171,7 +171,7 @@ class HeapSnapshotHelper {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.getAllFlagsAndPayloads(distinctId, {
+                await this.insights.getAllFlagsAndPayloads(distinctId, {
                     personProperties: personProps,
                     onlyEvaluateLocally: true,
                 })
@@ -195,7 +195,7 @@ class HeapSnapshotHelper {
             const distinctId = this.distinctIds[i % this.distinctIds.length]
 
             try {
-                await this.posthog.getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
+                await this.insights.getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
                     sendFeatureFlagEvents: true, // This populates the cache
                 })
             } catch (error) {
@@ -223,7 +223,7 @@ class HeapSnapshotHelper {
         console.log('\n📊 Recommended analysis workflow:')
         console.log('1. Compare "00-baseline" with "02-after-payloads"')
         console.log('   - Look for objects that increased significantly')
-        console.log('   - Focus on PostHog-related objects and arrays')
+        console.log('   - Focus on Insights-related objects and arrays')
 
         console.log('\n2. Compare "03-before-all-payloads" with "04-after-all-payloads"')
         console.log('   - Check if getAllFlagsAndPayloads leaks more than individual calls')
@@ -239,7 +239,7 @@ class HeapSnapshotHelper {
         console.log('- Promise chains or event listeners that persist')
 
         console.log('\n💡 Key objects to investigate:')
-        console.log('- distinctIdHasSentFlagCalls (should be in PostHog client)')
+        console.log('- distinctIdHasSentFlagCalls (should be in Insights client)')
         console.log('- featureFlags arrays (in FeatureFlagsPoller)')
         console.log('- cohorts objects (cached cohort data)')
         console.log('- Promise objects (unresolved promises)')
@@ -255,7 +255,7 @@ class HeapSnapshotHelper {
     async cleanup() {
         console.log('\n🧹 Cleaning up...')
         try {
-            await this.posthog._shutdown(5000)
+            await this.insights._shutdown(5000)
         } catch (error) {
             console.error('Error during cleanup:', error)
         }
@@ -268,7 +268,7 @@ async function quickMemoryLeakRepro() {
     console.log('🚀 Quick Memory Leak Reproduction')
     console.log('This will reproduce the memory leak in a simplified way for analysis')
 
-    const posthog = new PostHog(CONFIG.PROJECT_API_KEY, {
+    const insights = new Insights(CONFIG.PROJECT_API_KEY, {
         personalApiKey: CONFIG.PERSONAL_API_KEY,
         host: CONFIG.HOST,
         maxCacheSize: 1000,
@@ -276,7 +276,7 @@ async function quickMemoryLeakRepro() {
     })
 
     if (CONFIG.PERSONAL_API_KEY) {
-        await posthog.waitForLocalEvaluationReady(10000)
+        await insights.waitForLocalEvaluationReady(10000)
     }
 
     console.log('\n📊 Memory before operations:')
@@ -286,7 +286,7 @@ async function quickMemoryLeakRepro() {
     console.log('\n🔄 Running payload operations (known to leak)...')
     for (let i = 0; i < 2000; i++) {
         try {
-            await posthog.getAllFlagsAndPayloads(`user_${i % 100}`, {
+            await insights.getAllFlagsAndPayloads(`user_${i % 100}`, {
                 personProperties: { plan: 'premium' },
                 onlyEvaluateLocally: true,
             })
@@ -303,13 +303,13 @@ async function quickMemoryLeakRepro() {
     console.log('\n📊 Memory after operations:')
     console.log(process.memoryUsage())
 
-    await posthog._shutdown()
+    await insights._shutdown()
 }
 
 // Run analysis
 if (require.main === module) {
     if (!CONFIG.PROJECT_API_KEY) {
-        console.error('❌ Missing PostHog Project API Key!')
+        console.error('❌ Missing Insights Project API Key!')
         process.exit(1)
     }
 

@@ -1,75 +1,75 @@
-# @posthog/types
+# @hanzo/types
 
-Type definitions for the PostHog JavaScript SDK.
+Type definitions for the Insights JavaScript SDK.
 
 ## When to Use This Package
 
 ### ✅ You Need This Package If:
 
-You're loading PostHog via a **`<script>` tag** and want TypeScript types for `window.posthog`.
+You're loading Insights via a **`<script>` tag** and want TypeScript types for `window.insights`.
 
 ```html
-<!-- You load PostHog like this -->
+<!-- You load Insights like this -->
 <script>
-    !function(t,e){...}(document,window.posthog||[]);
-    posthog.init('your-api-key', { api_host: 'https://us.i.posthog.com' })
+    !function(t,e){...}(document,window.insights||[]);
+    insights.init('your-api-key', { api_host: 'https://us.i.insights.hanzo.ai' })
 </script>
 ```
 
 ### ❌ You Don't Need This Package If:
 
-You're installing any PostHog library via npm/yarn/pnpm. The types are **already included**:
+You're installing any Insights library via npm/yarn/pnpm. The types are **already included**:
 
-- `posthog-js` - Browser SDK (includes all types)
-- `posthog-node` - Node.js SDK
-- `posthog-react-native` - React Native SDK
-- `@posthog/react` - React hooks and components
+- `@hanzo/insights` - Browser SDK (includes all types)
+- `@hanzo/insights-node` - Node.js SDK
+- `@hanzo/insights-react-native` - React Native SDK
+- `@hanzo/react` - React hooks and components
 
 ```typescript
-// Types are already available when you install posthog-js
-import posthog from 'posthog-js'
+// Types are already available when you install @hanzo/insights
+import insights from '@hanzo/insights'
 
-posthog.init('your-api-key')
-posthog.capture('my_event') // ✅ Fully typed
+insights.init('your-api-key')
+insights.capture('my_event') // ✅ Fully typed
 ```
 
 ## Installation
 
 ```bash
-npm install @posthog/types
+npm install @hanzo/types
 # or
-yarn add @posthog/types
+yarn add @hanzo/types
 # or
-pnpm add @posthog/types
+pnpm add @hanzo/types
 ```
 
 ## Usage
 
-### Typing `window.posthog` (Script Tag Usage)
+### Typing `window.insights` (Script Tag Usage)
 
-Create a type declaration file to type `window.posthog`:
+Create a type declaration file to type `window.insights`:
 
 ```typescript
-// posthog.d.ts
-import type { PostHog } from '@posthog/types'
+// insights.d.ts
+import type { Insights } from '@hanzo/types'
 
 declare global {
     interface Window {
-        posthog?: PostHog
+        insights?: Insights
     }
 }
 
 export {}
 ```
 
-Now you can use `window.posthog` with full type safety:
+Now you can use `window.insights` with full type safety:
 
 ```typescript
 // Your code
-window.posthog?.capture('button_clicked', { button_id: 'signup' })
-window.posthog?.identify('user-123', { email: 'user@example.com' })
+window.insights?.capture('button_clicked', { button_id: 'signup' })
+window.insights?.identify('user-123', { email: 'user@example.com' })
 
-const flagValue = window.posthog?.getFeatureFlag('my-flag')
+const flagValue = window.insights?.getFeatureFlag('my-flag')
 if (flagValue === 'variant-a') {
     // ...
 }
@@ -78,11 +78,11 @@ if (flagValue === 'variant-a') {
 ### Typing Configuration Objects
 
 ```typescript
-import type { PostHogConfig, Properties } from '@posthog/types'
+import type { InsightsConfig, Properties } from '@hanzo/types'
 
 // Type your configuration
-const config: Partial<PostHogConfig> = {
-    api_host: 'https://us.i.posthog.com',
+const config: Partial<InsightsConfig> = {
+    api_host: 'https://us.i.insights.hanzo.ai',
     autocapture: true,
     capture_pageview: 'history_change',
 }
@@ -96,7 +96,7 @@ const eventProps: Properties = {
 
 ## Version Synchronization
 
-This package's version is synchronized with `posthog-js`. They are always released together with matching version numbers.
+This package's version is synchronized with `@hanzo/insights`. They are always released together with matching version numbers.
 
 ## License
 

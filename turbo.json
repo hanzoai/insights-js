@@ -23,8 +23,8 @@
             "inputs": ["dist/**", "package.json"],
             "env": ["PACKAGE_DEST"]
         },
-        "posthog-js#package": {
-            "dependsOn": ["@posthog/react#build"],
+        "@hanzo/insights#package": {
+            "dependsOn": ["@hanzo/react#build"],
             "inputs": ["dist/**", "lib/**", "react/**"],
             "env": ["PACKAGE_DEST"],
             "cache": false

@@ -1,8 +1,8 @@
-# PostHog JS SDK Development Guide
+# Insights JS SDK Development Guide
 
 ## Overview
 
-This is a pnpm monorepo containing multiple PostHog JavaScript SDKs and development tooling. The repository uses Turbo for build orchestration and supports local development through tarball-based testing.
+This is a pnpm monorepo containing multiple Insights JavaScript SDKs and development tooling. The repository uses Turbo for build orchestration and supports local development through tarball-based testing.
 
 **Key Information:**
 
@@ -26,22 +26,22 @@ The repository contains the following SDK packages in `./packages/`:
 
 | Package          | Name                     | Description                                     |
 | ---------------- | ------------------------ | ----------------------------------------------- |
-| `core/`          | `@posthog/core`          | Shared core functionality used by multiple SDKs |
-| `browser/`       | `posthog-js`             | Main browser SDK for capturing events and usage |
-| `web/`           | `posthog-js-lite`        | Lightweight browser SDK                         |
-| `ai/`            | `@posthog/ai`            | AI integrations for Node.js                     |
-| `convex/`        | `@posthog/convex`        | Convex.dev component                            |
-| `node/`          | `posthog-node`           | Node.js backend SDK (requires Node >= 20)       |
-| `react/`         | `@posthog/react`         | React components and hooks                      |
-| `react-native/`  | `posthog-react-native`   | React Native mobile SDK                         |
-| `nuxt/`          | `@posthog/nuxt`          | Nuxt framework module                           |
-| `nextjs-config/` | `@posthog/nextjs-config` | Next.js configuration helper                    |
-| `types/`         | `@posthog/types`         | TypeScript type definitions for the SDK         |
+| `core/`          | `@hanzo/core`          | Shared core functionality used by multiple SDKs |
+| `browser/`       | `@hanzo/insights`             | Main browser SDK for capturing events and usage |
+| `web/`           | `@hanzo/insights-lite`        | Lightweight browser SDK                         |
+| `ai/`            | `@hanzo/ai`            | AI integrations for Node.js                     |
+| `convex/`        | `@hanzo/convex`        | Convex.dev component                            |
+| `node/`          | `@hanzo/insights-node`           | Node.js backend SDK (requires Node >= 20)       |
+| `react/`         | `@hanzo/react`         | React components and hooks                      |
+| `react-native/`  | `@hanzo/insights-react-native`   | React Native mobile SDK                         |
+| `nuxt/`          | `@hanzo/nuxt`          | Nuxt framework module                           |
+| `nextjs-config/` | `@hanzo/nextjs-config` | Next.js configuration helper                    |
+| `types/`         | `@hanzo/types`         | TypeScript type definitions for the SDK         |
 
 ## Workspace
 
 - This repository is structured as a pnpm workspace and each SDK and tooling package is a member of this global workspace.
-- Example and playground projects are independent pnpm workspaces. You can install their dependencies by running `pnpm install` inside the specific project folder. All dependencies and sub-dependencies to PostHog SDKs will be overwritten using a pnpmfile.
+- Example and playground projects are independent pnpm workspaces. You can install their dependencies by running `pnpm install` inside the specific project folder. All dependencies and sub-dependencies to Insights SDKs will be overwritten using a pnpmfile.
 
 ## Environment Setup
 
@@ -115,14 +115,14 @@ You can run commands using the `turbo` CLI and target specific packages. Useful 
 # Create tarballs for all packages
 pnpm turbo package
 
-# Run unit tests for posthog-js only
-pnpm turbo --filter=posthog-js test:unit
+# Run unit tests for @hanzo/insights only
+pnpm turbo --filter=@hanzo/insights test:unit
 
-# Build posthog-react-native and its dependencies
-pnpm turbo --filter=posthog-react-native build
+# Build @hanzo/insights-react-native and its dependencies
+pnpm turbo --filter=@hanzo/insights-react-native build
 
 # Lint a specific package
-pnpm turbo --filter=@posthog/react lint:fix
+pnpm turbo --filter=@hanzo/react lint:fix
 ```
 
 ## Running an Example or Playground Project with Local Changes
@@ -134,7 +134,7 @@ The recommended workflow for testing local changes uses tarballs, which most rea
 1. Run `pnpm turbo package` inside the root folder to generate tarballs in `./target`
 2. Navigate to the example/playground project: `cd examples/example-nextjs`
 3. Run `pnpm install` (remove `pnpm-lock.yaml` if it exists) to install local tarballs
-4. you might need to point package.json at the tarball like `"posthog-js": "file:../../target/posthog-js.tgz",`
+4. you might need to point package.json at the tarball like `"@hanzo/insights": "file:../../target/@hanzo/insights.tgz",`
 5. Run `pnpm dev` or `pnpm start` to start the project
 
 ### Development Workflow (Recommended)
@@ -153,7 +153,7 @@ Turbo handles build orchestration and ensures packages are built in the correct 
 
 ### ESLint
 
-- Custom `eslint-plugin-posthog-js` for repository-specific rules
+- Custom `eslint-plugin-insights` for repository-specific rules
 - TypeScript support
 - React support
 - Prettier integration
@@ -273,7 +273,7 @@ pnpm turbo --filter=<package-name> test:unit -- -u
 
 ## Additional Resources
 
-- [PostHog Documentation](https://posthog.com/docs)
+- [Insights Documentation](https://insights.hanzo.ai/docs)
 - [Contributing Guide](./CONTRIBUTING.md)
 - [Release Process](./RELEASING.md)
-- [Issue Tracker](https://github.com/PostHog/posthog-js/issues)
+- [Issue Tracker](https://github.com/hanzoai/@hanzo/insights/issues)

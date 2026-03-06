@@ -1,4 +1,4 @@
-import { defaultConfig } from '../../../posthog-core'
+import { defaultConfig } from '../../../insights-core'
 import { buildNetworkRequestOptions } from '../../../extensions/replay/external/config'
 import { CapturedNetworkRequest } from '../../../types'
 
@@ -18,10 +18,10 @@ describe('config', () => {
             })
 
             it('client can force disable recording', () => {
-                const posthogConfig = defaultConfig()
-                posthogConfig.session_recording.recordHeaders = false
-                posthogConfig.session_recording.recordBody = false
-                const networkOptions = buildNetworkRequestOptions(posthogConfig, {
+                const insightsConfig = defaultConfig()
+                insightsConfig.session_recording.recordHeaders = false
+                insightsConfig.session_recording.recordBody = false
+                const networkOptions = buildNetworkRequestOptions(insightsConfig, {
                     recordHeaders: true,
                     recordBody: true,
                 })
@@ -42,14 +42,14 @@ describe('config', () => {
             })
 
             it('uses the deprecated mask fn when set', () => {
-                const posthogConfig = defaultConfig()
-                posthogConfig.session_recording.maskNetworkRequestFn = (data) => {
+                const insightsConfig = defaultConfig()
+                insightsConfig.session_recording.maskNetworkRequestFn = (data) => {
                     return {
                         ...data,
                         url: 'edited', // deprecated fn only edits the url
                     }
                 }
-                const networkOptions = buildNetworkRequestOptions(posthogConfig, {})
+                const networkOptions = buildNetworkRequestOptions(insightsConfig, {})
 
                 const cleaned = networkOptions.maskRequestFn!({
                     name: 'something',
@@ -70,30 +70,30 @@ describe('config', () => {
             it.each([
                 [
                     {
-                        name: 'https://app.posthog.com/api/feature_flag/',
+                        name: 'https://app.insights.com/api/feature_flag/',
                     },
                     {
-                        name: 'https://app.posthog.com/api/feature_flag/',
+                        name: 'https://app.insights.com/api/feature_flag/',
                     },
                     undefined,
                 ],
                 [
                     {
-                        name: 'https://app.posthog.com/s/?ip=0&ver=123',
-                    },
-                    undefined,
-                    undefined,
-                ],
-                [
-                    {
-                        name: 'https://app.posthog.com/e/?ip=0&ver=123',
+                        name: 'https://app.insights.com/s/?ip=0&ver=123',
                     },
                     undefined,
                     undefined,
                 ],
                 [
                     {
-                        name: 'https://app.posthog.com/i/v0/e/?ip=0&ver=123',
+                        name: 'https://app.insights.com/e/?ip=0&ver=123',
+                    },
+                    undefined,
+                    undefined,
+                ],
+                [
+                    {
+                        name: 'https://app.insights.com/i/v0/e/?ip=0&ver=123',
                     },
                     undefined,
                     undefined,
@@ -101,7 +101,7 @@ describe('config', () => {
                 [
                     {
                         // even an imaginary future world of rust session replay capture
-                        name: 'https://app.posthog.com/i/v0/s/?ip=0&ver=123',
+                        name: 'https://app.insights.com/i/v0/s/?ip=0&ver=123',
                     },
                     undefined,
                     undefined,
@@ -109,7 +109,7 @@ describe('config', () => {
                 [
                     {
                         // using a relative path as a reverse proxy api host
-                        name: 'https://app.posthog.com/ingest/s/?ip=0&ver=123',
+                        name: 'https://app.insights.com/ingest/s/?ip=0&ver=123',
                     },
                     undefined,
                     '/ingest',
@@ -117,14 +117,14 @@ describe('config', () => {
                 [
                     {
                         // using a reverse proxy with a path
-                        name: 'https://app.posthog.com/ingest/s/?ip=0&ver=123',
+                        name: 'https://app.insights.com/ingest/s/?ip=0&ver=123',
                     },
                     undefined,
-                    'https://app.posthog.com/ingest',
+                    'https://app.insights.com/ingest',
                 ],
             ])('ignores ingestion paths', (capturedRequest, expected, apiHost?: string) => {
                 const networkOptions = buildNetworkRequestOptions(
-                    { ...defaultConfig(), api_host: apiHost || 'https://us.posthog.com' },
+                    { ...defaultConfig(), api_host: apiHost || 'https://us.insights.com' },
                     {}
                 )
                 const x = networkOptions.maskRequestFn!(capturedRequest as CapturedNetworkRequest)
@@ -256,12 +256,12 @@ describe('config', () => {
         })
 
         it('can amend the provided object', () => {
-            const posthogConfig = defaultConfig()
-            posthogConfig.session_recording.maskCapturedNetworkRequestFn = (data) => {
+            const insightsConfig = defaultConfig()
+            insightsConfig.session_recording.maskCapturedNetworkRequestFn = (data) => {
                 data.name = 'changed'
                 return data
             }
-            const networkOptions = buildNetworkRequestOptions(posthogConfig, {})
+            const networkOptions = buildNetworkRequestOptions(insightsConfig, {})
 
             const cleaned = networkOptions.maskRequestFn!({
                 name: 'something',
@@ -272,8 +272,8 @@ describe('config', () => {
         })
 
         it('should remove the Authorization header from requests even when a mask request fn is set', () => {
-            const posthogConfig = defaultConfig()
-            posthogConfig.session_recording.maskCapturedNetworkRequestFn = (data) => {
+            const insightsConfig = defaultConfig()
+            insightsConfig.session_recording.maskCapturedNetworkRequestFn = (data) => {
                 return {
                     ...data,
                     requestHeaders: {
@@ -282,7 +282,7 @@ describe('config', () => {
                     },
                 }
             }
-            const networkOptions = buildNetworkRequestOptions(posthogConfig, {})
+            const networkOptions = buildNetworkRequestOptions(insightsConfig, {})
 
             const cleaned = networkOptions.maskRequestFn!({
                 name: 'something',
@@ -323,8 +323,8 @@ describe('config', () => {
         })
 
         it('mask request fn replaces scrubPayload functionality', () => {
-            const posthogConfig = defaultConfig()
-            posthogConfig.session_recording.maskCapturedNetworkRequestFn = (data) => {
+            const insightsConfig = defaultConfig()
+            insightsConfig.session_recording.maskCapturedNetworkRequestFn = (data) => {
                 return {
                     ...data,
                     requestHeaders: {
@@ -334,7 +334,7 @@ describe('config', () => {
                     requestBody: 'the provided function ran',
                 }
             }
-            const networkOptions = buildNetworkRequestOptions(posthogConfig, {})
+            const networkOptions = buildNetworkRequestOptions(insightsConfig, {})
 
             const cleaned = networkOptions.maskRequestFn!({
                 name: 'something',

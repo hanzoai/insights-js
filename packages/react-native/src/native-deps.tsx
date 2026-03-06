@@ -6,7 +6,7 @@ import { OptionalExpoDevice } from './optional/OptionalExpoDevice'
 import { OptionalExpoFileSystem } from './optional/OptionalExpoFileSystem'
 import { OptionalExpoLocalization } from './optional/OptionalExpoLocalization'
 import { OptionalReactNativeDeviceInfo } from './optional/OptionalReactNativeDeviceInfo'
-import { PostHogCustomAppProperties, PostHogCustomStorage } from './types'
+import { InsightsCustomAppProperties, InsightsCustomStorage } from './types'
 import { OptionalReactNativeLocalize } from './optional/OptionalReactNativeLocalize'
 import { OptionalExpoFileSystemLegacy } from './optional/OptionalExpoFileSystemLegacy'
 import { detectDeviceType } from '@hanzo/insights-core'
@@ -27,8 +27,8 @@ const getDeviceType = (): string => {
 
 export const currentDeviceType = getDeviceType()
 
-export const getAppProperties = (): PostHogCustomAppProperties => {
-  const properties: PostHogCustomAppProperties = {
+export const getAppProperties = (): InsightsCustomAppProperties => {
+  const properties: InsightsCustomAppProperties = {
     $device_type: currentDeviceType,
   }
 
@@ -130,7 +130,7 @@ const returnPropertyIfNotUnknown = (value: string | null): string | null => {
   return null
 }
 
-const buildLegacyStorage = (filesystem: any): PostHogCustomStorage => {
+const buildLegacyStorage = (filesystem: any): InsightsCustomStorage => {
   return {
     async getItem(key: string) {
       try {
@@ -149,7 +149,7 @@ const buildLegacyStorage = (filesystem: any): PostHogCustomStorage => {
   }
 }
 
-export const buildOptimisticAsyncStorage = (): PostHogCustomStorage | undefined => {
+export const buildOptimisticAsyncStorage = (): InsightsCustomStorage | undefined => {
   // On web platform during SSR (no window), skip file storage
   // The caller will fall back to memory storage
   if (isWeb() && typeof (GLOBAL_OBJ as any)?.window === 'undefined') {
@@ -157,18 +157,18 @@ export const buildOptimisticAsyncStorage = (): PostHogCustomStorage | undefined 
   }
 
   // expo-file-system is not supported on web and macos, so we need to use the react-native-async-storage package instead
-  // see https://github.com/PostHog/posthog-js-lite/blob/5fb7bee96f739b243dfea5589e2027f16629e8cd/posthog-react-native/src/optional/OptionalExpoFileSystem.ts#L7-L11
+  // see https://github.com/Insights/@hanzo/insights-lite/blob/5fb7bee96f739b243dfea5589e2027f16629e8cd/insights-react-native/src/optional/OptionalExpoFileSystem.ts#L7-L11
   const supportedPlatform = !isWeb() && !isMacOS()
 
   // expo-file-system is only supported on native platforms (not web/macOS).
-  // See https://github.com/PostHog/posthog-js-lite/issues/140
+  // See https://github.com/Insights/@hanzo/insights-lite/issues/140
   if (supportedPlatform) {
     // expo >= 54 and expo-file-system >= 19: prefer the new File/Paths API.
     // We always check for the new API first because:
     // - SDK 54 stable exports legacy methods (readAsStringAsync, writeAsStringAsync) that throw
     //   a deprecation error when called, so existence checks alone are unreliable.
     // - SDK 55+ has a working legacy subpath, but the new API is the recommended approach.
-    // See https://github.com/PostHog/posthog-js/issues/3151
+    // See https://github.com/Insights/@hanzo/insights/issues/3151
     if (OptionalExpoFileSystem) {
       const filesystem = OptionalExpoFileSystem as any
 
@@ -211,6 +211,6 @@ export const buildOptimisticAsyncStorage = (): PostHogCustomStorage | undefined 
   }
 
   throw new Error(
-    'PostHog: No storage available. Please install expo-file-system or react-native-async-storage OR implement a custom storage provider.'
+    'Insights: No storage available. Please install expo-file-system or react-native-async-storage OR implement a custom storage provider.'
   )
 }

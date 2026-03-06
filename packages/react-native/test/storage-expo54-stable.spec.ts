@@ -1,6 +1,6 @@
 // Test for Expo SDK 54 stable where legacy methods exist but throw deprecation errors
 // and the new File/Paths API should be used instead.
-// See https://github.com/PostHog/posthog-js/issues/3151
+// See https://github.com/Insights/@hanzo/insights/issues/3151
 
 const mockFileWrite = jest.fn()
 const mockFileText = jest.fn().mockResolvedValue('stored-value')

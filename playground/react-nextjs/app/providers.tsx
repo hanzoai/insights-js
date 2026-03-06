@@ -1,7 +1,7 @@
 'use client'
 
-import posthog, { CaptureResult } from 'posthog-js'
-import { PostHogProvider } from '@posthog/react'
+import insights, { CaptureResult } from '@hanzo/insights'
+import { InsightsProvider } from '@insights/react'
 import { useEffect, useState } from 'react'
 import { EventDisplay } from './EventDisplay'
 
@@ -15,8 +15,8 @@ export function addEventListener(callback: (event: CaptureResult | null) => void
 }
 
 if (typeof window !== 'undefined') {
-    posthog.init('phc_test_key_for_playground', {
-        api_host: 'https://us.i.posthog.com',
+    insights.init('phc_test_key_for_playground', {
+        api_host: 'https://us.i.insights.com',
         person_profiles: 'identified_only',
         capture_pageview: 'history_change',
         capture_pageleave: true,
@@ -39,15 +39,15 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
             setEvents((prev) => [event, ...prev].slice(0, 10))
         })
 
-        posthog.capture('playground_loaded')
+        insights.capture('playground_loaded')
 
         return removeListener
     }, [])
 
     return (
-        <PostHogProvider client={posthog}>
+        <InsightsProvider client={insights}>
             <EventDisplay events={events} />
             {children}
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }

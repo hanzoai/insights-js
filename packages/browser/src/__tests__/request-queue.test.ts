@@ -1,6 +1,6 @@
 import { DEFAULT_FLUSH_INTERVAL_MS, RequestQueue } from '../request-queue'
 import { QueuedRequestWithOptions } from '../types'
-import { createPosthogInstance } from './helpers/posthog-instance'
+import { createInsightsInstance } from './helpers/insights-instance'
 
 const EPOCH = 1_600_000_000
 
@@ -31,10 +31,10 @@ describe('RequestQueue', () => {
             expect(queue['_flushTimeoutMs']).toEqual(5000)
         })
 
-        it('can be passed in from posthog config', async () => {
-            const posthog = await createPosthogInstance('token', { request_queue_config: { flush_interval_ms: 1000 } })
-            expect(posthog.config.request_queue_config.flush_interval_ms).toEqual(1000)
-            expect(posthog['_requestQueue']['_flushTimeoutMs']).toEqual(1000)
+        it('can be passed in from insights config', async () => {
+            const insights = await createInsightsInstance('token', { request_queue_config: { flush_interval_ms: 1000 } })
+            expect(insights.config.request_queue_config.flush_interval_ms).toEqual(1000)
+            expect(insights['_requestQueue']['_flushTimeoutMs']).toEqual(1000)
         })
     })
 

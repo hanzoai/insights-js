@@ -3,14 +3,14 @@ on: [pull_request]
 env:
   BROWSERSTACK_ACCESS_KEY: "${{ secrets.BROWSERSTACK_ACCESS_KEY }}"
   BROWSERSTACK_USERNAME: "${{ secrets.BROWSERSTACK_USERNAME }}"
-  POSTHOG_PROJECT_API_KEY: "${{ secrets.POSTHOG_PROJECT_API_KEY }}"
-  POSTHOG_PERSONAL_API_KEY: "${{ secrets.POSTHOG_PERSONAL_API_KEY }}"
+  INSIGHTS_PROJECT_API_KEY: "${{ secrets.INSIGHTS_PROJECT_API_KEY }}"
+  INSIGHTS_PERSONAL_API_KEY: "${{ secrets.INSIGHTS_PERSONAL_API_KEY }}"
   BROWSERSTACK_DEBUG: "true"
   BROWSERSTACK_NETWORK_LOGS: "true"
   BROWSERSTACK_CONSOLE: "info"
   BROWSERSTACK_FORCE_PROXY: "true"
   BROWSERSTACK_USE_AUTOMATE: "true"
-  BROWSERSTACK_PROJECT_NAME: "PostHog JS SDK"
+  BROWSERSTACK_PROJECT_NAME: "Insights JS SDK"
 
 jobs:
   browsers:
@@ -37,7 +37,7 @@ jobs:
       - uses: ./.github/actions/is-affected
         id: is-affected
         with:
-          package-name: posthog-js
+          package-name: @hanzo/insights
 
       - name: Build packages
         if: steps.is-affected.outputs.is-affected == 'true'

@@ -1,5 +1,5 @@
 import { addEventListener, trySafe, isToolbarInstance } from '../utils'
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { ToolbarParams } from '../types'
 import { _getHashParam } from '../utils/request-utils'
 import { createLogger } from '../utils/logger'
@@ -7,13 +7,13 @@ import { window, document, assignableWindow } from '../utils/globals'
 import { TOOLBAR_ID } from '../constants'
 import { isFunction, isNullish } from '@hanzo/insights-core'
 
-// TRICKY: Many web frameworks will modify the route on load, potentially before posthog is initialized.
-// To get ahead of this we grab it as soon as the posthog-js is parsed
+// TRICKY: Many web frameworks will modify the route on load, potentially before insights is initialized.
+// To get ahead of this we grab it as soon as the @hanzo/insights is parsed
 const STATE_FROM_WINDOW = window?.location
-    ? _getHashParam(window.location.hash, '__posthog') || _getHashParam(location.hash, 'state')
+    ? _getHashParam(window.location.hash, '__insights') || _getHashParam(location.hash, 'state')
     : null
 
-const LOCALSTORAGE_KEY = '_postHogToolbarParams'
+const LOCALSTORAGE_KEY = '_insightsToolbarParams'
 
 const logger = createLogger('[Toolbar]')
 
@@ -24,9 +24,9 @@ enum ToolbarState {
 }
 
 export class Toolbar {
-    instance: PostHog
+    instance: Insights
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this.instance = instance
     }
 
@@ -77,12 +77,12 @@ export class Toolbar {
              * Info about the state
              * The state is a json object
              * 1. (Legacy) The state can be `state={}` as a urlencoded object of info. In this case
-             * 2. The state should now be found in `__posthog={}` and can be base64 encoded or urlencoded.
+             * 2. The state should now be found in `__insights={}` and can be base64 encoded or urlencoded.
              * 3. Base64 encoding is preferred and will gradually be rolled out everywhere
              */
 
             const stateHash =
-                STATE_FROM_WINDOW || _getHashParam(location.hash, '__posthog') || _getHashParam(location.hash, 'state')
+                STATE_FROM_WINDOW || _getHashParam(location.hash, '__insights') || _getHashParam(location.hash, 'state')
 
             let toolbarParams: ToolbarParams
             const state = stateHash
@@ -167,10 +167,10 @@ export class Toolbar {
         if (this._getToolbarState() === ToolbarState.LOADED) {
             this._callLoadToolbar(toolbarParams)
         } else if (this._getToolbarState() === ToolbarState.UNINITIALIZED) {
-            // only load the toolbar once, even if there are multiple instances of PostHogLib
+            // only load the toolbar once, even if there are multiple instances of InsightsLib
             this._setToolbarState(ToolbarState.LOADING)
 
-            assignableWindow.__PosthogExtensions__?.loadExternalDependency?.(this.instance, 'toolbar', (err) => {
+            assignableWindow.__InsightsExtensions__?.loadExternalDependency?.(this.instance, 'toolbar', (err) => {
                 if (err) {
                     logger.error('[Toolbar] Failed to load', err)
                     this._setToolbarState(ToolbarState.UNINITIALIZED)

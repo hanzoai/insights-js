@@ -13,7 +13,7 @@ let lastKeysCount: number | undefined
 let cachedFilenameChunkIds: ChunkIdMapType | undefined
 
 export function getFilenameToChunkIdMap(stackParser: StackParser): ChunkIdMapType | undefined {
-  const chunkIdMap = (globalThis as any)._posthogChunkIds as ChunkIdMapType | undefined
+  const chunkIdMap = (globalThis as any)._insightsChunkIds as ChunkIdMapType | undefined
   if (!chunkIdMap) {
     return undefined
   }

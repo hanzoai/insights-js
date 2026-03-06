@@ -1,7 +1,7 @@
 import { defineApp } from 'convex/server'
-import posthog from '@posthog/convex/convex.config.js'
+import insights from '@insights/convex/convex.config.js'
 
 const app = defineApp()
-app.use(posthog)
+app.use(insights)
 
 export default app

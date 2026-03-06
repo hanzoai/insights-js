@@ -1,4 +1,4 @@
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import {
     CAMPAIGN_PARAMS,
     getCampaignParams,
@@ -9,17 +9,17 @@ import {
 import { each, extend } from '../utils'
 import { includes } from '@hanzo/insights-core'
 
-export const setAllPersonProfilePropertiesAsPersonPropertiesForFlags = (posthog: PostHog): void => {
+export const setAllPersonProfilePropertiesAsPersonPropertiesForFlags = (insights: Insights): void => {
     const allProperties = extend(
         {},
         getEventProperties(
-            posthog.config.mask_personal_data_properties,
-            posthog.config.custom_personal_data_properties
+            insights.config.mask_personal_data_properties,
+            insights.config.custom_personal_data_properties
         ),
         getCampaignParams(
-            posthog.config.custom_campaign_params,
-            posthog.config.mask_personal_data_properties,
-            posthog.config.custom_personal_data_properties
+            insights.config.custom_campaign_params,
+            insights.config.mask_personal_data_properties,
+            insights.config.custom_personal_data_properties
         ),
         getReferrerInfo()
     )
@@ -30,5 +30,5 @@ export const setAllPersonProfilePropertiesAsPersonPropertiesForFlags = (posthog:
         }
     })
 
-    posthog.setPersonPropertiesForFlags(personProperties)
+    insights.setPersonPropertiesForFlags(personProperties)
 }

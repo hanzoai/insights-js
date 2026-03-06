@@ -13,12 +13,12 @@ const argv = yargs(hideBin(process.argv)).argv
 const dryRun = argv.dryRun !== 'false'
 
 const runNpmView = () => {
-    const result = spawnSync('npm', ['view', 'posthog-js', '--json'], { encoding: 'utf-8' })
+    const result = spawnSync('npm', ['view', '@hanzo/insights', '--json'], { encoding: 'utf-8' })
     return JSON.parse(result.stdout.trim())
 }
 
 const runNpmDeprecateBeforeVersion = () => {
-    const command = ['deprecate', `posthog-js@<${deprecateBeforeVersion}`, message]
+    const command = ['deprecate', `@hanzo/insights@<${deprecateBeforeVersion}`, message]
     if (dryRun) {
         console.log('Dry run: command', 'npm', command)
     } else {
@@ -26,7 +26,7 @@ const runNpmDeprecateBeforeVersion = () => {
     }
 }
 const runNpmDeprecateBeforeOrEqualVersion = (version) => {
-    const command = ['deprecate', `posthog-js@<=${version}`, message]
+    const command = ['deprecate', `@hanzo/insights@<=${version}`, message]
     if (dryRun) {
         console.log('Dry run: command', 'npm', command)
     } else {

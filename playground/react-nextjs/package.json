@@ -12,8 +12,8 @@
     },
     "dependencies": {
         "next": "14.2.33",
-        "posthog-js": "*",
-        "@posthog/react": "*",
+        "@hanzo/insights": "*",
+        "@hanzo/react": "*",
         "react": "18.3.1",
         "react-dom": "18.3.1"
     },

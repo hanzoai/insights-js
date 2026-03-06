@@ -2,7 +2,7 @@
 import { render, fireEvent, waitFor } from '@testing-library/preact'
 import '@testing-library/jest-dom'
 import { ConversationsWidget } from '../../../extensions/conversations/external/components/ConversationsWidget'
-import { ConversationsRemoteConfig } from '../../../posthog-conversations-types'
+import { ConversationsRemoteConfig } from '../../../insights-conversations-types'
 
 describe('ConversationsWidget restore request UI', () => {
     const config: ConversationsRemoteConfig = {

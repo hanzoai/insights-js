@@ -1,6 +1,6 @@
-import { PostHog } from './posthog-rn'
-import { PostHogAutocaptureElement, JsonType } from '@hanzo/insights-core'
-import { PostHogAutocaptureOptions } from './types'
+import { Insights } from './insights-rn'
+import { InsightsAutocaptureElement, JsonType } from '@hanzo/insights-core'
+import { InsightsAutocaptureOptions } from './types'
 
 interface Element {
   elementType?: {
@@ -57,12 +57,12 @@ const sanitiseLabel = (label: string): string => {
   return label.replace(/[^a-z0-9]+/gi, '-')
 }
 
-export const defaultPostHogLabelProp = 'ph-label'
+export const defaultInsightsLabelProp = 'ph-label'
 
-export const autocaptureFromTouchEvent = (e: any, posthog: PostHog, options: PostHogAutocaptureOptions = {}): void => {
+export const autocaptureFromTouchEvent = (e: any, insights: Insights, options: InsightsAutocaptureOptions = {}): void => {
   const {
     noCaptureProp = 'ph-no-capture',
-    customLabelProp = defaultPostHogLabelProp,
+    customLabelProp = defaultInsightsLabelProp,
     maxElementsCaptured = 20,
     ignoreLabels = [],
     propsToCapture = ['style', 'testID', 'accessibilityLabel', customLabelProp, 'children'],
@@ -71,7 +71,7 @@ export const autocaptureFromTouchEvent = (e: any, posthog: PostHog, options: Pos
   if (!e._targetInst) {
     return
   }
-  const elements: PostHogAutocaptureElement[] = []
+  const elements: InsightsAutocaptureElement[] = []
 
   let currentInst: Element | undefined = e._targetInst
 
@@ -80,7 +80,7 @@ export const autocaptureFromTouchEvent = (e: any, posthog: PostHog, options: Pos
     // maxComponentTreeSize will always be defined as we have a defaultProps. But ts needs a check so this is here.
     elements.length < maxElementsCaptured
   ) {
-    const el: PostHogAutocaptureElement = {
+    const el: InsightsAutocaptureElement = {
       tag_name: '',
     }
 
@@ -148,7 +148,7 @@ export const autocaptureFromTouchEvent = (e: any, posthog: PostHog, options: Pos
         element['tag_name'] = lastLabel
       }
     }
-    posthog.autocapture('touch', elements, {
+    insights.autocapture('touch', elements, {
       $touch_x: e.nativeEvent.pageX,
       $touch_y: e.nativeEvent.pageY,
     })

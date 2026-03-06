@@ -1,4 +1,4 @@
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 import { find } from './utils'
 import { assignableWindow, navigator } from './utils/globals'
 import { cookieStore, localStore } from './storage'
@@ -19,7 +19,7 @@ export enum ConsentStatus {
 export class ConsentManager {
     private _persistentStore?: PersistentStore
 
-    constructor(private _instance: PostHog) {}
+    constructor(private _instance: Insights) {}
 
     private get _config() {
         return this._instance.config
@@ -77,7 +77,7 @@ export class ConsentManager {
         } else if (opt_out_capturing_cookie_prefix) {
             // Deprecated, but we still support it for backwards compatibility.
             // This was deprecated because it differed in behaviour from storage.ts, and appends the token.
-            // This meant it was not possible to share the same consent state across multiple PostHog instances,
+            // This meant it was not possible to share the same consent state across multiple Insights instances,
             // and made it harder for people to migrate from other systems.
             return opt_out_capturing_cookie_prefix + token
         } else {

@@ -54,7 +54,7 @@ export const todoLogic = kea<TodoLogicType>([
             [
                 { id: 1, text: 'Learn Kea with TypeScript', completed: false },
                 { id: 2, text: 'Build a todo app with Kea', completed: false },
-                { id: 3, text: 'Test with PostHog Kea Logger', completed: false },
+                { id: 3, text: 'Test with Insights Kea Logger', completed: false },
             ] as Todo[],
             {
                 addTodo: (state, { text }) => [

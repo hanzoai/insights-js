@@ -9,16 +9,16 @@ const version = packageJson.version;
 
 // React Native-specific configuration
 const REACT_NATIVE_SPEC_INFO = {
-    id: 'posthog-react-native',
-    title: 'PostHog React Native SDK',
-    description: 'PostHog React Native SDK allows you to capture events and send them to PostHog from your React Native applications.',
-    slugPrefix: 'posthog-react-native',
-    specUrl: 'https://github.com/PostHog/posthog-js'
+    id: 'insights-react-native',
+    title: 'Insights React Native SDK',
+    description: 'Insights React Native SDK allows you to capture events and send them to Insights from your React Native applications.',
+    slugPrefix: 'insights-react-native',
+    specUrl: 'https://github.com/Insights/@hanzo/insights'
 };
 
 // React Native-specific type examples (can be customized as needed)
 const REACT_NATIVE_TYPE_EXAMPLES = {
-    PostHogEventProperties: `// Properties for React Native events
+    InsightsEventProperties: `// Properties for React Native events
 {
     event: 'user_signed_up',
     userId: 'user123',
@@ -29,21 +29,21 @@ const REACT_NATIVE_TYPE_EXAMPLES = {
         name: 'John Doe'
     }
 }`,
-    PostHogEventProperty: `// Can be a string or an object
+    InsightsEventProperty: `// Can be a string or an object
 "user@example.com" | { name: "John", age: 25 }`
 };
 
 const config = {
     packageDir: path.resolve(__dirname, '..'),  // packages/react-native
-    apiJsonPath: path.resolve(__dirname, '../docs/posthog-react-native.api.json'),
-    outputPath: path.resolve(__dirname, `../references/posthog-react-native-references-${version}.json`),
+    apiJsonPath: path.resolve(__dirname, '../docs/insights-react-native.api.json'),
+    outputPath: path.resolve(__dirname, `../references/insights-react-native-references-${version}.json`),
     version: version,
     id: REACT_NATIVE_SPEC_INFO.id,
     hogRef: HOG_REF,
     specInfo: REACT_NATIVE_SPEC_INFO,
     typeExamples: REACT_NATIVE_TYPE_EXAMPLES,
-    parentClass: 'PostHog',
-    extraMethods: ['PostHogProvider']
+    parentClass: 'Insights',
+    extraMethods: ['InsightsProvider']
 };
 
 // Ensure references directory exists
@@ -56,9 +56,9 @@ if (!fs.existsSync(referencesDir)) {
 const output = generateApiSpecs(config);
 
 // Write versioned file
-const versionedPath = path.resolve(__dirname, `../references/posthog-react-native-references-${version}.json`);
+const versionedPath = path.resolve(__dirname, `../references/insights-react-native-references-${version}.json`);
 fs.writeFileSync(versionedPath, JSON.stringify(output, null, 2));
 
 // Copy to latest file
-const latestPath = path.resolve(__dirname, '../references/posthog-react-native-references-latest.json');
+const latestPath = path.resolve(__dirname, '../references/insights-react-native-references-latest.json');
 fs.writeFileSync(latestPath, JSON.stringify(output, null, 2));

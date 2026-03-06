@@ -2,7 +2,7 @@ import {
     SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION,
     SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION,
 } from '../../../constants'
-import { PostHog } from '../../../posthog-core'
+import { Insights } from '../../../insights-core'
 import { FlagVariant, RemoteConfig, SessionRecordingPersistedConfig, SessionRecordingUrlTrigger } from '../../../types'
 import { isNullish, isBoolean, isString, isObject } from '@hanzo/insights-core'
 import { window } from '../../../utils/globals'
@@ -157,7 +157,7 @@ export class URLTriggerMatching implements TriggerStatusMatching {
 
     urlBlocked: boolean = false
 
-    constructor(private readonly _instance: PostHog) {}
+    constructor(private readonly _instance: Insights) {}
 
     onConfig(config: ReplayConfigType) {
         this._urlTriggers =
@@ -279,7 +279,7 @@ export class LinkedFlagMatching implements TriggerStatusMatching {
     linkedFlag: string | FlagVariant | null = null
     linkedFlagSeen: boolean = false
     private _flagListenerCleanup: () => void = () => {}
-    constructor(private readonly _instance: PostHog) {}
+    constructor(private readonly _instance: Insights) {}
 
     triggerStatus(): TriggerStatus {
         let result = TRIGGER_PENDING
@@ -343,7 +343,7 @@ export class LinkedFlagMatching implements TriggerStatusMatching {
 export class EventTriggerMatching implements TriggerStatusMatching {
     _eventTriggers: string[] = []
 
-    constructor(private readonly _instance: PostHog) {}
+    constructor(private readonly _instance: Insights) {}
 
     onConfig(config: ReplayConfigType) {
         this._eventTriggers =

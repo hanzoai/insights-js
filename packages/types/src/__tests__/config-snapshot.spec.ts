@@ -57,8 +57,8 @@ function extractTypeInfo(filePath: string, typeName: string): string {
 // and/or change the types of existing options.
 describe('config', () => {
     describe('snapshot', () => {
-        it('for PostHogConfig', () => {
-            const typeInfo = extractTypeInfo(path.resolve(__dirname, '../posthog-config.ts'), 'PostHogConfig')
+        it('for InsightsConfig', () => {
+            const typeInfo = extractTypeInfo(path.resolve(__dirname, '../insights-config.ts'), 'InsightsConfig')
             expect(typeInfo).toMatchSnapshot()
         })
     })

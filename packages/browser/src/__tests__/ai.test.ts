@@ -1,5 +1,5 @@
-import { defaultPostHog } from './helpers/posthog-instance'
-import type { PostHogConfig } from '../types'
+import { defaultInsights } from './helpers/insights-instance'
+import type { InsightsConfig } from '../types'
 import { uuidv7 } from '../uuidv7'
 
 describe('ai', () => {
@@ -7,18 +7,18 @@ describe('ai', () => {
         console.error = jest.fn()
     })
 
-    const setup = (config: Partial<PostHogConfig> = {}, token: string = uuidv7()) => {
+    const setup = (config: Partial<InsightsConfig> = {}, token: string = uuidv7()) => {
         const beforeSendMock = jest.fn().mockImplementation((e) => e)
-        const posthog = defaultPostHog().init(token, { ...config, before_send: beforeSendMock }, token)!
-        posthog.debug()
-        return { posthog, beforeSendMock }
+        const insights = defaultInsights().init(token, { ...config, before_send: beforeSendMock }, token)!
+        insights.debug()
+        return { insights, beforeSendMock }
     }
 
     describe('captureTraceMetric()', () => {
         it('should capture metric', () => {
-            const { posthog, beforeSendMock } = setup()
+            const { insights, beforeSendMock } = setup()
 
-            posthog.captureTraceMetric('123', 'test', 'test')
+            insights.captureTraceMetric('123', 'test', 'test')
 
             const { event, properties } = beforeSendMock.mock.calls[0][0]
             expect(event).toBe('$ai_metric')
@@ -28,9 +28,9 @@ describe('ai', () => {
         })
 
         it('should convert numeric values', () => {
-            const { posthog, beforeSendMock } = setup()
+            const { insights, beforeSendMock } = setup()
 
-            posthog.captureTraceMetric(123, 'test', 1)
+            insights.captureTraceMetric(123, 'test', 1)
 
             const { event, properties } = beforeSendMock.mock.calls[0][0]
             expect(event).toBe('$ai_metric')
@@ -40,9 +40,9 @@ describe('ai', () => {
         })
 
         it('should convert boolean metric_value', () => {
-            const { posthog, beforeSendMock } = setup()
+            const { insights, beforeSendMock } = setup()
 
-            posthog.captureTraceMetric('test', 'test', false)
+            insights.captureTraceMetric('test', 'test', false)
 
             const { event, properties } = beforeSendMock.mock.calls[0][0]
             expect(event).toBe('$ai_metric')
@@ -54,9 +54,9 @@ describe('ai', () => {
 
     describe('captureTraceFeedback()', () => {
         it('should capture feedback', () => {
-            const { posthog, beforeSendMock } = setup()
+            const { insights, beforeSendMock } = setup()
 
-            posthog.captureTraceFeedback('123', 'feedback')
+            insights.captureTraceFeedback('123', 'feedback')
 
             const { event, properties } = beforeSendMock.mock.calls[0][0]
             expect(event).toBe('$ai_feedback')
@@ -65,9 +65,9 @@ describe('ai', () => {
         })
 
         it('should convert numeric values', () => {
-            const { posthog, beforeSendMock } = setup()
+            const { insights, beforeSendMock } = setup()
 
-            posthog.captureTraceFeedback(123, 'feedback')
+            insights.captureTraceFeedback(123, 'feedback')
 
             const { event, properties } = beforeSendMock.mock.calls[0][0]
             expect(event).toBe('$ai_feedback')

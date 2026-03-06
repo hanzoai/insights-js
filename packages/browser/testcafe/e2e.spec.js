@@ -2,7 +2,7 @@ import { t } from 'testcafe'
 import {
     captureLogger,
     capturesMap,
-    initPosthog,
+    initInsights,
     isLoaded,
     queryAPI,
     retryUntilResults,
@@ -11,7 +11,7 @@ import {
 } from './helpers'
 import { expect } from 'expect'
 
-fixture('posthog.js capture')
+fixture('insights.js capture')
     .page('http://localhost:8000/playground/cypress-full/index.html')
     .requestHooks(captureLogger, staticFilesMock)
     .afterEach(async () => {
@@ -23,11 +23,11 @@ fixture('posthog.js capture')
             })
         })
 
-        // console.debug('Requests to posthog:', JSON.stringify(captureLogger.requests, null, 2))
+        // console.debug('Requests to insights:', JSON.stringify(captureLogger.requests, null, 2))
     })
 
 test('Custom events work and are accessible via /api/event', async (t) => {
-    const testSessionId = await initPosthog(t.testRun.test.name)
+    const testSessionId = await initInsights(t.testRun.test.name)
     await t
         .wait(5000)
         .expect(isLoaded())
@@ -58,7 +58,7 @@ export async function assertCustomEventsWorkAndAreAccessibleViaApi(testSessionId
 }
 
 test('Autocaptured events work and are accessible via /api/event', async (t) => {
-    const testSessionId = await initPosthog(t.testRun.test.name)
+    const testSessionId = await initInsights(t.testRun.test.name)
     await t
         .wait(5000)
         .expect(isLoaded())
@@ -114,7 +114,7 @@ export async function assertAutocapturedEventsWorkAndAreAccessibleViaApi(testSes
 }
 
 test('Config options change autocapture behavior accordingly', async (t) => {
-    const testSessionId = await initPosthog(t.testRun.test.name, {
+    const testSessionId = await initInsights(t.testRun.test.name, {
         mask_all_text: true,
         mask_all_element_attributes: true,
     })

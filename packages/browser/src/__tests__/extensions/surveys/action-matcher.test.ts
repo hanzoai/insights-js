@@ -1,26 +1,26 @@
 /// <reference lib="dom" />
 
-import { SurveyActionType, ActionStepStringMatching } from '../../../posthog-surveys-types'
-import { PostHogPersistence } from '../../../posthog-persistence'
-import { PostHog } from '../../../posthog-core'
-import { CaptureResult, PostHogConfig, Properties, PropertyMatchType } from '../../../types'
+import { SurveyActionType, ActionStepStringMatching } from '../../../insights-surveys-types'
+import { InsightsPersistence } from '../../../insights-persistence'
+import { Insights } from '../../../insights-core'
+import { CaptureResult, InsightsConfig, Properties, PropertyMatchType } from '../../../types'
 import { ActionMatcher } from '../../../extensions/surveys/action-matcher'
-import { createMockPostHog, createMockConfig } from '../../helpers/posthog-instance'
+import { createMockInsights, createMockConfig } from '../../helpers/insights-instance'
 
 describe('action-matcher', () => {
-    let config: PostHogConfig
-    let instance: PostHog
+    let config: InsightsConfig
+    let instance: Insights
 
     beforeEach(() => {
         config = createMockConfig({
             token: 'testtoken',
-            api_host: 'https://app.posthog.com',
+            api_host: 'https://app.insights.com',
             persistence: 'memory',
         })
 
-        instance = createMockPostHog({
+        instance = createMockInsights({
             config: config,
-            persistence: new PostHogPersistence(config),
+            persistence: new InsightsPersistence(config),
             _addCaptureHook: jest.fn(),
         })
     })
@@ -94,7 +94,7 @@ describe('action-matcher', () => {
     })
 
     it('can match action on current_url exact', () => {
-        const pageViewAction = createAction(2, '$autocapture', 'https://us.posthog.com')
+        const pageViewAction = createAction(2, '$autocapture', 'https://us.insights.com')
         const actionMatcher = new ActionMatcher(instance)
         actionMatcher.register([pageViewAction])
 
@@ -107,15 +107,15 @@ describe('action-matcher', () => {
         }
 
         actionMatcher._addActionHook(onAction)
-        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://eu.posthog.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://eu.insights.com'))
         expect(pageViewActionMatched).toBeFalsy()
 
-        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://us.posthog.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://us.insights.com'))
         expect(pageViewActionMatched).toBeTruthy()
     })
 
     it('can match action on current_url regexp', () => {
-        const pageViewAction = createAction(2, '$current_url_regexp', '[a-z][a-z].posthog.*', 'regex')
+        const pageViewAction = createAction(2, '$current_url_regexp', '[a-z][a-z].insights.*', 'regex')
         const actionMatcher = new ActionMatcher(instance)
         actionMatcher.register([pageViewAction])
 
@@ -128,11 +128,11 @@ describe('action-matcher', () => {
         }
 
         actionMatcher._addActionHook(onAction)
-        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://eu.posthog.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://eu.insights.com'))
         expect(pageViewActionMatched).toBeTruthy()
         pageViewActionMatched = false
 
-        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://us.posthog.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://us.insights.com'))
         expect(pageViewActionMatched).toBeTruthy()
     })
 
@@ -153,7 +153,7 @@ describe('action-matcher', () => {
         }
         actionMatcher._addActionHook(onAction)
 
-        const result = createCaptureResult('$autocapture', 'https://eu.posthog.com')
+        const result = createCaptureResult('$autocapture', 'https://eu.insights.com')
         result.properties.$element_selectors = []
         actionMatcher.on('$autocapture', result)
         expect(buttonClickedActionMatched).toBeFalsy()

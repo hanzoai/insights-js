@@ -1,92 +1,92 @@
-# PostHog Web
+# Insights Web
 
-> 🚧 This is a reduced feature set package. Currently the only officially supported feature complete way of using PostHog on the web is [posthog-js](https://github.com/PostHog/posthog-js)
+> 🚧 This is a reduced feature set package. Currently the only officially supported feature complete way of using Insights on the web is [@hanzo/insights](https://github.com/hanzoai/@hanzo/insights)
 
-This package is currently published to npm as [posthog-js-lite](https://www.npmjs.com/package/posthog-js-lite) and is a simplified version of the recommended and officially supported `posthog-js`
+This package is currently published to npm as [@hanzo/insights-lite](https://www.npmjs.com/package/@hanzo/insights-lite) and is a simplified version of the recommended and officially supported `@hanzo/insights`
 
 You'd want to use this only if you're very conscious about package sizes, and this reduced feature set (only analytics and feature flags) works for your use case. The most common use case is in chrome extensions.
 
 ## Installation
 
 ```bash
-npm i -s posthog-js-lite
+npm i -s @hanzo/insights-lite
 # or
-yarn add posthog-js-lite
+yarn add @hanzo/insights-lite
 ```
 
 It is entirely written in Typescript and has a minimal API as follows:
 
 ```ts
-import PostHog from 'posthog-js-lite'
+import Insights from '@hanzo/insights-lite'
 
-const posthog = new PostHog('my-api-key', {
+const insights = new Insights('my-api-key', {
   /* options, e.g. for self-hosted users */
-  // host: "https://my-posthog.app.com"
+  // host: "https://my-insights.app.com"
 })
 
 // Capture generic events
-posthog.capture('my-event', { myProperty: 'foo' })
+insights.capture('my-event', { myProperty: 'foo' })
 
 // Identify a user (e.g. on login)
-posthog.identify('my-unique-user-id', { email: 'example@posthog.com', name: 'Jane Doe' })
+insights.identify('my-unique-user-id', { email: 'example@insights.hanzo.ai', name: 'Jane Doe' })
 // ...or with Set Once additional properties
-posthog.identify('my-unique-user-id', { $set: { email: 'example@posthog.com', name: 'Jane Doe' }, $set_once: { vip: true } })
+insights.identify('my-unique-user-id', { $set: { email: 'example@insights.hanzo.ai', name: 'Jane Doe' }, $set_once: { vip: true } })
 
 // Reset a user (e.g. on logout)
-posthog.reset()
+insights.reset()
 
 // Register properties to be sent with all subsequent events
-posthog.register({ itemsInBasket: 3 })
+insights.register({ itemsInBasket: 3 })
 // ...or get rid of them if you don't want them anymore
-posthog.unregister('itemsInBasket')
+insights.unregister('itemsInBasket')
 
 // Add the user to a group
-posthog.group('organisations', 'org-1')
+insights.group('organisations', 'org-1')
 // ...or multiple groups at once
-posthog.group({ organisations: 'org-1', project: 'project-1' })
+insights.group({ organisations: 'org-1', project: 'project-1' })
 
 // Simple feature flags
-if (posthog.isFeatureEnabled('my-feature-flag')) {
+if (insights.isFeatureEnabled('my-feature-flag')) {
   renderFlaggedFunctionality()
 } else {
   renderDefaultFunctionality()
 }
 
 // Multivariate feature flags
-if (posthog.getFeatureFlag('my-feature-flag-with-variants') === 'variant1') {
+if (insights.getFeatureFlag('my-feature-flag-with-variants') === 'variant1') {
   renderVariant1()
-} else if (posthog.getFeatureFlag('my-feature-flag-with-variants') === 'variant2') {
+} else if (insights.getFeatureFlag('my-feature-flag-with-variants') === 'variant2') {
   renderVariant1()
-} else if (posthog.getFeatureFlag('my-feature-flag-with-variants') === 'control') {
+} else if (insights.getFeatureFlag('my-feature-flag-with-variants') === 'control') {
   renderControl()
 }
 
 // Override a feature flag for a specific user (e.g. for testing or user preference)
-posthog.overrideFeatureFlag('my-feature-flag', true)
+insights.overrideFeatureFlag('my-feature-flag', true)
 
 // Listen reactively to feature flag changes
-posthog.onFeatureFlag('my-feature-flag', (value) => {
+insights.onFeatureFlag('my-feature-flag', (value) => {
   respondToFeatureFlagChange(value)
 })
 
 // Opt users in or out, persisting across sessions (default is they are opted in)
-posthog.optOut() // Will stop tracking
-posthog.optIn() // Will start tracking
+insights.optOut() // Will stop tracking
+insights.optIn() // Will start tracking
 ```
 
 ## History API Navigation Tracking
 
-Single-page applications (SPAs) typically use the History API (`pushState`, `replaceState`) for navigation instead of full page loads. By default, PostHog only tracks the initial page load.
+Single-page applications (SPAs) typically use the History API (`pushState`, `replaceState`) for navigation instead of full page loads. By default, Insights only tracks the initial page load.
 
 To automatically track navigation events in SPAs, enable the `captureHistoryEvents` option:
 
 ```ts
-const posthog = new PostHog('my-api-key', {
+const insights = new Insights('my-api-key', {
   captureHistoryEvents: true
 })
 ```
 
-When enabled, PostHog will:
+When enabled, Insights will:
 - Track calls to `history.pushState()` and `history.replaceState()`
 - Track `popstate` events (browser back/forward navigation)
 - Send these as `$pageview` events with the current URL and pathname

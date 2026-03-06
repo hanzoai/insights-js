@@ -1,23 +1,23 @@
-# PostHog Next.js Config
+# Insights Next.js Config
 
-This package handles sourcemap configuration and upload for the PostHog Error Tracking product.
+This package handles sourcemap configuration and upload for the Insights Error Tracking product.
 
-Please see the main [PostHog Error Tracking docs](https://posthog.com/docs/error-tracking).
+Please see the main [Insights Error Tracking docs](https://insights.hanzo.ai/docs/error-tracking).
 
 ## Usage
 
 ```typescript
 // next.config.ts
-import { withPostHogConfig } from '@posthog/nextjs-config'
+import { withInsightsConfig } from '@hanzo/nextjs-config'
 
 const nextConfig = {
   // Your Next.js configuration here
 }
 
-export default withPostHogConfig(nextConfig, {
-  personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!, // Personal API key used for sourcemap uploads, see https://app.posthog.com/settings/user-api-keys
-  projectId: process.env.POSTHOG_PROJECT_ID!, // Project ID, see https://app.posthog.com/settings/project#variables
-  host: process.env.NEXT_PUBLIC_POSTHOG_HOST!, // (optional) Host URL, defaults to https://us.posthog.com
+export default withInsightsConfig(nextConfig, {
+  personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY!, // Personal API key used for sourcemap uploads, see https://app.insights.hanzo.ai/settings/user-api-keys
+  projectId: process.env.INSIGHTS_PROJECT_ID!, // Project ID, see https://app.insights.hanzo.ai/settings/project#variables
+  host: process.env.NEXT_PUBLIC_INSIGHTS_HOST!, // (optional) Host URL, defaults to https://us.insights.hanzo.ai
   sourcemaps: {
     // (optional)
     enabled: true, // (optional) Enable sourcemaps generation and upload, default to true on production builds
@@ -30,4 +30,4 @@ export default withPostHogConfig(nextConfig, {
 
 ## Questions?
 
-### [Check out our community page.](https://posthog.com/posts)
+### [Check out our community page.](https://insights.hanzo.ai/posts)

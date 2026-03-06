@@ -1,5 +1,5 @@
 {
-    "name": "@posthog-playground/vite",
+    "name": "@insights-playground/vite",
     "private": true,
     "version": "0.0.0",
     "type": "module",
@@ -9,7 +9,7 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "@posthog/rollup-plugin": "*",
+        "@hanzo/rollup-plugin": "*",
         "typescript": "~5.9.3",
         "vite": "^7.2.4",
         "vite-plugin-sri": "^0.0.2"

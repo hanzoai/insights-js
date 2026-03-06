@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import insightsJs, { PostHogConfig as InsightsConfig } from '@hanzo/insights'
+import insightsJs, { InsightsConfig as InsightsConfig } from '@hanzo/insights'
 
 import React, { useEffect, useMemo, useRef } from 'react'
 import { Insights, InsightsContext } from './InsightsContext'

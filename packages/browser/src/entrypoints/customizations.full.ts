@@ -4,4 +4,4 @@
 
 import * as customizations from '../customizations'
 import { assignableWindow } from '../utils/globals'
-assignableWindow.posthogCustomizations = customizations
+assignableWindow.insightsCustomizations = customizations

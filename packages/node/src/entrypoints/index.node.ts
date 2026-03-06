@@ -4,9 +4,9 @@ import { createModulerModifier } from '../extensions/error-tracking/modifiers/mo
 import { addSourceContext } from '../extensions/error-tracking/modifiers/context-lines.node'
 import ErrorTracking from '../extensions/error-tracking'
 
-import { PostHogBackendClient } from '../client'
+import { InsightsBackendClient } from '../client'
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
-import { PostHogContext } from '../extensions/context/context'
+import { InsightsContext } from '../extensions/context/context'
 
 ErrorTracking.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuilder(
   [
@@ -20,15 +20,14 @@ ErrorTracking.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuil
   [createModulerModifier(), addSourceContext]
 )
 
-export class PostHog extends PostHogBackendClient {
+export class Insights extends InsightsBackendClient {
   getLibraryId(): string {
-    return 'posthog-node'
+    return 'insights-node'
   }
 
-  protected initializeContext(): PostHogContext {
-    return new PostHogContext()
+  protected initializeContext(): InsightsContext {
+    return new InsightsContext()
   }
 }
 
-export { PostHog as Insights }
-export type { PostHogOptions as InsightsOptions } from '../types'
+export type { InsightsOptions } from '../types'

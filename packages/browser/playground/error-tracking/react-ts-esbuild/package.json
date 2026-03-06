@@ -7,14 +7,14 @@
         "dev": "vite",
         "build": "tsc -b && vite build",
         "lint": "eslint .",
-        "inject": "posthog-cli sourcemap inject --directory ./dist",
-        "upload": "posthog-cli sourcemap upload --directory ./dist",
+        "inject": "insights-cli sourcemap inject --directory ./dist",
+        "upload": "insights-cli sourcemap upload --directory ./dist",
         "preview": "vite preview",
-        "link-posthog": "pnpm link ../../..",
-        "build-posthog": "cd ../../.. && NODE_ENV=dev pnpm i && pnpm run build"
+        "link-insights": "pnpm link ../../..",
+        "build-insights": "cd ../../.. && NODE_ENV=dev pnpm i && pnpm run build"
     },
     "dependencies": {
-        "posthog-js": "link:../../..",
+        "@hanzo/insights": "link:../../..",
         "react": "^19.2.1",
         "react-dom": "^19.2.1"
     },

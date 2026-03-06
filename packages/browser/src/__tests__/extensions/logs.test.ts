@@ -1,5 +1,5 @@
 import { assignableWindow } from '../../utils/globals'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 
 // Mock external OpenTelemetry dependencies
 const mockLogs = {
@@ -48,7 +48,7 @@ jest.mock('@opentelemetry/resources', () => ({
 }))
 
 describe('logs entrypoint', () => {
-    let mockPostHog: PostHog
+    let mockInsights: Insights
     let originalConsole: Console
     let mockLogger: any
     let mockEmit: jest.Mock
@@ -66,10 +66,10 @@ describe('logs entrypoint', () => {
 
         mockLogs.getLogger.mockReturnValue(mockLogger)
 
-        // Mock PostHog instance
-        mockPostHog = {
+        // Mock Insights instance
+        mockInsights = {
             config: {
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 token: 'test-token',
             },
             sessionManager: {
@@ -81,7 +81,7 @@ describe('logs entrypoint', () => {
                 })),
             },
             get_distinct_id: jest.fn(() => 'user-123'),
-        } as unknown as PostHog
+        } as unknown as Insights
 
         // Mock assignableWindow
         Object.defineProperty(assignableWindow, 'location', {
@@ -104,7 +104,7 @@ describe('logs entrypoint', () => {
         })
 
         // Clear existing extensions
-        assignableWindow.__PosthogExtensions__ = {}
+        assignableWindow.__InsightsExtensions__ = {}
     })
 
     afterEach(() => {
@@ -113,23 +113,23 @@ describe('logs entrypoint', () => {
     })
 
     describe('module loading', () => {
-        it('should initialize PostHog extensions when imported', async () => {
+        it('should initialize Insights extensions when imported', async () => {
             await import('../../entrypoints/logs')
 
-            expect(assignableWindow.__PosthogExtensions__).toBeDefined()
-            expect(assignableWindow.__PosthogExtensions__.logs.initializeLogs).toBeDefined()
-            expect(typeof assignableWindow.__PosthogExtensions__.logs.initializeLogs).toBe('function')
+            expect(assignableWindow.__InsightsExtensions__).toBeDefined()
+            expect(assignableWindow.__InsightsExtensions__.logs.initializeLogs).toBeDefined()
+            expect(typeof assignableWindow.__InsightsExtensions__.logs.initializeLogs).toBe('function')
         })
 
-        it('should preserve existing PostHog extensions', async () => {
+        it('should preserve existing Insights extensions', async () => {
             const existingExtension = jest.fn()
-            assignableWindow.__PosthogExtensions__ = { logs: { initializeLogs: undefined } } as any
-            ;(assignableWindow.__PosthogExtensions__ as any).existingExtension = existingExtension
+            assignableWindow.__InsightsExtensions__ = { logs: { initializeLogs: undefined } } as any
+            ;(assignableWindow.__InsightsExtensions__ as any).existingExtension = existingExtension
 
             await import('../../entrypoints/logs')
 
-            expect((assignableWindow.__PosthogExtensions__ as any).existingExtension).toBe(existingExtension)
-            expect(assignableWindow.__PosthogExtensions__.logs.initializeLogs).toBeDefined()
+            expect((assignableWindow.__InsightsExtensions__ as any).existingExtension).toBe(existingExtension)
+            expect(assignableWindow.__InsightsExtensions__.logs.initializeLogs).toBeDefined()
         })
     })
 
@@ -138,18 +138,18 @@ describe('logs entrypoint', () => {
             await import('../../entrypoints/logs')
         })
 
-        it('should be available as a PostHog extension', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+        it('should be available as a Insights extension', () => {
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
             expect(initializeLogs).toBeDefined()
             expect(typeof initializeLogs).toBe('function')
         })
 
         it('should set up OpenTelemetry logging when called', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             expect(mockOTLPLogExporter).toHaveBeenCalledWith({
-                url: 'https://app.posthog.com/i/v1/logs?token=test-token',
+                url: 'https://app.insights.com/i/v1/logs?token=test-token',
                 headers: {
                     'Content-Type': 'text/plain',
                 },
@@ -168,8 +168,8 @@ describe('logs entrypoint', () => {
                 debug: assignableWindow.console.debug,
             }
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             // Console methods should be wrapped (different from originals)
             expect(assignableWindow.console.log).not.toBe(originalMethods.log)
@@ -186,20 +186,20 @@ describe('logs entrypoint', () => {
         })
 
         it('should set up OpenTelemetry with correct attributes', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
             expect(initializeLogs).toBeDefined()
 
-            initializeLogs(mockPostHog)
+            initializeLogs(mockInsights)
 
             expect(mockResourceFromAttributes).toHaveBeenCalledWith({
-                'service.name': 'posthog-browser-logs',
+                'service.name': 'insights-browser-logs',
                 host: 'example.com',
                 'session.id': 'session-123',
                 'window.id': 'window-456',
             })
 
             expect(mockOTLPLogExporter).toHaveBeenCalledWith({
-                url: 'https://app.posthog.com/i/v1/logs?token=test-token',
+                url: 'https://app.insights.com/i/v1/logs?token=test-token',
                 headers: {
                     'Content-Type': 'text/plain',
                 },
@@ -215,16 +215,16 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle missing session manager', () => {
-            const postHogWithoutSession = {
-                ...mockPostHog,
+            const insightsWithoutSession = {
+                ...mockInsights,
                 sessionManager: null,
-            } as unknown as PostHog
+            } as unknown as Insights
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(postHogWithoutSession)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(insightsWithoutSession)
 
             expect(mockResourceFromAttributes).toHaveBeenCalledWith({
-                'service.name': 'posthog-browser-logs',
+                'service.name': 'insights-browser-logs',
                 host: 'example.com',
             })
         })
@@ -233,8 +233,8 @@ describe('logs entrypoint', () => {
     describe('console wrapping behavior', () => {
         beforeEach(async () => {
             await import('../../entrypoints/logs')
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
         })
 
         it('should emit logs when console methods are called', () => {
@@ -295,8 +295,8 @@ describe('logs entrypoint', () => {
     describe('object flattening', () => {
         beforeEach(async () => {
             await import('../../entrypoints/logs')
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
         })
 
         it('should flatten nested objects in first argument', () => {
@@ -342,8 +342,8 @@ describe('logs entrypoint', () => {
     describe('error handling in logs', () => {
         beforeEach(async () => {
             await import('../../entrypoints/logs')
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
         })
 
         it('should handle Error objects correctly', () => {
@@ -389,11 +389,11 @@ describe('logs entrypoint', () => {
         })
 
         it('should include session information in resource attributes', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             expect(mockResourceFromAttributes).toHaveBeenCalledWith({
-                'service.name': 'posthog-browser-logs',
+                'service.name': 'insights-browser-logs',
                 host: 'example.com',
                 'session.id': 'session-123',
                 'window.id': 'window-456',
@@ -401,8 +401,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should include session timestamps in log attributes', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log('Test message')
 
@@ -417,21 +417,21 @@ describe('logs entrypoint', () => {
         })
 
         it('should work without session manager', () => {
-            const postHogWithoutSession = {
-                ...mockPostHog,
+            const insightsWithoutSession = {
+                ...mockInsights,
                 sessionManager: null,
-            } as unknown as PostHog
+            } as unknown as Insights
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            expect(() => initializeLogs(postHogWithoutSession)).not.toThrow()
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            expect(() => initializeLogs(insightsWithoutSession)).not.toThrow()
         })
     })
 
     describe('edge cases and error handling', () => {
         beforeEach(async () => {
             await import('../../entrypoints/logs')
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
         })
 
         it('should handle circular references in objects without throwing', () => {
@@ -581,27 +581,27 @@ describe('logs entrypoint', () => {
         })
     })
 
-    describe('PostHog extensions setup', () => {
-        it('should initialize PostHog extensions object if not present', async () => {
-            delete (assignableWindow as any).__PosthogExtensions__
+    describe('Insights extensions setup', () => {
+        it('should initialize Insights extensions object if not present', async () => {
+            delete (assignableWindow as any).__InsightsExtensions__
 
             await import('../../entrypoints/logs')
 
-            expect(assignableWindow.__PosthogExtensions__).toBeDefined()
-            expect(assignableWindow.__PosthogExtensions__.logs.initializeLogs).toBeDefined()
+            expect(assignableWindow.__InsightsExtensions__).toBeDefined()
+            expect(assignableWindow.__InsightsExtensions__.logs.initializeLogs).toBeDefined()
         })
     })
 
-    describe('integration with PostHog core', () => {
+    describe('integration with Insights core', () => {
         beforeEach(async () => {
             await import('../../entrypoints/logs')
         })
 
-        it('should use PostHog distinct_id in log attributes', () => {
-            ;(mockPostHog.get_distinct_id as jest.Mock).mockReturnValue('custom-distinct-id')
+        it('should use Insights distinct_id in log attributes', () => {
+            ;(mockInsights.get_distinct_id as jest.Mock).mockReturnValue('custom-distinct-id')
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log('Test message')
 
@@ -623,8 +623,8 @@ describe('logs entrypoint', () => {
                 writable: true,
             })
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log('Test message')
 
@@ -637,17 +637,17 @@ describe('logs entrypoint', () => {
             })
         })
 
-        it('should use PostHog config for OTLP exporter URL', () => {
-            const customPostHog = {
-                ...mockPostHog,
+        it('should use Insights config for OTLP exporter URL', () => {
+            const customInsights = {
+                ...mockInsights,
                 config: {
                     api_host: 'https://custom.example.com',
                     token: 'custom-token-123',
                 },
-            } as unknown as PostHog
+            } as unknown as Insights
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(customPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(customInsights)
 
             expect(mockOTLPLogExporter).toHaveBeenCalledWith({
                 url: 'https://custom.example.com/i/v1/logs?token=custom-token-123',

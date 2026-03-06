@@ -1,7 +1,7 @@
 import { Page, BrowserContext } from '@playwright/test'
-import { Compression, FlagsResponse, PostHogConfig } from '@/types'
+import { Compression, FlagsResponse, InsightsConfig } from '@/types'
 import path from 'path'
-import { WindowWithPostHog } from './posthog-playwright-test-base'
+import { WindowWithInsights } from './insights-playwright-test-base'
 
 /**
  * uses the standard playwright page.goto
@@ -21,16 +21,16 @@ export async function gotoPage(page: Page, url: string) {
 
 export interface StartOptions {
     waitForFlags?: boolean
-    initPosthog?: boolean
+    initInsights?: boolean
     resetOnInit?: boolean
     // playwright is stricter than cypress on access to the window object
     // sometimes you need to pass functions here that will run on window in the correct page
-    runBeforePostHogInit?: (pg: Page) => void
+    runBeforeInsightsInit?: (pg: Page) => void
     // playwright is stricter than cypress on access to the window object
     // sometimes you need to pass functions here that will run on window in the correct page
-    runAfterPostHogInit?: (pg: Page) => void
+    runAfterInsightsInit?: (pg: Page) => void
     type?: 'navigate' | 'reload'
-    options?: Partial<PostHogConfig>
+    options?: Partial<InsightsConfig>
     flagsResponseOverrides?: Partial<FlagsResponse>
     url?: string
 }
@@ -38,10 +38,10 @@ export interface StartOptions {
 export async function start(
     {
         waitForFlags = true,
-        initPosthog = true,
+        initInsights = true,
         resetOnInit = false,
-        runBeforePostHogInit = undefined,
-        runAfterPostHogInit = undefined,
+        runBeforeInsightsInit = undefined,
+        runAfterInsightsInit = undefined,
         type = 'navigate',
         options = {},
         flagsResponseOverrides = {
@@ -119,19 +119,19 @@ export async function start(
         await gotoPage(page, url)
     }
 
-    runBeforePostHogInit?.(page)
+    runBeforeInsightsInit?.(page)
 
-    // Initialize PostHog if required
-    if (initPosthog) {
+    // Initialize Insights if required
+    if (initInsights) {
         await page.evaluate(
-            // TS very unhappy with passing PostHogConfig here, so just pass an object
-            (posthogOptions: Record<string, any>) => {
-                const opts: Partial<PostHogConfig> = {
+            // TS very unhappy with passing InsightsConfig here, so just pass an object
+            (insightsOptions: Record<string, any>) => {
+                const opts: Partial<InsightsConfig> = {
                     api_host: 'https://localhost:1234',
                     debug: true,
                     ip: false, // Prevent IP deprecation warning in Playwright tests
                     before_send: (event) => {
-                        const win = window as WindowWithPostHog
+                        const win = window as WindowWithInsights
                         win.capturedEvents = win.capturedEvents || []
 
                         if (event) {
@@ -146,27 +146,27 @@ export async function start(
                         }
                         // playwright can't serialize functions to pass around from the playwright to browser context
                         // if we want to run custom code in the loaded function we need to pass it on the page's window,
-                        // but it's a new window so we have to create it in the `before_posthog_init` option
+                        // but it's a new window so we have to create it in the `before_insights_init` option
                         ;(window as any).__ph_loaded?.(ph)
                     },
                     opt_out_useragent_filter: true,
-                    ...posthogOptions,
+                    ...insightsOptions,
                 }
 
-                const windowPosthog = (window as WindowWithPostHog).posthog
-                windowPosthog?.init('test token', opts)
+                const windowInsights = (window as WindowWithInsights).insights
+                windowInsights?.init('test token', opts)
             },
             options as Record<string, any>
         )
     }
 
-    runAfterPostHogInit?.(page)
+    runAfterInsightsInit?.(page)
 
-    // Reset PostHog if required
+    // Reset Insights if required
     if (resetOnInit) {
         await page.evaluate(() => {
-            const windowPosthog = (window as WindowWithPostHog).posthog
-            windowPosthog?.reset(true)
+            const windowInsights = (window as WindowWithInsights).insights
+            windowInsights?.reset(true)
         })
     }
 
@@ -183,7 +183,7 @@ export async function start(
 export async function waitForSessionRecordingToStart(page: Page, timeout = 5000): Promise<void> {
     await page.waitForFunction(
         () => {
-            const ph = (window as any).posthog
+            const ph = (window as any).insights
             return ph?.sessionRecording?.started === true
         },
         { timeout }
@@ -198,7 +198,7 @@ export async function waitForSessionRecordingToStart(page: Page, timeout = 5000)
 export async function waitForRemoteConfig(page: Page, timeout = 5000): Promise<void> {
     await page.waitForFunction(
         () => {
-            const ph = (window as any).posthog
+            const ph = (window as any).insights
             const status = ph?.sessionRecording?.status
             return status !== 'pending_config' && status !== 'lazy_loading' && status !== undefined
         },

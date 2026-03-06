@@ -16,7 +16,7 @@ describe('error conversion', () => {
   )
 
   async function getExceptionList(error: unknown): Promise<CoreErrorTracking.ErrorProperties['$exception_list']> {
-    const syntheticException = new Error('PostHog syntheticException')
+    const syntheticException = new Error('Insights syntheticException')
     const { $exception_list } = errorPropertiesBuilder.buildFromUnknown(error, {
       syntheticException,
     })

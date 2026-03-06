@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { h, FunctionComponent } from 'preact'
-import { Ticket } from '../../../../posthog-conversations-types'
+import { Ticket } from '../../../../insights-conversations-types'
 import { getStyles } from './styles'
 import { TicketListItem } from './TicketListItem'
 

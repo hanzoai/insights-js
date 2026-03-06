@@ -1,5 +1,5 @@
-import { PostHog } from '@hanzo/insights-node'
-import { captureSpan, createPostHogSpanProcessor, PostHogSpanProcessor, PostHogSpanMapper } from '../src/otel'
+import { Insights } from '@hanzo/insights-node'
+import { captureSpan, createInsightsSpanProcessor, InsightsSpanProcessor, InsightsSpanMapper } from '../src/otel'
 import * as captureModule from '../src/otel/capture'
 import { flushPromises } from './test-utils'
 
@@ -11,7 +11,7 @@ const mockSpanContext = (traceId: string) => ({
 
 jest.mock('@hanzo/insights-node', () => {
   return {
-    PostHog: jest.fn().mockImplementation(() => {
+    Insights: jest.fn().mockImplementation(() => {
       return {
         capture: jest.fn(),
         captureImmediate: jest.fn(),
@@ -22,14 +22,14 @@ jest.mock('@hanzo/insights-node', () => {
 })
 
 describe('OTEL span mapping', () => {
-  let mockPostHogClient: PostHog
+  let mockInsightsClient: Insights
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockPostHogClient = new (PostHog as any)()
+    mockInsightsClient = new (Insights as any)()
   })
 
-  it('maps doGenerate spans into PostHog AI generation events', async () => {
+  it('maps doGenerate spans into Insights AI generation events', async () => {
     await captureSpan(
       {
         attributes: {
@@ -50,14 +50,14 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('otel-trace-123'),
       } as any,
-      mockPostHogClient,
+      mockInsightsClient,
       {
-        posthogDistinctId: 'user_123',
+        insightsDistinctId: 'user_123',
       }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const properties = captureCall[0].properties
 
     expect(properties.$ai_framework).toBe('vercel')
@@ -91,14 +91,14 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('otel-trace-no-sdk-version'),
       } as any,
-      mockPostHogClient,
+      mockInsightsClient,
       {
-        posthogDistinctId: 'user_123',
+        insightsDistinctId: 'user_123',
       }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_framework_version).toBeUndefined()
   })
 
@@ -119,14 +119,14 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('otel-trace-user-agent-version'),
       } as any,
-      mockPostHogClient,
+      mockInsightsClient,
       {
-        posthogDistinctId: 'user_123',
+        insightsDistinctId: 'user_123',
       }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_framework_version).toBe('6')
   })
 
@@ -147,14 +147,14 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('otel-stream-trace'),
       } as any,
-      mockPostHogClient,
+      mockInsightsClient,
       {
-        posthogDistinctId: 'user_abc',
+        insightsDistinctId: 'user_abc',
       }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_time_to_first_token).toBe(0.25)
   })
 
@@ -174,22 +174,22 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('otel-private-trace'),
       } as any,
-      mockPostHogClient,
+      mockInsightsClient,
       {
-        posthogDistinctId: 'user_private',
-        posthogPrivacyMode: true,
+        insightsDistinctId: 'user_private',
+        insightsPrivacyMode: true,
       }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_input).toBeNull()
     expect(captureCall[0].properties.$ai_output_choices).toBeNull()
   })
 
   it('span processor filters non-model spans and captures doGenerate spans', async () => {
-    const spanProcessor = createPostHogSpanProcessor(mockPostHogClient, {
-      posthogDistinctId: 'processor-user',
+    const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
+      insightsDistinctId: 'processor-user',
     })
 
     spanProcessor.onEnd({
@@ -218,8 +218,8 @@ describe('OTEL span mapping', () => {
 
     await flushPromises()
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_trace_id).toBe('accepted-trace')
   })
 
@@ -231,8 +231,8 @@ describe('OTEL span mapping', () => {
       })
     })
 
-    const spanProcessor = createPostHogSpanProcessor(mockPostHogClient, {
-      posthogDistinctId: 'processor-user',
+    const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
+      insightsDistinctId: 'processor-user',
     })
 
     spanProcessor.onEnd({
@@ -267,8 +267,8 @@ describe('OTEL span mapping', () => {
       })
     })
 
-    const spanProcessor = createPostHogSpanProcessor(mockPostHogClient, {
-      posthogDistinctId: 'processor-user',
+    const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
+      insightsDistinctId: 'processor-user',
     })
 
     spanProcessor.onEnd({
@@ -295,11 +295,11 @@ describe('OTEL span mapping', () => {
     captureSpy.mockRestore()
   })
 
-  it('creates a PostHog span processor', async () => {
-    const spanProcessor = createPostHogSpanProcessor(mockPostHogClient, {
-      posthogDistinctId: 'processor-user',
+  it('creates a Insights span processor', async () => {
+    const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
+      insightsDistinctId: 'processor-user',
     })
-    expect(spanProcessor).toBeInstanceOf(PostHogSpanProcessor)
+    expect(spanProcessor).toBeInstanceOf(InsightsSpanProcessor)
 
     await captureSpan(
       {
@@ -316,15 +316,15 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('alias-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'processor-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'processor-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
   })
 
   it('supports custom mappers', async () => {
-    const customMapper: PostHogSpanMapper = {
+    const customMapper: InsightsSpanMapper = {
       name: 'custom-openai',
       canMap: (span) => Boolean(span.attributes?.['openai.request.model']),
       map: (span) => {
@@ -336,7 +336,7 @@ describe('OTEL span mapping', () => {
           output: [{ role: 'assistant', content: 'world' }],
           latency: 0.1,
           usage: { inputTokens: 1, outputTokens: 1 },
-          posthogProperties: { source: 'custom-mapper' },
+          insightsProperties: { source: 'custom-mapper' },
         }
       },
     }
@@ -350,12 +350,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('custom-mapper-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'custom-user', mappers: [customMapper] }
+      mockInsightsClient,
+      { insightsDistinctId: 'custom-user', mappers: [customMapper] }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_model).toBe('gpt-4.1')
     expect(captureCall[0].properties.source).toBe('custom-mapper')
   })
@@ -376,14 +376,14 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('gated-trace'),
       } as any,
-      mockPostHogClient,
+      mockInsightsClient,
       {
-        posthogDistinctId: 'gated-user',
+        insightsDistinctId: 'gated-user',
         shouldExportSpan: () => false,
       }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(0)
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(0)
   })
 
   it('maps generateObject.doGenerate spans', async () => {
@@ -404,12 +404,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('generate-object-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'object-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'object-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_model).toBe('gpt-4.1')
     expect(captureCall[0].properties.ai_finish_reason).toBe('stop')
     expect(captureCall[0].properties.ai_schema_name).toBe('UserProfile')
@@ -431,12 +431,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('embed-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'embed-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'embed-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].event).toBe('$ai_embedding')
     expect(captureCall[0].properties.$ai_input_tokens).toBe(6)
     expect(captureCall[0].properties.$ai_output_choices).toBeNull()
@@ -465,12 +465,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('tools-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'tools-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'tools-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_tools).toEqual([
       {
         type: 'function',
@@ -501,12 +501,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('files-image-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'image-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'image-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices[0].content).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -551,12 +551,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('provider-inline-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'provider-inline-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'provider-inline-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const content = captureCall[0].properties.$ai_output_choices[0].content
     expect(content).toEqual(
       expect.arrayContaining([
@@ -590,12 +590,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('files-url-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'files-url-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'files-url-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const content = captureCall[0].properties.$ai_output_choices[0].content
     expect(content).toEqual(
       expect.arrayContaining([
@@ -634,12 +634,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('provider-text-fallback-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'provider-text-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'provider-text-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     const content = captureCall[0].properties.$ai_output_choices[0].content
     expect(content).toEqual(
       expect.arrayContaining([
@@ -678,12 +678,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('unknown-response-media-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'unknown-response-media-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'unknown-response-media-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices[0].content).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -714,12 +714,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('text-tool-regression'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'regression-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'regression-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices).toEqual([
       {
         role: 'assistant',
@@ -766,12 +766,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('response-messages-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'response-messages-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'response-messages-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices).toEqual([
       {
         role: 'assistant',
@@ -812,12 +812,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('response-messages-image-type-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'response-messages-image-type-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'response-messages-image-type-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices).toEqual([
       {
         role: 'assistant',
@@ -865,12 +865,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('generic-gen-ai-response-media-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'generic-gen-ai-response-media-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'generic-gen-ai-response-media-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices[0].content).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -901,12 +901,12 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('multiple-messages-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'multiple-messages-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'multiple-messages-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
     expect(captureCall[0].properties.$ai_output_choices).toEqual([
       { role: 'assistant', content: [{ type: 'text', text: 'Line one' }] },
       { role: 'assistant', content: [{ type: 'text', text: 'Line two' }] },
@@ -928,10 +928,10 @@ describe('OTEL span mapping', () => {
         status: { code: 1 },
         spanContext: () => mockSpanContext('parent-trace'),
       } as any,
-      mockPostHogClient,
-      { posthogDistinctId: 'parent-user' }
+      mockInsightsClient,
+      { insightsDistinctId: 'parent-user' }
     )
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(0)
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(0)
   })
 })

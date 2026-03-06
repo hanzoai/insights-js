@@ -7,7 +7,7 @@ import {
     RatingSurveyQuestion,
     SurveyAppearance,
     SurveyQuestionType,
-} from '../../../posthog-surveys-types'
+} from '../../../insights-surveys-types'
 import {
     isArray,
     isNull,

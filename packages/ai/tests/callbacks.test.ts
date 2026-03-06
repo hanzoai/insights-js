@@ -1,18 +1,18 @@
 import { LangChainCallbackHandler } from '../src/langchain/callbacks'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { AIMessage } from '@langchain/core/messages'
 import { version } from '../package.json'
 
-const mockPostHogClient = {
+const mockInsightsClient = {
   capture: jest.fn(),
-} as unknown as PostHog
+} as unknown as Insights
 
 describe('LangChainCallbackHandler', () => {
   let handler: LangChainCallbackHandler
 
   beforeEach(() => {
     handler = new LangChainCallbackHandler({
-      client: mockPostHogClient,
+      client: mockInsightsClient,
     })
     jest.clearAllMocks()
   })
@@ -63,11 +63,11 @@ describe('LangChainCallbackHandler', () => {
     handler.handleLLMEnd(llmResult, runId)
 
     // Verify capture was called
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     // Check $ai_lib and $ai_lib_version
-    expect(captureCall[0].properties['$ai_lib']).toBe('posthog-ai')
+    expect(captureCall[0].properties['$ai_lib']).toBe('insights-ai')
     expect(captureCall[0].properties['$ai_lib_version']).toBe(version)
 
     // Check $ai_framework
@@ -198,8 +198,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should NOT be reduced for OpenAI: 150 (no subtraction)
@@ -252,8 +252,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should NOT be reduced for OpenAI: 80 (no subtraction)
@@ -303,8 +303,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should remain unchanged at 100
@@ -355,8 +355,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should remain 0 (no subtraction because input_tokens is falsy)
@@ -409,8 +409,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should be reduced for Anthropic: 1200 - 800 = 400
@@ -462,8 +462,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Should subtract because model name contains "anthropic": 500 - 200 = 300
@@ -515,8 +515,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Should be max(100 - 150, 0) = 0
@@ -567,8 +567,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should be reduced for Anthropic: 1000 - 800 = 200
@@ -622,8 +622,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should be reduced for Anthropic: 2000 - 800 - 500 = 700
@@ -676,8 +676,8 @@ describe('LangChainCallbackHandler', () => {
 
     handler.handleLLMEnd(llmResult, runId)
 
-    expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-    const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+    expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+    const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
     expect(captureCall[0].event).toBe('$ai_generation')
     // Input tokens should NOT be reduced for OpenAI

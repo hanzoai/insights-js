@@ -7,7 +7,7 @@ const prod = process.env.NODE_ENV === 'production'
 
 export default {
     input: {
-        posthog: 'src/posthog.js',
+        insights: 'src/insights.js',
         main: 'src/main.js',
     },
     output: {
@@ -17,9 +17,9 @@ export default {
     plugins: [
         replace({
             preventAssignment: true,
-            'process.env.POSTHOG_PROJECT_API_KEY': JSON.stringify(process.env.POSTHOG_PROJECT_API_KEY),
-            'process.env.POSTHOG_API_HOST': JSON.stringify(process.env.POSTHOG_API_HOST),
-            'process.env.POSTHOG_UI_HOST': JSON.stringify(process.env.POSTHOG_UI_HOST),
+            'process.env.INSIGHTS_PROJECT_API_KEY': JSON.stringify(process.env.INSIGHTS_PROJECT_API_KEY),
+            'process.env.INSIGHTS_API_HOST': JSON.stringify(process.env.INSIGHTS_API_HOST),
+            'process.env.INSIGHTS_UI_HOST': JSON.stringify(process.env.INSIGHTS_UI_HOST),
         }),
         resolve(),
         commonjs(),

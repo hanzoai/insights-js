@@ -1,44 +1,44 @@
 import { defineNuxtPlugin, useRuntimeConfig } from '#app'
 
-import posthog from '@hanzo/insights'
-import type { PostHogClientConfig, PostHogCommon } from '../module'
+import insights from '@hanzo/insights'
+import type { InsightsClientConfig, InsightsCommon } from '../module'
 
 export default defineNuxtPlugin({
-  name: 'posthog-client',
+  name: 'insights-client',
   setup(nuxtApp) {
     const runtimeConfig = useRuntimeConfig()
-    const posthogCommon = runtimeConfig.public.posthog as PostHogCommon
-    const posthogClientConfig = runtimeConfig.public.posthogClientConfig as PostHogClientConfig
+    const insightsCommon = runtimeConfig.public.insights as InsightsCommon
+    const insightsClientConfig = runtimeConfig.public.insightsClientConfig as InsightsClientConfig
 
     // prevent nitro from trying to load this
-    if (!window || posthog.__loaded) {
+    if (!window || insights.__loaded) {
       return
     }
 
-    posthog.init(posthogCommon.publicKey, {
-      api_host: posthogCommon.host,
-      ...posthogClientConfig,
+    insights.init(insightsCommon.publicKey, {
+      api_host: insightsCommon.host,
+      ...insightsClientConfig,
     })
 
-    if (posthogCommon.debug) {
-      posthog.debug(true)
+    if (insightsCommon.debug) {
+      insights.debug(true)
     }
 
-    if (autocaptureEnabled(posthogClientConfig)) {
+    if (autocaptureEnabled(insightsClientConfig)) {
       nuxtApp.hook('vue:error', (error, info) => {
-        posthog.captureException(error, { info })
+        insights.captureException(error, { info })
       })
     }
 
     return {
       provide: {
-        posthog: () => posthog,
+        insights: () => insights,
       },
     }
   },
 })
 
-function autocaptureEnabled(config: PostHogClientConfig): boolean {
+function autocaptureEnabled(config: InsightsClientConfig): boolean {
   if (!config) return false
   if (typeof config.capture_exceptions === 'boolean') return config.capture_exceptions
   if (typeof config.capture_exceptions === 'object') return config.capture_exceptions.capture_unhandled_errors === true

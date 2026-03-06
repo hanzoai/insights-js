@@ -12,6 +12,6 @@
 		"wrangler": "^4.38.0"
 	},
 	"dependencies": {
-		"posthog-node": "*"
+		"@hanzo/insights-node": "*"
 	}
 }

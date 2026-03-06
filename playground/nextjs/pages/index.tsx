@@ -1,14 +1,14 @@
 /* eslint-disable no-console */
-import { PostHogFeature, useActiveFeatureFlags, usePostHog } from 'posthog-js/react'
+import { InsightsFeature, useActiveFeatureFlags, useInsights } from '@hanzo/insights/react'
 import { useEffect, useState } from 'react'
-import { cookieConsentGiven, PERSON_PROCESSING_MODE } from '@/src/posthog'
-import { setAllPersonProfilePropertiesAsPersonPropertiesForFlags } from 'posthog-js/lib/src/customizations'
-import { STORED_PERSON_PROPERTIES_KEY } from 'posthog-js/lib/src/constants'
-import { DisplaySurveyType, Survey } from 'posthog-js'
+import { cookieConsentGiven, PERSON_PROCESSING_MODE } from '@/src/insights'
+import { setAllPersonProfilePropertiesAsPersonPropertiesForFlags } from '@hanzo/insights/lib/src/customizations'
+import { STORED_PERSON_PROPERTIES_KEY } from '@hanzo/insights/lib/src/constants'
+import { DisplaySurveyType, Survey } from '@hanzo/insights'
 import { SessionInteractions } from '@/src/SessionInteractions'
 
 export default function Home() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [isClient, setIsClient] = useState(false)
     const flags = useActiveFeatureFlags()
 
@@ -34,14 +34,14 @@ export default function Home() {
             <p className="italic my-2 text-gray-500">The current time is {time}</p>
 
             <h2>
-                Trigger posthog <span>events </span>
+                Trigger insights <span>events </span>
             </h2>
             <div className="flex items-center gap-2 flex-wrap">
-                <button onClick={() => posthog.capture('Clicked button')}>Capture event</button>
-                <button id="subscribe-user-to-newsletter" onClick={() => posthog.capture('user_subscribed')}>
+                <button onClick={() => insights.capture('Clicked button')}>Capture event</button>
+                <button id="subscribe-user-to-newsletter" onClick={() => insights.capture('user_subscribed')}>
                     Subscribe to newsletter
                 </button>
-                <button onClick={() => posthog.capture('user_unsubscribed')}>Unsubscribe from newsletter</button>
+                <button onClick={() => insights.capture('user_unsubscribed')}>Unsubscribe from newsletter</button>
                 <button data-attr="autocapture-button">Autocapture buttons</button>
                 <a className="Button" data-attr="autocapture-button" href="#">
                     <span>Autocapture a &gt; span</span>
@@ -51,9 +51,9 @@ export default function Home() {
                 </a>
                 <button
                     onClick={() => {
-                        console.log(posthog.persistence?.props[STORED_PERSON_PROPERTIES_KEY])
-                        setAllPersonProfilePropertiesAsPersonPropertiesForFlags(posthog as any)
-                        console.log(posthog.persistence?.props[STORED_PERSON_PROPERTIES_KEY])
+                        console.log(insights.persistence?.props[STORED_PERSON_PROPERTIES_KEY])
+                        setAllPersonProfilePropertiesAsPersonPropertiesForFlags(insights as any)
+                        console.log(insights.persistence?.props[STORED_PERSON_PROPERTIES_KEY])
                     }}
                 >
                     SetPersonPropertiesForFlags
@@ -63,9 +63,9 @@ export default function Home() {
                     <a
                         className="Button"
                         href={
-                            window.location.host === 'www.posthog.dev:3000'
-                                ? 'https://app.posthog.dev:3000'
-                                : 'https://www.posthog.dev:3000'
+                            window.location.host === 'www.insights.dev:3000'
+                                ? 'https://app.insights.dev:3000'
+                                : 'https://www.insights.dev:3000'
                         }
                     >
                         Change subdomain
@@ -76,7 +76,7 @@ export default function Home() {
 
                 <button
                     onClick={() => {
-                        posthog?.reloadFeatureFlags()
+                        insights?.reloadFeatureFlags()
                     }}
                 >
                     Reload feature flags
@@ -84,8 +84,8 @@ export default function Home() {
 
                 <button
                     onClick={() =>
-                        posthog?.setPersonProperties({
-                            email: `user-${randomID()}@posthog.com`,
+                        insights?.setPersonProperties({
+                            email: `user-${randomID()}@insights.com`,
                         })
                     }
                 >
@@ -95,13 +95,13 @@ export default function Home() {
                     onClick={() => {
                         // display javascript input with survey id input
                         let survey: Survey | undefined
-                        posthog?.surveys.getSurveys((surveys: Survey[]) => {
+                        insights?.surveys.getSurveys((surveys: Survey[]) => {
                             survey = surveys[0]
                         })
                         if (!survey) {
                             return
                         }
-                        posthog?.displaySurvey(survey.id, {
+                        insights?.displaySurvey(survey.id, {
                             ignoreConditions: true,
                             ignoreDelay: true,
                             displayType: DisplaySurveyType.Popover,
@@ -111,7 +111,7 @@ export default function Home() {
                     Display survey
                 </button>
 
-                <button onClick={() => posthog?.reset()} id="set-user-properties">
+                <button onClick={() => insights?.reset()} id="set-user-properties">
                     Reset
                 </button>
                 <button onClick={() => setModalOpen(true)}>Open Modal</button>
@@ -156,21 +156,21 @@ export default function Home() {
             {isClient && (
                 <>
                     <div className="px-4 py-2 bg-gray-100 rounded border-2 border-gray-800 my-2">
-                        <h1>PostHog React Components</h1>
+                        <h1>Insights React Components</h1>
                         <p>
-                            Contains some flagged components. You need to create a `beta-feature` flag in PostHog to see
+                            Contains some flagged components. You need to create a `beta-feature` flag in Insights to see
                             them. It should have variants `test` and `control`.
                         </p>
-                        <PostHogFeature flag="beta-feature" match="test" trackInteraction trackView>
+                        <InsightsFeature flag="beta-feature" match="test" trackInteraction trackView>
                             <p className="px-4 py-2 bg-gray-100 rounded border-2 border-gray-800 my-2">
                                 This is a beta feature, With the variant "test"
                             </p>
-                        </PostHogFeature>
-                        <PostHogFeature flag="beta-feature" match="control" trackInteraction trackView>
+                        </InsightsFeature>
+                        <InsightsFeature flag="beta-feature" match="control" trackInteraction trackView>
                             <p className="px-4 py-2 bg-gray-100 rounded border-2 border-gray-800 my-2">
                                 This is a beta feature, With the variant "control"
                             </p>
-                        </PostHogFeature>
+                        </InsightsFeature>
                     </div>
                     {consentGiven !== 'granted' && (
                         <p className="border border-red-900 bg-red-200 rounded p-2">
@@ -179,16 +179,16 @@ export default function Home() {
                         </p>
                     )}
 
-                    <h2 className="mt-4">PostHog info</h2>
+                    <h2 className="mt-4">Insights info</h2>
                     <ul className="text-xs bg-gray-100 rounded border-2 border-gray-800 p-4 space-y-2">
                         <li className="font-mono">
                             Person Mode: <b>{PERSON_PROCESSING_MODE}</b>
                         </li>
                         <li className="font-mono">
-                            DistinctID: <b>{posthog.get_distinct_id()}</b>
+                            DistinctID: <b>{insights.get_distinct_id()}</b>
                         </li>
                         <li className="font-mono">
-                            SessionID: <b>{posthog.get_session_id()}</b>
+                            SessionID: <b>{insights.get_session_id()}</b>
                         </li>
 
                         <li className="font-mono">
@@ -199,9 +199,9 @@ export default function Home() {
                         </li>
                     </ul>
 
-                    <h2 className="mt-4">PostHog config</h2>
+                    <h2 className="mt-4">Insights config</h2>
                     <pre className="text-xs bg-gray-100 rounded border-2 border-gray-800 p-4">
-                        <code>{JSON.stringify(posthog.config, null, 2)}</code>
+                        <code>{JSON.stringify(insights.config, null, 2)}</code>
                     </pre>
                 </>
             )}

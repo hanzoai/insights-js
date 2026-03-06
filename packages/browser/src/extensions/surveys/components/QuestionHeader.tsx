@@ -1,6 +1,6 @@
 import { h } from 'preact'
 import { useContext } from 'preact/hooks'
-import { SurveyQuestion, SurveyQuestionType } from '../../../posthog-surveys-types'
+import { SurveyQuestion, SurveyQuestionType } from '../../../insights-surveys-types'
 import { cancelSVG } from '../icons'
 import { SurveyContext, renderChildrenAsTextOrHtml } from '../surveys-extension-utils'
 

@@ -1,6 +1,6 @@
-import { SurveyActionType, SurveyEventType, SurveyEventWithFilters } from '../posthog-surveys-types'
+import { SurveyActionType, SurveyEventType, SurveyEventWithFilters } from '../insights-surveys-types'
 import { ActionMatcher } from '../extensions/surveys/action-matcher'
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { CaptureResult } from '../types'
 import { matchPropertyFilters } from './property-utils'
 import { isUndefined } from '@hanzo/insights-core'
@@ -32,9 +32,9 @@ export abstract class EventReceiver<T extends EventTriggerable> {
     protected readonly _actionToItems: Map<string, string[]>
     // actionMatcher can look at CaptureResult payloads and match an event to its corresponding action.
     protected _actionMatcher?: ActionMatcher | null
-    protected readonly _instance?: PostHog
+    protected readonly _instance?: Insights
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this._instance = instance
         this._eventToItems = new Map<string, string[]>()
         this._cancelEventToItems = new Map<string, string[]>()

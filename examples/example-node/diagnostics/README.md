@@ -1,12 +1,12 @@
-# PostHog Node.js Memory Diagnostics
+# Insights Node.js Memory Diagnostics
 
-This directory contains diagnostic tools for debugging memory leaks and performance issues in the PostHog Node.js SDK.
+This directory contains diagnostic tools for debugging memory leaks and performance issues in the Insights Node.js SDK.
 
 ## Scripts
 
 ### `memory-leak-diagnostic.js`
 
-**Primary diagnostic tool** for identifying memory leaks in PostHog API methods.
+**Primary diagnostic tool** for identifying memory leaks in Insights API methods.
 
 - Tests each API method in isolation (getFeatureFlag, getAllFlags, etc.)
 - Measures memory growth over thousands of iterations
@@ -53,7 +53,7 @@ node --expose-gc heap-snapshot-helper.js quick
 1. Open Chrome DevTools → Memory tab
 2. Load the generated `.heapsnapshot` files
 3. Compare snapshots to identify accumulating objects
-4. Focus on PostHog-related objects, arrays, and closures
+4. Focus on Insights-related objects, arrays, and closures
 
 ## Configuration
 
@@ -68,10 +68,10 @@ cp .env.example .env
 The `.env` file should contain:
 
 ```env
-POSTHOG_PROJECT_API_KEY=phc_your_project_api_key_here
-POSTHOG_PERSONAL_API_KEY=phx_your_personal_api_key_here
-POSTHOG_HOST=https://app.posthog.com
-POSTHOG_TEST_FLAG_KEY=beta-feature
+INSIGHTS_PROJECT_API_KEY=phc_your_project_api_key_here
+INSIGHTS_PERSONAL_API_KEY=phx_your_personal_api_key_here
+INSIGHTS_HOST=https://app.insights.hanzo.ai
+INSIGHTS_TEST_FLAG_KEY=beta-feature
 ```
 
 **Note:** No flags need to exist on the server - the diagnostics work with non-existent flags and still detect memory leaks.
