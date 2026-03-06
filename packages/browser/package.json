@@ -86,9 +86,6 @@
     "@jest/globals": "^29.7.0",
     "@playwright/test": "^1.52.0",
     "@hanzo/insights-tooling-rollup-utils": "workspace:*",
-    "@posthog/rrweb-plugin-console-record": "^0.0.45",
-    "@posthog/rrweb-record": "^0.0.45",
-    "@posthog/rrweb-types": "^0.0.45",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-json": "^6.1.0",
@@ -142,7 +139,10 @@
     "ts-node": "^10.9.2",
     "tslib": "catalog:",
     "typescript": "catalog:",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "@hanzo/rrweb-plugin-console-record": "^0.0.45",
+    "@hanzo/rrweb-record": "^0.0.45",
+    "@hanzo/rrweb-types": "^0.0.45"
   },
   "browserslist": [
     "> 0.5%, last 2 versions, Firefox ESR, not dead, IE 11"

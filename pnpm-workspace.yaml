@@ -39,13 +39,13 @@ minimumReleaseAgeExclude:
   - node-forge@1.3.2
   - next@15.5.7
   - "@next/env@15.5.7"
-  - "@posthog/rrweb-plugin-console-record@0.0.45"
-  - "@posthog/rrweb-record@0.0.45"
-  - "@posthog/rrweb-types@0.0.45"
-  - "@posthog/rrweb-utils@0.0.45"
-  - "@posthog/rrweb@0.0.45"
-  - "@posthog/rrweb-snapshot@0.0.45"
-  - "@posthog/rrdom@0.0.45"
+  - "@hanzo/rrweb-plugin-console-record@0.0.45"
+  - "@hanzo/rrweb-record@0.0.45"
+  - "@hanzo/rrweb-types@0.0.45"
+  - "@hanzo/rrweb-utils@0.0.45"
+  - "@hanzo/rrweb@0.0.45"
+  - "@hanzo/rrweb-snapshot@0.0.45"
+  - "@hanzo/rrdom@0.0.45"
   - "@hanzo/cli"
   - "@hanzo/insights-react-native-session-replay"
 
