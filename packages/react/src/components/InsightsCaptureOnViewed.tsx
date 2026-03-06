@@ -1,8 +1,8 @@
 import React, { Children, useCallback, useRef, JSX } from 'react'
-import { usePostHog } from '../hooks'
+import { useInsights } from '../hooks'
 import { VisibilityAndClickTracker } from './internal/VisibilityAndClickTracker'
 
-export type PostHogCaptureOnViewedProps = React.HTMLProps<HTMLDivElement> & {
+export type InsightsCaptureOnViewedProps = React.HTMLProps<HTMLDivElement> & {
     name?: string
     properties?: Record<string, any>
     observerOptions?: IntersectionObserverInit
@@ -23,12 +23,12 @@ function TrackedChild({
     observerOptions?: IntersectionObserverInit
 }): JSX.Element {
     const trackedRef = useRef(false)
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     const onIntersect = useCallback(
         (entry: IntersectionObserverEntry) => {
             if (entry.isIntersecting && !trackedRef.current) {
-                posthog.capture('$element_viewed', {
+                insights.capture('$element_viewed', {
                     element_name: name,
                     child_index: index,
                     ...properties,
@@ -36,7 +36,7 @@ function TrackedChild({
                 trackedRef.current = true
             }
         },
-        [posthog, name, index, properties]
+        [insights, name, index, properties]
     )
 
     return (
@@ -47,59 +47,35 @@ function TrackedChild({
 }
 
 /**
- * PostHogCaptureOnViewed - Track when elements are scrolled into view
+ * InsightsCaptureOnViewed - Track when elements are scrolled into view
  *
- * Wraps any children and automatically sends a `$element_viewed` event to PostHog
+ * Wraps any children and automatically sends a `$element_viewed` event
  * when the element comes into the viewport. Only fires once per component instance.
- *
- * @example
- * ```tsx
- * <PostHogCaptureOnViewed name="hero-banner">
- *   <div>Important content here</div>
- * </PostHogCaptureOnViewed>
- *
- * // With custom properties
- * <PostHogCaptureOnViewed
- *   name="product-card"
- *   properties={{ product_id: '123', category: 'electronics' }}
- * >
- *   <ProductCard />
- * </PostHogCaptureOnViewed>
- *
- * // With custom intersection observer options
- * <PostHogCaptureOnViewed
- *   name="footer"
- *   observerOptions={{ threshold: 0.5 }}
- * >
- *   <Footer />
- * </PostHogCaptureOnViewed>
- * ```
  */
-export function PostHogCaptureOnViewed({
+export function InsightsCaptureOnViewed({
     name,
     properties,
     observerOptions,
     trackAllChildren,
     children,
     ...props
-}: PostHogCaptureOnViewedProps): JSX.Element {
+}: InsightsCaptureOnViewedProps): JSX.Element {
     const trackedRef = useRef(false)
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     const onIntersect = useCallback(
         (entry: IntersectionObserverEntry) => {
             if (entry.isIntersecting && !trackedRef.current) {
-                posthog.capture('$element_viewed', {
+                insights.capture('$element_viewed', {
                     element_name: name,
                     ...properties,
                 })
                 trackedRef.current = true
             }
         },
-        [posthog, name, properties]
+        [insights, name, properties]
     )
 
-    // If trackAllChildren is enabled, wrap each child individually
     if (trackAllChildren) {
         const trackedChildren = Children.map(children, (child, index) => {
             return (
@@ -117,7 +93,6 @@ export function PostHogCaptureOnViewed({
         return <div {...props}>{trackedChildren}</div>
     }
 
-    // Default behavior: track the container as a single element
     return (
         <VisibilityAndClickTracker onIntersect={onIntersect} trackView={true} options={observerOptions} {...props}>
             {children}

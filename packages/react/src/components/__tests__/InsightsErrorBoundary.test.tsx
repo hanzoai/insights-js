@@ -2,20 +2,20 @@
 
 import * as React from 'react'
 import { render } from '@testing-library/react'
-import { __POSTHOG_ERROR_MESSAGES, PostHogErrorBoundary } from '../PostHogErrorBoundary'
-import posthog from '@hanzo/insights'
+import { __INSIGHTS_ERROR_MESSAGES, InsightsErrorBoundary } from '../InsightsErrorBoundary'
+import insights from '@hanzo/insights'
 
-describe('PostHogErrorBoundary component', () => {
+describe('InsightsErrorBoundary component', () => {
     mockFunction(console, 'error')
     mockFunction(console, 'warn')
-    mockFunction(posthog, 'captureException')
+    mockFunction(insights, 'captureException')
 
     const renderWithError = (props: any) => render(<RenderWithError {...props} />)
     const renderWithoutError = (props?: any) => render(<RenderWithoutError {...props} />)
 
     it('should call captureException with error message', () => {
         const { container } = renderWithError({ message: 'Test error', fallback: <div></div> })
-        expect(posthog.captureException).toHaveBeenCalledWith(new Error('Test error'), undefined)
+        expect(insights.captureException).toHaveBeenCalledWith(new Error('Test error'), undefined)
         expect(container.innerHTML).toBe('<div></div>')
         expect(console.error).toHaveBeenCalledTimes(1)
         expect((console.error as any).mock.calls[0][1].message).toEqual('Test error')
@@ -23,22 +23,22 @@ describe('PostHogErrorBoundary component', () => {
 
     it('should warn user when fallback is null', () => {
         const { container } = renderWithError({ fallback: null })
-        expect(posthog.captureException).toHaveBeenCalledWith(new Error('Error'), undefined)
+        expect(insights.captureException).toHaveBeenCalledWith(new Error('Error'), undefined)
         expect(container.innerHTML).toBe('')
-        expect(console.warn).toHaveBeenCalledWith(__POSTHOG_ERROR_MESSAGES.INVALID_FALLBACK)
+        expect(console.warn).toHaveBeenCalledWith(__INSIGHTS_ERROR_MESSAGES.INVALID_FALLBACK)
     })
 
     it('should warn user when fallback is a string', () => {
         const { container } = renderWithError({ fallback: 'hello' })
-        expect(posthog.captureException).toHaveBeenCalledWith(new Error('Error'), undefined)
+        expect(insights.captureException).toHaveBeenCalledWith(new Error('Error'), undefined)
         expect(container.innerHTML).toBe('')
-        expect(console.warn).toHaveBeenCalledWith(__POSTHOG_ERROR_MESSAGES.INVALID_FALLBACK)
+        expect(console.warn).toHaveBeenCalledWith(__INSIGHTS_ERROR_MESSAGES.INVALID_FALLBACK)
     })
 
     it('should add additional properties before sending event (as object)', () => {
         const props = { team_id: '1234' }
         renderWithError({ message: 'Kaboom', additionalProperties: props })
-        expect(posthog.captureException).toHaveBeenCalledWith(new Error('Kaboom'), props)
+        expect(insights.captureException).toHaveBeenCalledWith(new Error('Kaboom'), props)
     })
 
     it('should add additional properties before sending event (as function)', () => {
@@ -50,7 +50,7 @@ describe('PostHogErrorBoundary component', () => {
                 return props
             },
         })
-        expect(posthog.captureException).toHaveBeenCalledWith(new Error('Kaboom'), props)
+        expect(insights.captureException).toHaveBeenCalledWith(new Error('Kaboom'), props)
     })
 
     it('should render children without errors', () => {
@@ -62,13 +62,13 @@ describe('PostHogErrorBoundary component', () => {
 describe('captureException processing', () => {
     mockFunction(console, 'error')
     mockFunction(console, 'warn')
-    mockFunction(posthog, 'capture')
+    mockFunction(insights, 'capture')
 
     const renderWithError = (props: any) => render(<RenderWithError {...props} />)
 
     it('should call capture with a stacktrace', () => {
         renderWithError({ message: 'Kaboom', fallback: <div></div>, additionalProperties: {} })
-        const captureCalls = (posthog.capture as jest.Mock).mock.calls
+        const captureCalls = (insights.capture as jest.Mock).mock.calls
         expect(captureCalls.length).toBe(1)
         const exceptionList = captureCalls[0][1].$exception_list
         expect(exceptionList.length).toBe(1)
@@ -95,16 +95,16 @@ function ComponentWithError({ message }: { message: string }): React.ReactElemen
 
 function RenderWithError({ message = 'Error', fallback, additionalProperties }: any) {
     return (
-        <PostHogErrorBoundary fallback={fallback} additionalProperties={additionalProperties}>
+        <InsightsErrorBoundary fallback={fallback} additionalProperties={additionalProperties}>
             <ComponentWithError message={message} />
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }
 
 function RenderWithoutError({ additionalProperties }: any) {
     return (
-        <PostHogErrorBoundary fallback={<div></div>} additionalProperties={additionalProperties}>
+        <InsightsErrorBoundary fallback={<div></div>} additionalProperties={additionalProperties}>
             <div>Amazing content</div>
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }

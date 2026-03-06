@@ -1,10 +1,10 @@
-import { useFeatureFlagPayload, useFeatureFlagVariantKey, usePostHog } from '../hooks'
+import { useFeatureFlagPayload, useFeatureFlagVariantKey, useInsights } from '../hooks'
 import React, { JSX } from 'react'
-import { PostHog } from '../context'
+import { Insights } from '../context'
 import { isFunction, isUndefined } from '../utils/type-utils'
 import { VisibilityAndClickTrackers } from './internal/VisibilityAndClickTrackers'
 
-export type PostHogFeatureProps = Omit<React.HTMLProps<HTMLDivElement>, 'children'> & {
+export type InsightsFeatureProps = Omit<React.HTMLProps<HTMLDivElement>, 'children'> & {
     flag: string
     children: React.ReactNode | ((payload: any) => React.ReactNode)
     fallback?: React.ReactNode
@@ -14,7 +14,7 @@ export type PostHogFeatureProps = Omit<React.HTMLProps<HTMLDivElement>, 'childre
     trackView?: boolean
 }
 
-export function PostHogFeature({
+export function InsightsFeature({
     flag,
     match,
     children,
@@ -23,10 +23,10 @@ export function PostHogFeature({
     trackInteraction,
     trackView,
     ...props
-}: PostHogFeatureProps): JSX.Element | null {
+}: InsightsFeatureProps): JSX.Element | null {
     const payload = useFeatureFlagPayload(flag)
     const variant = useFeatureFlagVariantKey(flag)
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     const shouldTrackInteraction = trackInteraction ?? true
     const shouldTrackView = trackView ?? true
@@ -40,8 +40,8 @@ export function PostHogFeature({
                     options={visibilityObserverOptions}
                     trackInteraction={shouldTrackInteraction}
                     trackView={shouldTrackView}
-                    onInteract={() => captureFeatureInteraction({ flag, posthog, flagVariant: variant })}
-                    onView={() => captureFeatureView({ flag, posthog, flagVariant: variant })}
+                    onInteract={() => captureFeatureInteraction({ flag, insights, flagVariant: variant })}
+                    onView={() => captureFeatureView({ flag, insights, flagVariant: variant })}
                     {...props}
                 >
                     {childNode}
@@ -54,11 +54,11 @@ export function PostHogFeature({
 
 export function captureFeatureInteraction({
     flag,
-    posthog,
+    insights,
     flagVariant,
 }: {
     flag: string
-    posthog: PostHog
+    insights: Insights
     flagVariant?: string | boolean
 }) {
     const properties: Record<string, any> = {
@@ -68,16 +68,16 @@ export function captureFeatureInteraction({
     if (typeof flagVariant === 'string') {
         properties.feature_flag_variant = flagVariant
     }
-    posthog.capture('$feature_interaction', properties)
+    insights.capture('$feature_interaction', properties)
 }
 
 export function captureFeatureView({
     flag,
-    posthog,
+    insights,
     flagVariant,
 }: {
     flag: string
-    posthog: PostHog
+    insights: Insights
     flagVariant?: string | boolean
 }) {
     const properties: Record<string, any> = {
@@ -87,5 +87,5 @@ export function captureFeatureView({
     if (typeof flagVariant === 'string') {
         properties.feature_flag_variant = flagVariant
     }
-    posthog.capture('$feature_view', properties)
+    insights.capture('$feature_view', properties)
 }
