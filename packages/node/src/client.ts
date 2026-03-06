@@ -103,9 +103,9 @@ export abstract class PostHogBackendClient extends PostHogCoreStateless implemen
         : THIRTY_SECONDS
 
     if (options.personalApiKey) {
-      if (options.personalApiKey.includes('phc_')) {
+      if (options.personalApiKey.includes('hi_') && !options.personalApiKey.startsWith('hix_')) {
         throw new Error(
-          'Your Personal API key is invalid. These keys are prefixed with "phx_" and can be created in PostHog project settings.'
+          'Your Personal API key is invalid. These keys are prefixed with "hix_" and can be created in Insights project settings.'
         )
       }
 
