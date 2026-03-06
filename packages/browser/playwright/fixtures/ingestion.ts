@@ -1,15 +1,15 @@
 import { CaptureResult } from '@/types'
-import { PosthogPage, testPostHog } from './posthog'
+import { InsightsPage, testInsights } from './insights'
 
 const INGESTION_TIMEOUT = 10 * 60 * 1000 // 10 min
 const currentEnv = process.env
 const {
-    POSTHOG_PERSONAL_API_KEY = 'private_key',
-    POSTHOG_API_HOST = 'http://localhost:2345',
-    POSTHOG_PROJECT_ID = '1',
+    INSIGHTS_PERSONAL_API_KEY = 'private_key',
+    INSIGHTS_API_HOST = 'http://localhost:2345',
+    INSIGHTS_PROJECT_ID = '1',
 } = currentEnv
 
-export const testIngestion = testPostHog.extend<{}, { ingestion: IngestionPage }>({
+export const testIngestion = testInsights.extend<{}, { ingestion: IngestionPage }>({
     ingestion: [
         async ({}, use) => {
             const ingestion = new IngestionPage()
@@ -17,9 +17,9 @@ export const testIngestion = testPostHog.extend<{}, { ingestion: IngestionPage }
             await use(ingestion)
             // eslint-disable-next-line no-console
             console.log(`
-            Waiting for events from tests to appear in PostHog.
-            You can manually confirm whether the events have shown up at ${POSTHOG_API_HOST}/project/${POSTHOG_PROJECT_ID}/activity/explore
-            If they seem to be failing unexpectedly, check grafana for ingestion lag at https://grafana.prod-us.posthog.dev/d/homepage/homepage
+            Waiting for events from tests to appear in Insights.
+            You can manually confirm whether the events have shown up at ${INSIGHTS_API_HOST}/project/${INSIGHTS_PROJECT_ID}/activity/explore
+            If they seem to be failing unexpectedly, check grafana for ingestion lag at https://grafana.prod-us.insights.dev/d/homepage/homepage
             `)
             await ingestion.processSessionChecks()
         },
@@ -38,22 +38,22 @@ export class IngestionPage {
     constructor() {}
 
     addSessionCheck(
-        posthog: PosthogPage,
+        insights: InsightsPage,
         eventsCount: number,
         check: (events: CaptureResult[]) => Promise<void>
     ): void {
         this.sessionChecks.push({
-            testSessionId: posthog.getTestSessionId(),
-            testTitle: posthog.getTestTitle(),
+            testSessionId: insights.getTestSessionId(),
+            testTitle: insights.getTestTitle(),
             eventsCount,
             check,
         })
     }
 
     checkEnv() {
-        if (!POSTHOG_API_HOST || !POSTHOG_PROJECT_ID || !POSTHOG_PERSONAL_API_KEY) {
+        if (!INSIGHTS_API_HOST || !INSIGHTS_PROJECT_ID || !INSIGHTS_PERSONAL_API_KEY) {
             throw new Error(
-                'POSTHOG_API_HOST, POSTHOG_PROJECT_ID and POSTHOG_PERSONAL_API_KEY env variables must be set'
+                'INSIGHTS_API_HOST, INSIGHTS_PROJECT_ID and INSIGHTS_PERSONAL_API_KEY env variables must be set'
             )
         }
     }
@@ -73,7 +73,7 @@ export class IngestionPage {
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 // NOTE: This is limited by the real production ingestion lag, which you can see in grafana is usually
-// in the low minutes https://grafana.prod-us.posthog.dev/d/homepage/homepage
+// in the low minutes https://grafana.prod-us.insights.dev/d/homepage/homepage
 // This means that this test can fail if the ingestion lag is higher than the timeout, so we're pretty
 // generous with the timeout here.
 export async function retryUntilResults(
@@ -132,9 +132,9 @@ export async function retryUntilResults(
 }
 
 export async function queryAPI(testSessionId: string) {
-    const HEADERS = { Authorization: `Bearer ${POSTHOG_PERSONAL_API_KEY}` }
+    const HEADERS = { Authorization: `Bearer ${INSIGHTS_PERSONAL_API_KEY}` }
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-    const url = `${POSTHOG_API_HOST}/api/projects/${POSTHOG_PROJECT_ID}/events?properties=[{"key":"testSessionId","value":["${testSessionId}"],"operator":"exact","type":"event"}]&after=${yesterday}`
+    const url = `${INSIGHTS_API_HOST}/api/projects/${INSIGHTS_PROJECT_ID}/events?properties=[{"key":"testSessionId","value":["${testSessionId}"],"operator":"exact","type":"event"}]&after=${yesterday}`
     const response = await fetch(url, {
         headers: HEADERS,
     })

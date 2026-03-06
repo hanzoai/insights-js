@@ -1,13 +1,13 @@
 import AnthropicOriginal, { APIPromise } from '@anthropic-ai/sdk'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import {
   formatResponseAnthropic,
   mergeSystemPrompt,
   MonitoringParams,
-  sendEventToPosthog,
+  sendEventToInsights,
   extractAvailableToolCalls,
-  extractPosthogParams,
-  sendEventWithErrorToPosthog,
+  extractInsightsParams,
+  sendEventWithErrorToInsights,
 } from '../utils'
 import type { FormattedContentItem, FormattedTextContent, FormattedFunctionCall, FormattedMessage } from '../types'
 
@@ -28,27 +28,27 @@ interface ToolInProgress {
 
 interface MonitoringAnthropicConfig {
   apiKey: string
-  posthog: PostHog
+  insights: Insights
   baseURL?: string
 }
 
-export class PostHogAnthropic extends AnthropicOriginal {
-  private readonly phClient: PostHog
+export class InsightsAnthropic extends AnthropicOriginal {
+  private readonly phClient: Insights
   public messages: WrappedMessages
 
   constructor(config: MonitoringAnthropicConfig) {
-    const { posthog, ...anthropicConfig } = config
+    const { insights, ...anthropicConfig } = config
     super(anthropicConfig)
-    this.phClient = posthog
+    this.phClient = insights
     this.messages = new WrappedMessages(this, this.phClient)
   }
 }
 
 export class WrappedMessages extends AnthropicOriginal.Messages {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly baseURL: string
 
-  constructor(parentClient: PostHogAnthropic, phClient: PostHog) {
+  constructor(parentClient: InsightsAnthropic, phClient: Insights) {
     super(parentClient)
     this.phClient = phClient
     this.baseURL = parentClient.baseURL
@@ -67,7 +67,7 @@ export class WrappedMessages extends AnthropicOriginal.Messages {
     body: MessageCreateParams & MonitoringParams,
     options?: RequestOptions
   ): APIPromise<Message> | APIPromise<Stream<RawMessageStreamEvent>> {
-    const { providerParams: anthropicParams, posthogParams } = extractPosthogParams(body)
+    const { providerParams: anthropicParams, insightsParams } = extractInsightsParams(body)
     const startTime = Date.now()
 
     const parentPromise = super.create(anthropicParams, options)
@@ -226,9 +226,9 @@ export class WrappedMessages extends AnthropicOriginal.Messages {
                       },
                     ]
 
-              await sendEventToPosthog({
+              await sendEventToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: anthropicParams.model,
                 provider: 'anthropic',
                 input: sanitizeAnthropic(mergeSystemPrompt(anthropicParams, 'anthropic')),
@@ -242,9 +242,9 @@ export class WrappedMessages extends AnthropicOriginal.Messages {
                 tools: availableTools,
               })
             } catch (error: unknown) {
-              const enrichedError = await sendEventWithErrorToPosthog({
+              const enrichedError = await sendEventWithErrorToInsights({
                 client: this.phClient,
-                ...posthogParams,
+                ...insightsParams,
                 model: anthropicParams.model,
                 provider: 'anthropic',
                 input: sanitizeAnthropic(mergeSystemPrompt(anthropicParams, 'anthropic')),
@@ -275,9 +275,9 @@ export class WrappedMessages extends AnthropicOriginal.Messages {
 
             const availableTools = extractAvailableToolCalls('anthropic', anthropicParams)
 
-            await sendEventToPosthog({
+            await sendEventToInsights({
               client: this.phClient,
-              ...posthogParams,
+              ...insightsParams,
               model: anthropicParams.model,
               provider: 'anthropic',
               input: sanitizeAnthropic(mergeSystemPrompt(anthropicParams, 'anthropic')),
@@ -300,9 +300,9 @@ export class WrappedMessages extends AnthropicOriginal.Messages {
           return result
         },
         async (error: any) => {
-          await sendEventToPosthog({
+          await sendEventToInsights({
             client: this.phClient,
-            ...posthogParams,
+            ...insightsParams,
             model: anthropicParams.model,
             provider: 'anthropic',
             input: sanitizeAnthropic(mergeSystemPrompt(anthropicParams, 'anthropic')),
@@ -326,6 +326,6 @@ export class WrappedMessages extends AnthropicOriginal.Messages {
   }
 }
 
-export default PostHogAnthropic
+export default InsightsAnthropic
 
-export { PostHogAnthropic as Anthropic }
+export { InsightsAnthropic as Anthropic }

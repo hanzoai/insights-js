@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 
 const startOptions = {
@@ -43,7 +43,7 @@ test.describe('Session recording - sampling', () => {
     })
 
     test('does not capture events when sampling is set to 0', async ({ page }) => {
-        await page.locator('[data-cy-input]').fill('hello posthog!')
+        await page.locator('[data-cy-input]').fill('hello insights!')
         // because it doesn't make sense to wait for a snapshot event that won't happen
         await page.waitForTimeout(250)
 
@@ -52,7 +52,7 @@ test.describe('Session recording - sampling', () => {
 
     test('can override sampling when starting session recording', async ({ page, context }) => {
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.startSessionRecording({ sampling: true })
             ph?.capture('test_registered_property')
         })
@@ -81,7 +81,7 @@ test.describe('Session recording - sampling', () => {
         await page.waitingForNetworkCausedBy({
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
-                await page.locator('[data-cy-input]').fill('hello posthog!')
+                await page.locator('[data-cy-input]').fill('hello insights!')
             },
         })
 

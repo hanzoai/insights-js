@@ -1,2 +1,2 @@
-export * from './PostHogCoreTestClient'
+export * from './InsightsCoreTestClient'
 export * from './test-utils'

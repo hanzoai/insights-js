@@ -1,5 +1,5 @@
 import { VNode, cloneElement, createContext, type JSX } from 'preact'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import {
     MultipleSurveyQuestion,
     Survey,
@@ -11,7 +11,7 @@ import {
     SurveySchedule,
     SurveyType,
     SurveyWidgetType,
-} from '../../posthog-surveys-types'
+} from '../../insights-surveys-types'
 import { document as _document, window as _window } from '../../utils/globals'
 import {
     getSurveyInteractionProperty,
@@ -353,15 +353,15 @@ export function getContrastingTextColor(color: string = defaultSurveyAppearance.
     return BLACK_TEXT_COLOR
 }
 
-export function getSurveyStylesheet(posthog?: PostHog) {
-    const stylesheet = prepareStylesheet(document, typeof surveyStyles === 'string' ? surveyStyles : '', posthog)
+export function getSurveyStylesheet(insights?: Insights) {
+    const stylesheet = prepareStylesheet(document, typeof surveyStyles === 'string' ? surveyStyles : '', insights)
     stylesheet?.setAttribute('data-ph-survey-style', 'true')
     return stylesheet
 }
 
 export const retrieveSurveyShadow = (
     survey: Pick<Survey, 'id' | 'appearance' | 'type'>,
-    posthog?: PostHog,
+    insights?: Insights,
     element?: Element
 ) => {
     const widgetClassName = getSurveyContainerClass(survey)
@@ -379,7 +379,7 @@ export const retrieveSurveyShadow = (
     addSurveyCSSVariablesToElement(div, survey.type, survey.appearance)
     div.className = widgetClassName
     const shadow = div.attachShadow({ mode: 'open' })
-    const stylesheet = getSurveyStylesheet(posthog)
+    const stylesheet = getSurveyStylesheet(insights)
     if (stylesheet) {
         const existingStylesheet = shadow.querySelector('style')
         if (existingStylesheet) {
@@ -399,7 +399,7 @@ interface SendSurveyEventArgs {
     survey: Survey
     surveySubmissionId: string
     isSurveyCompleted: boolean
-    posthog?: PostHog
+    insights?: Insights
     /** Additional properties to include in the survey event */
     properties?: Properties
 }
@@ -419,16 +419,16 @@ export const sendSurveyEvent = ({
     responses,
     survey,
     surveySubmissionId,
-    posthog,
+    insights,
     isSurveyCompleted,
     properties,
 }: SendSurveyEventArgs) => {
-    if (!posthog) {
-        logger.error('[survey sent] event not captured, PostHog instance not found.')
+    if (!insights) {
+        logger.error('[survey sent] event not captured, Insights instance not found.')
         return
     }
     setSurveySeenOnLocalStorage(survey)
-    posthog.capture(SurveyEventName.SENT, {
+    insights.capture(SurveyEventName.SENT, {
         [SurveyEventProperties.SURVEY_NAME]: survey.name,
         [SurveyEventProperties.SURVEY_ID]: survey.id,
         [SurveyEventProperties.SURVEY_ITERATION]: survey.current_iteration,
@@ -440,7 +440,7 @@ export const sendSurveyEvent = ({
         })),
         [SurveyEventProperties.SURVEY_SUBMISSION_ID]: surveySubmissionId,
         [SurveyEventProperties.SURVEY_COMPLETED]: isSurveyCompleted,
-        sessionRecordingUrl: posthog.get_session_replay_url?.(),
+        sessionRecordingUrl: insights.get_session_replay_url?.(),
         ...responses,
         ...properties,
         $set: {
@@ -461,14 +461,14 @@ const _surveyHasResponses = (inProgressSurvey: InProgressSurveyState | null) => 
 const _buildSurveyEventProperties = (
     survey: Survey,
     inProgressSurvey: InProgressSurveyState | null,
-    posthog: PostHog
+    insights: Insights
 ) => ({
     [SurveyEventProperties.SURVEY_NAME]: survey.name,
     [SurveyEventProperties.SURVEY_ID]: survey.id,
     [SurveyEventProperties.SURVEY_ITERATION]: survey.current_iteration,
     [SurveyEventProperties.SURVEY_ITERATION_START_DATE]: survey.current_iteration_start_date,
     [SurveyEventProperties.SURVEY_PARTIALLY_COMPLETED]: _surveyHasResponses(inProgressSurvey),
-    sessionRecordingUrl: posthog.get_session_replay_url?.(),
+    sessionRecordingUrl: insights.get_session_replay_url?.(),
     ...inProgressSurvey?.responses,
     [SurveyEventProperties.SURVEY_SUBMISSION_ID]: inProgressSurvey?.surveySubmissionId,
     [SurveyEventProperties.SURVEY_QUESTIONS]: survey.questions.map((question) => ({
@@ -478,9 +478,9 @@ const _buildSurveyEventProperties = (
     })),
 })
 
-export const dismissedSurveyEvent = (survey: Survey, posthog?: PostHog, readOnly?: boolean) => {
-    if (!posthog) {
-        logger.error('[survey dismissed] event not captured, PostHog instance not found.')
+export const dismissedSurveyEvent = (survey: Survey, insights?: Insights, readOnly?: boolean) => {
+    if (!insights) {
+        logger.error('[survey dismissed] event not captured, Insights instance not found.')
         return
     }
     if (readOnly) {
@@ -488,8 +488,8 @@ export const dismissedSurveyEvent = (survey: Survey, posthog?: PostHog, readOnly
     }
 
     const inProgressSurvey = getInProgressSurveyState(survey)
-    posthog.capture(SurveyEventName.DISMISSED, {
-        ..._buildSurveyEventProperties(survey, inProgressSurvey, posthog),
+    insights.capture(SurveyEventName.DISMISSED, {
+        ..._buildSurveyEventProperties(survey, inProgressSurvey, insights),
         $set: {
             [getSurveyInteractionProperty(survey, 'dismissed')]: true,
         },
@@ -499,9 +499,9 @@ export const dismissedSurveyEvent = (survey: Survey, posthog?: PostHog, readOnly
     window.dispatchEvent(new CustomEvent('PHSurveyClosed', { detail: { surveyId: survey.id } }))
 }
 
-export const sendSurveyAbandonedEvent = (survey: Survey, posthog?: PostHog) => {
-    if (!posthog) {
-        logger.error('[survey abandoned] event not captured, PostHog instance not found.')
+export const sendSurveyAbandonedEvent = (survey: Survey, insights?: Insights) => {
+    if (!insights) {
+        logger.error('[survey abandoned] event not captured, Insights instance not found.')
         return
     }
 
@@ -526,7 +526,7 @@ export const sendSurveyAbandonedEvent = (survey: Survey, posthog?: PostHog) => {
         // localStorage not available
     }
 
-    posthog.capture(SurveyEventName.ABANDONED, _buildSurveyEventProperties(survey, inProgressSurvey, posthog), {
+    insights.capture(SurveyEventName.ABANDONED, _buildSurveyEventProperties(survey, inProgressSurvey, insights), {
         transport: 'sendBeacon',
     })
 }
@@ -742,7 +742,7 @@ export const clearInProgressSurveyState = (survey: Pick<Survey, 'id' | 'current_
 }
 
 export function getSurveyContainerClass(survey: Pick<Survey, 'id'>, asSelector = false): string {
-    const className = `PostHogSurvey-${survey.id}`
+    const className = `InsightsSurvey-${survey.id}`
     return asSelector ? `.${className}` : className
 }
 

@@ -7,7 +7,7 @@ jest.mock('../src/optional/OptionalExpoFileSystem', () => ({
   },
 }))
 
-import { PostHogRNStorage } from '../src/storage'
+import { InsightsRNStorage } from '../src/storage'
 import { buildOptimisticAsyncStorage } from '../src/native-deps'
 import { OptionalExpoFileSystem } from '../src/optional/OptionalExpoFileSystem'
 
@@ -17,11 +17,11 @@ jest.mock('react-native', () => ({
   Platform: { OS: 'ios' },
 }))
 
-describe('PostHog React Native', () => {
+describe('Insights React Native', () => {
   jest.useRealTimers()
 
   describe('storage', () => {
-    let storage: PostHogRNStorage
+    let storage: InsightsRNStorage
     beforeEach(() => {
       mockedOptionalFileSystem!.readAsStringAsync.mockImplementation(() => {
         const res = Promise.resolve(
@@ -35,7 +35,7 @@ describe('PostHog React Native', () => {
         return res
       })
 
-      storage = new PostHogRNStorage(buildOptimisticAsyncStorage())
+      storage = new InsightsRNStorage(buildOptimisticAsyncStorage())
     })
 
     it('should load storage from the file system', async () => {
@@ -49,7 +49,7 @@ describe('PostHog React Native', () => {
       storage.setItem('foo', 'bar2')
       expect(storage.getItem('foo')).toEqual('bar2')
       expect(mockedOptionalFileSystem!.writeAsStringAsync).toHaveBeenCalledWith(
-        '/mock-doc-dir/.posthog-rn.json',
+        '/mock-doc-dir/.insights-rn.json',
         JSON.stringify({
           version: 'v1',
           content: {
@@ -131,7 +131,7 @@ describe('PostHog React Native', () => {
       // waitForPersist should still resolve (not reject)
       await storage.waitForPersist()
 
-      expect(consoleSpy).toHaveBeenCalledWith('PostHog storage persist failed:', expect.any(Error))
+      expect(consoleSpy).toHaveBeenCalledWith('Insights storage persist failed:', expect.any(Error))
       consoleSpy.mockRestore()
     })
   })

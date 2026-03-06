@@ -11,7 +11,7 @@ export type SegmentUser = {
 }
 
 /**
- * Segment analytics object used for integration with PostHog
+ * Segment analytics object used for integration with Insights
  */
 export type SegmentAnalytics = {
     user: () => SegmentUser | Promise<SegmentUser>

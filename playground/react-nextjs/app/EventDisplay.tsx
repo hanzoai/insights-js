@@ -1,6 +1,6 @@
 'use client'
 
-import { CaptureResult } from 'posthog-js'
+import { CaptureResult } from '@hanzo/insights'
 import { useState } from 'react'
 
 interface EventDisplayProps {
@@ -40,7 +40,7 @@ export function EventDisplay({ events }: EventDisplayProps) {
             }}
         >
             <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem', color: '#1f2937' }}>
-                PostHog Events
+                Insights Events
             </h2>
             {events.length === 0 ? (
                 <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>No events captured yet...</p>

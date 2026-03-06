@@ -1,10 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@posthog/nuxt'],
+  modules: ['@insights/nuxt'],
   compatibilityDate: '2025-11-03',
-  posthogConfig: {
-    host: process.env.POSTHOG_API_HOST!,
-    publicKey: process.env.POSTHOG_PROJECT_API_KEY!,
+  insightsConfig: {
+    host: process.env.INSIGHTS_API_HOST!,
+    publicKey: process.env.INSIGHTS_PROJECT_API_KEY!,
     debug: true,
     clientConfig: {
       capture_exceptions: true,
@@ -17,9 +17,9 @@ export default defineNuxtConfig({
       enabled: true,
       releaseVersion: '3',
       logLevel: 'debug',
-      projectId: process.env.POSTHOG_PROJECT_ID!,
+      projectId: process.env.INSIGHTS_PROJECT_ID!,
       releaseName: 'my-project',
-      personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
+      personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY!,
     },
   },
 })

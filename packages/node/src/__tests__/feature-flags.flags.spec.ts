@@ -1,20 +1,20 @@
-import { PostHog } from '@/entrypoints/index.node'
-import { PostHogOptions } from '@/types'
+import { Insights } from '@/entrypoints/index.node'
+import { InsightsOptions } from '@/types'
 import { apiImplementation, apiImplementationV4, waitForPromises } from './utils'
-import { PostHogV2FlagsResponse, FeatureFlagError } from '@hanzo/insights-core'
+import { InsightsV2FlagsResponse, FeatureFlagError } from '@hanzo/insights-core'
 
 jest.spyOn(console, 'debug').mockImplementation()
 
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
 
-const posthogImmediateResolveOptions: PostHogOptions = {
+const insightsImmediateResolveOptions: InsightsOptions = {
   fetchRetryCount: 0,
 }
 
 describe('flags v2', () => {
   describe('getFeatureFlag v2', () => {
     it('returns undefined if the flag is not found', async () => {
-      const flagsResponse: PostHogV2FlagsResponse = {
+      const flagsResponse: InsightsV2FlagsResponse = {
         flags: {},
         errorsWhileComputingFlags: false,
         requestId: '0152a345-295f-4fba-adac-2e6ea9c91082',
@@ -22,16 +22,16 @@ describe('flags v2', () => {
       }
       mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
       let capturedMessage: any
-      posthog.on('capture', (message) => {
+      insights.on('capture', (message) => {
         capturedMessage = message
       })
 
-      const result = await posthog.getFeatureFlag('non-existent-flag', 'some-distinct-id')
+      const result = await insights.getFeatureFlag('non-existent-flag', 'some-distinct-id')
 
       expect(result).toBe(undefined)
       expect(mockedFetch).toHaveBeenCalledWith('http://example.com/flags/?v=2&config=true', expect.any(Object))
@@ -40,8 +40,8 @@ describe('flags v2', () => {
       expect(capturedMessage).toMatchObject({
         distinct_id: 'some-distinct-id',
         event: '$feature_flag_called',
-        library: posthog.getLibraryId(),
-        library_version: posthog.getLibraryVersion(),
+        library: insights.getLibraryId(),
+        library_version: insights.getLibraryVersion(),
         properties: {
           '$feature/non-existent-flag': undefined,
           $feature_flag: 'non-existent-flag',
@@ -49,8 +49,8 @@ describe('flags v2', () => {
           $feature_flag_request_id: '0152a345-295f-4fba-adac-2e6ea9c91082',
           $feature_flag_evaluated_at: expect.any(Number),
           $groups: undefined,
-          $lib: posthog.getLibraryId(),
-          $lib_version: posthog.getLibraryVersion(),
+          $lib: insights.getLibraryId(),
+          $lib_version: insights.getLibraryVersion(),
           locally_evaluated: false,
         },
       })
@@ -81,7 +81,7 @@ describe('flags v2', () => {
     ])(
       'captures a feature flag called event with extra metadata when the flag is found',
       async ({ key, expectedResponse, expectedReason, expectedId, expectedVersion }) => {
-        const flagsResponse: PostHogV2FlagsResponse = {
+        const flagsResponse: InsightsV2FlagsResponse = {
           flags: {
             'variant-flag': {
               key: 'variant-flag',
@@ -138,16 +138,16 @@ describe('flags v2', () => {
         }
         mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-        const posthog = new PostHog('TEST_API_KEY', {
+        const insights = new Insights('TEST_API_KEY', {
           host: 'http://example.com',
-          ...posthogImmediateResolveOptions,
+          ...insightsImmediateResolveOptions,
         })
         let capturedMessage: any
-        posthog.on('capture', (message) => {
+        insights.on('capture', (message) => {
           capturedMessage = message
         })
 
-        const result = await posthog.getFeatureFlag(key, 'some-distinct-id')
+        const result = await insights.getFeatureFlag(key, 'some-distinct-id')
 
         expect(result).toBe(expectedResponse)
         expect(mockedFetch).toHaveBeenCalledWith('http://example.com/flags/?v=2&config=true', expect.any(Object))
@@ -156,8 +156,8 @@ describe('flags v2', () => {
         expect(capturedMessage).toMatchObject({
           distinct_id: 'some-distinct-id',
           event: '$feature_flag_called',
-          library: posthog.getLibraryId(),
-          library_version: posthog.getLibraryVersion(),
+          library: insights.getLibraryId(),
+          library_version: insights.getLibraryVersion(),
           properties: {
             [`$feature/${key}`]: expectedResponse,
             $feature_flag: key,
@@ -168,8 +168,8 @@ describe('flags v2', () => {
             $feature_flag_request_id: '0152a345-295f-4fba-adac-2e6ea9c91082',
             $feature_flag_evaluated_at: expect.any(Number),
             $groups: undefined,
-            $lib: posthog.getLibraryId(),
-            $lib_version: posthog.getLibraryVersion(),
+            $lib: insights.getLibraryId(),
+            $lib_version: insights.getLibraryVersion(),
             locally_evaluated: false,
           },
         })
@@ -202,16 +202,16 @@ describe('flags v2', () => {
           })
         )
 
-        const posthog = new PostHog('TEST_API_KEY', {
+        const insights = new Insights('TEST_API_KEY', {
           host: 'http://example.com',
-          ...posthogImmediateResolveOptions,
+          ...insightsImmediateResolveOptions,
         })
         let capturedMessage: any
-        posthog.on('capture', (message) => {
+        insights.on('capture', (message) => {
           capturedMessage = message
         })
 
-        const result = await posthog.getFeatureFlagPayload('flag-with-payload', 'some-distinct-id')
+        const result = await insights.getFeatureFlagPayload('flag-with-payload', 'some-distinct-id')
 
         expect(result).toEqual([0, 1, 2])
         expect(mockedFetch).toHaveBeenCalledWith('http://example.com/flags/?v=2&config=true', expect.any(Object))
@@ -223,7 +223,7 @@ describe('flags v2', () => {
   })
 
   describe('error handling', () => {
-    let posthog: PostHog
+    let insights: Insights
     describe.each([
       {
         case: 'JSON error response',
@@ -266,31 +266,31 @@ describe('flags v2', () => {
       },
     ])('when $case', ({ mock }) => {
       beforeEach(() => {
-        posthog = new PostHog('TEST_API_KEY', {
+        insights = new Insights('TEST_API_KEY', {
           host: 'http://example.com',
-          ...posthogImmediateResolveOptions,
+          ...insightsImmediateResolveOptions,
         })
         mockedFetch.mockImplementation(mock)
       })
 
       it('getFeatureFlag returns undefined', async () => {
-        expect(await posthog.getFeatureFlag('error-flag', 'some-distinct-id')).toBe(undefined)
+        expect(await insights.getFeatureFlag('error-flag', 'some-distinct-id')).toBe(undefined)
       })
 
       it('isFeatureEnabled returns undefined', async () => {
-        expect(await posthog.isFeatureEnabled('error-flag', 'some-distinct-id')).toBe(undefined)
+        expect(await insights.isFeatureEnabled('error-flag', 'some-distinct-id')).toBe(undefined)
       })
 
       it('getFeatureFlagPayload returns undefined', async () => {
-        expect(await posthog.getFeatureFlagPayload('error-flag', 'some-distinct-id')).toBe(undefined)
+        expect(await insights.getFeatureFlagPayload('error-flag', 'some-distinct-id')).toBe(undefined)
       })
 
       it('getAllFlags returns empty object', async () => {
-        expect(await posthog.getAllFlags('some-distinct-id')).toEqual({})
+        expect(await insights.getAllFlags('some-distinct-id')).toEqual({})
       })
 
       it('getAllFlagsAndPayloads returns object with empty flags and payloads', async () => {
-        expect(await posthog.getAllFlagsAndPayloads('some-distinct-id')).toEqual({
+        expect(await insights.getAllFlagsAndPayloads('some-distinct-id')).toEqual({
           featureFlags: {},
           featureFlagPayloads: {},
         })
@@ -298,11 +298,11 @@ describe('flags v2', () => {
 
       it('captures event with $feature_flag_error=unknown_error', async () => {
         let capturedMessage: any
-        posthog.on('capture', (message) => {
+        insights.on('capture', (message) => {
           capturedMessage = message
         })
 
-        await posthog.getFeatureFlag('error-flag', 'some-distinct-id')
+        await insights.getFeatureFlag('error-flag', 'some-distinct-id')
         await waitForPromises()
         expect(capturedMessage).toBeDefined()
         expect(capturedMessage.event).toBe('$feature_flag_called')
@@ -317,16 +317,16 @@ describe('flags v1', () => {
     it('returns undefined if the flag is not found', async () => {
       mockedFetch.mockImplementation(apiImplementation({ decideFlags: {} }))
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
       let capturedMessage: any
-      posthog.on('capture', (message) => {
+      insights.on('capture', (message) => {
         capturedMessage = message
       })
 
-      const result = await posthog.getFeatureFlag('non-existent-flag', 'some-distinct-id')
+      const result = await insights.getFeatureFlag('non-existent-flag', 'some-distinct-id')
 
       expect(result).toBe(undefined)
       expect(mockedFetch).toHaveBeenCalledWith('http://example.com/flags/?v=2&config=true', expect.any(Object))
@@ -335,15 +335,15 @@ describe('flags v1', () => {
       expect(capturedMessage).toMatchObject({
         distinct_id: 'some-distinct-id',
         event: '$feature_flag_called',
-        library: posthog.getLibraryId(),
-        library_version: posthog.getLibraryVersion(),
+        library: insights.getLibraryId(),
+        library_version: insights.getLibraryVersion(),
         properties: {
           '$feature/non-existent-flag': undefined,
           $feature_flag: 'non-existent-flag',
           $feature_flag_response: undefined,
           $groups: undefined,
-          $lib: posthog.getLibraryId(),
-          $lib_version: posthog.getLibraryVersion(),
+          $lib: insights.getLibraryId(),
+          $lib_version: insights.getLibraryVersion(),
           locally_evaluated: false,
         },
       })
@@ -363,16 +363,16 @@ describe('flags v1', () => {
         })
       )
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
       let capturedMessage: any = undefined
-      posthog.on('capture', (message) => {
+      insights.on('capture', (message) => {
         capturedMessage = message
       })
 
-      const result = await posthog.getFeatureFlagPayload('flag-with-payload', 'some-distinct-id')
+      const result = await insights.getFeatureFlagPayload('flag-with-payload', 'some-distinct-id')
 
       expect(result).toEqual([0, 1, 2])
       expect(mockedFetch).toHaveBeenCalledWith('http://example.com/flags/?v=2&config=true', expect.any(Object))
@@ -385,7 +385,7 @@ describe('flags v1', () => {
 
 describe('feature flag error tracking', () => {
   it('sets $feature_flag_error to flag_missing when flag is not in response', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {},
       errorsWhileComputingFlags: false,
       requestId: '0152a345-295f-4fba-adac-2e6ea9c91082',
@@ -393,16 +393,16 @@ describe('feature flag error tracking', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('non-existent-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlag('non-existent-flag', 'some-distinct-id')
 
     expect(result).toBe(undefined)
 
@@ -411,7 +411,7 @@ describe('feature flag error tracking', () => {
   })
 
   it('sets $feature_flag_error to errors_while_computing_flags when errorsWhileComputingFlags is true', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'some-flag': {
           key: 'some-flag',
@@ -436,16 +436,16 @@ describe('feature flag error tracking', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('some-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlag('some-flag', 'some-distinct-id')
 
     expect(result).toBe(true)
 
@@ -455,7 +455,7 @@ describe('feature flag error tracking', () => {
 
   it('sets $feature_flag_error to quota_limited when quota limited', async () => {
     // When quota limited, the core library returns empty flags but preserves quotaLimited info
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {},
       errorsWhileComputingFlags: false,
       quotaLimited: ['feature_flags'],
@@ -464,16 +464,16 @@ describe('feature flag error tracking', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('some-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlag('some-flag', 'some-distinct-id')
 
     // Flag is undefined because quota limiting returns empty flags
     expect(result).toBe(undefined)
@@ -488,16 +488,16 @@ describe('feature flag error tracking', () => {
   it('sets $feature_flag_error to unknown_error when request fails completely', async () => {
     mockedFetch.mockImplementation(() => Promise.reject(new Error('Network error')))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('some-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlag('some-flag', 'some-distinct-id')
 
     expect(result).toBe(undefined)
 
@@ -506,7 +506,7 @@ describe('feature flag error tracking', () => {
   })
 
   it('joins multiple errors with commas', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {},
       errorsWhileComputingFlags: true,
       requestId: '0152a345-295f-4fba-adac-2e6ea9c91082',
@@ -514,16 +514,16 @@ describe('feature flag error tracking', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('missing-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlag('missing-flag', 'some-distinct-id')
 
     expect(result).toBe(undefined)
 
@@ -535,7 +535,7 @@ describe('feature flag error tracking', () => {
   })
 
   it('does not set $feature_flag_error when there are no errors', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'some-flag': {
           key: 'some-flag',
@@ -560,16 +560,16 @@ describe('feature flag error tracking', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('some-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlag('some-flag', 'some-distinct-id')
 
     expect(result).toBe(true)
 
@@ -580,16 +580,16 @@ describe('feature flag error tracking', () => {
   it('does not capture events when sendFeatureFlagEvents is false', async () => {
     mockedFetch.mockImplementation(() => Promise.reject(new Error('Network error')))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    const result = await posthog.getFeatureFlag('some-flag', 'some-distinct-id', {
+    const result = await insights.getFeatureFlag('some-flag', 'some-distinct-id', {
       sendFeatureFlagEvents: false,
     })
 
@@ -602,7 +602,7 @@ describe('feature flag error tracking', () => {
 
 describe('getFeatureFlagResult', () => {
   it('returns flag result including parsed payload', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'test-flag': {
           key: 'test-flag',
@@ -627,12 +627,12 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('test-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('test-flag', 'some-distinct-id')
 
     expect(result).toEqual({
       key: 'test-flag',
@@ -643,7 +643,7 @@ describe('getFeatureFlagResult', () => {
   })
 
   it('returns raw string payload when JSON parsing fails', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'test-flag': {
           key: 'test-flag',
@@ -664,12 +664,12 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('test-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('test-flag', 'some-distinct-id')
 
     expect(result).toEqual({
       key: 'test-flag',
@@ -678,11 +678,11 @@ describe('getFeatureFlagResult', () => {
       payload: 'not valid json {{{',
     })
 
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   it('returns undefined when flag is not found', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {},
       errorsWhileComputingFlags: false,
       requestId: '0152a345-295f-4fba-adac-2e6ea9c91082',
@@ -690,18 +690,18 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('non-existent-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('non-existent-flag', 'some-distinct-id')
 
     expect(result).toBeUndefined()
   })
 
   it('returns result for simple boolean flag without variant or payload', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'boolean-flag': {
           key: 'boolean-flag',
@@ -726,12 +726,12 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('boolean-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('boolean-flag', 'some-distinct-id')
 
     expect(result?.enabled).toBe(true)
     expect(result?.variant).toBeUndefined()
@@ -739,7 +739,7 @@ describe('getFeatureFlagResult', () => {
   })
 
   it('returns disabled result when conditions do not match', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'disabled-flag': {
           key: 'disabled-flag',
@@ -764,12 +764,12 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    const result = await posthog.getFeatureFlagResult('disabled-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('disabled-flag', 'some-distinct-id')
 
     expect(result).toEqual({
       key: 'disabled-flag',
@@ -780,7 +780,7 @@ describe('getFeatureFlagResult', () => {
   })
 
   it('captures $feature_flag_called event with result', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'test-flag': {
           key: 'test-flag',
@@ -805,16 +805,16 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    await posthog.getFeatureFlagResult('test-flag', 'some-distinct-id')
+    await insights.getFeatureFlagResult('test-flag', 'some-distinct-id')
 
     await waitForPromises()
     expect(capturedMessage).toMatchObject({
@@ -834,7 +834,7 @@ describe('getFeatureFlagResult', () => {
   })
 
   it('does not capture event when sendFeatureFlagEvents is false', async () => {
-    const flagsResponse: PostHogV2FlagsResponse = {
+    const flagsResponse: InsightsV2FlagsResponse = {
       flags: {
         'test-flag': {
           key: 'test-flag',
@@ -850,16 +850,16 @@ describe('getFeatureFlagResult', () => {
     }
     mockedFetch.mockImplementation(apiImplementationV4(flagsResponse))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
     let capturedMessage: any
-    posthog.on('capture', (message) => {
+    insights.on('capture', (message) => {
       capturedMessage = message
     })
 
-    await posthog.getFeatureFlagResult('test-flag', 'some-distinct-id', {
+    await insights.getFeatureFlagResult('test-flag', 'some-distinct-id', {
       sendFeatureFlagEvents: false,
     })
 
@@ -870,17 +870,17 @@ describe('getFeatureFlagResult', () => {
   it('returns override result when flag is overridden', async () => {
     mockedFetch.mockImplementation(apiImplementationV4({ flags: {}, errorsWhileComputingFlags: false }))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    posthog.overrideFeatureFlags({
+    insights.overrideFeatureFlags({
       flags: { 'overridden-flag': 'override-variant' },
       payloads: { 'overridden-flag': { custom: 'payload' } },
     })
 
-    const result = await posthog.getFeatureFlagResult('overridden-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('overridden-flag', 'some-distinct-id')
 
     expect(result).toEqual({
       key: 'overridden-flag',
@@ -893,16 +893,16 @@ describe('getFeatureFlagResult', () => {
   it('returns disabled result when flag is overridden to false', async () => {
     mockedFetch.mockImplementation(apiImplementationV4({ flags: {}, errorsWhileComputingFlags: false }))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    posthog.overrideFeatureFlags({
+    insights.overrideFeatureFlags({
       flags: { 'disabled-override-flag': false },
     })
 
-    const result = await posthog.getFeatureFlagResult('disabled-override-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('disabled-override-flag', 'some-distinct-id')
 
     expect(result).toEqual({
       key: 'disabled-override-flag',
@@ -915,16 +915,16 @@ describe('getFeatureFlagResult', () => {
   it('returns undefined when flag is overridden to undefined (simulates missing flag)', async () => {
     mockedFetch.mockImplementation(apiImplementationV4({ flags: {}, errorsWhileComputingFlags: false }))
 
-    const posthog = new PostHog('TEST_API_KEY', {
+    const insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    posthog.overrideFeatureFlags({
+    insights.overrideFeatureFlags({
       flags: { 'undefined-override-flag': undefined as any },
     })
 
-    const result = await posthog.getFeatureFlagResult('undefined-override-flag', 'some-distinct-id')
+    const result = await insights.getFeatureFlagResult('undefined-override-flag', 'some-distinct-id')
 
     expect(result).toBeUndefined()
   })
@@ -952,13 +952,13 @@ describe('getFeatureFlagResult', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags }))
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
-      const result = await posthog.getFeatureFlagResult('local-flag', 'some-distinct-id', {
+      const result = await insights.getFeatureFlagResult('local-flag', 'some-distinct-id', {
         personProperties: { region: 'USA' },
       })
 
@@ -968,7 +968,7 @@ describe('getFeatureFlagResult', () => {
         payload: { discount: 15 },
       })
 
-      await posthog.shutdown()
+      await insights.shutdown()
     })
 
     it('returns variant result when evaluated locally with multivariate flag', async () => {
@@ -997,13 +997,13 @@ describe('getFeatureFlagResult', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags }))
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
-      const result = await posthog.getFeatureFlagResult('multivariate-flag', 'test-user-id')
+      const result = await insights.getFeatureFlagResult('multivariate-flag', 'test-user-id')
 
       expect(result).toMatchObject({
         key: 'multivariate-flag',
@@ -1013,7 +1013,7 @@ describe('getFeatureFlagResult', () => {
       expect(['control', 'test']).toContain(result?.variant)
       expect(result?.payload).toBeDefined()
 
-      await posthog.shutdown()
+      await insights.shutdown()
     })
 
     it('returns undefined when onlyEvaluateLocally is true and flag cannot be evaluated locally', async () => {
@@ -1037,19 +1037,19 @@ describe('getFeatureFlagResult', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags }))
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
-      const result = await posthog.getFeatureFlagResult('cohort-flag', 'some-distinct-id', {
+      const result = await insights.getFeatureFlagResult('cohort-flag', 'some-distinct-id', {
         onlyEvaluateLocally: true,
       })
 
       expect(result).toBeUndefined()
 
-      await posthog.shutdown()
+      await insights.shutdown()
     })
 
     it('captures $feature_flag_called event with locally_evaluated: true', async () => {
@@ -1068,18 +1068,18 @@ describe('getFeatureFlagResult', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags }))
 
-      const posthog = new PostHog('TEST_API_KEY', {
+      const insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
-        ...posthogImmediateResolveOptions,
+        ...insightsImmediateResolveOptions,
       })
 
       let capturedMessage: any
-      posthog.on('capture', (message) => {
+      insights.on('capture', (message) => {
         capturedMessage = message
       })
 
-      await posthog.getFeatureFlagResult('simple-flag', 'some-distinct-id')
+      await insights.getFeatureFlagResult('simple-flag', 'some-distinct-id')
 
       await waitForPromises()
       expect(capturedMessage).toMatchObject({
@@ -1092,7 +1092,7 @@ describe('getFeatureFlagResult', () => {
         },
       })
 
-      await posthog.shutdown()
+      await insights.shutdown()
     })
   })
 })

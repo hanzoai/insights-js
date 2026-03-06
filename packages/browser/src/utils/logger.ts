@@ -7,18 +7,18 @@ type CreateLoggerOptions = {
     debugEnabled?: boolean
 }
 
-type PosthogJsLogger = Omit<Logger, 'createLogger'> & {
+type InsightsJsLogger = Omit<Logger, 'createLogger'> & {
     _log: (level: 'log' | 'warn' | 'error', ...args: any[]) => void
     uninitializedWarning: (methodName: string) => void
-    createLogger: (prefix: string, options?: CreateLoggerOptions) => PosthogJsLogger
+    createLogger: (prefix: string, options?: CreateLoggerOptions) => InsightsJsLogger
 }
 
-const _createLogger = (prefix: string, { debugEnabled }: CreateLoggerOptions = {}): PosthogJsLogger => {
-    const logger: PosthogJsLogger = {
+const _createLogger = (prefix: string, { debugEnabled }: CreateLoggerOptions = {}): InsightsJsLogger => {
+    const logger: InsightsJsLogger = {
         _log: (level: 'log' | 'warn' | 'error', ...args: any[]) => {
             if (
                 window &&
-                (Config.DEBUG || assignableWindow.POSTHOG_DEBUG || debugEnabled) &&
+                (Config.DEBUG || assignableWindow.INSIGHTS_DEBUG || debugEnabled) &&
                 !isUndefined(window.console) &&
                 window.console
             ) {
@@ -51,7 +51,7 @@ const _createLogger = (prefix: string, { debugEnabled }: CreateLoggerOptions = {
         },
 
         uninitializedWarning: (methodName: string) => {
-            logger.error(`You must initialize PostHog before calling ${methodName}`)
+            logger.error(`You must initialize Insights before calling ${methodName}`)
         },
 
         createLogger: (additionalPrefix: string, options?: CreateLoggerOptions) =>
@@ -60,6 +60,6 @@ const _createLogger = (prefix: string, { debugEnabled }: CreateLoggerOptions = {
     return logger
 }
 
-export const logger = _createLogger('[PostHog.js]')
+export const logger = _createLogger('[Insights.js]')
 
 export const createLogger = logger.createLogger

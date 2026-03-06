@@ -1,5 +1,5 @@
 import { uuidv7 } from '../../uuidv7'
-import { createPosthogInstance } from '../helpers/posthog-instance'
+import { createInsightsInstance } from '../helpers/insights-instance'
 import { setAllPersonProfilePropertiesAsPersonPropertiesForFlags } from '../../customizations/setAllPersonProfilePropertiesAsPersonPropertiesForFlags'
 import { STORED_PERSON_PROPERTIES_KEY } from '../../constants'
 
@@ -47,13 +47,13 @@ describe('setAllPersonPropertiesForFlags', () => {
     it('should called setPersonPropertiesForFlags with all saved properties that are used for person properties', async () => {
         // arrange
         const token = uuidv7()
-        const posthog = await createPosthogInstance(token)
+        const insights = await createInsightsInstance(token)
 
         // act
-        setAllPersonProfilePropertiesAsPersonPropertiesForFlags(posthog)
+        setAllPersonProfilePropertiesAsPersonPropertiesForFlags(insights)
 
         // assert
-        expect(posthog.persistence?.props[STORED_PERSON_PROPERTIES_KEY]).toMatchInlineSnapshot(`
+        expect(insights.persistence?.props[STORED_PERSON_PROPERTIES_KEY]).toMatchInlineSnapshot(`
 {
   "$browser": "Mobile Safari",
   "$browser_version": null,

@@ -1,15 +1,15 @@
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { captureSpan } from './capture'
 import type { Context, Span } from '@opentelemetry/api'
 import type { ReadableSpan, SpanProcessor } from '@opentelemetry/sdk-trace-base'
-import type { PostHogTelemetryOptions } from './types'
+import type { InsightsTelemetryOptions } from './types'
 
-export class PostHogSpanProcessor implements SpanProcessor {
+export class InsightsSpanProcessor implements SpanProcessor {
   private readonly pendingCaptures = new Set<Promise<void>>()
 
   constructor(
-    private readonly phClient: PostHog,
-    private readonly options: PostHogTelemetryOptions = {}
+    private readonly phClient: Insights,
+    private readonly options: InsightsTelemetryOptions = {}
   ) {}
 
   onStart(_span: Span, _parentContext: Context): void {
@@ -39,6 +39,6 @@ export class PostHogSpanProcessor implements SpanProcessor {
   }
 }
 
-export function createPostHogSpanProcessor(phClient: PostHog, options: PostHogTelemetryOptions = {}): SpanProcessor {
-  return new PostHogSpanProcessor(phClient, options)
+export function createInsightsSpanProcessor(phClient: Insights, options: InsightsTelemetryOptions = {}): SpanProcessor {
+  return new InsightsSpanProcessor(phClient, options)
 }

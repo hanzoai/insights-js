@@ -10,7 +10,7 @@ import {
     SurveyQuestionBranchingType,
     SurveyQuestionType,
     SurveyType,
-} from '../../posthog-surveys-types'
+} from '../../insights-surveys-types'
 
 describe('extractPrefillParamsFromUrl', () => {
     describe('empty and invalid inputs', () => {

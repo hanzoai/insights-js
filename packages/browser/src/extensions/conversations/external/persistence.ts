@@ -1,12 +1,12 @@
-import { PostHog } from '../../../posthog-core'
-import { UserProvidedTraits } from '../../../posthog-conversations-types'
+import { Insights } from '../../../insights-core'
+import { UserProvidedTraits } from '../../../insights-conversations-types'
 import { createLogger } from '../../../utils/logger'
 import { window } from '../../../utils/globals'
 import { uuidv7 } from '../../../uuidv7'
 
 const logger = createLogger('[ConversationsPersistence]')
 
-// Old persistence keys (in PostHog's main persistence blob).
+// Old persistence keys (in Insights's main persistence blob).
 // Kept for one-time migration to dedicated storage.
 const LEGACY_WIDGET_SESSION_ID = '$conversations_widget_session_id'
 const LEGACY_TICKET_ID = '$conversations_ticket_id'
@@ -21,19 +21,19 @@ interface ConversationsStorageData {
 }
 
 /**
- * Dedicated localStorage key scoped to the PostHog project token.
+ * Dedicated localStorage key scoped to the Insights project token.
  * Format: `ph_conv_<token>`
  */
-function storageKey(posthog: PostHog): string | null {
-    const token = posthog.config?.token
+function storageKey(insights: Insights): string | null {
+    const token = insights.config?.token
     return token ? 'ph_conv_' + token : null
 }
 
 /**
  * ConversationsPersistence manages conversation data in its own dedicated
- * localStorage entry, independent of PostHog's core persistence layer.
+ * localStorage entry, independent of Insights's core persistence layer.
  *
- * This avoids a known issue where PostHog's persistence.props can lose data
+ * This avoids a known issue where Insights's persistence.props can lose data
  * when the cookie+localStorage merge in _parse() fails on large entries.
  *
  * Pattern follows toolbar and surveys extensions which also use dedicated
@@ -43,8 +43,8 @@ export class ConversationsPersistence {
     private _cachedWidgetSessionId: string | null = null
     private _storageKey: string | null
 
-    constructor(private readonly _posthog: PostHog) {
-        this._storageKey = storageKey(_posthog)
+    constructor(private readonly _insights: Insights) {
+        this._storageKey = storageKey(_insights)
         this._migrateFromLegacyPersistence()
     }
 
@@ -82,7 +82,7 @@ export class ConversationsPersistence {
     }
 
     /**
-     * Clear the widget session ID (called on posthog.reset()).
+     * Clear the widget session ID (called on insights.reset()).
      * This will create a new session and lose access to previous tickets.
      */
     clearWidgetSessionId(): void {
@@ -174,9 +174,9 @@ export class ConversationsPersistence {
     }
 
     /**
-     * One-time migration: copy conversations data from PostHog's main
+     * One-time migration: copy conversations data from Insights's main
      * persistence blob into the dedicated localStorage key, then remove
-     * the old keys from PostHog persistence so they stop bloating it.
+     * the old keys from Insights persistence so they stop bloating it.
      */
     private _migrateFromLegacyPersistence(): void {
         if (!this._storageKey || this._read()?.widgetSessionId) {
@@ -184,7 +184,7 @@ export class ConversationsPersistence {
         }
 
         try {
-            const persistence = this._posthog.persistence
+            const persistence = this._insights.persistence
             if (!persistence || persistence.isDisabled?.()) {
                 return
             }
@@ -232,17 +232,17 @@ export class ConversationsPersistence {
 
     /**
      * Fallback for migration: read legacy keys directly from raw localStorage
-     * when PostHog persistence.props didn't load them (the original bug).
+     * when Insights persistence.props didn't load them (the original bug).
      */
     private _readLegacyFromRawStorage(): ConversationsStorageData | null {
         try {
-            const token = this._posthog.config?.token
+            const token = this._insights.config?.token
             if (!token) {
                 return null
             }
-            const key = (this._posthog.config as any).persistence_name
-                ? 'ph_' + (this._posthog.config as any).persistence_name
-                : 'ph_' + token + '_posthog'
+            const key = (this._insights.config as any).persistence_name
+                ? 'ph_' + (this._insights.config as any).persistence_name
+                : 'ph_' + token + '_insights'
 
             const raw = window?.localStorage?.getItem(key)
             if (!raw) {

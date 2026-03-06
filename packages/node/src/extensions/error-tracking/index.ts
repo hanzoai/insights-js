@@ -1,7 +1,7 @@
 import { addUncaughtExceptionListener, addUnhandledRejectionListener } from './autocapture'
-import { PostHogBackendClient } from '@/client'
+import { InsightsBackendClient } from '@/client'
 import { isObject, uuidv7 } from '@hanzo/insights-core'
-import { EventMessage, PostHogOptions } from '@/types'
+import { EventMessage, InsightsOptions } from '@/types'
 import type { Logger } from '@hanzo/insights-core'
 import { BucketedRateLimiter } from '@hanzo/insights-core'
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
@@ -9,14 +9,14 @@ import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 const SHUTDOWN_TIMEOUT = 2000
 
 export default class ErrorTracking {
-  private client: PostHogBackendClient
+  private client: InsightsBackendClient
   private _exceptionAutocaptureEnabled: boolean
   private _rateLimiter: BucketedRateLimiter<string>
   private _logger: Logger
 
   static errorPropertiesBuilder: CoreErrorTracking.ErrorPropertiesBuilder
 
-  constructor(client: PostHogBackendClient, options: PostHogOptions, _logger: Logger) {
+  constructor(client: InsightsBackendClient, options: InsightsOptions, _logger: Logger) {
     this.client = client
     this._exceptionAutocaptureEnabled = options.enableExceptionAutocapture || false
     this._logger = _logger
@@ -35,7 +35,7 @@ export default class ErrorTracking {
   }
 
   static isPreviouslyCapturedError(x: unknown): boolean {
-    return isObject(x) && '__posthog_previously_captured_error' in x && x.__posthog_previously_captured_error === true
+    return isObject(x) && '__insights_previously_captured_error' in x && x.__insights_previously_captured_error === true
   }
 
   static async buildEventMessage(

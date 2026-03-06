@@ -1,6 +1,6 @@
 import { FlagDefinitionCacheProvider, FlagDefinitionCacheData } from '../extensions/feature-flags/cache'
-import { PostHogFeatureFlag } from '../types'
-import { PostHog } from '../entrypoints/index.node'
+import { InsightsFeatureFlag } from '../types'
+import { Insights } from '../entrypoints/index.node'
 import { anyLocalEvalCall, apiImplementation } from './utils'
 
 jest.spyOn(console, 'debug').mockImplementation()
@@ -9,7 +9,7 @@ jest.spyOn(console, 'warn').mockImplementation()
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
 
 describe('FlagDefinitionCacheProvider Integration', () => {
-  let posthog: PostHog
+  let insights: Insights
   let mockCacheProvider: jest.Mocked<FlagDefinitionCacheProvider>
   let onErrorMock: jest.Mock
 
@@ -24,7 +24,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
         rollout_percentage: null,
         ensure_experience_continuity: false,
         experiment_set: [],
-      } as PostHogFeatureFlag,
+      } as InsightsFeatureFlag,
     ],
     group_type_mapping: { '0': 'company' },
     cohorts: {},
@@ -41,7 +41,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
         rollout_percentage: null,
         ensure_experience_continuity: false,
         experiment_set: [],
-      } as PostHogFeatureFlag,
+      } as InsightsFeatureFlag,
     ],
     groupTypeMapping: { '0': 'company' },
     cohorts: {},
@@ -61,8 +61,8 @@ describe('FlagDefinitionCacheProvider Integration', () => {
   })
 
   afterEach(async () => {
-    if (posthog) {
-      await posthog.shutdown()
+    if (insights) {
+      await insights.shutdown()
     }
   })
 
@@ -71,7 +71,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -89,7 +89,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -100,7 +100,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       await jest.runOnlyPendingTimersAsync()
 
       expect(mockCacheProvider.getFlagDefinitions).toHaveBeenCalled()
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('fetches directly when shouldFetchFlagDefinitions returns true', async () => {
@@ -109,7 +109,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -128,14 +128,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      posthog.on('localEvaluationFlagsLoaded', onLoadMock)
+      insights.on('localEvaluationFlagsLoaded', onLoadMock)
 
       await jest.runOnlyPendingTimersAsync()
 
@@ -146,14 +146,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockResolvedValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      const poller = (posthog as any).featureFlagsPoller
+      const poller = (insights as any).featureFlagsPoller
       const promise1 = poller.loadFeatureFlags()
       const promise2 = poller.loadFeatureFlags()
 
@@ -170,7 +170,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -188,7 +188,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -209,7 +209,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -230,7 +230,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -247,7 +247,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -270,21 +270,21 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      posthog.on('error', onErrorMock)
+      insights.on('error', onErrorMock)
 
       await jest.runOnlyPendingTimersAsync()
 
       // Error might be emitted, but the key is that initialization continues
       // Should still fetch from API despite cache error
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('catches shouldFetchFlagDefinitions errors, defaults to fetching', async () => {
@@ -294,14 +294,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      posthog.on('error', onErrorMock)
+      insights.on('error', onErrorMock)
 
       await jest.runOnlyPendingTimersAsync()
 
@@ -322,14 +322,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      posthog.on('error', onErrorMock)
+      insights.on('error', onErrorMock)
 
       await jest.runOnlyPendingTimersAsync()
 
@@ -339,7 +339,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
         })
       )
       // Flags should still be available in memory
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('catches shutdown errors, logs and continues', async () => {
@@ -348,17 +348,17 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
       mockCacheProvider.shutdown.mockRejectedValue(error)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      posthog.on('error', onErrorMock)
+      insights.on('error', onErrorMock)
 
       await jest.runOnlyPendingTimersAsync()
-      await posthog.shutdown()
+      await insights.shutdown()
 
       expect(onErrorMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -374,7 +374,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -383,14 +383,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       await jest.runOnlyPendingTimersAsync()
 
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('works with async getFlagDefinitions', async () => {
       mockCacheProvider.getFlagDefinitions.mockResolvedValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -399,7 +399,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       await jest.runOnlyPendingTimersAsync()
 
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('works with sync shouldFetchFlagDefinitions', async () => {
@@ -408,7 +408,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -427,7 +427,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -445,7 +445,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
       mockCacheProvider.shutdown.mockResolvedValue(undefined)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -453,7 +453,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       })
 
       await jest.runOnlyPendingTimersAsync()
-      await posthog.shutdown()
+      await insights.shutdown()
 
       expect(mockCacheProvider.shutdown).toHaveBeenCalled()
     })
@@ -463,7 +463,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
       mockCacheProvider.shutdown.mockReturnValue(undefined)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -471,7 +471,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       })
 
       await jest.runOnlyPendingTimersAsync()
-      await posthog.shutdown()
+      await insights.shutdown()
 
       expect(mockCacheProvider.shutdown).toHaveBeenCalled()
     })
@@ -482,7 +482,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -491,7 +491,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       await jest.runOnlyPendingTimersAsync()
 
-      const flagValue = await posthog.getFeatureFlag('test-flag', 'user-123')
+      const flagValue = await insights.getFeatureFlag('test-flag', 'user-123')
       expect(flagValue).toBeDefined()
     })
 
@@ -501,7 +501,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -511,14 +511,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       await jest.runOnlyPendingTimersAsync()
 
       expect(mockCacheProvider.onFlagDefinitionsReceived).toHaveBeenCalledWith(testFlagData)
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('cache provider integrates successfully with flag loading', async () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -531,15 +531,15 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       expect(mockCacheProvider.getFlagDefinitions).toHaveBeenCalled()
 
       // Verify flags were loaded from cache
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
-      const flagValue = await posthog.getFeatureFlag('test-flag', 'user-123')
+      expect(insights.isLocalEvaluationReady()).toBe(true)
+      const flagValue = await insights.getFeatureFlag('test-flag', 'user-123')
       expect(flagValue).toBeDefined()
     })
 
     it('works without cache provider (null/undefined)', async () => {
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         fetchRetryCount: 0,
@@ -547,7 +547,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       await jest.runOnlyPendingTimersAsync()
 
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
 
@@ -563,7 +563,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
             rollout_percentage: null,
             ensure_experience_continuity: false,
             experiment_set: [],
-          } as PostHogFeatureFlag,
+          } as InsightsFeatureFlag,
         ],
         groupTypeMapping: {},
         cohorts: {},
@@ -572,7 +572,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(staleData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -582,10 +582,10 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       await jest.runOnlyPendingTimersAsync()
 
       // Should still initialize with stale data
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
 
       // But flag should evaluate to false since it's inactive
-      const flagValue = await posthog.getFeatureFlag('old-flag', 'user-123')
+      const flagValue = await insights.getFeatureFlag('old-flag', 'user-123')
       expect(flagValue).toBe(false)
     })
   })
@@ -597,26 +597,26 @@ describe('FlagDefinitionCacheProvider Integration', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      await posthog.waitForLocalEvaluationReady()
+      await insights.waitForLocalEvaluationReady()
 
       expect(mockCacheProvider.getFlagDefinitions).toHaveBeenCalledTimes(1)
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
       expect(mockedFetch).toHaveBeenCalledTimes(1)
-      expect(posthog.isLocalEvaluationReady()).toBe(true)
+      expect(insights.isLocalEvaluationReady()).toBe(true)
     })
 
     it('handles multiple flag evaluation calls efficiently with single cache check', async () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -624,14 +624,14 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       })
 
       const results = await Promise.all([
-        posthog.getFeatureFlag('test-flag', 'user-1'),
-        posthog.getFeatureFlag('test-flag', 'user-2'),
-        posthog.getFeatureFlag('test-flag', 'user-3'),
-        posthog.getAllFlags('user-4'),
-        posthog.getFeatureFlag('test-flag', 'user-5'),
+        insights.getFeatureFlag('test-flag', 'user-1'),
+        insights.getFeatureFlag('test-flag', 'user-2'),
+        insights.getFeatureFlag('test-flag', 'user-3'),
+        insights.getAllFlags('user-4'),
+        insights.getFeatureFlag('test-flag', 'user-5'),
       ])
 
-      await posthog.waitForLocalEvaluationReady()
+      await insights.waitForLocalEvaluationReady()
 
       expect(mockCacheProvider.getFlagDefinitions).toHaveBeenCalledTimes(1)
       results.forEach((result) => {
@@ -645,7 +645,7 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(undefined)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(true)
       mockedFetch.mockImplementation(apiImplementation({ localFlags: testFlagDataApiResponse }))
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
@@ -653,12 +653,12 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       })
 
       const results = await Promise.all([
-        posthog.getFeatureFlag('test-flag', 'user-1'),
-        posthog.getFeatureFlag('test-flag', 'user-2'),
-        posthog.getAllFlags('user-3'),
+        insights.getFeatureFlag('test-flag', 'user-1'),
+        insights.getFeatureFlag('test-flag', 'user-2'),
+        insights.getAllFlags('user-3'),
       ])
 
-      await posthog.waitForLocalEvaluationReady()
+      await insights.waitForLocalEvaluationReady()
 
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       results.forEach((result) => {
@@ -670,22 +670,22 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       mockCacheProvider.getFlagDefinitions.mockReturnValue(testFlagData)
       mockCacheProvider.shouldFetchFlagDefinitions.mockResolvedValue(false)
 
-      posthog = new PostHog('TEST_API_KEY', {
+      insights = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         personalApiKey: 'TEST_PERSONAL_API_KEY',
         flagDefinitionCacheProvider: mockCacheProvider,
         fetchRetryCount: 0,
       })
 
-      await posthog.waitForLocalEvaluationReady()
+      await insights.waitForLocalEvaluationReady()
 
       mockCacheProvider.getFlagDefinitions.mockClear()
       mockCacheProvider.shouldFetchFlagDefinitions.mockClear()
       mockedFetch.mockClear()
 
-      await posthog.getFeatureFlag('test-flag', 'user-1')
-      await posthog.getAllFlags('user-2')
-      await posthog.getFeatureFlag('test-flag', 'user-3')
+      await insights.getFeatureFlag('test-flag', 'user-1')
+      await insights.getAllFlags('user-2')
+      await insights.getFeatureFlag('test-flag', 'user-3')
 
       expect(mockCacheProvider.getFlagDefinitions).not.toHaveBeenCalled()
       expect(mockCacheProvider.shouldFetchFlagDefinitions).not.toHaveBeenCalled()

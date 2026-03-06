@@ -2,17 +2,17 @@
 
 const { withAppBuildGradle, withXcodeProject } = require('@expo/config-plugins')
 
-const resolvePostHogReactNativePackageJsonPath =
-  "[\"node\", \"--print\", \"require('path').join(require('path').dirname(require.resolve('posthog-react-native')), '..', 'tooling', 'posthog.gradle')\"].execute().text.trim()"
+const resolveInsightsReactNativePackageJsonPath =
+  "[\"node\", \"--print\", \"require('path').join(require('path').dirname(require.resolve('insights-react-native')), '..', 'tooling', 'insights.gradle')\"].execute().text.trim()"
 
 const withAndroidPlugin = (config: any) => {
   return withAppBuildGradle(config, (config: any) => {
     if (config.modResults.language !== 'groovy') {
-      console.warn('Cannot configure PostHog in the app gradle because the build.gradle is not groovy')
+      console.warn('Cannot configure Insights in the app gradle because the build.gradle is not groovy')
     }
 
     const buildGradle = config.modResults.contents
-    const applyFrom = `apply from: new File(${resolvePostHogReactNativePackageJsonPath})`
+    const applyFrom = `apply from: new File(${resolveInsightsReactNativePackageJsonPath})`
 
     if (buildGradle.includes(applyFrom)) {
       return config
@@ -24,7 +24,7 @@ const withAndroidPlugin = (config: any) => {
     if (buildGradle.match(pattern)) {
       config.modResults.contents = buildGradle.replace(pattern, `${applyFrom}\n\nandroid {`)
     } else {
-      console.warn('PostHog: Could not find "android {" block in build.gradle')
+      console.warn('Insights: Could not find "android {" block in build.gradle')
     }
 
     return config
@@ -38,26 +38,26 @@ export function modifyExistingXcodeBuildScript(script: BuildPhase): void {
     return
   }
 
-  if (script.shellScript.includes('posthog-xcode.sh')) {
+  if (script.shellScript.includes('insights-xcode.sh')) {
     return
   }
 
-  if (script.shellScript.includes('posthog-react-native')) {
+  if (script.shellScript.includes('insights-react-native')) {
     return
   }
 
   const code = JSON.parse(script.shellScript)
-  script.shellScript = JSON.stringify(addPostHogWithBundledScriptsToBundleShellScript(code))
+  script.shellScript = JSON.stringify(addInsightsWithBundledScriptsToBundleShellScript(code))
 }
 
-const POSTHOG_REACT_NATIVE_XCODE_PATH =
-  "`\"$NODE_BINARY\" --print \"require('path').join(require('path').dirname(require.resolve('posthog-react-native')), '..', 'tooling', 'posthog-xcode.sh')\"`"
+const INSIGHTS_REACT_NATIVE_XCODE_PATH =
+  "`\"$NODE_BINARY\" --print \"require('path').join(require('path').dirname(require.resolve('insights-react-native')), '..', 'tooling', 'insights-xcode.sh')\"`"
 
-export function addPostHogWithBundledScriptsToBundleShellScript(script: string): string {
+export function addInsightsWithBundledScriptsToBundleShellScript(script: string): string {
   return script.replace(
     /^.*?(packager|scripts)\/react-native-xcode\.sh\s*(\\'\\\\")?/m,
     // eslint-disable-next-line no-useless-escape
-    (match: string) => `/bin/sh ${POSTHOG_REACT_NATIVE_XCODE_PATH} ${match}`
+    (match: string) => `/bin/sh ${INSIGHTS_REACT_NATIVE_XCODE_PATH} ${match}`
   )
 }
 
@@ -76,11 +76,11 @@ const withIosPlugin = (config: any) => {
   })
 }
 
-const withPostHogPlugin = (config: any) => {
+const withInsightsPlugin = (config: any) => {
   config = withAndroidPlugin(config)
   return withIosPlugin(config)
 }
 
 module.exports = (config: any) => {
-  return withPostHogPlugin(config)
+  return withInsightsPlugin(config)
 }

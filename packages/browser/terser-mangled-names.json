@@ -256,7 +256,7 @@
         "_isPolling",
         "_isPollingMessages",
         "_isPollingTickets",
-        "_isPostHogException",
+        "_isInsightsException",
         "_isPreviewMode",
         "_isProductToursFeatureFlagEnabled",
         "_isReadonly",

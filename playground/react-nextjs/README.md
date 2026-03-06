@@ -1,11 +1,11 @@
-# PostHog React Playground
+# Insights React Playground
 
-This is a Next.js playground application that demonstrates the `@posthog/react` SDK.
+This is a Next.js playground application that demonstrates the `@hanzo/react` SDK.
 
 ## Features
 
 - **Cat Gallery**: A grid of cat images from [cataas.com](https://cataas.com)
-- **Event Display**: Real-time display of PostHog events in the top-right corner
+- **Event Display**: Real-time display of Insights events in the top-right corner
 
 ## Running the Playground
 
@@ -35,4 +35,4 @@ This is a Next.js playground application that demonstrates the `@posthog/react` 
 
 ## How It Works
 
-- The `EventDisplay` component intercepts PostHog events and displays them in real-time
+- The `EventDisplay` component intercepts Insights events and displays them in real-time

@@ -1,4 +1,4 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 import { createTour, mockProductToursApi } from './product-tours/utils'
 import { Z_INDEX_TOURS, Z_INDEX_SURVEYS, Z_INDEX_CONVERSATIONS } from '@/constants'
@@ -38,14 +38,14 @@ test.describe('z-index hierarchy', () => {
         await toursRoute
 
         // Wait for both to render
-        await expect(page.locator('.PostHogSurvey-zindex-survey .survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-zindex-survey .survey-form')).toBeVisible()
         await expect(page.locator('.ph-product-tour-container-zindex-tour .ph-tour-tooltip')).toBeVisible()
 
         // Enable conversations widget
         await page.evaluate(() => {
-            const posthog = (window as any).posthog
-            if (posthog?.conversations) {
-                posthog.conversations.onRemoteConfig({
+            const insights = (window as any).insights
+            if (insights?.conversations) {
+                insights.conversations.onRemoteConfig({
                     conversations: {
                         enabled: true,
                         token: 'test-token',
@@ -64,7 +64,7 @@ test.describe('z-index hierarchy', () => {
             .evaluate((el) => parseInt(getComputedStyle(el).zIndex, 10))
 
         const surveyZIndex = await page
-            .locator('.PostHogSurvey-zindex-survey .survey-form')
+            .locator('.InsightsSurvey-zindex-survey .survey-form')
             .evaluate((el) => parseInt(getComputedStyle(el).zIndex, 10))
 
         const conversationsZIndex = await page

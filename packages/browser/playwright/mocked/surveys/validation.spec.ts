@@ -1,4 +1,4 @@
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const startOptions = {
@@ -43,7 +43,7 @@ test.describe('survey validation', () => {
         await surveysAPICall
 
         // Wait for survey form to appear
-        await expect(page.locator('.PostHogSurvey-validation-test-1').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-validation-test-1').locator('.survey-form')).toBeVisible()
 
         // Type only spaces
         await page.locator('textarea').fill('   ')
@@ -52,7 +52,7 @@ test.describe('survey validation', () => {
         await expect(page.locator('button:has-text("Submit")')).toBeDisabled()
 
         // Survey form should still be visible
-        await expect(page.locator('.PostHogSurvey-validation-test-1').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-validation-test-1').locator('.survey-form')).toBeVisible()
     })
 
     test('required field accepts valid input after trim', async ({ page, context }) => {
@@ -82,14 +82,14 @@ test.describe('survey validation', () => {
 
         await start(startOptions, page, context)
         await surveysAPICall
-        await expect(page.locator('.PostHogSurvey-validation-test-2').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-validation-test-2').locator('.survey-form')).toBeVisible()
 
         // Type valid content with surrounding whitespace
         await page.locator('textarea').fill('  valid response  ')
         await page.locator('button:has-text("Submit")').click()
 
         // Should show thank you message (submitted successfully)
-        await expect(page.locator('.PostHogSurvey-validation-test-2')).toContainText('Thanks')
+        await expect(page.locator('.InsightsSurvey-validation-test-2')).toContainText('Thanks')
     })
 
     test('backwards compat - old survey without validation field works', async ({ page, context }) => {
@@ -120,13 +120,13 @@ test.describe('survey validation', () => {
 
         await start(startOptions, page, context)
         await surveysAPICall
-        await expect(page.locator('.PostHogSurvey-validation-test-3').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-validation-test-3').locator('.survey-form')).toBeVisible()
 
         await page.locator('textarea').fill('valid response')
         await page.locator('button:has-text("Submit")').click()
 
         // Should show thank you message (submitted successfully)
-        await expect(page.locator('.PostHogSurvey-validation-test-3')).toContainText('Thanks')
+        await expect(page.locator('.InsightsSurvey-validation-test-3')).toContainText('Thanks')
     })
 
     test('minLength validation prevents short input', async ({ page, context }) => {
@@ -156,7 +156,7 @@ test.describe('survey validation', () => {
 
         await start(startOptions, page, context)
         await surveysAPICall
-        await expect(page.locator('.PostHogSurvey-validation-test-4').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-validation-test-4').locator('.survey-form')).toBeVisible()
 
         await page.locator('textarea').fill('short')
 
@@ -164,6 +164,6 @@ test.describe('survey validation', () => {
         await expect(page.locator('button:has-text("Submit")')).toBeDisabled()
 
         // Survey form should still be visible
-        await expect(page.locator('.PostHogSurvey-validation-test-4').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-validation-test-4').locator('.survey-form')).toBeVisible()
     })
 })

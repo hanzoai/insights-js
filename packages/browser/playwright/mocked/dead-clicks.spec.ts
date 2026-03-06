@@ -1,4 +1,4 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 import { pollUntilEventCaptured } from './utils/event-capture-utils'
 
@@ -104,7 +104,7 @@ test.describe('Dead clicks', () => {
         await page.waitForFunction(
             () => {
                 const win = window as any
-                return !!win.posthog?.deadClicksAutocapture?.lazyLoadedDeadClicksAutocapture
+                return !!win.insights?.deadClicksAutocapture?.lazyLoadedDeadClicksAutocapture
             },
             { timeout: 10000 }
         )

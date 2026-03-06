@@ -4,13 +4,13 @@ import {
     TRIGGER_ACTIVATED,
     TRIGGER_PENDING,
 } from '../../../extensions/replay/external/triggerMatching'
-import { createMockPostHog } from '../../helpers/posthog-instance'
+import { createMockInsights } from '../../helpers/insights-instance'
 import { SessionRecordingUrlTrigger } from '../../../types'
 import { SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION } from '../../../constants'
 
 describe('checkUrlTriggerConditions - activation loop detection', () => {
     let urlTriggerMatching: URLTriggerMatching
-    let mockPostHog: any
+    let mockInsights: any
     let onPauseCalls: number
     let onResumeCalls: number
     let onActivateCalls: number
@@ -70,7 +70,7 @@ describe('checkUrlTriggerConditions - activation loop detection', () => {
         onActivateCalls = 0
         persistedSession = null
 
-        mockPostHog = createMockPostHog({
+        mockInsights = createMockInsights({
             register_for_session: jest.fn(),
             get_property: jest.fn((key: string) => {
                 if (key === SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION) {
@@ -80,7 +80,7 @@ describe('checkUrlTriggerConditions - activation loop detection', () => {
             }),
         })
 
-        urlTriggerMatching = new URLTriggerMatching(mockPostHog)
+        urlTriggerMatching = new URLTriggerMatching(mockInsights)
         // Reset URL tracking state for each test
         ;(urlTriggerMatching as any)._lastCheckedUrl = ''
     })

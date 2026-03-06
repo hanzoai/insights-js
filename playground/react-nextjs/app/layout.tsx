@@ -3,8 +3,8 @@ import { PHProvider } from './providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-    title: 'PostHog InView Playground',
-    description: 'Test PostHog InView component with a cat gallery',
+    title: 'Insights InView Playground',
+    description: 'Test Insights InView component with a cat gallery',
 }
 
 export default function RootLayout({

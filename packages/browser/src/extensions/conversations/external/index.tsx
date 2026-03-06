@@ -16,10 +16,10 @@ import {
     RestoreFromTokenResponse,
     RequestRestoreLinkPayload,
     RequestRestoreLinkResponse,
-} from '../../../posthog-conversations-types'
-import { PostHog } from '../../../posthog-core'
+} from '../../../insights-conversations-types'
+import { Insights } from '../../../insights-core'
 import { STORED_PERSON_PROPERTIES_KEY } from '../../../constants'
-import { ConversationsManager as ConversationsManagerInterface } from '../posthog-conversations'
+import { ConversationsManager as ConversationsManagerInterface } from '../insights-conversations'
 import { ConversationsPersistence } from './persistence'
 import { ConversationsWidget, WidgetView } from './components/ConversationsWidget'
 import { createLogger } from '../../../utils/logger'
@@ -35,8 +35,8 @@ const RESTORE_EXCHANGE_ENDPOINT = '/api/conversations/v1/widget/restore'
 const RESTORE_REQUEST_ENDPOINT = '/api/conversations/v1/widget/restore/request'
 
 // Singleton guard: only one ConversationsManager per page.
-// The toolbar's internal PostHog instance is excluded from creating a manager
-// (see PostHogConversations.loadIfEnabled), so this always belongs to the main instance.
+// The toolbar's internal Insights instance is excluded from creating a manager
+// (see InsightsConversations.loadIfEnabled), so this always belongs to the main instance.
 let _activeManager: ConversationsManager | null = null
 
 export class ConversationsManager implements ConversationsManagerInterface {
@@ -67,10 +67,10 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
     constructor(
         config: ConversationsRemoteConfig,
-        private readonly _posthog: PostHog
+        private readonly _insights: Insights
     ) {
         this._config = config
-        this._persistence = new ConversationsPersistence(_posthog)
+        this._persistence = new ConversationsPersistence(_insights)
 
         this._widgetSessionId = this._persistence.getOrCreateWidgetSessionId()
 
@@ -107,7 +107,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
         // eslint-disable-next-line compat/compat
         return new Promise((resolve, reject) => {
-            const distinctId = this._posthog.get_distinct_id()
+            const distinctId = this._insights.get_distinct_id()
             const personTraits = this._getPersonTraits()
 
             const name = userTraits?.name || personTraits.name || null
@@ -127,13 +127,13 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
             try {
                 // Capture session ID - sent with every message
-                const capturedSessionId = this._posthog.get_session_id()
+                const capturedSessionId = this._insights.get_session_id()
                 if (capturedSessionId) {
                     payload.session_id = capturedSessionId
                 }
 
                 // Capture session replay URL with timestamp - sent with every message
-                const replayUrl = this._posthog.get_session_replay_url({
+                const replayUrl = this._insights.get_session_replay_url({
                     withTimestamp: true,
                     timestampLookBack: 30,
                 })
@@ -152,8 +152,8 @@ export class ConversationsManager implements ConversationsManagerInterface {
                 logger.warn('Failed to capture session context', error)
             }
 
-            this._posthog._send_request({
-                url: this._posthog.requestRouter.endpointFor('api', '/api/conversations/v1/widget/message'),
+            this._insights._send_request({
+                url: this._insights.requestRouter.endpointFor('api', '/api/conversations/v1/widget/message'),
                 method: 'POST',
                 data: payload,
                 headers: {
@@ -191,7 +191,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
                     }
 
                     // Track message sent
-                    this._posthog.capture('$conversations_message_sent', {
+                    this._insights.capture('$conversations_message_sent', {
                         ticketId: data.ticket_id,
                         isNewTicket: isNewTicket,
                         messageLength: message.length,
@@ -246,8 +246,8 @@ export class ConversationsManager implements ConversationsManagerInterface {
                 queryParams.after = after
             }
 
-            this._posthog._send_request({
-                url: this._posthog.requestRouter.endpointFor(
+            this._insights._send_request({
+                url: this._insights.requestRouter.endpointFor(
                     'api',
                     `/api/conversations/v1/widget/messages/${targetTicketId}?${formDataToQuery(queryParams)}`
                 ),
@@ -298,8 +298,8 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
         // eslint-disable-next-line compat/compat
         return new Promise((resolve, reject) => {
-            this._posthog._send_request({
-                url: this._posthog.requestRouter.endpointFor(
+            this._insights._send_request({
+                url: this._insights.requestRouter.endpointFor(
                     'api',
                     `/api/conversations/v1/widget/messages/${targetTicketId}/read`
                 ),
@@ -379,7 +379,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
         logger.info('Loaded ticket ID from storage', { ticketId: this._currentTicketId })
 
         // Track conversations API loaded (separate from widget loaded)
-        this._posthog.capture('$conversations_loaded', {
+        this._insights.capture('$conversations_loaded', {
             hasExistingTicket: !!this._currentTicketId,
             widgetEnabled: this._isWidgetEnabled,
             domainAllowed: this._isDomainAllowed,
@@ -414,14 +414,14 @@ export class ConversationsManager implements ConversationsManagerInterface {
         const payload: RestoreFromTokenPayload = {
             restore_token: restoreToken,
             widget_session_id: this._widgetSessionId,
-            distinct_id: this._posthog.get_distinct_id(),
+            distinct_id: this._insights.get_distinct_id(),
             current_url: window?.location?.href,
         }
 
         // eslint-disable-next-line compat/compat
         const data = await new Promise<RestoreFromTokenResponse>((resolve, reject) => {
-            this._posthog._send_request({
-                url: this._posthog.requestRouter.endpointFor('api', RESTORE_EXCHANGE_ENDPOINT),
+            this._insights._send_request({
+                url: this._insights.requestRouter.endpointFor('api', RESTORE_EXCHANGE_ENDPOINT),
                 method: 'POST',
                 data: payload,
                 headers: {
@@ -501,7 +501,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
         const initialState: ConversationsWidgetState = savedState === 'open' ? 'open' : 'closed'
         this._widgetState = initialState
 
-        // Get initial user traits (from PostHog person properties or saved)
+        // Get initial user traits (from Insights person properties or saved)
         const initialUserTraits = this._getInitialUserTraits()
 
         // Determine initial view based on ticket count
@@ -512,7 +512,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
         this._renderWidget(initialState, initialUserTraits, initialView, tickets)
         this._isWidgetRendered = true
 
-        this._posthog.capture('$conversations_widget_loaded', {
+        this._insights.capture('$conversations_widget_loaded', {
             hasExistingTicket: !!this._currentTicketId,
             initialState: initialState,
             initialView: initialView,
@@ -525,16 +525,16 @@ export class ConversationsManager implements ConversationsManagerInterface {
     }
 
     /**
-     * Extract name and email from PostHog's stored person properties.
+     * Extract name and email from Insights's stored person properties.
      *
-     * Person properties set via posthog.identify() are stored under the
+     * Person properties set via insights.identify() are stored under the
      * $stored_person_properties persistence key, not as top-level props.
      * We check both locations plus the super-properties for completeness.
      */
     private _getPersonTraits(): { name: string | undefined; email: string | undefined } {
-        const superProps = this._posthog.persistence?.props || {}
+        const superProps = this._insights.persistence?.props || {}
         const storedPersonProps =
-            (this._posthog.get_property(STORED_PERSON_PROPERTIES_KEY) as Record<string, any>) || {}
+            (this._insights.get_property(STORED_PERSON_PROPERTIES_KEY) as Record<string, any>) || {}
 
         const name =
             storedPersonProps.$name || storedPersonProps.name || superProps.$name || superProps.name || undefined
@@ -545,7 +545,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
     }
 
     /**
-     * Get initial user traits from PostHog or localStorage
+     * Get initial user traits from Insights or localStorage
      */
     private _getInitialUserTraits(): UserProvidedTraits | null {
         const { name, email } = this._getPersonTraits()
@@ -574,7 +574,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
         this._persistence.saveUserTraits(traits)
 
         // Track identification
-        this._posthog.capture('$conversations_user_identified', {
+        this._insights.capture('$conversations_user_identified', {
             hasName: !!traits.name,
             hasEmail: !!traits.email,
         })
@@ -582,7 +582,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
     private _handleRequestRestoreLink = async (email: string): Promise<RequestRestoreLinkResponse> => {
         const response = await this.requestRestoreLink(email)
-        this._posthog.capture('$conversations_restore_link_requested', {
+        this._insights.capture('$conversations_restore_link_requested', {
             hasEmail: !!email,
         })
         return response
@@ -614,7 +614,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
         this._widgetState = state
         logger.info('Widget state changed', { state, view: this._currentView })
 
-        this._posthog.capture('$conversations_widget_state_changed', {
+        this._insights.capture('$conversations_widget_state_changed', {
             state: state,
             view: this._currentView,
             ticketId: this._currentTicketId,
@@ -822,7 +822,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
         await this._loadTickets()
 
         // Track back to tickets
-        this._posthog.capture('$conversations_back_to_tickets')
+        this._insights.capture('$conversations_back_to_tickets')
     }
 
     /**
@@ -888,11 +888,11 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
     /**
      * Setup listener for identify events.
-     * When user calls posthog.identify(), hide the identification form
+     * When user calls insights.identify(), hide the identification form
      * since we now know who they are.
      */
     private _setupIdentifyListener(): void {
-        this._unsubscribeIdentifyListener = this._posthog.on('eventCaptured', (event: any) => {
+        this._unsubscribeIdentifyListener = this._insights.on('eventCaptured', (event: any) => {
             if (event.event === '$identify') {
                 // User just identified - hide the identification form if it's showing
                 this._widgetRef?.setUserIdentified()
@@ -962,8 +962,8 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
         // eslint-disable-next-line compat/compat
         return new Promise((resolve, reject) => {
-            this._posthog._send_request({
-                url: this._posthog.requestRouter.endpointFor(
+            this._insights._send_request({
+                url: this._insights.requestRouter.endpointFor(
                     'api',
                     `/api/conversations/v1/widget/tickets?${formDataToQuery(queryParams)}`
                 ),
@@ -1010,8 +1010,8 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
         // eslint-disable-next-line compat/compat
         return new Promise((resolve, reject) => {
-            this._posthog._send_request({
-                url: this._posthog.requestRouter.endpointFor('api', RESTORE_REQUEST_ENDPOINT),
+            this._insights._send_request({
+                url: this._insights.requestRouter.endpointFor('api', RESTORE_REQUEST_ENDPOINT),
                 method: 'POST',
                 data: payload,
                 headers: {
@@ -1108,7 +1108,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
     /**
      * Reset all conversation data and destroy the widget.
-     * Called on posthog.reset() to start fresh.
+     * Called on insights.reset() to start fresh.
      */
     reset(): void {
         // Clear all persisted conversation data
@@ -1161,7 +1161,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
                 config={this._config}
                 initialState={initialState}
                 initialUserTraits={initialUserTraits}
-                isUserIdentified={this._posthog._isIdentified()}
+                isUserIdentified={this._insights._isIdentified()}
                 initialView={initialView}
                 initialTickets={initialTickets}
                 hasMultipleTickets={this._hasMultipleTickets}
@@ -1184,14 +1184,14 @@ export class ConversationsManager implements ConversationsManagerInterface {
  * This is the entry point called from the lazy-loaded bundle.
  *
  * Singleton guard: only one ConversationsManager per page. The toolbar's
- * internal PostHog instance is excluded upstream (see loadIfEnabled), so
+ * internal Insights instance is excluded upstream (see loadIfEnabled), so
  * this always belongs to the customer's main instance.
  */
-export function initConversations(config: ConversationsRemoteConfig, posthog: PostHog): ConversationsManager {
+export function initConversations(config: ConversationsRemoteConfig, insights: Insights): ConversationsManager {
     if (_activeManager) {
         return _activeManager
     }
 
-    _activeManager = new ConversationsManager(config, posthog)
+    _activeManager = new ConversationsManager(config, insights)
     return _activeManager
 }

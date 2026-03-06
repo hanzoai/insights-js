@@ -1,5 +1,5 @@
-if (!window.__posthogObservedViolations) {
-    window.__posthogObservedViolations = []
+if (!window.__insightsObservedViolations) {
+    window.__insightsObservedViolations = []
 }
 
 if (window.ReportingObserver) {
@@ -7,7 +7,7 @@ if (window.ReportingObserver) {
         (reports) => {
             reports.forEach((violation) => {
                 console.log(violation)
-                window.__posthogObservedViolations.push(violation)
+                window.__insightsObservedViolations.push(violation)
             })
         },
         {

@@ -1,7 +1,7 @@
 import { h } from 'preact'
 import { useState, useRef, useEffect } from 'preact/hooks'
-import { ProductTourStep, ProductTourAppearance, ProductTourSurveyQuestion } from '../../../posthog-product-tours-types'
-import { cancelSVG, IconPosthogLogo } from '../../surveys/icons'
+import { ProductTourStep, ProductTourAppearance, ProductTourSurveyQuestion } from '../../../insights-product-tours-types'
+import { cancelSVG, IconInsightsLogo } from '../../surveys/icons'
 import {
     dissatisfiedEmoji,
     neutralEmoji,
@@ -237,13 +237,13 @@ export function ProductTourSurveyStepInner({
 
             {!whiteLabel && (
                 <a
-                    href={isInteractive ? 'https://posthog.com/product-tours' : undefined}
+                    href={isInteractive ? 'https://insights.com/product-tours' : undefined}
                     target={isInteractive ? '_blank' : undefined}
                     rel={isInteractive ? 'noopener noreferrer' : undefined}
                     class="ph-tour-branding"
                     style={isInteractive ? undefined : { cursor: 'default', pointerEvents: 'none' }}
                 >
-                    Survey by {IconPosthogLogo}
+                    Survey by {IconInsightsLogo}
                 </a>
             )}
         </>

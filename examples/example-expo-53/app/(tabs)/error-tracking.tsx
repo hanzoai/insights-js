@@ -5,7 +5,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { usePostHog, PostHogErrorBoundary } from 'posthog-react-native'
+import { useInsights, InsightsErrorBoundary } from 'insights-react-native'
 
 function BuggyComponent({ shouldThrow }: { shouldThrow: boolean }) {
     if (shouldThrow) {
@@ -21,14 +21,14 @@ function BuggyComponent({ shouldThrow }: { shouldThrow: boolean }) {
 function ErrorFallback({ error, componentStack }: { error: unknown; componentStack: string }) {
     return (
         <View style={styles.errorFallback}>
-            <Text style={styles.errorFallbackTitle}>Caught by PostHogErrorBoundary</Text>
+            <Text style={styles.errorFallbackTitle}>Caught by InsightsErrorBoundary</Text>
             <Text style={styles.errorFallbackMessage}>{error instanceof Error ? error.message : String(error)}</Text>
         </View>
     )
 }
 
 export default function ErrorTrackingScreen() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [shouldThrow, setShouldThrow] = useState(false)
 
     return (
@@ -46,14 +46,14 @@ export default function ErrorTrackingScreen() {
             <ThemedView style={styles.sectionContainer}>
                 <ThemedText type="subtitle">Error Boundary</ThemedText>
                 <ThemedText>
-                    Wrap components with PostHogErrorBoundary to automatically capture render errors.
+                    Wrap components with InsightsErrorBoundary to automatically capture render errors.
                 </ThemedText>
-                <PostHogErrorBoundary
+                <InsightsErrorBoundary
                     fallback={ErrorFallback}
-                    additionalProperties={{ attachedFromPostHogErrorBoundary: true }}
+                    additionalProperties={{ attachedFromInsightsErrorBoundary: true }}
                 >
                     <BuggyComponent shouldThrow={shouldThrow} />
-                </PostHogErrorBoundary>
+                </InsightsErrorBoundary>
                 <Button onPress={() => setShouldThrow(true)} title="Trigger render crash" />
             </ThemedView>
 
@@ -64,7 +64,7 @@ export default function ErrorTrackingScreen() {
                         try {
                             throw new Error('User clicked Capture Error')
                         } catch (error) {
-                            posthog.captureException(error)
+                            insights.captureException(error)
                         }
                     }}
                     title="Capture error manually"

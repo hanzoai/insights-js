@@ -2,7 +2,7 @@
 import { h, Fragment } from 'preact'
 import { useMemo } from 'preact/hooks'
 import { isUndefined, isNumber, isArray } from '@hanzo/insights-core'
-import { TipTapDoc, TipTapNode, TipTapMark } from '../../../../posthog-conversations-types'
+import { TipTapDoc, TipTapNode, TipTapMark } from '../../../../insights-conversations-types'
 
 interface RichContentProps {
     /** Rich content in TipTap JSON format (preferred) */

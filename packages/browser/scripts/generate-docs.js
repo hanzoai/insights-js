@@ -9,23 +9,23 @@ const version = packageJson.version;
 
 const config = {
     packageDir: path.resolve(__dirname, '..'),  // packages/browser
-    apiJsonPath: path.resolve(__dirname, '../docs/posthog-js.api.json'),
-    outputPath: path.resolve(__dirname, `../references/posthog-js-references-${version}.json`),
+    apiJsonPath: path.resolve(__dirname, '../docs/@hanzo/insights.api.json'),
+    outputPath: path.resolve(__dirname, `../references/@hanzo/insights-references-${version}.json`),
     version: version,
-    id: 'posthog-js',
+    id: '@hanzo/insights',
     hogRef: HOG_REF,
     specInfo: {
-        id: 'posthog-js',
-        title: 'PostHog JavaScript Web SDK',
-        description: 'Posthog-js allows you to automatically capture usage and send events to PostHog.',
-        slugPrefix: 'posthog-js',
-        specUrl: 'https://github.com/PostHog/posthog-js'
+        id: '@hanzo/insights',
+        title: 'Insights JavaScript Web SDK',
+        description: 'Insights-js allows you to automatically capture usage and send events to Insights.',
+        slugPrefix: '@hanzo/insights',
+        specUrl: 'https://github.com/Insights/@hanzo/insights'
     },
     typeExamples: {
         Properties: PROPERTIES_EXAMPLE,
         Property: PROPERTY_EXAMPLE
     },
-    parentClass: 'PostHog'
+    parentClass: 'Insights'
 };
 
 // Ensure references directory exists
@@ -38,9 +38,9 @@ if (!fs.existsSync(referencesDir)) {
 const output = generateApiSpecs(config);
 
 // Write versioned file
-const versionedPath = path.resolve(__dirname, `../references/posthog-js-references-${version}.json`);
+const versionedPath = path.resolve(__dirname, `../references/@hanzo/insights-references-${version}.json`);
 fs.writeFileSync(versionedPath, JSON.stringify(output, null, 2));
 
 // Copy to latest file
-const latestPath = path.resolve(__dirname, '../references/posthog-js-references-latest.json');
+const latestPath = path.resolve(__dirname, '../references/@hanzo/insights-references-latest.json');
 fs.writeFileSync(latestPath, JSON.stringify(output, null, 2));

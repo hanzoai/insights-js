@@ -1,4 +1,4 @@
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { createTour, tourTooltip, startWithTours, captureEvent } from './utils'
 
 test.describe('product tours - auto triggers', () => {
@@ -110,7 +110,7 @@ test.describe('product tours - auto triggers', () => {
             ;(window as any).buttonClickCount = 0
             const btn = document.getElementById('click-trigger-btn')
             if (btn) {
-                // eslint-disable-next-line posthog-js/no-add-event-listener
+                // eslint-disable-next-line @hanzo/insights/no-add-event-listener
                 btn.addEventListener('click', () => {
                     ;(window as any).buttonClickCount++
                 })
@@ -135,7 +135,7 @@ test.describe('product tours - auto triggers', () => {
 
         // Clear the cache to force a refresh
         await page.evaluate(() => {
-            ;(window as any).posthog.productTours.clearCache()
+            ;(window as any).insights.productTours.clearCache()
         })
 
         // Wait for next evaluation cycle to pick up empty tours and clean up listeners

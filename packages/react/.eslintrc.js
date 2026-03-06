@@ -19,7 +19,7 @@ module.exports = {
         {
             files: ['./src/**/*.ts'],
             rules: {
-                'posthog-js/no-direct-null-check': 'off',
+                '@hanzo/insights/no-direct-null-check': 'off',
             },
         },
         {

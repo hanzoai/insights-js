@@ -1,6 +1,5 @@
-import { PostHog } from './posthog-web'
+import { Insights } from './insights-web'
 
-export default PostHog
+export default Insights
 
-export * from './posthog-web'
-export { PostHog as Insights } from './posthog-web'
+export * from './insights-web'

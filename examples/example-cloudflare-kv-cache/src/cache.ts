@@ -1,9 +1,9 @@
-import { FlagDefinitionCacheData, FlagDefinitionCacheProvider } from 'posthog-node/experimental'
+import { FlagDefinitionCacheData, FlagDefinitionCacheProvider } from 'insights-node/experimental'
 
 // Base implementation of a Cloudflare KV-backed flag definition cache.
 // Not intended to be used directly.
 class CloudflareKVFlagCache implements FlagDefinitionCacheProvider {
-    private static readonly CACHE_KEY_PREFIX = 'posthog:flags:'
+    private static readonly CACHE_KEY_PREFIX = 'insights:flags:'
 
     constructor(
         protected kv: KVNamespace,

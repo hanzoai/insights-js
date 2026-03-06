@@ -1,34 +1,34 @@
 # the recorder file can have unexpected impact on users' sites
-packages/browser/src/entrypoints/recorder.ts           @PostHog/team-replay
+packages/browser/src/entrypoints/recorder.ts           @Insights/team-replay
 
 # Network recorder
-packages/browser/src/extensions/replay/external/network-plugin.ts @PostHog/team-client-libraries
+packages/browser/src/extensions/replay/external/network-plugin.ts @Insights/team-client-libraries
 
 # Surveys
-packages/browser/src/extensions/surveys/               @PostHog/team-surveys
-packages/browser/src/extensions/surveys.tsx            @PostHog/team-surveys
-packages/browser/src/entrypoints/surveys.ts            @PostHog/team-surveys
-packages/browser/src/entrypoints/surveys-preview.es.ts @PostHog/team-surveys
-packages/browser/src/posthog-surveys-types.ts          @PostHog/team-surveys
-packages/browser/src/posthog-surveys.ts                @PostHog/team-surveys
-packages/browser/src/utils/survey-event-receiver.ts    @PostHog/team-surveys
-packages/browser/src/utils/survey-utils.ts             @PostHog/team-surveys
+packages/browser/src/extensions/surveys/               @Insights/team-surveys
+packages/browser/src/extensions/surveys.tsx            @Insights/team-surveys
+packages/browser/src/entrypoints/surveys.ts            @Insights/team-surveys
+packages/browser/src/entrypoints/surveys-preview.es.ts @Insights/team-surveys
+packages/browser/src/insights-surveys-types.ts          @Insights/team-surveys
+packages/browser/src/insights-surveys.ts                @Insights/team-surveys
+packages/browser/src/utils/survey-event-receiver.ts    @Insights/team-surveys
+packages/browser/src/utils/survey-utils.ts             @Insights/team-surveys
 
 # Mobile
-packages/react-native/                                 @PostHog/team-client-libraries
+packages/react-native/                                 @Insights/team-client-libraries
 
 # AI
-/packages/ai/package.json                              @PostHog/team-llm-analytics
+/packages/ai/package.json                              @Insights/team-llm-analytics
 
 # Web Analytics
-packages/browser/src/page-view.ts                      @PostHog/team-web-analytics
-packages/browser/src/sessionid.ts                      @PostHog/team-web-analytics
-packages/browser/src/session-props.ts                  @PostHog/team-web-analytics
-packages/browser/src/utils/blocked-uas.ts              @PostHog/team-web-analytics
-packages/browser/src/consent.ts                        @PostHog/team-web-analytics
+packages/browser/src/page-view.ts                      @Insights/team-web-analytics
+packages/browser/src/sessionid.ts                      @Insights/team-web-analytics
+packages/browser/src/session-props.ts                  @Insights/team-web-analytics
+packages/browser/src/utils/blocked-uas.ts              @Insights/team-web-analytics
+packages/browser/src/consent.ts                        @Insights/team-web-analytics
 
 # Error tracking
-packages/rollup-plugin/                                @PostHog/team-error-tracking
-packages/nuxt/                                         @PostHog/team-error-tracking
-packages/nextjs-config/                                @PostHog/team-error-tracking
-packages/core/src/process/                             @PostHog/team-error-tracking
+packages/rollup-plugin/                                @Insights/team-error-tracking
+packages/nuxt/                                         @Insights/team-error-tracking
+packages/nextjs-config/                                @Insights/team-error-tracking
+packages/core/src/process/                             @Insights/team-error-tracking

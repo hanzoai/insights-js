@@ -1,10 +1,10 @@
 name: Playwright Integration Tests
 on: [pull_request]
 env:
-  POSTHOG_PROJECT_API_KEY: "${{ secrets.POSTHOG_PROJECT_API_KEY }}"
-  POSTHOG_PERSONAL_API_KEY: "${{ secrets.POSTHOG_PERSONAL_API_KEY }}"
-  POSTHOG_API_HOST: https://us.i.posthog.com
-  POSTHOG_PROJECT_ID: 11213
+  INSIGHTS_PROJECT_API_KEY: "${{ secrets.INSIGHTS_PROJECT_API_KEY }}"
+  INSIGHTS_PERSONAL_API_KEY: "${{ secrets.INSIGHTS_PERSONAL_API_KEY }}"
+  INSIGHTS_API_HOST: https://us.i.insights.hanzo.ai
+  INSIGHTS_PROJECT_ID: 11213
 
 permissions:
   contents: read
@@ -46,7 +46,7 @@ jobs:
       - uses: ./.github/actions/is-affected
         id: is-affected
         with:
-          package-name: posthog-js
+          package-name: @hanzo/insights
 
       - name: Build packages
         if: ${{ steps.is-affected.outputs.is-affected == 'true' }}

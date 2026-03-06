@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 import { warnIfNoClient, resetWarnedCallers } from '../src/hooks/utils'
-import type { PostHog } from '../src/posthog-rn'
+import type { Insights } from '../src/insights-rn'
 
 describe('warnIfNoClient', () => {
   afterEach(() => {
@@ -13,16 +13,16 @@ describe('warnIfNoClient', () => {
     warnIfNoClient(undefined, 'useFeatureFlag')
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('useFeatureFlag was called without a PostHog client')
+      expect.stringContaining('useFeatureFlag was called without a Insights client')
     )
     consoleErrorSpy.mockRestore()
   })
 
   it('should not log error when a valid client is provided', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const mockPostHog = {} as PostHog
+    const mockInsights = {} as Insights
 
-    warnIfNoClient(mockPostHog, 'useFeatureFlag')
+    warnIfNoClient(mockInsights, 'useFeatureFlag')
 
     expect(consoleErrorSpy).not.toHaveBeenCalled()
     consoleErrorSpy.mockRestore()
@@ -42,14 +42,14 @@ describe('warnIfNoClient', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     warnIfNoClient(undefined, 'useFeatureFlag')
-    warnIfNoClient(undefined, 'usePostHog')
+    warnIfNoClient(undefined, 'useInsights')
 
     expect(consoleErrorSpy).toHaveBeenCalledTimes(2)
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('useFeatureFlag was called without a PostHog client')
+      expect.stringContaining('useFeatureFlag was called without a Insights client')
     )
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining('usePostHog was called without a PostHog client')
+      expect.stringContaining('useInsights was called without a Insights client')
     )
     consoleErrorSpy.mockRestore()
   })

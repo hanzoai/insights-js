@@ -1,5 +1,5 @@
 /**
- * Extend Segment with extra PostHog JS functionality. Required for things like Recordings and feature flags to work correctly.
+ * Extend Segment with extra Insights JS functionality. Required for things like Recordings and feature flags to work correctly.
  *
  * ### Usage
  *
@@ -8,7 +8,7 @@
  *  analytics.load("GOEDfA21zZTtR7clsBuDvmBKAtAdZ6Np");
  *
  *  analytics.ready(() => {
- *    posthog.init('<posthog-api-key>', {
+ *    insights.init('<insights-api-key>', {
  *      capture_pageview: false,
  *      segment: window.analytics, // NOTE: Be sure to use window.analytics here!
  *    });
@@ -16,7 +16,7 @@
  *  })
  *  ```
  */
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { createLogger } from '../utils/logger'
 
 import { USER_STATE } from '../constants'
@@ -30,7 +30,7 @@ export type { SegmentUser, SegmentAnalytics, SegmentContext, SegmentPlugin }
 
 const logger = createLogger('[SegmentIntegration]')
 
-const createSegmentIntegration = (posthog: PostHog): SegmentPlugin => {
+const createSegmentIntegration = (insights: Insights): SegmentPlugin => {
     if (!Promise || !Promise.resolve) {
         logger.warn('This browser does not have Promise support, and can not use the segment integration')
     }
@@ -39,23 +39,23 @@ const createSegmentIntegration = (posthog: PostHog): SegmentPlugin => {
         if (!eventName) {
             return ctx
         }
-        if (!ctx.event.userId && ctx.event.anonymousId !== posthog.get_distinct_id()) {
+        if (!ctx.event.userId && ctx.event.anonymousId !== insights.get_distinct_id()) {
             // This is our only way of detecting that segment's analytics.reset() has been called so we also call it
-            logger.info('No userId set, resetting PostHog')
-            posthog.reset()
+            logger.info('No userId set, resetting Insights')
+            insights.reset()
         }
-        if (ctx.event.userId && ctx.event.userId !== posthog.get_distinct_id()) {
-            logger.info('UserId set, identifying with PostHog')
-            posthog.identify(ctx.event.userId)
+        if (ctx.event.userId && ctx.event.userId !== insights.get_distinct_id()) {
+            logger.info('UserId set, identifying with Insights')
+            insights.identify(ctx.event.userId)
         }
 
-        const additionalProperties = posthog.calculateEventProperties(eventName, ctx.event.properties)
+        const additionalProperties = insights.calculateEventProperties(eventName, ctx.event.properties)
         ctx.event.properties = Object.assign({}, additionalProperties, ctx.event.properties)
         return ctx
     }
 
     return {
-        name: 'PostHog JS',
+        name: 'Insights JS',
         type: 'enrichment',
         version: '1.0.0',
         isLoaded: () => true,
@@ -69,8 +69,8 @@ const createSegmentIntegration = (posthog: PostHog): SegmentPlugin => {
     }
 }
 
-function setupPostHogFromSegment(posthog: PostHog, done: () => void) {
-    const segment = posthog.config.segment
+function setupInsightsFromSegment(insights: Insights, done: () => void) {
+    const segment = insights.config.segment
     if (!segment) {
         return done()
     }
@@ -78,15 +78,15 @@ function setupPostHogFromSegment(posthog: PostHog, done: () => void) {
     const bootstrapUser = (user: SegmentUser) => {
         // Use segments anonymousId instead
         const getSegmentAnonymousId = () => user.anonymousId() || uuidv7()
-        posthog.config.get_device_id = getSegmentAnonymousId
+        insights.config.get_device_id = getSegmentAnonymousId
 
         // If a segment user ID exists, set it as the distinct_id
         if (user.id()) {
-            posthog.register({
+            insights.register({
                 distinct_id: user.id(),
                 $device_id: getSegmentAnonymousId(),
             })
-            posthog.persistence!.set_property(USER_STATE, 'identified')
+            insights.persistence!.set_property(USER_STATE, 'identified')
         }
 
         done()
@@ -100,14 +100,14 @@ function setupPostHogFromSegment(posthog: PostHog, done: () => void) {
     }
 }
 
-export function setupSegmentIntegration(posthog: PostHog, done: () => void) {
-    const segment = posthog.config.segment
+export function setupSegmentIntegration(insights: Insights, done: () => void) {
+    const segment = insights.config.segment
     if (!segment) {
         return done()
     }
 
-    setupPostHogFromSegment(posthog, () => {
-        segment.register(createSegmentIntegration(posthog)).then(() => {
+    setupInsightsFromSegment(insights, () => {
+        segment.register(createSegmentIntegration(insights)).then(() => {
             done()
         })
     })

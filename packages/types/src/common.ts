@@ -1,5 +1,5 @@
 /**
- * Common types shared across PostHog SDKs
+ * Common types shared across Insights SDKs
  */
 
 export type Property = any

@@ -8,9 +8,9 @@ import {
     getDisplayOrderChoices,
     getDisplayOrderQuestions,
 } from '../extensions/surveys/surveys-extension-utils'
-import { PostHog } from '../posthog-core'
-import { PostHogPersistence } from '../posthog-persistence'
-import { PostHogSurveys } from '../posthog-surveys'
+import { Insights } from '../insights-core'
+import { InsightsPersistence } from '../insights-persistence'
+import { InsightsSurveys } from '../insights-surveys'
 import {
     MultipleSurveyQuestion,
     RatingSurveyQuestion,
@@ -19,19 +19,19 @@ import {
     SurveyQuestionBranchingType,
     SurveyQuestionType,
     SurveyType,
-} from '../posthog-surveys-types'
-import { FlagsResponse, PostHogConfig, Properties, RemoteConfig } from '../types'
+} from '../insights-surveys-types'
+import { FlagsResponse, InsightsConfig, Properties, RemoteConfig } from '../types'
 import * as globals from '../utils/globals'
 import { assignableWindow, window } from '../utils/globals'
 import { RequestRouter } from '../utils/request-router'
 import { SurveyEventReceiver } from '../utils/survey-event-receiver'
 import { SURVEY_LOGGER as logger } from '../utils/survey-utils'
-import { createMockPostHog, createMockConfig } from './helpers/posthog-instance'
+import { createMockInsights, createMockConfig } from './helpers/insights-instance'
 
 describe('surveys', () => {
-    let config: PostHogConfig
-    let instance: PostHog
-    let surveys: PostHogSurveys
+    let config: InsightsConfig
+    let instance: Insights
+    let surveys: InsightsSurveys
     let surveysResponse: { status?: number; surveys?: Survey[] }
     const originalWindowLocation = assignableWindow.location
 
@@ -176,23 +176,23 @@ describe('surveys', () => {
         const loadScriptMock = jest.fn()
 
         loadScriptMock.mockImplementation((_ph, _path, callback) => {
-            assignableWindow.__PosthogExtensions__ = assignableWindow.__Posthog__ || {}
-            assignableWindow.__PosthogExtensions__.generateSurveys = generateSurveys
-            assignableWindow.__PosthogExtensions__.canActivateRepeatedly = canActivateRepeatedly
+            assignableWindow.__InsightsExtensions__ = assignableWindow.__Insights__ || {}
+            assignableWindow.__InsightsExtensions__.generateSurveys = generateSurveys
+            assignableWindow.__InsightsExtensions__.canActivateRepeatedly = canActivateRepeatedly
 
             callback()
         })
 
         config = createMockConfig({
             token: 'testtoken',
-            api_host: 'https://app.posthog.com',
+            api_host: 'https://app.insights.com',
             persistence: 'memory',
             surveys_request_timeout_ms: SURVEYS_REQUEST_TIMEOUT_MS,
         })
 
-        instance = createMockPostHog({
+        instance = createMockInsights({
             config: config,
-            persistence: new PostHogPersistence(config),
+            persistence: new InsightsPersistence(config),
             requestRouter: new RequestRouter({ config } as any),
             _addCaptureHook: jest.fn(),
             register: (props: Properties) => instance.persistence?.register(props),
@@ -212,17 +212,17 @@ describe('surveys', () => {
             },
         })
 
-        assignableWindow.__PosthogExtensions__ = {
+        assignableWindow.__InsightsExtensions__ = {
             loadExternalDependency: loadScriptMock,
         }
 
-        surveys = new PostHogSurveys(instance)
+        surveys = new InsightsSurveys(instance)
         instance.surveys = surveys
-        // all being squashed into a mock posthog so...
+        // all being squashed into a mock insights so...
         instance.getActiveMatchingSurveys = instance.surveys.getActiveMatchingSurveys.bind(instance.surveys)
         instance.canRenderSurveyAsync = instance.surveys.canRenderSurveyAsync.bind(instance.surveys)
 
-        // mock loadIfEnabled so posthog.surveys.loadIfEnabled() doesn't call _send_request
+        // mock loadIfEnabled so insights.surveys.loadIfEnabled() doesn't call _send_request
         // and it instantiates the survey event receiver
         const loadIfEnabledMock = jest.fn()
         loadIfEnabledMock.mockImplementation(() => {
@@ -256,7 +256,7 @@ describe('surveys', () => {
             expect(data).toEqual(firstSurveys)
         })
         expect(instance._send_request).toHaveBeenCalledWith({
-            url: 'https://us.i.posthog.com/api/surveys/?token=testtoken',
+            url: 'https://us.i.insights.com/api/surveys/?token=testtoken',
             timeout: SURVEYS_REQUEST_TIMEOUT_MS,
             method: 'GET',
             callback: expect.any(Function),
@@ -272,7 +272,7 @@ describe('surveys', () => {
         expect(instance._send_request).toHaveBeenCalledTimes(1)
     })
 
-    it('posthog.reset() removes surveys tracking properties from storage', () => {
+    it('insights.reset() removes surveys tracking properties from storage', () => {
         localStorage.setItem('seenSurvey_XYZ', '1')
         localStorage.setItem('seenSurvey_ABC', '1')
         localStorage.setItem('lastSeenSurveyDate', 'some date here')
@@ -302,7 +302,7 @@ describe('surveys', () => {
             expect(data).toEqual(firstSurveys)
         })
         expect(instance._send_request).toHaveBeenCalledWith({
-            url: 'https://us.i.posthog.com/api/surveys/?token=testtoken',
+            url: 'https://us.i.insights.com/api/surveys/?token=testtoken',
             timeout: SURVEYS_REQUEST_TIMEOUT_MS,
             method: 'GET',
             callback: expect.any(Function),
@@ -376,7 +376,7 @@ describe('surveys', () => {
             description: 'survey with url description',
             type: SurveyType.Popover,
             questions: [{ type: SurveyQuestionType.Open, question: 'what is a survey with url?' }],
-            conditions: { url: 'posthog.com' },
+            conditions: { url: 'insights.com' },
             start_date: new Date().toISOString(),
             end_date: null,
         } as unknown as Survey
@@ -468,7 +468,7 @@ describe('surveys', () => {
             description: 'survey with url does not contain description',
             type: SurveyType.Popover,
             questions: [{ type: SurveyQuestionType.Open, question: 'what is a survey with url does not contain?' }],
-            conditions: { url: 'posthog.com', urlMatchType: 'not_icontains' },
+            conditions: { url: 'insights.com', urlMatchType: 'not_icontains' },
             start_date: new Date().toISOString(),
             end_date: null,
         } as unknown as Survey
@@ -486,7 +486,7 @@ describe('surveys', () => {
             description: 'survey with url and selector description',
             type: SurveyType.Popover,
             questions: [{ type: SurveyQuestionType.Open, question: 'what is a survey with url and selector?' }],
-            conditions: { url: 'posthogapp.com', selector: '#foo' },
+            conditions: { url: 'insightsapp.com', selector: '#foo' },
             start_date: new Date().toISOString(),
             end_date: null,
         } as unknown as Survey
@@ -559,7 +559,7 @@ describe('surveys', () => {
             questions: [{ type: SurveyQuestionType.Open, question: 'what is a survey with everything?' }],
             start_date: new Date().toISOString(),
             end_date: null,
-            conditions: { url: 'posthogapp.com', selector: '.test-selector' },
+            conditions: { url: 'insightsapp.com', selector: '.test-selector' },
             linked_flag_key: 'linked-flag-key',
             targeting_flag_key: 'survey-targeting-flag-key',
         } as unknown as Survey
@@ -577,7 +577,7 @@ describe('surveys', () => {
                 surveys: [surveyWithUrl, surveyWithSelector, surveyWithUrlAndSelector],
             }
             // eslint-disable-next-line compat/compat
-            assignableWindow.location = new URL('https://posthog.com') as unknown as Location
+            assignableWindow.location = new URL('https://insights.com') as unknown as Location
             surveys.getActiveMatchingSurveys((data) => {
                 expect(data).toEqual([surveyWithUrl])
             })
@@ -593,7 +593,7 @@ describe('surveys', () => {
             }
 
             // eslint-disable-next-line compat/compat
-            assignableWindow.location = new URL('https://posthogapp.com') as unknown as Location
+            assignableWindow.location = new URL('https://insightsapp.com') as unknown as Location
             document.body.appendChild(document.createElement('div')).id = 'foo'
 
             surveys.getActiveMatchingSurveys((data) => {
@@ -695,9 +695,9 @@ describe('surveys', () => {
             }
 
             // eslint-disable-next-line compat/compat
-            assignableWindow.location = new URL('https://posthog.com') as unknown as Location
+            assignableWindow.location = new URL('https://insights.com') as unknown as Location
             surveys.getActiveMatchingSurveys((data) => {
-                // returns surveyWithIsNotUrlMatch and surveyWithUrlDoesNotContainRegex because they don't contain posthog.com
+                // returns surveyWithIsNotUrlMatch and surveyWithUrlDoesNotContainRegex because they don't contain insights.com
                 expect(data).toEqual([surveyWithIsNotUrlMatch, surveyWithUrlDoesNotContainRegex])
             })
             assignableWindow.location = originalWindowLocation
@@ -770,7 +770,7 @@ describe('surveys', () => {
 
         it('returns surveys that inclusively matches any of the above', () => {
             // eslint-disable-next-line compat/compat
-            assignableWindow.location = new URL('https://posthogapp.com') as unknown as Location
+            assignableWindow.location = new URL('https://insightsapp.com') as unknown as Location
             document.body.appendChild(document.createElement('div')).className = 'test-selector'
             surveysResponse = { surveys: [activeSurvey, surveyWithSelector, surveyWithEverything] }
             // activeSurvey returns because there are no restrictions on conditions or flags on it

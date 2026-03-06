@@ -1,5 +1,5 @@
 import { SurveyPosition } from '@hanzo/insights-core'
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import {
     createTour,
     createStep,
@@ -83,7 +83,7 @@ test.describe('product tours - customization', () => {
             expect(borderRadius).toBe('20px')
         })
 
-        test('whiteLabel hides PostHog branding', async ({ page, context }) => {
+        test('whiteLabel hides Insights branding', async ({ page, context }) => {
             const tour = createTour({
                 id: 'white-label',
                 steps: [createStep({ contentHtml: '<p>White label tour</p>' })],

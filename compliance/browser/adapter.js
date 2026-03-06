@@ -1,7 +1,7 @@
 /**
- * PostHog Browser SDK Compliance Adapter
+ * Insights Browser SDK Compliance Adapter
  *
- * Wraps the posthog-js browser SDK using jsdom for testing.
+ * Wraps the @hanzo/insights browser SDK using jsdom for testing.
  */
 
 const express = require('express')
@@ -43,7 +43,7 @@ const state = {
     requestsMade: [],
 }
 
-// Override XMLHttpRequest to track requests BEFORE importing PostHog
+// Override XMLHttpRequest to track requests BEFORE importing Insights
 const OriginalXHR = global.XMLHttpRequest
 global.XMLHttpRequest = function() {
     const xhr = new OriginalXHR()
@@ -177,18 +177,18 @@ global.fetch = async (url, options) => {
 }
 
 // Import the built browser SDK AFTER setting up overrides
-const PostHogModule = require('../../packages/browser/dist/module')
+const InsightsModule = require('../../packages/browser/dist/module')
 
-// Create a PostHog instance
-const { PostHog } = PostHogModule
-const posthog = new PostHog()
+// Create a Insights instance
+const { Insights } = InsightsModule
+const insights = new Insights()
 
 const app = express()
 app.use(express.json())
 
 app.get('/health', (req, res) => {
     res.json({
-        sdk_name: 'posthog-js',
+        sdk_name: '@hanzo/insights',
         sdk_version: require('../../packages/browser/package.json').version,
         adapter_version: '1.0.0',
     })
@@ -202,17 +202,17 @@ app.post('/init', (req, res) => {
     state.totalEventsSent = 0
     state.requestsMade = []
 
-    // Reset the PostHog instance if it was previously initialized
+    // Reset the Insights instance if it was previously initialized
     if (state.instance && state.instance.__loaded) {
-        posthog.reset()
+        insights.reset()
         // Clear localStorage to fully reset state
         global.localStorage.clear()
         // Manually reset __loaded flag to allow re-initialization
-        posthog.__loaded = false
+        insights.__loaded = false
     }
 
-    // Initialize PostHog (use the singleton instance)
-    posthog.init(api_key, {
+    // Initialize Insights (use the singleton instance)
+    insights.init(api_key, {
         api_host: host,
         persistence: 'memory',
         autocapture: false,
@@ -232,7 +232,7 @@ app.post('/init', (req, res) => {
         },
     })
 
-    state.instance = posthog
+    state.instance = insights
 
     res.json({ success: true })
 })
@@ -301,5 +301,5 @@ app.post('/reset', (req, res) => {
 
 const port = process.env.PORT || 8080
 app.listen(port, () => {
-    console.log(`PostHog Browser SDK adapter listening on port ${port}`)
+    console.log(`Insights Browser SDK adapter listening on port ${port}`)
 })

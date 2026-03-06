@@ -13,40 +13,40 @@ export function hasCompilerHook(): boolean {
   return semver.gte(nextJsVersion, '15.4.1')
 }
 
-export async function processSourceMaps(posthogOptions: ResolvedPluginConfig, directory: string) {
+export async function processSourceMaps(insightsOptions: ResolvedPluginConfig, directory: string) {
   const cliOptions = []
   cliOptions.push('sourcemap', 'process')
   cliOptions.push('--directory', directory)
 
-  if (posthogOptions.sourcemaps.releaseName) {
-    cliOptions.push('--release-name', posthogOptions.sourcemaps.releaseName)
+  if (insightsOptions.sourcemaps.releaseName) {
+    cliOptions.push('--release-name', insightsOptions.sourcemaps.releaseName)
   }
 
-  if (posthogOptions.sourcemaps.releaseVersion) {
-    cliOptions.push('--release-version', posthogOptions.sourcemaps.releaseVersion)
+  if (insightsOptions.sourcemaps.releaseVersion) {
+    cliOptions.push('--release-version', insightsOptions.sourcemaps.releaseVersion)
   }
 
-  if (posthogOptions.sourcemaps.deleteAfterUpload) {
+  if (insightsOptions.sourcemaps.deleteAfterUpload) {
     cliOptions.push('--delete-after')
   }
 
-  if (posthogOptions.sourcemaps.batchSize) {
-    cliOptions.push('--batch-size', posthogOptions.sourcemaps.batchSize.toString())
+  if (insightsOptions.sourcemaps.batchSize) {
+    cliOptions.push('--batch-size', insightsOptions.sourcemaps.batchSize.toString())
   }
 
-  const logLevel = `posthog_cli=${posthogOptions.logLevel}`
+  const logLevel = `insights_cli=${insightsOptions.logLevel}`
   // Add env variables
   const envVars = {
     ...process.env,
     RUST_LOG: logLevel,
-    POSTHOG_CLI_HOST: posthogOptions.host,
-    POSTHOG_CLI_API_KEY: posthogOptions.personalApiKey,
-    POSTHOG_CLI_PROJECT_ID: posthogOptions.projectId,
+    INSIGHTS_CLI_HOST: insightsOptions.host,
+    INSIGHTS_CLI_API_KEY: insightsOptions.personalApiKey,
+    INSIGHTS_CLI_PROJECT_ID: insightsOptions.projectId,
   }
-  await callPosthogCli(posthogOptions.cliBinaryPath, cliOptions, envVars)
+  await callInsightsCli(insightsOptions.cliBinaryPath, cliOptions, envVars)
 }
 
-async function callPosthogCli(binaryPath: string, args: string[], env: NodeJS.ProcessEnv): Promise<void> {
+async function callInsightsCli(binaryPath: string, args: string[], env: NodeJS.ProcessEnv): Promise<void> {
   await spawnLocal(binaryPath, args, {
     env,
     stdio: 'inherit',

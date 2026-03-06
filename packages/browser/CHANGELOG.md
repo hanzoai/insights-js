@@ -1,698 +1,698 @@
-# posthog-js
+# @hanzo/insights
 
 ## 1.357.1
 
 ### Patch Changes
 
-- [#3149](https://github.com/PostHog/posthog-js/pull/3149) [`91223c5`](https://github.com/PostHog/posthog-js/commit/91223c5577c1dc6baf02c39ae708d840ff0ffcea) Thanks [@adboio](https://github.com/adboio)! - avoid re-checking URLs if they have not changed
+- [#3149](https://github.com/hanzoai/@hanzo/insights/pull/3149) [`91223c5`](https://github.com/hanzoai/@hanzo/insights/commit/91223c5577c1dc6baf02c39ae708d840ff0ffcea) Thanks [@adboio](https://github.com/adboio)! - avoid re-checking URLs if they have not changed
   (2026-03-02)
-- Updated dependencies [[`5e8d5fc`](https://github.com/PostHog/posthog-js/commit/5e8d5fc9c12e5545e015c9c5556167b9fb279347)]:
-    - @posthog/core@1.23.2
-    - @posthog/types@1.357.1
+- Updated dependencies [[`5e8d5fc`](https://github.com/hanzoai/@hanzo/insights/commit/5e8d5fc9c12e5545e015c9c5556167b9fb279347)]:
+    - @hanzo/core@1.23.2
+    - @hanzo/types@1.357.1
 
 ## 1.357.0
 
 ### Minor Changes
 
-- [#3169](https://github.com/PostHog/posthog-js/pull/3169) [`4f885c0`](https://github.com/PostHog/posthog-js/commit/4f885c067f3e46398629f4163a204206e71d4757) Thanks [@marandaneto](https://github.com/marandaneto)! - feat: add local sampleRate config for session recording
+- [#3169](https://github.com/hanzoai/@hanzo/insights/pull/3169) [`4f885c0`](https://github.com/hanzoai/@hanzo/insights/commit/4f885c067f3e46398629f4163a204206e71d4757) Thanks [@marandaneto](https://github.com/marandaneto)! - feat: add local sampleRate config for session recording
   (2026-03-02)
 
 ### Patch Changes
 
-- [#3179](https://github.com/PostHog/posthog-js/pull/3179) [`0dce119`](https://github.com/PostHog/posthog-js/commit/0dce11905e62737033f59294252f5f390212cf33) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Bump @posthog/rrweb-\* to 0.0.45 — reuses a single OffscreenCanvas in the canvas recording worker instead of allocating a new one per frame, fixing a memory leak in Safari where GPU-backed canvas resources were not being garbage collected promptly
+- [#3179](https://github.com/hanzoai/@hanzo/insights/pull/3179) [`0dce119`](https://github.com/hanzoai/@hanzo/insights/commit/0dce11905e62737033f59294252f5f390212cf33) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Bump @hanzo/rrweb-\* to 0.0.45 — reuses a single OffscreenCanvas in the canvas recording worker instead of allocating a new one per frame, fixing a memory leak in Safari where GPU-backed canvas resources were not being garbage collected promptly
   (2026-03-02)
-- Updated dependencies [[`4f885c0`](https://github.com/PostHog/posthog-js/commit/4f885c067f3e46398629f4163a204206e71d4757)]:
-    - @posthog/types@1.357.0
+- Updated dependencies [[`4f885c0`](https://github.com/hanzoai/@hanzo/insights/commit/4f885c067f3e46398629f4163a204206e71d4757)]:
+    - @hanzo/types@1.357.0
 
 ## 1.356.2
 
 ### Patch Changes
 
-- [#3174](https://github.com/PostHog/posthog-js/pull/3174) [`e9127d8`](https://github.com/PostHog/posthog-js/commit/e9127d8d98f21886d1ca2f3b193a443c7a837b5f) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Detect and report when rrweb fails to initialize. rrweb's `record()` silently swallows startup errors and returns `undefined`, which previously left the SDK reporting an active recording status while capturing zero data. The SDK now checks the return value and reports a new `rrweb_error` status, making the failure visible in debug properties.
+- [#3174](https://github.com/hanzoai/@hanzo/insights/pull/3174) [`e9127d8`](https://github.com/hanzoai/@hanzo/insights/commit/e9127d8d98f21886d1ca2f3b193a443c7a837b5f) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Detect and report when rrweb fails to initialize. rrweb's `record()` silently swallows startup errors and returns `undefined`, which previously left the SDK reporting an active recording status while capturing zero data. The SDK now checks the return value and reports a new `rrweb_error` status, making the failure visible in debug properties.
   (2026-03-02)
 
-- [#3175](https://github.com/PostHog/posthog-js/pull/3175) [`6ee5f12`](https://github.com/PostHog/posthog-js/commit/6ee5f12254f8504ea317d587ba9244775f0e4344) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Fix memory leak in canvas recording on Safari < 16.4 where ImageBitmaps were never closed when OffscreenCanvas was unavailable in the web worker.
+- [#3175](https://github.com/hanzoai/@hanzo/insights/pull/3175) [`6ee5f12`](https://github.com/hanzoai/@hanzo/insights/commit/6ee5f12254f8504ea317d587ba9244775f0e4344) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Fix memory leak in canvas recording on Safari < 16.4 where ImageBitmaps were never closed when OffscreenCanvas was unavailable in the web worker.
   (2026-03-02)
 
-- [#3178](https://github.com/PostHog/posthog-js/pull/3178) [`186871a`](https://github.com/PostHog/posthog-js/commit/186871a277928a4c6ad010fc9b2ea6525cc3f61e) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Skip canvas FPS recording entirely on browsers without OffscreenCanvas support (Safari < 16.4) instead of running a wasteful requestAnimationFrame loop that can never produce data. Also includes displayWidth/displayHeight in canvas mutation data for correct replay sizing.
+- [#3178](https://github.com/hanzoai/@hanzo/insights/pull/3178) [`186871a`](https://github.com/hanzoai/@hanzo/insights/commit/186871a277928a4c6ad010fc9b2ea6525cc3f61e) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Skip canvas FPS recording entirely on browsers without OffscreenCanvas support (Safari < 16.4) instead of running a wasteful requestAnimationFrame loop that can never produce data. Also includes displayWidth/displayHeight in canvas mutation data for correct replay sizing.
   (2026-03-02)
 
-- [#3176](https://github.com/PostHog/posthog-js/pull/3176) [`87bae20`](https://github.com/PostHog/posthog-js/commit/87bae20a1ff9a7153a699e8e81de3ea16db2541e) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Drop explicit exports
+- [#3176](https://github.com/hanzoai/@hanzo/insights/pull/3176) [`87bae20`](https://github.com/hanzoai/@hanzo/insights/commit/87bae20a1ff9a7153a699e8e81de3ea16db2541e) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Drop explicit exports
   (2026-03-02)
 
-- [#3172](https://github.com/PostHog/posthog-js/pull/3172) [`2e46959`](https://github.com/PostHog/posthog-js/commit/2e46959e3b88a6571d1a0e60cdd0ef5a2db1a02b) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Compressed requests use ArrayBuffer
+- [#3172](https://github.com/hanzoai/@hanzo/insights/pull/3172) [`2e46959`](https://github.com/hanzoai/@hanzo/insights/commit/2e46959e3b88a6571d1a0e60cdd0ef5a2db1a02b) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Compressed requests use ArrayBuffer
   (2026-03-02)
 - Updated dependencies []:
-    - @posthog/types@1.356.2
+    - @hanzo/types@1.356.2
 
 ## 1.356.1
 
 ### Patch Changes
 
-- [#3128](https://github.com/PostHog/posthog-js/pull/3128) [`a500d14`](https://github.com/PostHog/posthog-js/commit/a500d141a13cee832b75e58e92f2239b9df9c6a7) Thanks [@ksvat](https://github.com/ksvat)! - wait for fresh config before recording start decision, add new recorder status, output recording started event
+- [#3128](https://github.com/hanzoai/@hanzo/insights/pull/3128) [`a500d14`](https://github.com/hanzoai/@hanzo/insights/commit/a500d141a13cee832b75e58e92f2239b9df9c6a7) Thanks [@ksvat](https://github.com/ksvat)! - wait for fresh config before recording start decision, add new recorder status, output recording started event
   (2026-02-27)
 - Updated dependencies []:
-    - @posthog/types@1.356.1
+    - @hanzo/types@1.356.1
 
 ## 1.356.0
 
 ### Minor Changes
 
-- [#3142](https://github.com/PostHog/posthog-js/pull/3142) [`ec54fd8`](https://github.com/PostHog/posthog-js/commit/ec54fd8fcfda496879e456361fb97de504063393) Thanks [@dmarticus](https://github.com/dmarticus)! - Add feature_flag_cache_ttl_ms config to prevent stale flag values
+- [#3142](https://github.com/hanzoai/@hanzo/insights/pull/3142) [`ec54fd8`](https://github.com/hanzoai/@hanzo/insights/commit/ec54fd8fcfda496879e456361fb97de504063393) Thanks [@dmarticus](https://github.com/dmarticus)! - Add feature_flag_cache_ttl_ms config to prevent stale flag values
   (2026-02-26)
 
 ### Patch Changes
 
-- [#3154](https://github.com/PostHog/posthog-js/pull/3154) [`a47179c`](https://github.com/PostHog/posthog-js/commit/a47179c1d007d17e2f65848c98b66cba2b706e65) Thanks [@slshults](https://github.com/slshults)! - fix: Improve tablet device type detection when Chrome sends desktop-like UA strings
+- [#3154](https://github.com/hanzoai/@hanzo/insights/pull/3154) [`a47179c`](https://github.com/hanzoai/@hanzo/insights/commit/a47179c1d007d17e2f65848c98b66cba2b706e65) Thanks [@slshults](https://github.com/slshults)! - fix: Improve tablet device type detection when Chrome sends desktop-like UA strings
 
     Chrome on Android tablets defaults to "request desktop site" mode, sending a UA string
     indistinguishable from desktop Linux. This uses the Client Hints API (navigator.userAgentData.platform)
     and touch capability (navigator.maxTouchPoints) to correctly classify these devices as Tablet or Mobile
     when UA-based detection falls through to the Desktop default. (2026-02-26)
 
-- [#3145](https://github.com/PostHog/posthog-js/pull/3145) [`d741668`](https://github.com/PostHog/posthog-js/commit/d741668f6f966c729308d3b71fd7deebe16411f0) Thanks [@dmarticus](https://github.com/dmarticus)! - Adds a remote_config_refresh_interval_ms config option to control how often feature flags are automatically refreshed in long-running sessions.
+- [#3145](https://github.com/hanzoai/@hanzo/insights/pull/3145) [`d741668`](https://github.com/hanzoai/@hanzo/insights/commit/d741668f6f966c729308d3b71fd7deebe16411f0) Thanks [@dmarticus](https://github.com/dmarticus)! - Adds a remote_config_refresh_interval_ms config option to control how often feature flags are automatically refreshed in long-running sessions.
   (2026-02-26)
-- Updated dependencies [[`ec54fd8`](https://github.com/PostHog/posthog-js/commit/ec54fd8fcfda496879e456361fb97de504063393), [`d741668`](https://github.com/PostHog/posthog-js/commit/d741668f6f966c729308d3b71fd7deebe16411f0)]:
-    - @posthog/types@1.356.0
+- Updated dependencies [[`ec54fd8`](https://github.com/hanzoai/@hanzo/insights/commit/ec54fd8fcfda496879e456361fb97de504063393), [`d741668`](https://github.com/hanzoai/@hanzo/insights/commit/d741668f6f966c729308d3b71fd7deebe16411f0)]:
+    - @hanzo/types@1.356.0
 
 ## 1.355.0
 
 ### Minor Changes
 
-- [#3109](https://github.com/PostHog/posthog-js/pull/3109) [`1d3f14c`](https://github.com/PostHog/posthog-js/commit/1d3f14cadfe49a83d70d1efd778c1a24268b0f4f) Thanks [@adboio](https://github.com/adboio)! - add product tour wait period support
+- [#3109](https://github.com/hanzoai/@hanzo/insights/pull/3109) [`1d3f14c`](https://github.com/hanzoai/@hanzo/insights/commit/1d3f14cadfe49a83d70d1efd778c1a24268b0f4f) Thanks [@adboio](https://github.com/adboio)! - add product tour wait period support
   (2026-02-26)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.355.0
+    - @hanzo/types@1.355.0
 
 ## 1.354.4
 
 ### Patch Changes
 
-- [#3152](https://github.com/PostHog/posthog-js/pull/3152) [`d6fd9c9`](https://github.com/PostHog/posthog-js/commit/d6fd9c9c60564da2b095e6b83100a45676ea0f12) Thanks [@ksvat](https://github.com/ksvat)! - add re-entrancy guard for cases where ALL + regex + event trigger matching is configured
+- [#3152](https://github.com/hanzoai/@hanzo/insights/pull/3152) [`d6fd9c9`](https://github.com/hanzoai/@hanzo/insights/commit/d6fd9c9c60564da2b095e6b83100a45676ea0f12) Thanks [@ksvat](https://github.com/ksvat)! - add re-entrancy guard for cases where ALL + regex + event trigger matching is configured
   (2026-02-26)
 - Updated dependencies []:
-    - @posthog/types@1.354.4
+    - @hanzo/types@1.354.4
 
 ## 1.354.3
 
 ### Patch Changes
 
-- [#3113](https://github.com/PostHog/posthog-js/pull/3113) [`77261d8`](https://github.com/PostHog/posthog-js/commit/77261d8a27e64e2f7b80db60a25616e9f1aa0959) Thanks [@adboio](https://github.com/adboio)! - add product tours device type targeting
+- [#3113](https://github.com/hanzoai/@hanzo/insights/pull/3113) [`77261d8`](https://github.com/hanzoai/@hanzo/insights/commit/77261d8a27e64e2f7b80db60a25616e9f1aa0959) Thanks [@adboio](https://github.com/adboio)! - add product tours device type targeting
   (2026-02-25)
 - Updated dependencies []:
-    - @posthog/types@1.354.3
+    - @hanzo/types@1.354.3
 
 ## 1.354.2
 
 ### Patch Changes
 
-- [#3153](https://github.com/PostHog/posthog-js/pull/3153) [`67cf41e`](https://github.com/PostHog/posthog-js/commit/67cf41e10cdca853b39f37d8b16b5dee37e0283a) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Add additional legacy exports for fully qualified dist and lib exports
+- [#3153](https://github.com/hanzoai/@hanzo/insights/pull/3153) [`67cf41e`](https://github.com/hanzoai/@hanzo/insights/commit/67cf41e10cdca853b39f37d8b16b5dee37e0283a) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Add additional legacy exports for fully qualified dist and lib exports
   (2026-02-25)
 - Updated dependencies []:
-    - @posthog/types@1.354.2
+    - @hanzo/types@1.354.2
 
 ## 1.354.1
 
 ### Patch Changes
 
-- [#3148](https://github.com/PostHog/posthog-js/pull/3148) [`9ae20e7`](https://github.com/PostHog/posthog-js/commit/9ae20e7cde5d474da1d52ae3b77929b4f4adb54e) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Expose all export paths
+- [#3148](https://github.com/hanzoai/@hanzo/insights/pull/3148) [`9ae20e7`](https://github.com/hanzoai/@hanzo/insights/commit/9ae20e7cde5d474da1d52ae3b77929b4f4adb54e) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Expose all export paths
   (2026-02-25)
 - Updated dependencies []:
-    - @posthog/types@1.354.1
+    - @hanzo/types@1.354.1
 
 ## 1.354.0
 
 ### Minor Changes
 
-- [#3080](https://github.com/PostHog/posthog-js/pull/3080) [`4d0c783`](https://github.com/PostHog/posthog-js/commit/4d0c783fadac64718da01d1773a65f1d350f8201) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Introduce internal config to improve tree-shaking
+- [#3080](https://github.com/hanzoai/@hanzo/insights/pull/3080) [`4d0c783`](https://github.com/hanzoai/@hanzo/insights/commit/4d0c783fadac64718da01d1773a65f1d350f8201) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Introduce internal config to improve tree-shaking
   (2026-02-25)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.354.0
+    - @hanzo/types@1.354.0
 
 ## 1.353.1
 
 ### Patch Changes
 
-- [#3143](https://github.com/PostHog/posthog-js/pull/3143) [`0b86924`](https://github.com/PostHog/posthog-js/commit/0b86924ac25445686618cf36c2bfe58f1bcee9e7) Thanks [@adboio](https://github.com/adboio)! - fix autofill bug in hosted surveys
+- [#3143](https://github.com/hanzoai/@hanzo/insights/pull/3143) [`0b86924`](https://github.com/hanzoai/@hanzo/insights/commit/0b86924ac25445686618cf36c2bfe58f1bcee9e7) Thanks [@adboio](https://github.com/adboio)! - fix autofill bug in hosted surveys
   (2026-02-24)
 - Updated dependencies []:
-    - @posthog/types@1.353.1
+    - @hanzo/types@1.353.1
 
 ## 1.353.0
 
 ### Minor Changes
 
-- [#3135](https://github.com/PostHog/posthog-js/pull/3135) [`fba7e5b`](https://github.com/PostHog/posthog-js/commit/fba7e5bcf67d3a7e5b55b6bb95a0dcb637f56f6a) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Persist $user_state to cookie for server-side access
+- [#3135](https://github.com/hanzoai/@hanzo/insights/pull/3135) [`fba7e5b`](https://github.com/hanzoai/@hanzo/insights/commit/fba7e5bcf67d3a7e5b55b6bb95a0dcb637f56f6a) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Persist $user_state to cookie for server-side access
   (2026-02-23)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.353.0
+    - @hanzo/types@1.353.0
 
 ## 1.352.1
 
 ### Patch Changes
 
-- [#3129](https://github.com/PostHog/posthog-js/pull/3129) [`6bfa003`](https://github.com/PostHog/posthog-js/commit/6bfa003116aa8ef65fe605c29ffee711f4d39b74) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: no need to put rrweb and friends directly on window in posthog-recorder
+- [#3129](https://github.com/hanzoai/@hanzo/insights/pull/3129) [`6bfa003`](https://github.com/hanzoai/@hanzo/insights/commit/6bfa003116aa8ef65fe605c29ffee711f4d39b74) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: no need to put rrweb and friends directly on window in insights-recorder
   (2026-02-23)
 
-- [#3131](https://github.com/PostHog/posthog-js/pull/3131) [`ad26474`](https://github.com/PostHog/posthog-js/commit/ad26474d8964798ee3e10b6cfdf14f1cbd0969ac) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix issue with toolbar interferring distinct id in conversations
+- [#3131](https://github.com/hanzoai/@hanzo/insights/pull/3131) [`ad26474`](https://github.com/hanzoai/@hanzo/insights/commit/ad26474d8964798ee3e10b6cfdf14f1cbd0969ac) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix issue with toolbar interferring distinct id in conversations
   (2026-02-23)
 - Updated dependencies []:
-    - @posthog/types@1.352.1
+    - @hanzo/types@1.352.1
 
 ## 1.352.0
 
 ### Minor Changes
 
-- [#3121](https://github.com/PostHog/posthog-js/pull/3121) [`c3c9780`](https://github.com/PostHog/posthog-js/commit/c3c978053bda3466df47e244ec05812aecd01f1f) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Ability to retrieve previous conversations
+- [#3121](https://github.com/hanzoai/@hanzo/insights/pull/3121) [`c3c9780`](https://github.com/hanzoai/@hanzo/insights/commit/c3c978053bda3466df47e244ec05812aecd01f1f) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Ability to retrieve previous conversations
   (2026-02-20)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.352.0
+    - @hanzo/types@1.352.0
 
 ## 1.351.4
 
 ### Patch Changes
 
-- [#3119](https://github.com/PostHog/posthog-js/pull/3119) [`2649a9a`](https://github.com/PostHog/posthog-js/commit/2649a9a6eeef19c67036c1298b5b5b6ba61eda8e) Thanks [@dmarticus](https://github.com/dmarticus)! - Adds a fresh option to getFeatureFlag(), getFeatureFlagResult(), and isFeatureEnabled() that only returns values loaded from the server, not cached localStorage values.
+- [#3119](https://github.com/hanzoai/@hanzo/insights/pull/3119) [`2649a9a`](https://github.com/hanzoai/@hanzo/insights/commit/2649a9a6eeef19c67036c1298b5b5b6ba61eda8e) Thanks [@dmarticus](https://github.com/dmarticus)! - Adds a fresh option to getFeatureFlag(), getFeatureFlagResult(), and isFeatureEnabled() that only returns values loaded from the server, not cached localStorage values.
   (2026-02-19)
-- Updated dependencies [[`2649a9a`](https://github.com/PostHog/posthog-js/commit/2649a9a6eeef19c67036c1298b5b5b6ba61eda8e)]:
-    - @posthog/types@1.351.4
+- Updated dependencies [[`2649a9a`](https://github.com/hanzoai/@hanzo/insights/commit/2649a9a6eeef19c67036c1298b5b5b6ba61eda8e)]:
+    - @hanzo/types@1.351.4
 
 ## 1.351.3
 
 ### Patch Changes
 
-- [#3098](https://github.com/PostHog/posthog-js/pull/3098) [`1a53e8c`](https://github.com/PostHog/posthog-js/commit/1a53e8c7042575905e9fd9efa7b336c51f110e60) Thanks [@adboio](https://github.com/adboio)! - add animation option for tour banners
+- [#3098](https://github.com/hanzoai/@hanzo/insights/pull/3098) [`1a53e8c`](https://github.com/hanzoai/@hanzo/insights/commit/1a53e8c7042575905e9fd9efa7b336c51f110e60) Thanks [@adboio](https://github.com/adboio)! - add animation option for tour banners
   (2026-02-19)
 - Updated dependencies []:
-    - @posthog/types@1.351.3
+    - @hanzo/types@1.351.3
 
 ## 1.351.2
 
 ### Patch Changes
 
-- [#3096](https://github.com/PostHog/posthog-js/pull/3096) [`d964a31`](https://github.com/PostHog/posthog-js/commit/d964a31414cbf5358e22af1e383ba44e1801ccdb) Thanks [@adboio](https://github.com/adboio)! - add banner click tracking for tours
+- [#3096](https://github.com/hanzoai/@hanzo/insights/pull/3096) [`d964a31`](https://github.com/hanzoai/@hanzo/insights/commit/d964a31414cbf5358e22af1e383ba44e1801ccdb) Thanks [@adboio](https://github.com/adboio)! - add banner click tracking for tours
   (2026-02-19)
 - Updated dependencies []:
-    - @posthog/types@1.351.2
+    - @hanzo/types@1.351.2
 
 ## 1.351.1
 
 ### Patch Changes
 
-- [#3112](https://github.com/PostHog/posthog-js/pull/3112) [`c0b911d`](https://github.com/PostHog/posthog-js/commit/c0b911da06333e4fbc153c7ccaec5552127cc78b) Thanks [@adboio](https://github.com/adboio)! - prevent infinite recursion bug with 3rd party proxy on posthog
+- [#3112](https://github.com/hanzoai/@hanzo/insights/pull/3112) [`c0b911d`](https://github.com/hanzoai/@hanzo/insights/commit/c0b911da06333e4fbc153c7ccaec5552127cc78b) Thanks [@adboio](https://github.com/adboio)! - prevent infinite recursion bug with 3rd party proxy on insights
   (2026-02-18)
 - Updated dependencies []:
-    - @posthog/types@1.351.1
+    - @hanzo/types@1.351.1
 
 ## 1.351.0
 
 ### Minor Changes
 
-- [#3115](https://github.com/PostHog/posthog-js/pull/3115) [`8655261`](https://github.com/PostHog/posthog-js/commit/8655261ad362c0001f1c86a5330b634421143733) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Strip markdown in tickets list
+- [#3115](https://github.com/hanzoai/@hanzo/insights/pull/3115) [`8655261`](https://github.com/hanzoai/@hanzo/insights/commit/8655261ad362c0001f1c86a5330b634421143733) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Strip markdown in tickets list
   (2026-02-18)
 
 ### Patch Changes
 
-- [#3107](https://github.com/PostHog/posthog-js/pull/3107) [`9dbc05e`](https://github.com/PostHog/posthog-js/commit/9dbc05ed65ddc8c37c9262b9aebfc51d0c748971) Thanks [@ablaszkiewicz](https://github.com/ablaszkiewicz)! - warning on manual capture('$exception')
+- [#3107](https://github.com/hanzoai/@hanzo/insights/pull/3107) [`9dbc05e`](https://github.com/hanzoai/@hanzo/insights/commit/9dbc05ed65ddc8c37c9262b9aebfc51d0c748971) Thanks [@ablaszkiewicz](https://github.com/ablaszkiewicz)! - warning on manual capture('$exception')
   (2026-02-18)
-- Updated dependencies [[`9dbc05e`](https://github.com/PostHog/posthog-js/commit/9dbc05ed65ddc8c37c9262b9aebfc51d0c748971)]:
-    - @posthog/types@1.351.0
-    - @posthog/core@1.23.1
+- Updated dependencies [[`9dbc05e`](https://github.com/hanzoai/@hanzo/insights/commit/9dbc05ed65ddc8c37c9262b9aebfc51d0c748971)]:
+    - @hanzo/types@1.351.0
+    - @hanzo/core@1.23.1
 
 ## 1.350.0
 
 ### Minor Changes
 
-- [#2895](https://github.com/PostHog/posthog-js/pull/2895) [`1b47203`](https://github.com/PostHog/posthog-js/commit/1b47203a5cc1b8f76e224101975e462cd777e2ee) Thanks [@benjackwhite](https://github.com/benjackwhite)! - RemoteConfig (config.js) has been loaded for ages and is in use by us in production. This PR makes it the sole config loading mechanism for posthog-js, removing the legacy /flags/?v=2&config=true path and the \_\_preview_remote_config gate.
+- [#2895](https://github.com/hanzoai/@hanzo/insights/pull/2895) [`1b47203`](https://github.com/hanzoai/@hanzo/insights/commit/1b47203a5cc1b8f76e224101975e462cd777e2ee) Thanks [@benjackwhite](https://github.com/benjackwhite)! - RemoteConfig (config.js) has been loaded for ages and is in use by us in production. This PR makes it the sole config loading mechanism for @hanzo/insights, removing the legacy /flags/?v=2&config=true path and the \_\_preview_remote_config gate.
   (2026-02-17)
 
 ### Patch Changes
 
-- Updated dependencies [[`1b47203`](https://github.com/PostHog/posthog-js/commit/1b47203a5cc1b8f76e224101975e462cd777e2ee)]:
-    - @posthog/types@1.350.0
+- Updated dependencies [[`1b47203`](https://github.com/hanzoai/@hanzo/insights/commit/1b47203a5cc1b8f76e224101975e462cd777e2ee)]:
+    - @hanzo/types@1.350.0
 
 ## 1.349.0
 
 ### Minor Changes
 
-- [#3105](https://github.com/PostHog/posthog-js/pull/3105) [`f707ec9`](https://github.com/PostHog/posthog-js/commit/f707ec95e4b718bffe48e3e6be9afbc855b39f8f) Thanks [@adboio](https://github.com/adboio)! - add support for product tours localization
+- [#3105](https://github.com/hanzoai/@hanzo/insights/pull/3105) [`f707ec9`](https://github.com/hanzoai/@hanzo/insights/commit/f707ec95e4b718bffe48e3e6be9afbc855b39f8f) Thanks [@adboio](https://github.com/adboio)! - add support for product tours localization
   (2026-02-17)
 
 ### Patch Changes
 
-- Updated dependencies [[`f707ec9`](https://github.com/PostHog/posthog-js/commit/f707ec95e4b718bffe48e3e6be9afbc855b39f8f)]:
-    - @posthog/types@1.349.0
+- Updated dependencies [[`f707ec9`](https://github.com/hanzoai/@hanzo/insights/commit/f707ec95e4b718bffe48e3e6be9afbc855b39f8f)]:
+    - @hanzo/types@1.349.0
 
 ## 1.348.0
 
 ### Minor Changes
 
-- [#3108](https://github.com/PostHog/posthog-js/pull/3108) [`c4ca045`](https://github.com/PostHog/posthog-js/commit/c4ca0450e6bbd39e7e90c442776ba0cf0b848ce4) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Support multiple tickets
+- [#3108](https://github.com/hanzoai/@hanzo/insights/pull/3108) [`c4ca045`](https://github.com/hanzoai/@hanzo/insights/commit/c4ca0450e6bbd39e7e90c442776ba0cf0b848ce4) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Support multiple tickets
   (2026-02-17)
 
 ### Patch Changes
 
-- [#3104](https://github.com/PostHog/posthog-js/pull/3104) [`b11c3c5`](https://github.com/PostHog/posthog-js/commit/b11c3c58fe14121cda89bc48aeabf817ae44a8d0) Thanks [@adboio](https://github.com/adboio)! - support customizable survey step button texts in product tours
+- [#3104](https://github.com/hanzoai/@hanzo/insights/pull/3104) [`b11c3c5`](https://github.com/hanzoai/@hanzo/insights/commit/b11c3c58fe14121cda89bc48aeabf817ae44a8d0) Thanks [@adboio](https://github.com/adboio)! - support customizable survey step button texts in product tours
   (2026-02-17)
 
-- [#3081](https://github.com/PostHog/posthog-js/pull/3081) [`d36a6ed`](https://github.com/PostHog/posthog-js/commit/d36a6ed75c68742b07863fed0e7a64ad3f842c8d) Thanks [@adboio](https://github.com/adboio)! - move tour event names to constants
+- [#3081](https://github.com/hanzoai/@hanzo/insights/pull/3081) [`d36a6ed`](https://github.com/hanzoai/@hanzo/insights/commit/d36a6ed75c68742b07863fed0e7a64ad3f842c8d) Thanks [@adboio](https://github.com/adboio)! - move tour event names to constants
   (2026-02-17)
-- Updated dependencies [[`e962f01`](https://github.com/PostHog/posthog-js/commit/e962f01c80476b9325f0bbb4ca591820cfb9f338)]:
-    - @posthog/core@1.23.0
-    - @posthog/types@1.348.0
+- Updated dependencies [[`e962f01`](https://github.com/hanzoai/@hanzo/insights/commit/e962f01c80476b9325f0bbb4ca591820cfb9f338)]:
+    - @hanzo/core@1.23.0
+    - @hanzo/types@1.348.0
 
 ## 1.347.2
 
 ### Patch Changes
 
-- [#3094](https://github.com/PostHog/posthog-js/pull/3094) [`0d30218`](https://github.com/PostHog/posthog-js/commit/0d30218b3087f27104408e873a3421e3ba27633d) Thanks [@TueHaulund](https://github.com/TueHaulund)! - feat(replay): add $snapshot_max_depth_exceeded debug property and bump rrweb to 0.0.42 with DOM depth limit
+- [#3094](https://github.com/hanzoai/@hanzo/insights/pull/3094) [`0d30218`](https://github.com/hanzoai/@hanzo/insights/commit/0d30218b3087f27104408e873a3421e3ba27633d) Thanks [@TueHaulund](https://github.com/TueHaulund)! - feat(replay): add $snapshot_max_depth_exceeded debug property and bump rrweb to 0.0.42 with DOM depth limit
   (2026-02-13)
 
-- [#3093](https://github.com/PostHog/posthog-js/pull/3093) [`f19b7f2`](https://github.com/PostHog/posthog-js/commit/f19b7f2df37d24b81f57477497f21196006b72e7) Thanks [@TueHaulund](https://github.com/TueHaulund)! - fix(replay): retry session recording start when persisted remote config is stale
+- [#3093](https://github.com/hanzoai/@hanzo/insights/pull/3093) [`f19b7f2`](https://github.com/hanzoai/@hanzo/insights/commit/f19b7f2df37d24b81f57477497f21196006b72e7) Thanks [@TueHaulund](https://github.com/TueHaulund)! - fix(replay): retry session recording start when persisted remote config is stale
   (2026-02-13)
 - Updated dependencies []:
-    - @posthog/types@1.347.2
+    - @hanzo/types@1.347.2
 
 ## 1.347.1
 
 ### Patch Changes
 
-- [#3090](https://github.com/PostHog/posthog-js/pull/3090) [`312b785`](https://github.com/PostHog/posthog-js/commit/312b78520c68d02efd7b2f22ca3ed4c30911b045) Thanks [@adboio](https://github.com/adboio)! - enable product tour image preload
+- [#3090](https://github.com/hanzoai/@hanzo/insights/pull/3090) [`312b785`](https://github.com/hanzoai/@hanzo/insights/commit/312b78520c68d02efd7b2f22ca3ed4c30911b045) Thanks [@adboio](https://github.com/adboio)! - enable product tour image preload
   (2026-02-13)
 - Updated dependencies []:
-    - @posthog/types@1.347.1
+    - @hanzo/types@1.347.1
 
 ## 1.347.0
 
 ### Minor Changes
 
-- [#3087](https://github.com/PostHog/posthog-js/pull/3087) [`512d578`](https://github.com/PostHog/posthog-js/commit/512d5785488a4fb507ef1edf2a5b1788e8c17e86) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Revert tree shaking configuration
+- [#3087](https://github.com/hanzoai/@hanzo/insights/pull/3087) [`512d578`](https://github.com/hanzoai/@hanzo/insights/commit/512d5785488a4fb507ef1edf2a5b1788e8c17e86) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Revert tree shaking configuration
   (2026-02-12)
 
 ### Patch Changes
 
-- [#3079](https://github.com/PostHog/posthog-js/pull/3079) [`9c078ac`](https://github.com/PostHog/posthog-js/commit/9c078ac771d09ad2e9df3c796cc4be01d949a806) Thanks [@adboio](https://github.com/adboio)! - update z-index hierarchy for tours > surveys > conversations
+- [#3079](https://github.com/hanzoai/@hanzo/insights/pull/3079) [`9c078ac`](https://github.com/hanzoai/@hanzo/insights/commit/9c078ac771d09ad2e9df3c796cc4be01d949a806) Thanks [@adboio](https://github.com/adboio)! - update z-index hierarchy for tours > surveys > conversations
   (2026-02-12)
 - Updated dependencies []:
-    - @posthog/types@1.347.0
+    - @hanzo/types@1.347.0
 
 ## 1.346.0
 
 ### Minor Changes
 
-- [#3082](https://github.com/PostHog/posthog-js/pull/3082) [`0d730bd`](https://github.com/PostHog/posthog-js/commit/0d730bd8d6786bf9dc5a818caaa47e378531bd0c) Thanks [@adboio](https://github.com/adboio)! - enable tours by default
+- [#3082](https://github.com/hanzoai/@hanzo/insights/pull/3082) [`0d730bd`](https://github.com/hanzoai/@hanzo/insights/commit/0d730bd8d6786bf9dc5a818caaa47e378531bd0c) Thanks [@adboio](https://github.com/adboio)! - enable tours by default
   (2026-02-12)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.346.0
+    - @hanzo/types@1.346.0
 
 ## 1.345.5
 
 ### Patch Changes
 
-- [#3060](https://github.com/PostHog/posthog-js/pull/3060) [`7437982`](https://github.com/PostHog/posthog-js/commit/7437982efa2c7a7a9ede563ddd97beba5c70d650) Thanks [@pauldambra](https://github.com/pauldambra)! - Add missing `featureFlags` property and `OverrideFeatureFlagsOptions` type to `PostHog` interface, restore `set_config` to the loaded callback type, and add `featureFlagsReloading` to `on()` event types
+- [#3060](https://github.com/hanzoai/@hanzo/insights/pull/3060) [`7437982`](https://github.com/hanzoai/@hanzo/insights/commit/7437982efa2c7a7a9ede563ddd97beba5c70d650) Thanks [@pauldambra](https://github.com/pauldambra)! - Add missing `featureFlags` property and `OverrideFeatureFlagsOptions` type to `Insights` interface, restore `set_config` to the loaded callback type, and add `featureFlagsReloading` to `on()` event types
   (2026-02-11)
-- Updated dependencies [[`7437982`](https://github.com/PostHog/posthog-js/commit/7437982efa2c7a7a9ede563ddd97beba5c70d650)]:
-    - @posthog/types@1.345.5
+- Updated dependencies [[`7437982`](https://github.com/hanzoai/@hanzo/insights/commit/7437982efa2c7a7a9ede563ddd97beba5c70d650)]:
+    - @hanzo/types@1.345.5
 
 ## 1.345.4
 
 ### Patch Changes
 
-- [#3074](https://github.com/PostHog/posthog-js/pull/3074) [`4e7fda9`](https://github.com/PostHog/posthog-js/commit/4e7fda93be4fe2afbbe9d11dd9b1b6517a37573d) Thanks [@marandaneto](https://github.com/marandaneto)! - fix: session replay respects the network_timing remote config
+- [#3074](https://github.com/hanzoai/@hanzo/insights/pull/3074) [`4e7fda9`](https://github.com/hanzoai/@hanzo/insights/commit/4e7fda93be4fe2afbbe9d11dd9b1b6517a37573d) Thanks [@marandaneto](https://github.com/marandaneto)! - fix: session replay respects the network_timing remote config
   (2026-02-11)
 - Updated dependencies []:
-    - @posthog/types@1.345.4
+    - @hanzo/types@1.345.4
 
 ## 1.345.3
 
 ### Patch Changes
 
-- [#3064](https://github.com/PostHog/posthog-js/pull/3064) [`50ebdfb`](https://github.com/PostHog/posthog-js/commit/50ebdfb26306bdaaeaa081fb4b3722030e3c4378) Thanks [@jordanm-posthog](https://github.com/jordanm-posthog)! - Fixed an issue where Dead Clicks could continue being captured after being disabled via remote config.
+- [#3064](https://github.com/hanzoai/@hanzo/insights/pull/3064) [`50ebdfb`](https://github.com/hanzoai/@hanzo/insights/commit/50ebdfb26306bdaaeaa081fb4b3722030e3c4378) Thanks [@jordanm-insights](https://github.com/jordanm-insights)! - Fixed an issue where Dead Clicks could continue being captured after being disabled via remote config.
   (2026-02-10)
-- Updated dependencies [[`0acf16f`](https://github.com/PostHog/posthog-js/commit/0acf16fcbf8c32d5f28b86b6fa200271ad0b647e)]:
-    - @posthog/core@1.22.0
-    - @posthog/types@1.345.3
+- Updated dependencies [[`0acf16f`](https://github.com/hanzoai/@hanzo/insights/commit/0acf16fcbf8c32d5f28b86b6fa200271ad0b647e)]:
+    - @hanzo/core@1.22.0
+    - @hanzo/types@1.345.3
 
 ## 1.345.2
 
 ### Patch Changes
 
-- [#3067](https://github.com/PostHog/posthog-js/pull/3067) [`4580975`](https://github.com/PostHog/posthog-js/commit/4580975b499069a60567e2844cfb0d8970ca641d) Thanks [@adboio](https://github.com/adboio)! - add "product tour button clicked" events
+- [#3067](https://github.com/hanzoai/@hanzo/insights/pull/3067) [`4580975`](https://github.com/hanzoai/@hanzo/insights/commit/4580975b499069a60567e2844cfb0d8970ca641d) Thanks [@adboio](https://github.com/adboio)! - add "product tour button clicked" events
   (2026-02-10)
 - Updated dependencies []:
-    - @posthog/types@1.345.2
+    - @hanzo/types@1.345.2
 
 ## 1.345.1
 
 ### Patch Changes
 
-- [#3034](https://github.com/PostHog/posthog-js/pull/3034) [`de43d70`](https://github.com/PostHog/posthog-js/commit/de43d70e5d94f74cf58745695968eee09fbc64b6) Thanks [@adboio](https://github.com/adboio)! - add survey shown tracking to useThumbSurvey + option to disable shown tracking in displaySurvey
+- [#3034](https://github.com/hanzoai/@hanzo/insights/pull/3034) [`de43d70`](https://github.com/hanzoai/@hanzo/insights/commit/de43d70e5d94f74cf58745695968eee09fbc64b6) Thanks [@adboio](https://github.com/adboio)! - add survey shown tracking to useThumbSurvey + option to disable shown tracking in displaySurvey
   (2026-02-10)
 - Updated dependencies []:
-    - @posthog/types@1.345.1
+    - @hanzo/types@1.345.1
 
 ## 1.345.0
 
 ### Minor Changes
 
-- [#2919](https://github.com/PostHog/posthog-js/pull/2919) [`fe8090c`](https://github.com/PostHog/posthog-js/commit/fe8090c00f0122ed4aad37465f43480c50392506) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - Add `$feature_flag_error` property to `$feature_flag_called` events
+- [#2919](https://github.com/hanzoai/@hanzo/insights/pull/2919) [`fe8090c`](https://github.com/hanzoai/@hanzo/insights/commit/fe8090c00f0122ed4aad37465f43480c50392506) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - Add `$feature_flag_error` property to `$feature_flag_called` events
   (2026-02-09)
 
 ### Patch Changes
 
-- [#3066](https://github.com/PostHog/posthog-js/pull/3066) [`90db5d4`](https://github.com/PostHog/posthog-js/commit/90db5d48d7ef0bff0ece31fa9a1047c10b76aa55) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remote config cache invalidation was too aggressive
+- [#3066](https://github.com/hanzoai/@hanzo/insights/pull/3066) [`90db5d4`](https://github.com/hanzoai/@hanzo/insights/commit/90db5d48d7ef0bff0ece31fa9a1047c10b76aa55) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remote config cache invalidation was too aggressive
   (2026-02-09)
-- Updated dependencies [[`fe8090c`](https://github.com/PostHog/posthog-js/commit/fe8090c00f0122ed4aad37465f43480c50392506)]:
-    - @posthog/types@1.345.0
+- Updated dependencies [[`fe8090c`](https://github.com/hanzoai/@hanzo/insights/commit/fe8090c00f0122ed4aad37465f43480c50392506)]:
+    - @hanzo/types@1.345.0
 
 ## 1.344.0
 
 ### Minor Changes
 
-- [#2820](https://github.com/PostHog/posthog-js/pull/2820) [`d578824`](https://github.com/PostHog/posthog-js/commit/d578824395ceba3b854970c2a7723e97466d9e9d) Thanks [@ordehi](https://github.com/ordehi)! - Add survey response validation for message length (min and max length). Fixes whitespace-only bypass for required questions. Existing surveys work unchanged but now properly reject blank responses.
+- [#2820](https://github.com/hanzoai/@hanzo/insights/pull/2820) [`d578824`](https://github.com/hanzoai/@hanzo/insights/commit/d578824395ceba3b854970c2a7723e97466d9e9d) Thanks [@ordehi](https://github.com/ordehi)! - Add survey response validation for message length (min and max length). Fixes whitespace-only bypass for required questions. Existing surveys work unchanged but now properly reject blank responses.
   (2026-02-09)
 
 ### Patch Changes
 
-- [#3055](https://github.com/PostHog/posthog-js/pull/3055) [`afdf746`](https://github.com/PostHog/posthog-js/commit/afdf7467ecff7bf8ed8f1645de0d370808c3ee9a) Thanks [@adboio](https://github.com/adboio)! - do not attempt to load the toolbar from the toolbar itself
+- [#3055](https://github.com/hanzoai/@hanzo/insights/pull/3055) [`afdf746`](https://github.com/hanzoai/@hanzo/insights/commit/afdf7467ecff7bf8ed8f1645de0d370808c3ee9a) Thanks [@adboio](https://github.com/adboio)! - do not attempt to load the toolbar from the toolbar itself
   (2026-02-09)
-- Updated dependencies [[`d578824`](https://github.com/PostHog/posthog-js/commit/d578824395ceba3b854970c2a7723e97466d9e9d)]:
-    - @posthog/core@1.21.0
-    - @posthog/types@1.344.0
+- Updated dependencies [[`d578824`](https://github.com/hanzoai/@hanzo/insights/commit/d578824395ceba3b854970c2a7723e97466d9e9d)]:
+    - @hanzo/core@1.21.0
+    - @hanzo/types@1.344.0
 
 ## 1.343.2
 
 ### Patch Changes
 
-- Updated dependencies [[`e055f9a`](https://github.com/PostHog/posthog-js/commit/e055f9a344d7c11309c56444383f79df335a5c51)]:
-    - @posthog/core@1.20.2
-    - @posthog/types@1.343.2
+- Updated dependencies [[`e055f9a`](https://github.com/hanzoai/@hanzo/insights/commit/e055f9a344d7c11309c56444383f79df335a5c51)]:
+    - @hanzo/core@1.20.2
+    - @hanzo/types@1.343.2
 
 ## 1.343.1
 
 ### Patch Changes
 
-- [#3051](https://github.com/PostHog/posthog-js/pull/3051) [`aa712a3`](https://github.com/PostHog/posthog-js/commit/aa712a37265c7f1bb4ac9532fe440f696115c3a2) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: replay remote config cache should be invalidated periodically
+- [#3051](https://github.com/hanzoai/@hanzo/insights/pull/3051) [`aa712a3`](https://github.com/hanzoai/@hanzo/insights/commit/aa712a37265c7f1bb4ac9532fe440f696115c3a2) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: replay remote config cache should be invalidated periodically
   (2026-02-09)
 - Updated dependencies []:
-    - @posthog/types@1.343.1
+    - @hanzo/types@1.343.1
 
 ## 1.343.0
 
 ### Minor Changes
 
-- [#3048](https://github.com/PostHog/posthog-js/pull/3048) [`dd3328f`](https://github.com/PostHog/posthog-js/commit/dd3328f82f56777217e0672f33d04924aff9b69f) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Do not show identification form if user is identified
+- [#3048](https://github.com/hanzoai/@hanzo/insights/pull/3048) [`dd3328f`](https://github.com/hanzoai/@hanzo/insights/commit/dd3328f82f56777217e0672f33d04924aff9b69f) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Do not show identification form if user is identified
   (2026-02-09)
 
 ### Patch Changes
 
-- [#3049](https://github.com/PostHog/posthog-js/pull/3049) [`8d9bb16`](https://github.com/PostHog/posthog-js/commit/8d9bb16ea664fbd83529715edf1e330d45832e2d) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: sampled: true in persistence if legacy and should be ignored
+- [#3049](https://github.com/hanzoai/@hanzo/insights/pull/3049) [`8d9bb16`](https://github.com/hanzoai/@hanzo/insights/commit/8d9bb16ea664fbd83529715edf1e330d45832e2d) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: sampled: true in persistence if legacy and should be ignored
   (2026-02-09)
 - Updated dependencies []:
-    - @posthog/types@1.343.0
+    - @hanzo/types@1.343.0
 
 ## 1.342.1
 
 ### Patch Changes
 
-- [#3039](https://github.com/PostHog/posthog-js/pull/3039) [`8f75dae`](https://github.com/PostHog/posthog-js/commit/8f75dae39ae2938624ca49e778915a92f2491556) Thanks [@hpouillot](https://github.com/hpouillot)! - fix(err): fix console error capturing
+- [#3039](https://github.com/hanzoai/@hanzo/insights/pull/3039) [`8f75dae`](https://github.com/hanzoai/@hanzo/insights/commit/8f75dae39ae2938624ca49e778915a92f2491556) Thanks [@hpouillot](https://github.com/hpouillot)! - fix(err): fix console error capturing
   (2026-02-06)
-- Updated dependencies [[`8f75dae`](https://github.com/PostHog/posthog-js/commit/8f75dae39ae2938624ca49e778915a92f2491556)]:
-    - @posthog/core@1.20.1
-    - @posthog/types@1.342.1
+- Updated dependencies [[`8f75dae`](https://github.com/hanzoai/@hanzo/insights/commit/8f75dae39ae2938624ca49e778915a92f2491556)]:
+    - @hanzo/core@1.20.1
+    - @hanzo/types@1.342.1
 
 ## 1.342.0
 
 ### Minor Changes
 
-- [#3032](https://github.com/PostHog/posthog-js/pull/3032) [`19d59ea`](https://github.com/PostHog/posthog-js/commit/19d59ea40a909a5018605ab04ee7598f1d1611b2) Thanks [@dmarticus](https://github.com/dmarticus)! - add featureFlagsReloading event for tracking flag reload state
+- [#3032](https://github.com/hanzoai/@hanzo/insights/pull/3032) [`19d59ea`](https://github.com/hanzoai/@hanzo/insights/commit/19d59ea40a909a5018605ab04ee7598f1d1611b2) Thanks [@dmarticus](https://github.com/dmarticus)! - add featureFlagsReloading event for tracking flag reload state
   (2026-02-05)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.342.0
+    - @hanzo/types@1.342.0
 
 ## 1.341.2
 
 ### Patch Changes
 
-- [#3035](https://github.com/PostHog/posthog-js/pull/3035) [`b68e991`](https://github.com/PostHog/posthog-js/commit/b68e99105b3135f619e098a042d9a91c7c9ef8cf) Thanks [@adboio](https://github.com/adboio)! - unify element<>modal steps for product tours, deprecate element steps
+- [#3035](https://github.com/hanzoai/@hanzo/insights/pull/3035) [`b68e991`](https://github.com/hanzoai/@hanzo/insights/commit/b68e99105b3135f619e098a042d9a91c7c9ef8cf) Thanks [@adboio](https://github.com/adboio)! - unify element<>modal steps for product tours, deprecate element steps
   (2026-02-05)
 - Updated dependencies []:
-    - @posthog/types@1.341.2
+    - @hanzo/types@1.341.2
 
 ## 1.341.1
 
 ### Patch Changes
 
-- [#3041](https://github.com/PostHog/posthog-js/pull/3041) [`23292d4`](https://github.com/PostHog/posthog-js/commit/23292d4cfbb589908dd6a64b1472b1d6ac2e6c1c) Thanks [@adboio](https://github.com/adboio)! - replace stopPropagation with preventDefault for tour manaul click triggers
+- [#3041](https://github.com/hanzoai/@hanzo/insights/pull/3041) [`23292d4`](https://github.com/hanzoai/@hanzo/insights/commit/23292d4cfbb589908dd6a64b1472b1d6ac2e6c1c) Thanks [@adboio](https://github.com/adboio)! - replace stopPropagation with preventDefault for tour manaul click triggers
   (2026-02-05)
 - Updated dependencies []:
-    - @posthog/types@1.341.1
+    - @hanzo/types@1.341.1
 
 ## 1.341.0
 
 ### Minor Changes
 
-- [#3027](https://github.com/PostHog/posthog-js/pull/3027) [`d7b37f7`](https://github.com/PostHog/posthog-js/commit/d7b37f7d5140955da5adb11b6a6d4317a676bcc7) Thanks [@robbie-c](https://github.com/robbie-c)! - Rename setTestUser to setInternalOrTestUser
+- [#3027](https://github.com/hanzoai/@hanzo/insights/pull/3027) [`d7b37f7`](https://github.com/hanzoai/@hanzo/insights/commit/d7b37f7d5140955da5adb11b6a6d4317a676bcc7) Thanks [@robbie-c](https://github.com/robbie-c)! - Rename setTestUser to setInternalOrTestUser
   (2026-02-04)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.341.0
+    - @hanzo/types@1.341.0
 
 ## 1.340.0
 
 ### Minor Changes
 
-- [#3024](https://github.com/PostHog/posthog-js/pull/3024) [`2b2725e`](https://github.com/PostHog/posthog-js/commit/2b2725efc24416cc659ea963d4a121c0c8666db7) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Support widget position
+- [#3024](https://github.com/hanzoai/@hanzo/insights/pull/3024) [`2b2725e`](https://github.com/hanzoai/@hanzo/insights/commit/2b2725efc24416cc659ea963d4a121c0c8666db7) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Support widget position
   (2026-02-04)
 
 ### Patch Changes
 
-- Updated dependencies [[`bb62809`](https://github.com/PostHog/posthog-js/commit/bb62809917845685ae7e2e6d5adad6be5528356e)]:
-    - @posthog/core@1.20.0
-    - @posthog/types@1.340.0
+- Updated dependencies [[`bb62809`](https://github.com/hanzoai/@hanzo/insights/commit/bb62809917845685ae7e2e6d5adad6be5528356e)]:
+    - @hanzo/core@1.20.0
+    - @hanzo/types@1.340.0
 
 ## 1.339.1
 
 ### Patch Changes
 
-- [#3007](https://github.com/PostHog/posthog-js/pull/3007) [`af665cc`](https://github.com/PostHog/posthog-js/commit/af665cc98b2fe2f59bdc5226bcf616b0a5bd0f25) Thanks [@adboio](https://github.com/adboio)! - add element inference precision to tours; do not mark as shown until we know first step rendered successfully
+- [#3007](https://github.com/hanzoai/@hanzo/insights/pull/3007) [`af665cc`](https://github.com/hanzoai/@hanzo/insights/commit/af665cc98b2fe2f59bdc5226bcf616b0a5bd0f25) Thanks [@adboio](https://github.com/adboio)! - add element inference precision to tours; do not mark as shown until we know first step rendered successfully
   (2026-02-03)
 - Updated dependencies []:
-    - @posthog/types@1.339.1
+    - @hanzo/types@1.339.1
 
 ## 1.339.0
 
 ### Minor Changes
 
-- [#3006](https://github.com/PostHog/posthog-js/pull/3006) [`b3ec434`](https://github.com/PostHog/posthog-js/commit/b3ec4346e77917121c4fe7bfd966d09850df00f6) Thanks [@robbie-c](https://github.com/robbie-c)! - Add a function isTestUser() and config option test_user_hostname
+- [#3006](https://github.com/hanzoai/@hanzo/insights/pull/3006) [`b3ec434`](https://github.com/hanzoai/@hanzo/insights/commit/b3ec4346e77917121c4fe7bfd966d09850df00f6) Thanks [@robbie-c](https://github.com/robbie-c)! - Add a function isTestUser() and config option test_user_hostname
   (2026-02-03)
 
 ### Patch Changes
 
-- [#2993](https://github.com/PostHog/posthog-js/pull/2993) [`5420f4d`](https://github.com/PostHog/posthog-js/commit/5420f4d5efb35e38d54df8dc0ec0c479f9e80eba) Thanks [@pauldambra](https://github.com/pauldambra)! - upgrade to posthog/rrweb 0.0.40
+- [#2993](https://github.com/hanzoai/@hanzo/insights/pull/2993) [`5420f4d`](https://github.com/hanzoai/@hanzo/insights/commit/5420f4d5efb35e38d54df8dc0ec0c479f9e80eba) Thanks [@pauldambra](https://github.com/pauldambra)! - upgrade to insights/rrweb 0.0.40
   (2026-02-03)
-- Updated dependencies [[`b3ec434`](https://github.com/PostHog/posthog-js/commit/b3ec4346e77917121c4fe7bfd966d09850df00f6)]:
-    - @posthog/types@1.339.0
+- Updated dependencies [[`b3ec434`](https://github.com/hanzoai/@hanzo/insights/commit/b3ec4346e77917121c4fe7bfd966d09850df00f6)]:
+    - @hanzo/types@1.339.0
 
 ## 1.338.1
 
 ### Patch Changes
 
-- [#3002](https://github.com/PostHog/posthog-js/pull/3002) [`3105ff6`](https://github.com/PostHog/posthog-js/commit/3105ff6d0783c77ed75b1eb1be33617d836fd43f) Thanks [@adboio](https://github.com/adboio)! - fix stale element references in multi-page product tours
+- [#3002](https://github.com/hanzoai/@hanzo/insights/pull/3002) [`3105ff6`](https://github.com/hanzoai/@hanzo/insights/commit/3105ff6d0783c77ed75b1eb1be33617d836fd43f) Thanks [@adboio](https://github.com/adboio)! - fix stale element references in multi-page product tours
   (2026-02-03)
 - Updated dependencies []:
-    - @posthog/types@1.338.1
+    - @hanzo/types@1.338.1
 
 ## 1.338.0
 
 ### Minor Changes
 
-- [#3020](https://github.com/PostHog/posthog-js/pull/3020) [`5ccf27e`](https://github.com/PostHog/posthog-js/commit/5ccf27e1eb37f349c0f9602830df65a7cd3d02a4) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix issue with contrast colors in support widget
+- [#3020](https://github.com/hanzoai/@hanzo/insights/pull/3020) [`5ccf27e`](https://github.com/hanzoai/@hanzo/insights/commit/5ccf27e1eb37f349c0f9602830df65a7cd3d02a4) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix issue with contrast colors in support widget
   (2026-02-03)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.338.0
+    - @hanzo/types@1.338.0
 
 ## 1.337.1
 
 ### Patch Changes
 
-- Updated dependencies [[`c99e5fe`](https://github.com/PostHog/posthog-js/commit/c99e5feb043870357c8f722eb52542327c3f472b)]:
-    - @posthog/core@1.19.0
-    - @posthog/types@1.337.1
+- Updated dependencies [[`c99e5fe`](https://github.com/hanzoai/@hanzo/insights/commit/c99e5feb043870357c8f722eb52542327c3f472b)]:
+    - @hanzo/core@1.19.0
+    - @hanzo/types@1.337.1
 
 ## 1.337.0
 
 ### Minor Changes
 
-- [#2996](https://github.com/PostHog/posthog-js/pull/2996) [`7768010`](https://github.com/PostHog/posthog-js/commit/77680105f1e8baf5ed1934d423494793d11ff01a) Thanks [@matheus-vb](https://github.com/matheus-vb)! - Filter out flags marked as failed before merging with cached values, preventing transient backend errors from overwriting previously evaluated flag states
+- [#2996](https://github.com/hanzoai/@hanzo/insights/pull/2996) [`7768010`](https://github.com/hanzoai/@hanzo/insights/commit/77680105f1e8baf5ed1934d423494793d11ff01a) Thanks [@matheus-vb](https://github.com/matheus-vb)! - Filter out flags marked as failed before merging with cached values, preventing transient backend errors from overwriting previously evaluated flag states
   (2026-02-03)
 
-- [#3000](https://github.com/PostHog/posthog-js/pull/3000) [`4a1af3b`](https://github.com/PostHog/posthog-js/commit/4a1af3bcdc659127fbdab43dbfe887096bfd9c8d) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Render markdown in support product
+- [#3000](https://github.com/hanzoai/@hanzo/insights/pull/3000) [`4a1af3b`](https://github.com/hanzoai/@hanzo/insights/commit/4a1af3bcdc659127fbdab43dbfe887096bfd9c8d) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Render markdown in support product
   (2026-02-03)
 
 ### Patch Changes
 
-- [#3001](https://github.com/PostHog/posthog-js/pull/3001) [`9bd4dbc`](https://github.com/PostHog/posthog-js/commit/9bd4dbc89017b009cdbdc6ac21456b1f2bc590f4) Thanks [@adboio](https://github.com/adboio)! - do not intercept element clicks if a product tour fails to show
+- [#3001](https://github.com/hanzoai/@hanzo/insights/pull/3001) [`9bd4dbc`](https://github.com/hanzoai/@hanzo/insights/commit/9bd4dbc89017b009cdbdc6ac21456b1f2bc590f4) Thanks [@adboio](https://github.com/adboio)! - do not intercept element clicks if a product tour fails to show
   (2026-02-03)
-- Updated dependencies [[`7768010`](https://github.com/PostHog/posthog-js/commit/77680105f1e8baf5ed1934d423494793d11ff01a)]:
-    - @posthog/core@1.18.0
-    - @posthog/types@1.337.0
+- Updated dependencies [[`7768010`](https://github.com/hanzoai/@hanzo/insights/commit/77680105f1e8baf5ed1934d423494793d11ff01a)]:
+    - @hanzo/core@1.18.0
+    - @hanzo/types@1.337.0
 
 ## 1.336.4
 
 ### Patch Changes
 
-- Updated dependencies [[`727536c`](https://github.com/PostHog/posthog-js/commit/727536cf5f1ab5a8d21fa9d4e2e6b13efc851fca)]:
-    - @posthog/core@1.17.0
-    - @posthog/types@1.336.4
+- Updated dependencies [[`727536c`](https://github.com/hanzoai/@hanzo/insights/commit/727536cf5f1ab5a8d21fa9d4e2e6b13efc851fca)]:
+    - @hanzo/core@1.17.0
+    - @hanzo/types@1.336.4
 
 ## 1.336.3
 
 ### Patch Changes
 
-- Updated dependencies [[`cbe84c1`](https://github.com/PostHog/posthog-js/commit/cbe84c1ea8b6dd398569ed401139e9698e08fd64)]:
-    - @posthog/core@1.16.0
-    - @posthog/types@1.336.3
+- Updated dependencies [[`cbe84c1`](https://github.com/hanzoai/@hanzo/insights/commit/cbe84c1ea8b6dd398569ed401139e9698e08fd64)]:
+    - @hanzo/core@1.16.0
+    - @hanzo/types@1.336.3
 
 ## 1.336.2
 
 ### Patch Changes
 
-- [#2985](https://github.com/PostHog/posthog-js/pull/2985) [`2ed9623`](https://github.com/PostHog/posthog-js/commit/2ed9623261d93dbcd89981151c3bee6e55903fa0) Thanks [@adboio](https://github.com/adboio)! - support custom banner container for product tours
+- [#2985](https://github.com/hanzoai/@hanzo/insights/pull/2985) [`2ed9623`](https://github.com/hanzoai/@hanzo/insights/commit/2ed9623261d93dbcd89981151c3bee6e55903fa0) Thanks [@adboio](https://github.com/adboio)! - support custom banner container for product tours
   (2026-01-29)
 
-- [#2991](https://github.com/PostHog/posthog-js/pull/2991) [`2b32a60`](https://github.com/PostHog/posthog-js/commit/2b32a60721498936c8092c8bbf75297878140217) Thanks [@lricoy](https://github.com/lricoy)! - treat undefined and null the same when receiving config
+- [#2991](https://github.com/hanzoai/@hanzo/insights/pull/2991) [`2b32a60`](https://github.com/hanzoai/@hanzo/insights/commit/2b32a60721498936c8092c8bbf75297878140217) Thanks [@lricoy](https://github.com/lricoy)! - treat undefined and null the same when receiving config
   (2026-01-29)
 
-- [#2973](https://github.com/PostHog/posthog-js/pull/2973) [`c1aa45c`](https://github.com/PostHog/posthog-js/commit/c1aa45ca4e4b4907974b14dc5e9aa388225347bb) Thanks [@lricoy](https://github.com/lricoy)! - make attribution opt-in by default to reduce memory usage
+- [#2973](https://github.com/hanzoai/@hanzo/insights/pull/2973) [`c1aa45c`](https://github.com/hanzoai/@hanzo/insights/commit/c1aa45ca4e4b4907974b14dc5e9aa388225347bb) Thanks [@lricoy](https://github.com/lricoy)! - make attribution opt-in by default to reduce memory usage
   (2026-01-29)
 - Updated dependencies []:
-    - @posthog/types@1.336.2
+    - @hanzo/types@1.336.2
 
 ## 1.336.1
 
 ### Patch Changes
 
-- Updated dependencies [[`8c0c495`](https://github.com/PostHog/posthog-js/commit/8c0c495caaf4cd7f950cbc77fdfc1df499772008)]:
-    - @posthog/core@1.15.0
-    - @posthog/types@1.336.1
+- Updated dependencies [[`8c0c495`](https://github.com/hanzoai/@hanzo/insights/commit/8c0c495caaf4cd7f950cbc77fdfc1df499772008)]:
+    - @hanzo/core@1.15.0
+    - @hanzo/types@1.336.1
 
 ## 1.336.0
 
 ### Minor Changes
 
-- [#2954](https://github.com/PostHog/posthog-js/pull/2954) [`228930a`](https://github.com/PostHog/posthog-js/commit/228930a48b35f67cf12fc8dc155f431ff97b9f05) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Add `getFeatureFlagResult` method
+- [#2954](https://github.com/hanzoai/@hanzo/insights/pull/2954) [`228930a`](https://github.com/hanzoai/@hanzo/insights/commit/228930a48b35f67cf12fc8dc155f431ff97b9f05) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Add `getFeatureFlagResult` method
   (2026-01-28)
 
 ### Patch Changes
 
-- Updated dependencies [[`228930a`](https://github.com/PostHog/posthog-js/commit/228930a48b35f67cf12fc8dc155f431ff97b9f05)]:
-    - @posthog/types@1.336.0
+- Updated dependencies [[`228930a`](https://github.com/hanzoai/@hanzo/insights/commit/228930a48b35f67cf12fc8dc155f431ff97b9f05)]:
+    - @hanzo/types@1.336.0
 
 ## 1.335.5
 
 ### Patch Changes
 
-- [#2981](https://github.com/PostHog/posthog-js/pull/2981) [`b5c1981`](https://github.com/PostHog/posthog-js/commit/b5c198143ba6befe200054680365ec9d9ccc3fbe) Thanks [@adboio](https://github.com/adboio)! - fix survey close button color
+- [#2981](https://github.com/hanzoai/@hanzo/insights/pull/2981) [`b5c1981`](https://github.com/hanzoai/@hanzo/insights/commit/b5c198143ba6befe200054680365ec9d9ccc3fbe) Thanks [@adboio](https://github.com/adboio)! - fix survey close button color
   (2026-01-27)
 - Updated dependencies []:
-    - @posthog/types@1.335.5
+    - @hanzo/types@1.335.5
 
 ## 1.335.4
 
 ### Patch Changes
 
-- [#2980](https://github.com/PostHog/posthog-js/pull/2980) [`f81d065`](https://github.com/PostHog/posthog-js/commit/f81d065aef7eacf568dea612dd2676331bd8d5c0) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Bump preact minimum version to 10.28.2
+- [#2980](https://github.com/hanzoai/@hanzo/insights/pull/2980) [`f81d065`](https://github.com/hanzoai/@hanzo/insights/commit/f81d065aef7eacf568dea612dd2676331bd8d5c0) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Bump preact minimum version to 10.28.2
   (2026-01-27)
 
-- [#2978](https://github.com/PostHog/posthog-js/pull/2978) [`724587d`](https://github.com/PostHog/posthog-js/commit/724587d6fd0a852f17b78d3912e43c6628dd13d9) Thanks [@fasyy612](https://github.com/fasyy612)! - Bump rrweb dependency version to 0.0.37
+- [#2978](https://github.com/hanzoai/@hanzo/insights/pull/2978) [`724587d`](https://github.com/hanzoai/@hanzo/insights/commit/724587d6fd0a852f17b78d3912e43c6628dd13d9) Thanks [@fasyy612](https://github.com/fasyy612)! - Bump rrweb dependency version to 0.0.37
   (2026-01-27)
-- Updated dependencies [[`f51560c`](https://github.com/PostHog/posthog-js/commit/f51560caf78386cef5278f7cf0e9f253b2ec0e50)]:
-    - @posthog/core@1.14.1
-    - @posthog/types@1.335.4
+- Updated dependencies [[`f51560c`](https://github.com/hanzoai/@hanzo/insights/commit/f51560caf78386cef5278f7cf0e9f253b2ec0e50)]:
+    - @hanzo/core@1.14.1
+    - @hanzo/types@1.335.4
 
 ## 1.335.3
 
 ### Patch Changes
 
-- [#2956](https://github.com/PostHog/posthog-js/pull/2956) [`3f26f7f`](https://github.com/PostHog/posthog-js/commit/3f26f7fcfbcc549473310cb81243bf641d8a3753) Thanks [@ksvat](https://github.com/ksvat)! - Bump rr-web dependency version
+- [#2956](https://github.com/hanzoai/@hanzo/insights/pull/2956) [`3f26f7f`](https://github.com/hanzoai/@hanzo/insights/commit/3f26f7fcfbcc549473310cb81243bf641d8a3753) Thanks [@ksvat](https://github.com/ksvat)! - Bump rr-web dependency version
   (2026-01-26)
 - Updated dependencies []:
-    - @posthog/types@1.335.3
+    - @hanzo/types@1.335.3
 
 ## 1.335.2
 
 ### Patch Changes
 
-- [#2958](https://github.com/PostHog/posthog-js/pull/2958) [`592a5d7`](https://github.com/PostHog/posthog-js/commit/592a5d788760c54744fb2b8ce71c8301c110e4a6) Thanks [@adboio](https://github.com/adboio)! - fix: update cancel button on surveys to be black
+- [#2958](https://github.com/hanzoai/@hanzo/insights/pull/2958) [`592a5d7`](https://github.com/hanzoai/@hanzo/insights/commit/592a5d788760c54744fb2b8ce71c8301c110e4a6) Thanks [@adboio](https://github.com/adboio)! - fix: update cancel button on surveys to be black
   (2026-01-23)
 - Updated dependencies []:
-    - @posthog/types@1.335.2
+    - @hanzo/types@1.335.2
 
 ## 1.335.1
 
 ### Patch Changes
 
-- Updated dependencies [[`933c763`](https://github.com/PostHog/posthog-js/commit/933c7639ae30390ca562a0891d59649711b53522)]:
-    - @posthog/core@1.14.0
-    - @posthog/types@1.335.1
+- Updated dependencies [[`933c763`](https://github.com/hanzoai/@hanzo/insights/commit/933c7639ae30390ca562a0891d59649711b53522)]:
+    - @hanzo/core@1.14.0
+    - @hanzo/types@1.335.1
 
 ## 1.335.0
 
 ### Minor Changes
 
-- [#2953](https://github.com/PostHog/posthog-js/pull/2953) [`c8d3fbe`](https://github.com/PostHog/posthog-js/commit/c8d3fbe5e3a4944596d7a34086484affd94d7329) Thanks [@pauldambra](https://github.com/pauldambra)! - allows using web vitals with and without attribution
+- [#2953](https://github.com/hanzoai/@hanzo/insights/pull/2953) [`c8d3fbe`](https://github.com/hanzoai/@hanzo/insights/commit/c8d3fbe5e3a4944596d7a34086484affd94d7329) Thanks [@pauldambra](https://github.com/pauldambra)! - allows using web vitals with and without attribution
   (2026-01-23)
 
 ### Patch Changes
 
-- [#2947](https://github.com/PostHog/posthog-js/pull/2947) [`b586b6b`](https://github.com/PostHog/posthog-js/commit/b586b6bdd8d77f1b6805b987233d50784d7a6084) Thanks [@adboio](https://github.com/adboio)! - enable linked flags for product tours
+- [#2947](https://github.com/hanzoai/@hanzo/insights/pull/2947) [`b586b6b`](https://github.com/hanzoai/@hanzo/insights/commit/b586b6bdd8d77f1b6805b987233d50784d7a6084) Thanks [@adboio](https://github.com/adboio)! - enable linked flags for product tours
   (2026-01-23)
-- Updated dependencies [[`c8d3fbe`](https://github.com/PostHog/posthog-js/commit/c8d3fbe5e3a4944596d7a34086484affd94d7329)]:
-    - @posthog/types@1.335.0
+- Updated dependencies [[`c8d3fbe`](https://github.com/hanzoai/@hanzo/insights/commit/c8d3fbe5e3a4944596d7a34086484affd94d7329)]:
+    - @hanzo/types@1.335.0
 
 ## 1.334.1
 
 ### Patch Changes
 
-- [#2940](https://github.com/PostHog/posthog-js/pull/2940) [`d38842d`](https://github.com/PostHog/posthog-js/commit/d38842d0337fad8ea78ee6dfea375d2045608049) Thanks [@adboio](https://github.com/adboio)! - enable element inference for product tours
+- [#2940](https://github.com/hanzoai/@hanzo/insights/pull/2940) [`d38842d`](https://github.com/hanzoai/@hanzo/insights/commit/d38842d0337fad8ea78ee6dfea375d2045608049) Thanks [@adboio](https://github.com/adboio)! - enable element inference for product tours
   (2026-01-22)
 - Updated dependencies []:
-    - @posthog/types@1.334.1
+    - @hanzo/types@1.334.1
 
 ## 1.334.0
 
 ### Minor Changes
 
-- [#2802](https://github.com/PostHog/posthog-js/pull/2802) [`f8c17bc`](https://github.com/PostHog/posthog-js/commit/f8c17bca4846ea8d0a479169548af40c6f28075e) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: add external_scripts_inject_target config to control script injection location
+- [#2802](https://github.com/hanzoai/@hanzo/insights/pull/2802) [`f8c17bc`](https://github.com/hanzoai/@hanzo/insights/commit/f8c17bca4846ea8d0a479169548af40c6f28075e) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: add external_scripts_inject_target config to control script injection location
   (2026-01-22)
 
 ### Patch Changes
 
-- [#2950](https://github.com/PostHog/posthog-js/pull/2950) [`8543f0f`](https://github.com/PostHog/posthog-js/commit/8543f0fc30651cbee6cec6563b860ec840f9c890) Thanks [@fuziontech](https://github.com/fuziontech)! - fix(web-vitals): reduce memory leak in SPAs
+- [#2950](https://github.com/hanzoai/@hanzo/insights/pull/2950) [`8543f0f`](https://github.com/hanzoai/@hanzo/insights/commit/8543f0fc30651cbee6cec6563b860ec840f9c890) Thanks [@fuziontech](https://github.com/fuziontech)! - fix(web-vitals): reduce memory leak in SPAs
     - Upgrade web-vitals from v4.2.4 to v5.1.0 (includes internal memory fixes from v5.0.3)
     - Remove duplicate observer creation on URL change
 
@@ -701,81 +701,81 @@
     doesn't provide cleanup functions (Issue #629 was closed as "not planned"). (2026-01-22)
 
 - Updated dependencies []:
-    - @posthog/types@1.334.0
+    - @hanzo/types@1.334.0
 
 ## 1.333.0
 
 ### Minor Changes
 
-- [#2942](https://github.com/PostHog/posthog-js/pull/2942) [`994206d`](https://github.com/PostHog/posthog-js/commit/994206d4ceac218061ef35eec744a0698fb0afed) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Send context on sendMessage
+- [#2942](https://github.com/hanzoai/@hanzo/insights/pull/2942) [`994206d`](https://github.com/hanzoai/@hanzo/insights/commit/994206d4ceac218061ef35eec744a0698fb0afed) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Send context on sendMessage
   (2026-01-21)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.333.0
+    - @hanzo/types@1.333.0
 
 ## 1.332.0
 
 ### Minor Changes
 
-- [#2882](https://github.com/PostHog/posthog-js/pull/2882) [`8a5a3d5`](https://github.com/PostHog/posthog-js/commit/8a5a3d5693facda62b90b66dead338f7dca19705) Thanks [@adboio](https://github.com/adboio)! - add support for question prefill in popover surveys, add useThumbSurvey hook
+- [#2882](https://github.com/hanzoai/@hanzo/insights/pull/2882) [`8a5a3d5`](https://github.com/hanzoai/@hanzo/insights/commit/8a5a3d5693facda62b90b66dead338f7dca19705) Thanks [@adboio](https://github.com/adboio)! - add support for question prefill in popover surveys, add useThumbSurvey hook
   (2026-01-20)
 
 ### Patch Changes
 
-- Updated dependencies [[`8a5a3d5`](https://github.com/PostHog/posthog-js/commit/8a5a3d5693facda62b90b66dead338f7dca19705)]:
-    - @posthog/core@1.13.0
-    - @posthog/types@1.332.0
+- Updated dependencies [[`8a5a3d5`](https://github.com/hanzoai/@hanzo/insights/commit/8a5a3d5693facda62b90b66dead338f7dca19705)]:
+    - @hanzo/core@1.13.0
+    - @hanzo/types@1.332.0
 
 ## 1.331.3
 
 ### Patch Changes
 
-- [#2916](https://github.com/PostHog/posthog-js/pull/2916) [`cbab5d2`](https://github.com/PostHog/posthog-js/commit/cbab5d2585b284b1adace8307a8acdb080501227) Thanks [@adboio](https://github.com/adboio)! - fix product tour tooltips on mobile
+- [#2916](https://github.com/hanzoai/@hanzo/insights/pull/2916) [`cbab5d2`](https://github.com/hanzoai/@hanzo/insights/commit/cbab5d2585b284b1adace8307a8acdb080501227) Thanks [@adboio](https://github.com/adboio)! - fix product tour tooltips on mobile
   (2026-01-20)
 
-- [#2933](https://github.com/PostHog/posthog-js/pull/2933) [`d9eaf41`](https://github.com/PostHog/posthog-js/commit/d9eaf413bea479af86d6418f45a58ee1df2a8fe0) Thanks [@adboio](https://github.com/adboio)! - add url params to posthog logo in surveys footer
+- [#2933](https://github.com/hanzoai/@hanzo/insights/pull/2933) [`d9eaf41`](https://github.com/hanzoai/@hanzo/insights/commit/d9eaf413bea479af86d6418f45a58ee1df2a8fe0) Thanks [@adboio](https://github.com/adboio)! - add url params to insights logo in surveys footer
   (2026-01-20)
 - Updated dependencies []:
-    - @posthog/types@1.331.3
+    - @hanzo/types@1.331.3
 
 ## 1.331.2
 
 ### Patch Changes
 
-- [#2939](https://github.com/PostHog/posthog-js/pull/2939) [`6442f5d`](https://github.com/PostHog/posthog-js/commit/6442f5d6cd8ae097c07584f102bc6001948dce59) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Rate limiting configuration changes are respected
+- [#2939](https://github.com/hanzoai/@hanzo/insights/pull/2939) [`6442f5d`](https://github.com/hanzoai/@hanzo/insights/commit/6442f5d6cd8ae097c07584f102bc6001948dce59) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - fix: Rate limiting configuration changes are respected
   (2026-01-20)
 - Updated dependencies []:
-    - @posthog/types@1.331.2
+    - @hanzo/types@1.331.2
 
 ## 1.331.1
 
 ### Patch Changes
 
-- Updated dependencies [[`b7fa003`](https://github.com/PostHog/posthog-js/commit/b7fa003ef6ef74bdf4666be0748d89a5a6169054), [`f0cbc0d`](https://github.com/PostHog/posthog-js/commit/f0cbc0d8e4e5efc27d9595676e886d6d3d3892f4)]:
-    - @posthog/core@1.12.0
-    - @posthog/types@1.331.1
+- Updated dependencies [[`b7fa003`](https://github.com/hanzoai/@hanzo/insights/commit/b7fa003ef6ef74bdf4666be0748d89a5a6169054), [`f0cbc0d`](https://github.com/hanzoai/@hanzo/insights/commit/f0cbc0d8e4e5efc27d9595676e886d6d3d3892f4)]:
+    - @hanzo/core@1.12.0
+    - @hanzo/types@1.331.1
 
 ## 1.331.0
 
 ### Minor Changes
 
-- [#2900](https://github.com/PostHog/posthog-js/pull/2900) [`23770e9`](https://github.com/PostHog/posthog-js/commit/23770e9e2eed1aca5c2bc7a34a6d64dc115b0d11) Thanks [@dmarticus](https://github.com/dmarticus)! - Renamed `evaluationEnvironments` to `evaluationContexts` for clearer semantics. The term "contexts" better reflects that this feature is for specifying evaluation contexts (e.g., "web", "mobile", "checkout") rather than deployment environments (e.g., "staging", "production").
+- [#2900](https://github.com/hanzoai/@hanzo/insights/pull/2900) [`23770e9`](https://github.com/hanzoai/@hanzo/insights/commit/23770e9e2eed1aca5c2bc7a34a6d64dc115b0d11) Thanks [@dmarticus](https://github.com/dmarticus)! - Renamed `evaluationEnvironments` to `evaluationContexts` for clearer semantics. The term "contexts" better reflects that this feature is for specifying evaluation contexts (e.g., "web", "mobile", "checkout") rather than deployment environments (e.g., "staging", "production").
 
     ### Deprecated
-    - `posthog.init` option `evaluationEnvironments` is now deprecated in favor of `evaluationContexts`. The old property will continue to work and will log a deprecation warning. It will be removed in a future major version.
+    - `insights.init` option `evaluationEnvironments` is now deprecated in favor of `evaluationContexts`. The old property will continue to work and will log a deprecation warning. It will be removed in a future major version.
 
     ### Migration Guide
 
     ````javascript
     // Before
-    posthog.init('<ph_project_api_key>', {
+    insights.init('<ph_project_api_key>', {
         evaluationEnvironments: ['production', 'web', 'checkout'],
     })
 
     // After
-    posthog.init('<ph_project_api_key>', {
+    insights.init('<ph_project_api_key>', {
         evaluationContexts: ['production', 'web', 'checkout'],
     })
     ``` (2026-01-19)
@@ -783,345 +783,345 @@
 
 ### Patch Changes
 
-- Updated dependencies [[`23770e9`](https://github.com/PostHog/posthog-js/commit/23770e9e2eed1aca5c2bc7a34a6d64dc115b0d11)]:
-    - @posthog/core@1.11.0
-    - @posthog/types@1.331.0
+- Updated dependencies [[`23770e9`](https://github.com/hanzoai/@hanzo/insights/commit/23770e9e2eed1aca5c2bc7a34a6d64dc115b0d11)]:
+    - @hanzo/core@1.11.0
+    - @hanzo/types@1.331.0
 
 ## 1.330.0
 
 ### Minor Changes
 
-- [#2929](https://github.com/PostHog/posthog-js/pull/2929) [`6695383`](https://github.com/PostHog/posthog-js/commit/669538338970f4de22fe8c694db4cc880ba92ba9) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Add more context to a ticket when created
+- [#2929](https://github.com/hanzoai/@hanzo/insights/pull/2929) [`6695383`](https://github.com/hanzoai/@hanzo/insights/commit/669538338970f4de22fe8c694db4cc880ba92ba9) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Add more context to a ticket when created
   (2026-01-19)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.330.0
+    - @hanzo/types@1.330.0
 
 ## 1.329.0
 
 ### Minor Changes
 
-- [#2927](https://github.com/PostHog/posthog-js/pull/2927) [`da78b8c`](https://github.com/PostHog/posthog-js/commit/da78b8c7e2fd7ecb9f16703a0e19582572b7ffbd) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Remove loading state in support product
+- [#2927](https://github.com/hanzoai/@hanzo/insights/pull/2927) [`da78b8c`](https://github.com/hanzoai/@hanzo/insights/commit/da78b8c7e2fd7ecb9f16703a0e19582572b7ffbd) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Remove loading state in support product
   (2026-01-19)
 
 ### Patch Changes
 
-- [#2926](https://github.com/PostHog/posthog-js/pull/2926) [`3676972`](https://github.com/PostHog/posthog-js/commit/3676972e7ddd75496ac17d9528508d97269c4e8a) Thanks [@pawel-cebula](https://github.com/pawel-cebula)! - Fix TypeError when logging objects with null/undefined property values in flattenObject
+- [#2926](https://github.com/hanzoai/@hanzo/insights/pull/2926) [`3676972`](https://github.com/hanzoai/@hanzo/insights/commit/3676972e7ddd75496ac17d9528508d97269c4e8a) Thanks [@pawel-cebula](https://github.com/pawel-cebula)! - Fix TypeError when logging objects with null/undefined property values in flattenObject
   (2026-01-19)
 - Updated dependencies []:
-    - @posthog/types@1.329.0
+    - @hanzo/types@1.329.0
 
 ## 1.328.0
 
 ### Minor Changes
 
-- [#2925](https://github.com/PostHog/posthog-js/pull/2925) [`ce4566d`](https://github.com/PostHog/posthog-js/commit/ce4566d9107c7fd7d802274c1b8ccf477b8ccd0d) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Restore fetch wrappers to most recent working version
+- [#2925](https://github.com/hanzoai/@hanzo/insights/pull/2925) [`ce4566d`](https://github.com/hanzoai/@hanzo/insights/commit/ce4566d9107c7fd7d802274c1b8ccf477b8ccd0d) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Restore fetch wrappers to most recent working version
   (2026-01-17)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.328.0
+    - @hanzo/types@1.328.0
 
 ## 1.327.0
 
 ### Minor Changes
 
-- [#2923](https://github.com/PostHog/posthog-js/pull/2923) [`b8b7f90`](https://github.com/PostHog/posthog-js/commit/b8b7f9058cba58b2ff2eb76ab49776304dabef1c) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Fixed issue with fetch wrappers reconsuming request bodies and generating mismatched FormData boundaries
+- [#2923](https://github.com/hanzoai/@hanzo/insights/pull/2923) [`b8b7f90`](https://github.com/hanzoai/@hanzo/insights/commit/b8b7f9058cba58b2ff2eb76ab49776304dabef1c) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Fixed issue with fetch wrappers reconsuming request bodies and generating mismatched FormData boundaries
   (2026-01-17)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.327.0
+    - @hanzo/types@1.327.0
 
 ## 1.326.0
 
 ### Minor Changes
 
-- [#2881](https://github.com/PostHog/posthog-js/pull/2881) [`d37e570`](https://github.com/PostHog/posthog-js/commit/d37e5709863e869825df57d0854588140c4294b2) Thanks [@adboio](https://github.com/adboio)! - add support for thumbs up/down survey rating scale
+- [#2881](https://github.com/hanzoai/@hanzo/insights/pull/2881) [`d37e570`](https://github.com/hanzoai/@hanzo/insights/commit/d37e5709863e869825df57d0854588140c4294b2) Thanks [@adboio](https://github.com/adboio)! - add support for thumbs up/down survey rating scale
   (2026-01-16)
 
 ### Patch Changes
 
-- Updated dependencies [[`d37e570`](https://github.com/PostHog/posthog-js/commit/d37e5709863e869825df57d0854588140c4294b2)]:
-    - @posthog/core@1.10.0
-    - @posthog/types@1.326.0
+- Updated dependencies [[`d37e570`](https://github.com/hanzoai/@hanzo/insights/commit/d37e5709863e869825df57d0854588140c4294b2)]:
+    - @hanzo/core@1.10.0
+    - @hanzo/types@1.326.0
 
 ## 1.325.0
 
 ### Minor Changes
 
-- [#2913](https://github.com/PostHog/posthog-js/pull/2913) [`262cb4b`](https://github.com/PostHog/posthog-js/commit/262cb4b6ef5c62aad4e2ef047f5349b6220fd2f9) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Ensure we always pass RequestInit object to wrapped fetch
+- [#2913](https://github.com/hanzoai/@hanzo/insights/pull/2913) [`262cb4b`](https://github.com/hanzoai/@hanzo/insights/commit/262cb4b6ef5c62aad4e2ef047f5349b6220fd2f9) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Ensure we always pass RequestInit object to wrapped fetch
   (2026-01-16)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.325.0
+    - @hanzo/types@1.325.0
 
 ## 1.324.1
 
 ### Patch Changes
 
-- [#2891](https://github.com/PostHog/posthog-js/pull/2891) [`4785cc4`](https://github.com/PostHog/posthog-js/commit/4785cc40fd8de6a49d31143abee826b786964ce4) Thanks [@ksvat](https://github.com/ksvat)! - introduce cache and url change tracking for regex
+- [#2891](https://github.com/hanzoai/@hanzo/insights/pull/2891) [`4785cc4`](https://github.com/hanzoai/@hanzo/insights/commit/4785cc40fd8de6a49d31143abee826b786964ce4) Thanks [@ksvat](https://github.com/ksvat)! - introduce cache and url change tracking for regex
   (2026-01-15)
 - Updated dependencies []:
-    - @posthog/types@1.324.1
+    - @hanzo/types@1.324.1
 
 ## 1.324.0
 
 ### Minor Changes
 
-- [#2908](https://github.com/PostHog/posthog-js/pull/2908) [`b9efc01`](https://github.com/PostHog/posthog-js/commit/b9efc019df59329f7a146a8e61974fb444ef774f) Thanks [@adboio](https://github.com/adboio)! - add display frequency options for product tour announcements
+- [#2908](https://github.com/hanzoai/@hanzo/insights/pull/2908) [`b9efc01`](https://github.com/hanzoai/@hanzo/insights/commit/b9efc019df59329f7a146a8e61974fb444ef774f) Thanks [@adboio](https://github.com/adboio)! - add display frequency options for product tour announcements
   (2026-01-15)
 
 ### Patch Changes
 
-- [#2906](https://github.com/PostHog/posthog-js/pull/2906) [`665d84f`](https://github.com/PostHog/posthog-js/commit/665d84f15bde57d1e255103c740b421a73c16468) Thanks [@frankh](https://github.com/frankh)! - do not require preflight requests for logs extension
+- [#2906](https://github.com/hanzoai/@hanzo/insights/pull/2906) [`665d84f`](https://github.com/hanzoai/@hanzo/insights/commit/665d84f15bde57d1e255103c740b421a73c16468) Thanks [@frankh](https://github.com/frankh)! - do not require preflight requests for logs extension
   (2026-01-15)
 - Updated dependencies []:
-    - @posthog/types@1.324.0
+    - @hanzo/types@1.324.0
 
 ## 1.323.0
 
 ### Minor Changes
 
-- [#2902](https://github.com/PostHog/posthog-js/pull/2902) [`584657a`](https://github.com/PostHog/posthog-js/commit/584657a0686c80c439261a1a90bb69fe45e873d0) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Ensure wrapped fetch() passes duplex option when required
+- [#2902](https://github.com/hanzoai/@hanzo/insights/pull/2902) [`584657a`](https://github.com/hanzoai/@hanzo/insights/commit/584657a0686c80c439261a1a90bb69fe45e873d0) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Ensure wrapped fetch() passes duplex option when required
   (2026-01-15)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.323.0
+    - @hanzo/types@1.323.0
 
 ## 1.322.0
 
 ### Minor Changes
 
-- [#2904](https://github.com/PostHog/posthog-js/pull/2904) [`b9fb2e2`](https://github.com/PostHog/posthog-js/commit/b9fb2e2364b1f8c04689d6fb6635bd81a3caa8eb) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix the issue with \_currentTicketId
+- [#2904](https://github.com/hanzoai/@hanzo/insights/pull/2904) [`b9fb2e2`](https://github.com/hanzoai/@hanzo/insights/commit/b9fb2e2364b1f8c04689d6fb6635bd81a3caa8eb) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix the issue with \_currentTicketId
   (2026-01-15)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.322.0
+    - @hanzo/types@1.322.0
 
 ## 1.321.3
 
 ### Patch Changes
 
-- [#2899](https://github.com/PostHog/posthog-js/pull/2899) [`f56a875`](https://github.com/PostHog/posthog-js/commit/f56a875fd11dab296ad3c35f292192137579f22a) Thanks [@adboio](https://github.com/adboio)! - support configurable z-index
+- [#2899](https://github.com/hanzoai/@hanzo/insights/pull/2899) [`f56a875`](https://github.com/hanzoai/@hanzo/insights/commit/f56a875fd11dab296ad3c35f292192137579f22a) Thanks [@adboio](https://github.com/adboio)! - support configurable z-index
   (2026-01-15)
 
-- [#2898](https://github.com/PostHog/posthog-js/pull/2898) [`037ccb5`](https://github.com/PostHog/posthog-js/commit/037ccb509fbf922171623888e9b9594bc01d69e9) Thanks [@adboio](https://github.com/adboio)! - more robust element-based tooltip positioning for product tours
+- [#2898](https://github.com/hanzoai/@hanzo/insights/pull/2898) [`037ccb5`](https://github.com/hanzoai/@hanzo/insights/commit/037ccb509fbf922171623888e9b9594bc01d69e9) Thanks [@adboio](https://github.com/adboio)! - more robust element-based tooltip positioning for product tours
   (2026-01-15)
 - Updated dependencies []:
-    - @posthog/types@1.321.3
+    - @hanzo/types@1.321.3
 
 ## 1.321.2
 
 ### Patch Changes
 
-- [#2893](https://github.com/PostHog/posthog-js/pull/2893) [`8eff3c0`](https://github.com/PostHog/posthog-js/commit/8eff3c0cf9b89f1bce37768dbd26665eab7235f3) Thanks [@ksvat](https://github.com/ksvat)! - bump rrweb version to 0.0.35
+- [#2893](https://github.com/hanzoai/@hanzo/insights/pull/2893) [`8eff3c0`](https://github.com/hanzoai/@hanzo/insights/commit/8eff3c0cf9b89f1bce37768dbd26665eab7235f3) Thanks [@ksvat](https://github.com/ksvat)! - bump rrweb version to 0.0.35
   (2026-01-14)
 - Updated dependencies []:
-    - @posthog/types@1.321.2
+    - @hanzo/types@1.321.2
 
 ## 1.321.1
 
 ### Patch Changes
 
-- [#2865](https://github.com/PostHog/posthog-js/pull/2865) [`54b064e`](https://github.com/PostHog/posthog-js/commit/54b064e1f92d1d12cca7ab997fe4b11a9d52a081) Thanks [@adboio](https://github.com/adboio)! - support banner rendering for product tours
+- [#2865](https://github.com/hanzoai/@hanzo/insights/pull/2865) [`54b064e`](https://github.com/hanzoai/@hanzo/insights/commit/54b064e1f92d1d12cca7ab997fe4b11a9d52a081) Thanks [@adboio](https://github.com/adboio)! - support banner rendering for product tours
   (2026-01-14)
 - Updated dependencies []:
-    - @posthog/types@1.321.1
+    - @hanzo/types@1.321.1
 
 ## 1.321.0
 
 ### Minor Changes
 
-- [#2880](https://github.com/PostHog/posthog-js/pull/2880) [`9ba650d`](https://github.com/PostHog/posthog-js/commit/9ba650d8fc632c64c4f88813a1b82b21ef5c1556) Thanks [@adboio](https://github.com/adboio)! - allow custom properties in API survey events
+- [#2880](https://github.com/hanzoai/@hanzo/insights/pull/2880) [`9ba650d`](https://github.com/hanzoai/@hanzo/insights/commit/9ba650d8fc632c64c4f88813a1b82b21ef5c1556) Thanks [@adboio](https://github.com/adboio)! - allow custom properties in API survey events
   (2026-01-14)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.321.0
+    - @hanzo/types@1.321.0
 
 ## 1.320.0
 
 ### Minor Changes
 
-- [#2875](https://github.com/PostHog/posthog-js/pull/2875) [`7662025`](https://github.com/PostHog/posthog-js/commit/76620251e0bb92eb362c4739c67b5b176c417d5e) Thanks [@lucasheriques](https://github.com/lucasheriques)! - chore(deps): bump preact from 10.19.3 to 10.28.0 to fix security vulnerability
+- [#2875](https://github.com/hanzoai/@hanzo/insights/pull/2875) [`7662025`](https://github.com/hanzoai/@hanzo/insights/commit/76620251e0bb92eb362c4739c67b5b176c417d5e) Thanks [@lucasheriques](https://github.com/lucasheriques)! - chore(deps): bump preact from 10.19.3 to 10.28.0 to fix security vulnerability
   (2026-01-13)
 
 ### Patch Changes
 
 - Updated dependencies []:
-    - @posthog/types@1.320.0
+    - @hanzo/types@1.320.0
 
 ## 1.319.2
 
 ### Patch Changes
 
-- [#2864](https://github.com/PostHog/posthog-js/pull/2864) [`f64ebef`](https://github.com/PostHog/posthog-js/commit/f64ebefe51b39d3c883f536624cc4b680fd2ba87) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - We were missing some public definitions inside `@posthog/types` so let's fix them here. We've also fixed the typing inside the `loaded` callback
+- [#2864](https://github.com/hanzoai/@hanzo/insights/pull/2864) [`f64ebef`](https://github.com/hanzoai/@hanzo/insights/commit/f64ebefe51b39d3c883f536624cc4b680fd2ba87) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - We were missing some public definitions inside `@hanzo/types` so let's fix them here. We've also fixed the typing inside the `loaded` callback
   (2026-01-13)
-- Updated dependencies [[`f64ebef`](https://github.com/PostHog/posthog-js/commit/f64ebefe51b39d3c883f536624cc4b680fd2ba87)]:
-    - @posthog/types@1.319.2
+- Updated dependencies [[`f64ebef`](https://github.com/hanzoai/@hanzo/insights/commit/f64ebefe51b39d3c883f536624cc4b680fd2ba87)]:
+    - @hanzo/types@1.319.2
 
 ## 1.319.1
 
 ### Patch Changes
 
-- [#2863](https://github.com/PostHog/posthog-js/pull/2863) [`c17b44a`](https://github.com/PostHog/posthog-js/commit/c17b44ac1129d6f5581174a1d95b8be113f81e93) Thanks [@adboio](https://github.com/adboio)! - add button actions to product tour steps
+- [#2863](https://github.com/hanzoai/@hanzo/insights/pull/2863) [`c17b44a`](https://github.com/hanzoai/@hanzo/insights/commit/c17b44ac1129d6f5581174a1d95b8be113f81e93) Thanks [@adboio](https://github.com/adboio)! - add button actions to product tour steps
   (2026-01-13)
 - Updated dependencies []:
-    - @posthog/types@1.319.1
+    - @hanzo/types@1.319.1
 
 ## 1.319.0
 
 ### Minor Changes
 
-- [#2784](https://github.com/PostHog/posthog-js/pull/2784) [`8195c0c`](https://github.com/PostHog/posthog-js/commit/8195c0c5d74d0c4994289cdb7ebe73b4f74b20b4) Thanks [@frankh](https://github.com/frankh)! - feat: add extension for PostHog Logs
+- [#2784](https://github.com/hanzoai/@hanzo/insights/pull/2784) [`8195c0c`](https://github.com/hanzoai/@hanzo/insights/commit/8195c0c5d74d0c4994289cdb7ebe73b4f74b20b4) Thanks [@frankh](https://github.com/frankh)! - feat: add extension for Insights Logs
   (2026-01-12)
 
 ### Patch Changes
 
-- [#2873](https://github.com/PostHog/posthog-js/pull/2873) [`ec5b64b`](https://github.com/PostHog/posthog-js/commit/ec5b64b2f837742c448cc9d8eb80763d3dc91655) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: use property based testing to expose another edge case bug in checkAndGetSessionAndWindowId
+- [#2873](https://github.com/hanzoai/@hanzo/insights/pull/2873) [`ec5b64b`](https://github.com/hanzoai/@hanzo/insights/commit/ec5b64b2f837742c448cc9d8eb80763d3dc91655) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: use property based testing to expose another edge case bug in checkAndGetSessionAndWindowId
   (2026-01-12)
 - Updated dependencies []:
-    - @posthog/types@1.319.0
+    - @hanzo/types@1.319.0
 
 ## 1.318.2
 
 ### Patch Changes
 
-- [#2871](https://github.com/PostHog/posthog-js/pull/2871) [`4f73495`](https://github.com/PostHog/posthog-js/commit/4f7349535a39b0bb1c46b5a319a28f3f691cf511) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: detecting activity timestamp should not compare null to numbers
+- [#2871](https://github.com/hanzoai/@hanzo/insights/pull/2871) [`4f73495`](https://github.com/hanzoai/@hanzo/insights/commit/4f7349535a39b0bb1c46b5a319a28f3f691cf511) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: detecting activity timestamp should not compare null to numbers
   (2026-01-12)
 - Updated dependencies []:
-    - @posthog/types@1.318.2
+    - @hanzo/types@1.318.2
 
 ## 1.318.1
 
 ### Patch Changes
 
-- [#2862](https://github.com/PostHog/posthog-js/pull/2862) [`9337928`](https://github.com/PostHog/posthog-js/commit/9337928f8435dba9026c4281e58616bf5cb1dfad) Thanks [@adboio](https://github.com/adboio)! - add position options to modal and survey tour steps
+- [#2862](https://github.com/hanzoai/@hanzo/insights/pull/2862) [`9337928`](https://github.com/hanzoai/@hanzo/insights/commit/9337928f8435dba9026c4281e58616bf5cb1dfad) Thanks [@adboio](https://github.com/adboio)! - add position options to modal and survey tour steps
   (2026-01-10)
 - Updated dependencies []:
-    - @posthog/types@1.318.1
+    - @hanzo/types@1.318.1
 
 ## 1.318.0
 
 ### Minor Changes
 
-- [#2870](https://github.com/PostHog/posthog-js/pull/2870) [`b703cbb`](https://github.com/PostHog/posthog-js/commit/b703cbbf2210d622b69492802f611877c04b2e4d) Thanks [@adboio](https://github.com/adboio)! - add missing sessionRecording types
+- [#2870](https://github.com/hanzoai/@hanzo/insights/pull/2870) [`b703cbb`](https://github.com/hanzoai/@hanzo/insights/commit/b703cbbf2210d622b69492802f611877c04b2e4d) Thanks [@adboio](https://github.com/adboio)! - add missing sessionRecording types
   (2026-01-09)
 
 ### Patch Changes
 
-- Updated dependencies [[`b703cbb`](https://github.com/PostHog/posthog-js/commit/b703cbbf2210d622b69492802f611877c04b2e4d)]:
-    - @posthog/types@1.318.0
+- Updated dependencies [[`b703cbb`](https://github.com/hanzoai/@hanzo/insights/commit/b703cbbf2210d622b69492802f611877c04b2e4d)]:
+    - @hanzo/types@1.318.0
 
 ## 1.317.1
 
 ### Patch Changes
 
-- [#2869](https://github.com/PostHog/posthog-js/pull/2869) [`a50645a`](https://github.com/PostHog/posthog-js/commit/a50645a4e8e322b08581438d88300a3db5640a23) Thanks [@ksvat](https://github.com/ksvat)! - Add first snapshot timestamp logging for monitoring/debugging purposes
+- [#2869](https://github.com/hanzoai/@hanzo/insights/pull/2869) [`a50645a`](https://github.com/hanzoai/@hanzo/insights/commit/a50645a4e8e322b08581438d88300a3db5640a23) Thanks [@ksvat](https://github.com/ksvat)! - Add first snapshot timestamp logging for monitoring/debugging purposes
   (2026-01-09)
 - Updated dependencies []:
-    - @posthog/types@1.317.1
+    - @hanzo/types@1.317.1
 
 ## 1.317.0
 
 ### Minor Changes
 
-- [#2857](https://github.com/PostHog/posthog-js/pull/2857) [`a2182ee`](https://github.com/PostHog/posthog-js/commit/a2182eeb39fa4123f7009ede74be623f6114f02d) Thanks [@adboio](https://github.com/adboio)! - add product tour element inference
+- [#2857](https://github.com/hanzoai/@hanzo/insights/pull/2857) [`a2182ee`](https://github.com/hanzoai/@hanzo/insights/commit/a2182eeb39fa4123f7009ede74be623f6114f02d) Thanks [@adboio](https://github.com/adboio)! - add product tour element inference
   (2026-01-09)
 
 ### Patch Changes
 
-- [#2853](https://github.com/PostHog/posthog-js/pull/2853) [`3390186`](https://github.com/PostHog/posthog-js/commit/339018635aa38d7792217169fee3723850263c07) Thanks [@adboio](https://github.com/adboio)! - product tours: support rich content
+- [#2853](https://github.com/hanzoai/@hanzo/insights/pull/2853) [`3390186`](https://github.com/hanzoai/@hanzo/insights/commit/339018635aa38d7792217169fee3723850263c07) Thanks [@adboio](https://github.com/adboio)! - product tours: support rich content
   (2026-01-09)
 - Updated dependencies []:
-    - @posthog/types@1.317.0
+    - @hanzo/types@1.317.0
 
 ## 1.316.1
 
 ### Patch Changes
 
-- [#2846](https://github.com/PostHog/posthog-js/pull/2846) [`5ce7252`](https://github.com/PostHog/posthog-js/commit/5ce7252dc97d231e9a4d4b9a1e814dc69792ab96) Thanks [@ordehi](https://github.com/ordehi)! - Fix survey URL prefill to respect branching/skip logic
+- [#2846](https://github.com/hanzoai/@hanzo/insights/pull/2846) [`5ce7252`](https://github.com/hanzoai/@hanzo/insights/commit/5ce7252dc97d231e9a4d4b9a1e814dc69792ab96) Thanks [@ordehi](https://github.com/ordehi)! - Fix survey URL prefill to respect branching/skip logic
 
     When using URL parameters to prefill survey responses (e.g., `?q0=9`), the SDK now correctly respects the survey's branching configuration. Previously, prefilled answers would always advance to the next sequential question, ignoring any skip logic. (2026-01-09)
 
 - Updated dependencies []:
-    - @posthog/types@1.316.1
+    - @hanzo/types@1.316.1
 
 ## 1.316.0
 
 ### Minor Changes
 
-- [#2851](https://github.com/PostHog/posthog-js/pull/2851) [`d4bf005`](https://github.com/PostHog/posthog-js/commit/d4bf005048473861632ca422b0a2e5e708151276) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Expose Conversations API Methods for Custom UI
+- [#2851](https://github.com/hanzoai/@hanzo/insights/pull/2851) [`d4bf005`](https://github.com/hanzoai/@hanzo/insights/commit/d4bf005048473861632ca422b0a2e5e708151276) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Expose Conversations API Methods for Custom UI
   (2026-01-08)
 
 ### Patch Changes
 
-- [#2856](https://github.com/PostHog/posthog-js/pull/2856) [`c1ed63b`](https://github.com/PostHog/posthog-js/commit/c1ed63b0f03380a5e4bb2463491b3f767f64a514) Thanks [@marandaneto](https://github.com/marandaneto)! - chore: expose default stack parser creator
+- [#2856](https://github.com/hanzoai/@hanzo/insights/pull/2856) [`c1ed63b`](https://github.com/hanzoai/@hanzo/insights/commit/c1ed63b0f03380a5e4bb2463491b3f767f64a514) Thanks [@marandaneto](https://github.com/marandaneto)! - chore: expose default stack parser creator
   (2026-01-08)
-- Updated dependencies [[`fba9fb2`](https://github.com/PostHog/posthog-js/commit/fba9fb2ea4be2ea396730741b4718b4a2c80d026), [`c1ed63b`](https://github.com/PostHog/posthog-js/commit/c1ed63b0f03380a5e4bb2463491b3f767f64a514)]:
-    - @posthog/core@1.9.1
-    - @posthog/types@1.316.0
+- Updated dependencies [[`fba9fb2`](https://github.com/hanzoai/@hanzo/insights/commit/fba9fb2ea4be2ea396730741b4718b4a2c80d026), [`c1ed63b`](https://github.com/hanzoai/@hanzo/insights/commit/c1ed63b0f03380a5e4bb2463491b3f767f64a514)]:
+    - @hanzo/core@1.9.1
+    - @hanzo/types@1.316.0
 
 ## 1.315.1
 
 ### Patch Changes
 
-- [#2843](https://github.com/PostHog/posthog-js/pull/2843) [`579cd53`](https://github.com/PostHog/posthog-js/commit/579cd53fc282f9a5dbd15255e08901355df4070e) Thanks [@adboio](https://github.com/adboio)! - support mutli-page product tours
+- [#2843](https://github.com/hanzoai/@hanzo/insights/pull/2843) [`579cd53`](https://github.com/hanzoai/@hanzo/insights/commit/579cd53fc282f9a5dbd15255e08901355df4070e) Thanks [@adboio](https://github.com/adboio)! - support mutli-page product tours
   (2026-01-07)
 - Updated dependencies []:
-    - @posthog/types@1.315.1
+    - @hanzo/types@1.315.1
 
 ## 1.315.0
 
 ### Minor Changes
 
-- [#2849](https://github.com/PostHog/posthog-js/pull/2849) [`8ddf472`](https://github.com/PostHog/posthog-js/commit/8ddf472ae952e7c1a402f10b9565a17176255d8d) Thanks [@veryayskiy](https://github.com/veryayskiy)! - separate enable conversation with enable conversations widget
+- [#2849](https://github.com/hanzoai/@hanzo/insights/pull/2849) [`8ddf472`](https://github.com/hanzoai/@hanzo/insights/commit/8ddf472ae952e7c1a402f10b9565a17176255d8d) Thanks [@veryayskiy](https://github.com/veryayskiy)! - separate enable conversation with enable conversations widget
   (2026-01-06)
 
-- [#2839](https://github.com/PostHog/posthog-js/pull/2839) [`83b03fe`](https://github.com/PostHog/posthog-js/commit/83b03feb885d5d7def9afee6b1b915548bcf5278) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Release new @posthog/types library to make it easy for those using the script version of `posthog-js` to properly type `window.posthog`
+- [#2839](https://github.com/hanzoai/@hanzo/insights/pull/2839) [`83b03fe`](https://github.com/hanzoai/@hanzo/insights/commit/83b03feb885d5d7def9afee6b1b915548bcf5278) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Release new @hanzo/types library to make it easy for those using the script version of `@hanzo/insights` to properly type `window.insights`
   (2026-01-06)
 
 ### Patch Changes
 
-- Updated dependencies [[`83b03fe`](https://github.com/PostHog/posthog-js/commit/83b03feb885d5d7def9afee6b1b915548bcf5278)]:
-    - @posthog/types@1.315.0
+- Updated dependencies [[`83b03fe`](https://github.com/hanzoai/@hanzo/insights/commit/83b03feb885d5d7def9afee6b1b915548bcf5278)]:
+    - @hanzo/types@1.315.0
 
 ## 1.314.0
 
 ### Minor Changes
 
-- [#2835](https://github.com/PostHog/posthog-js/pull/2835) [`d50ffaa`](https://github.com/PostHog/posthog-js/commit/d50ffaa5a1b321249f280271c22d2925d9b2c562) Thanks [@adboio](https://github.com/adboio)! - adds person property for last-seen survey date, bringing more consistent behavior cross-browser/device/etc
+- [#2835](https://github.com/hanzoai/@hanzo/insights/pull/2835) [`d50ffaa`](https://github.com/hanzoai/@hanzo/insights/commit/d50ffaa5a1b321249f280271c22d2925d9b2c562) Thanks [@adboio](https://github.com/adboio)! - adds person property for last-seen survey date, bringing more consistent behavior cross-browser/device/etc
   (2026-01-06)
 
 ### Patch Changes
 
-- [#2810](https://github.com/PostHog/posthog-js/pull/2810) [`add0648`](https://github.com/PostHog/posthog-js/commit/add0648f9059438c60999217355c774b2b491aaa) Thanks [@ksvat](https://github.com/ksvat)! - Add targetSessionID to lifecycle start events
+- [#2810](https://github.com/hanzoai/@hanzo/insights/pull/2810) [`add0648`](https://github.com/hanzoai/@hanzo/insights/commit/add0648f9059438c60999217355c774b2b491aaa) Thanks [@ksvat](https://github.com/ksvat)! - Add targetSessionID to lifecycle start events
   (2026-01-06)
 
 ## 1.313.0
 
 ### Minor Changes
 
-- [#2832](https://github.com/PostHog/posthog-js/pull/2832) [`f050f6c`](https://github.com/PostHog/posthog-js/commit/f050f6c0175b80a0b143b0c02e18ea77a4e4f605) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Introduce custom cookie properties for localStorage+cookie persistence using the new `cookie_persisted_properties` property. This allows people to opt-in to store properties in cookies even in `localstorage+cookies` mode
+- [#2832](https://github.com/hanzoai/@hanzo/insights/pull/2832) [`f050f6c`](https://github.com/hanzoai/@hanzo/insights/commit/f050f6c0175b80a0b143b0c02e18ea77a4e4f605) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Introduce custom cookie properties for localStorage+cookie persistence using the new `cookie_persisted_properties` property. This allows people to opt-in to store properties in cookies even in `localstorage+cookies` mode
   (2026-01-01)
 
 ## 1.312.0
 
 ### Minor Changes
 
-- [#2834](https://github.com/PostHog/posthog-js/pull/2834) [`548b466`](https://github.com/PostHog/posthog-js/commit/548b466d8786685f0ae21f42b4b5842414bb68f2) Thanks [@ordehi](https://github.com/ordehi)! - fix: Clear `PageViewManager` state on session rotation to prevent cross-session duration pollution
+- [#2834](https://github.com/hanzoai/@hanzo/insights/pull/2834) [`548b466`](https://github.com/hanzoai/@hanzo/insights/commit/548b466d8786685f0ae21f42b4b5842414bb68f2) Thanks [@ordehi](https://github.com/ordehi)! - fix: Clear `PageViewManager` state on session rotation to prevent cross-session duration pollution
 
     When a browser tab is backgrounded and the session rotates (30 min idle or 24 hour max), `PageViewManager` now clears its state. This prevents `$prev_pageview_duration` from spanning session boundaries, which was causing impossibly large values (94+ hours observed) in web analytics "Average Time on Page" metrics.
 
@@ -1131,179 +1131,179 @@
 
 ### Minor Changes
 
-- [#2813](https://github.com/PostHog/posthog-js/pull/2813) [`4b7443c`](https://github.com/PostHog/posthog-js/commit/4b7443c10e93d4647c84751e07500c416b140457) Thanks [@ordehi](https://github.com/ordehi)! - feat(flags): add updateFlags() method for injecting flags without network request
+- [#2813](https://github.com/hanzoai/@hanzo/insights/pull/2813) [`4b7443c`](https://github.com/hanzoai/@hanzo/insights/commit/4b7443c10e93d4647c84751e07500c416b140457) Thanks [@ordehi](https://github.com/ordehi)! - feat(flags): add updateFlags() method for injecting flags without network request
 
-    Adds `posthog.updateFlags(flags, payloads?, options?)` to inject feature flag values from an external source (e.g., server-side evaluation, edge middleware) without making a network request. Supports `{ merge: true }` option to merge with existing flags instead of replacing. (2025-12-29)
+    Adds `insights.updateFlags(flags, payloads?, options?)` to inject feature flag values from an external source (e.g., server-side evaluation, edge middleware) without making a network request. Supports `{ merge: true }` option to merge with existing flags instead of replacing. (2025-12-29)
 
 ## 1.310.2
 
 ### Patch Changes
 
-- [#2812](https://github.com/PostHog/posthog-js/pull/2812) [`ad42eae`](https://github.com/PostHog/posthog-js/commit/ad42eaea16305719e93ea98e75b6ee39eff38f30) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix(surveys): queue callbacks when fetch is in progress instead of returning error
+- [#2812](https://github.com/hanzoai/@hanzo/insights/pull/2812) [`ad42eae`](https://github.com/hanzoai/@hanzo/insights/commit/ad42eaea16305719e93ea98e75b6ee39eff38f30) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix(surveys): queue callbacks when fetch is in progress instead of returning error
   (2025-12-29)
 
-- [#2814](https://github.com/PostHog/posthog-js/pull/2814) [`3da6a4c`](https://github.com/PostHog/posthog-js/commit/3da6a4c739530db69d185d064f9d784c73cf404e) Thanks [@jurajmajerik](https://github.com/jurajmajerik)! - Persist $device_id to cookies so it survives localStorage clears
+- [#2814](https://github.com/hanzoai/@hanzo/insights/pull/2814) [`3da6a4c`](https://github.com/hanzoai/@hanzo/insights/commit/3da6a4c739530db69d185d064f9d784c73cf404e) Thanks [@jurajmajerik](https://github.com/jurajmajerik)! - Persist $device_id to cookies so it survives localStorage clears
   (2025-12-29)
 
 ## 1.310.1
 
 ### Patch Changes
 
-- [#2797](https://github.com/PostHog/posthog-js/pull/2797) [`8b1a39a`](https://github.com/PostHog/posthog-js/commit/8b1a39afc03bfe1117a7013c4f91326c7d355a14) Thanks [@adboio](https://github.com/adboio)! - product tours: support custom appearance, clean up animations
+- [#2797](https://github.com/hanzoai/@hanzo/insights/pull/2797) [`8b1a39a`](https://github.com/hanzoai/@hanzo/insights/commit/8b1a39afc03bfe1117a7013c4f91326c7d355a14) Thanks [@adboio](https://github.com/adboio)! - product tours: support custom appearance, clean up animations
   (2025-12-23)
 
 ## 1.310.0
 
 ### Minor Changes
 
-- [#2770](https://github.com/PostHog/posthog-js/pull/2770) [`6851061`](https://github.com/PostHog/posthog-js/commit/68510612c18fe6513b54dcf4545ca52196fc2dfd) Thanks [@daibhin](https://github.com/daibhin)! - feat: allow exception autocapture to be programatically enabled / disabled
+- [#2770](https://github.com/hanzoai/@hanzo/insights/pull/2770) [`6851061`](https://github.com/hanzoai/@hanzo/insights/commit/68510612c18fe6513b54dcf4545ca52196fc2dfd) Thanks [@daibhin](https://github.com/daibhin)! - feat: allow exception autocapture to be programatically enabled / disabled
   (2025-12-22)
 
-- [#2792](https://github.com/PostHog/posthog-js/pull/2792) [`f7372c8`](https://github.com/PostHog/posthog-js/commit/f7372c8eb62d46ef8fc72da1a394014be21b0108) Thanks [@adboio](https://github.com/adboio)! - add event/action triggers for product tours
+- [#2792](https://github.com/hanzoai/@hanzo/insights/pull/2792) [`f7372c8`](https://github.com/hanzoai/@hanzo/insights/commit/f7372c8eb62d46ef8fc72da1a394014be21b0108) Thanks [@adboio](https://github.com/adboio)! - add event/action triggers for product tours
   (2025-12-22)
 
-- [#2790](https://github.com/PostHog/posthog-js/pull/2790) [`96f42be`](https://github.com/PostHog/posthog-js/commit/96f42be6e1026862d1f64a914d8b180735cd3bfd) Thanks [@adboio](https://github.com/adboio)! - fix: hosted survey auto-submit behavior only submits skipped questions
+- [#2790](https://github.com/hanzoai/@hanzo/insights/pull/2790) [`96f42be`](https://github.com/hanzoai/@hanzo/insights/commit/96f42be6e1026862d1f64a914d8b180735cd3bfd) Thanks [@adboio](https://github.com/adboio)! - fix: hosted survey auto-submit behavior only submits skipped questions
   (2025-12-22)
 
-- [#2786](https://github.com/PostHog/posthog-js/pull/2786) [`2c54d15`](https://github.com/PostHog/posthog-js/commit/2c54d1552c7d57359107ea8eb725353407a28f6e) Thanks [@adboio](https://github.com/adboio)! - emit new "survey abandoned" event on pageleave
+- [#2786](https://github.com/hanzoai/@hanzo/insights/pull/2786) [`2c54d15`](https://github.com/hanzoai/@hanzo/insights/commit/2c54d1552c7d57359107ea8eb725353407a28f6e) Thanks [@adboio](https://github.com/adboio)! - emit new "survey abandoned" event on pageleave
   (2025-12-22)
 
-- [#2787](https://github.com/PostHog/posthog-js/pull/2787) [`b676b4d`](https://github.com/PostHog/posthog-js/commit/b676b4d7342c8c3b64960aa55630b2810366014e) Thanks [@lucasheriques](https://github.com/lucasheriques)! - feat: allow customizing text colors on web and react native
+- [#2787](https://github.com/hanzoai/@hanzo/insights/pull/2787) [`b676b4d`](https://github.com/hanzoai/@hanzo/insights/commit/b676b4d7342c8c3b64960aa55630b2810366014e) Thanks [@lucasheriques](https://github.com/lucasheriques)! - feat: allow customizing text colors on web and react native
   (2025-12-22)
 
 ### Patch Changes
 
-- Updated dependencies [[`b676b4d`](https://github.com/PostHog/posthog-js/commit/b676b4d7342c8c3b64960aa55630b2810366014e)]:
-    - @posthog/core@1.9.0
+- Updated dependencies [[`b676b4d`](https://github.com/hanzoai/@hanzo/insights/commit/b676b4d7342c8c3b64960aa55630b2810366014e)]:
+    - @hanzo/core@1.9.0
 
 ## 1.309.1
 
 ### Patch Changes
 
-- Updated dependencies [[`6b0aabf`](https://github.com/PostHog/posthog-js/commit/6b0aabff893e44d1710b7d122a68bf023f4e0bd5)]:
-    - @posthog/core@1.8.1
+- Updated dependencies [[`6b0aabf`](https://github.com/hanzoai/@hanzo/insights/commit/6b0aabff893e44d1710b7d122a68bf023f4e0bd5)]:
+    - @hanzo/core@1.8.1
 
 ## 1.309.0
 
 ### Minor Changes
 
-- [#2783](https://github.com/PostHog/posthog-js/pull/2783) [`0163c71`](https://github.com/PostHog/posthog-js/commit/0163c714de1a42227fa3f947f239897d440caaa3) Thanks [@adboio](https://github.com/adboio)! - product tours: enable click-element-to-progress steps
+- [#2783](https://github.com/hanzoai/@hanzo/insights/pull/2783) [`0163c71`](https://github.com/hanzoai/@hanzo/insights/commit/0163c714de1a42227fa3f947f239897d440caaa3) Thanks [@adboio](https://github.com/adboio)! - product tours: enable click-element-to-progress steps
   (2025-12-17)
 
-- [#2745](https://github.com/PostHog/posthog-js/pull/2745) [`ee5e76d`](https://github.com/PostHog/posthog-js/commit/ee5e76d5170fe5ebbc022f3dda3b27811e14fff0) Thanks [@adboio](https://github.com/adboio)! - reduce bundle size for product tours
+- [#2745](https://github.com/hanzoai/@hanzo/insights/pull/2745) [`ee5e76d`](https://github.com/hanzoai/@hanzo/insights/commit/ee5e76d5170fe5ebbc022f3dda3b27811e14fff0) Thanks [@adboio](https://github.com/adboio)! - reduce bundle size for product tours
   (2025-12-17)
 
 ## 1.308.0
 
 ### Minor Changes
 
-- [#2736](https://github.com/PostHog/posthog-js/pull/2736) [`9871ee0`](https://github.com/PostHog/posthog-js/commit/9871ee0058f633465598fcba6fdd87bd44216b6d) Thanks [@adboio](https://github.com/adboio)! - build tour-specific survey step
+- [#2736](https://github.com/hanzoai/@hanzo/insights/pull/2736) [`9871ee0`](https://github.com/hanzoai/@hanzo/insights/commit/9871ee0058f633465598fcba6fdd87bd44216b6d) Thanks [@adboio](https://github.com/adboio)! - build tour-specific survey step
   (2025-12-17)
 
-- [#2777](https://github.com/PostHog/posthog-js/pull/2777) [`72b8595`](https://github.com/PostHog/posthog-js/commit/72b8595a09e8606ee9201ce264b5c65e6b5b0c0d) Thanks [@adboio](https://github.com/adboio)! - support lt/gt operator in survey event property filters
+- [#2777](https://github.com/hanzoai/@hanzo/insights/pull/2777) [`72b8595`](https://github.com/hanzoai/@hanzo/insights/commit/72b8595a09e8606ee9201ce264b5c65e6b5b0c0d) Thanks [@adboio](https://github.com/adboio)! - support lt/gt operator in survey event property filters
   (2025-12-17)
 
 ## 1.307.2
 
 ### Patch Changes
 
-- Updated dependencies [[`2603a8d`](https://github.com/PostHog/posthog-js/commit/2603a8d6e1021cd8f84e8b61be77ce268435ebde)]:
-    - @posthog/core@1.8.0
+- Updated dependencies [[`2603a8d`](https://github.com/hanzoai/@hanzo/insights/commit/2603a8d6e1021cd8f84e8b61be77ce268435ebde)]:
+    - @hanzo/core@1.8.0
 
 ## 1.307.1
 
 ### Patch Changes
 
-- [#2708](https://github.com/PostHog/posthog-js/pull/2708) [`3b7f30c`](https://github.com/PostHog/posthog-js/commit/3b7f30cfb5ea1ae743ca0e3471b33f7ba5ff1d0b) Thanks [@andehen](https://github.com/andehen)! - Include $device_id when fetching feature flags
+- [#2708](https://github.com/hanzoai/@hanzo/insights/pull/2708) [`3b7f30c`](https://github.com/hanzoai/@hanzo/insights/commit/3b7f30cfb5ea1ae743ca0e3471b33f7ba5ff1d0b) Thanks [@andehen](https://github.com/andehen)! - Include $device_id when fetching feature flags
   (2025-12-16)
 
 ## 1.307.0
 
 ### Minor Changes
 
-- [#2700](https://github.com/PostHog/posthog-js/pull/2700) [`bb64696`](https://github.com/PostHog/posthog-js/commit/bb64696cc589f1b37e3fd864c10ee68bc0ee50a6) Thanks [@veryayskiy](https://github.com/veryayskiy)! - conversations widget
+- [#2700](https://github.com/hanzoai/@hanzo/insights/pull/2700) [`bb64696`](https://github.com/hanzoai/@hanzo/insights/commit/bb64696cc589f1b37e3fd864c10ee68bc0ee50a6) Thanks [@veryayskiy](https://github.com/veryayskiy)! - conversations widget
   (2025-12-16)
 
 ## 1.306.2
 
 ### Patch Changes
 
-- [#2730](https://github.com/PostHog/posthog-js/pull/2730) [`79184bd`](https://github.com/PostHog/posthog-js/commit/79184bdd385d7413718ba9b10f9a9d7a68fdc350) Thanks [@ablaszkiewicz](https://github.com/ablaszkiewicz)! - include synthetic exception in console.error capture
+- [#2730](https://github.com/hanzoai/@hanzo/insights/pull/2730) [`79184bd`](https://github.com/hanzoai/@hanzo/insights/commit/79184bdd385d7413718ba9b10f9a9d7a68fdc350) Thanks [@ablaszkiewicz](https://github.com/ablaszkiewicz)! - include synthetic exception in console.error capture
   (2025-12-15)
 
 ## 1.306.1
 
 ### Patch Changes
 
-- [#2746](https://github.com/PostHog/posthog-js/pull/2746) [`515c18f`](https://github.com/PostHog/posthog-js/commit/515c18fd32505cfe7afaa88f9950f0cdda2ecd8f) Thanks [@ksvat](https://github.com/ksvat)! - Update which network masking function usage
+- [#2746](https://github.com/hanzoai/@hanzo/insights/pull/2746) [`515c18f`](https://github.com/hanzoai/@hanzo/insights/commit/515c18fd32505cfe7afaa88f9950f0cdda2ecd8f) Thanks [@ksvat](https://github.com/ksvat)! - Update which network masking function usage
   (2025-12-13)
 
 ## 1.306.0
 
 ### Minor Changes
 
-- [#2733](https://github.com/PostHog/posthog-js/pull/2733) [`e97857c`](https://github.com/PostHog/posthog-js/commit/e97857cb62ce3d11e39de3fea734ba4d56a40298) Thanks [@adboio](https://github.com/adboio)! - support hideCancelButton in survey appearance
+- [#2733](https://github.com/hanzoai/@hanzo/insights/pull/2733) [`e97857c`](https://github.com/hanzoai/@hanzo/insights/commit/e97857cb62ce3d11e39de3fea734ba4d56a40298) Thanks [@adboio](https://github.com/adboio)! - support hideCancelButton in survey appearance
   (2025-12-12)
 
 ### Patch Changes
 
-- [#2725](https://github.com/PostHog/posthog-js/pull/2725) [`90a0f14`](https://github.com/PostHog/posthog-js/commit/90a0f143e639b898fc698f247ec8e08ea3db9ddf) Thanks [@ordehi](https://github.com/ordehi)! - fix: include initial person props in $identify when group() called first
+- [#2725](https://github.com/hanzoai/@hanzo/insights/pull/2725) [`90a0f14`](https://github.com/hanzoai/@hanzo/insights/commit/90a0f143e639b898fc698f247ec8e08ea3db9ddf) Thanks [@ordehi](https://github.com/ordehi)! - fix: include initial person props in $identify when group() called first
   (2025-12-12)
 
 ## 1.305.0
 
 ### Minor Changes
 
-- [#2732](https://github.com/PostHog/posthog-js/pull/2732) [`8496933`](https://github.com/PostHog/posthog-js/commit/849693303ef3527dd348c7c6e55c1f1780af13fe) Thanks [@adboio](https://github.com/adboio)! - support survey steps in product tours
+- [#2732](https://github.com/hanzoai/@hanzo/insights/pull/2732) [`8496933`](https://github.com/hanzoai/@hanzo/insights/commit/849693303ef3527dd348c7c6e55c1f1780af13fe) Thanks [@adboio](https://github.com/adboio)! - support survey steps in product tours
   (2025-12-11)
 
 ## 1.304.0
 
 ### Minor Changes
 
-- [#2723](https://github.com/PostHog/posthog-js/pull/2723) [`ecd68fb`](https://github.com/PostHog/posthog-js/commit/ecd68fbfa37bb0b6c692665818e630b9c604eb17) Thanks [@adboio](https://github.com/adboio)! - product tours: support auto-show config, add modal steps
+- [#2723](https://github.com/hanzoai/@hanzo/insights/pull/2723) [`ecd68fb`](https://github.com/hanzoai/@hanzo/insights/commit/ecd68fbfa37bb0b6c692665818e630b9c604eb17) Thanks [@adboio](https://github.com/adboio)! - product tours: support auto-show config, add modal steps
   (2025-12-10)
 
 ## 1.303.1
 
 ### Patch Changes
 
-- [#2719](https://github.com/PostHog/posthog-js/pull/2719) [`3f9e3d2`](https://github.com/PostHog/posthog-js/commit/3f9e3d2730acbfc00f8d53efa4e2d72558527549) Thanks [@ksvat](https://github.com/ksvat)! - Update rrweb version used
+- [#2719](https://github.com/hanzoai/@hanzo/insights/pull/2719) [`3f9e3d2`](https://github.com/hanzoai/@hanzo/insights/commit/3f9e3d2730acbfc00f8d53efa4e2d72558527549) Thanks [@ksvat](https://github.com/ksvat)! - Update rrweb version used
   (2025-12-10)
 
 ## 1.303.0
 
 ### Minor Changes
 
-- [#2720](https://github.com/PostHog/posthog-js/pull/2720) [`915da62`](https://github.com/PostHog/posthog-js/commit/915da624eca3368f2f0d8143d4973bff4f2c67ef) Thanks [@adboio](https://github.com/adboio)! - product tours super-alpha
+- [#2720](https://github.com/hanzoai/@hanzo/insights/pull/2720) [`915da62`](https://github.com/hanzoai/@hanzo/insights/commit/915da624eca3368f2f0d8143d4973bff4f2c67ef) Thanks [@adboio](https://github.com/adboio)! - product tours super-alpha
   (2025-12-10)
 
 ## 1.302.2
 
 ### Patch Changes
 
-- [#2696](https://github.com/PostHog/posthog-js/pull/2696) [`daeacdb`](https://github.com/PostHog/posthog-js/commit/daeacdb4ca39d4274e3dd51908562b9d83c74f96) Thanks [@ksvat](https://github.com/ksvat)! - Update @posthog/rrweb dependencies to 0.0.33
+- [#2696](https://github.com/hanzoai/@hanzo/insights/pull/2696) [`daeacdb`](https://github.com/hanzoai/@hanzo/insights/commit/daeacdb4ca39d4274e3dd51908562b9d83c74f96) Thanks [@ksvat](https://github.com/ksvat)! - Update @hanzo/rrweb dependencies to 0.0.33
   (2025-12-05)
 
 ## 1.302.1
 
 ### Patch Changes
 
-- [#2694](https://github.com/PostHog/posthog-js/pull/2694) [`0d2e26b`](https://github.com/PostHog/posthog-js/commit/0d2e26bcbb8c4ae67470fdfeb3bb53382aa30bd7) Thanks [@ksvat](https://github.com/ksvat)! - Restart session recording after opt_in_capture() called
+- [#2694](https://github.com/hanzoai/@hanzo/insights/pull/2694) [`0d2e26b`](https://github.com/hanzoai/@hanzo/insights/commit/0d2e26bcbb8c4ae67470fdfeb3bb53382aa30bd7) Thanks [@ksvat](https://github.com/ksvat)! - Restart session recording after opt_in_capture() called
   (2025-12-05)
 
 ## 1.302.0
 
 ### Minor Changes
 
-- [#2693](https://github.com/PostHog/posthog-js/pull/2693) [`4458da7`](https://github.com/PostHog/posthog-js/commit/4458da7cafa64749059eea6e6a1ef056f64fea98) Thanks [@adboio](https://github.com/adboio)! - fix(surveys): prefilled questions for hosted surveys
+- [#2693](https://github.com/hanzoai/@hanzo/insights/pull/2693) [`4458da7`](https://github.com/hanzoai/@hanzo/insights/commit/4458da7cafa64749059eea6e6a1ef056f64fea98) Thanks [@adboio](https://github.com/adboio)! - fix(surveys): prefilled questions for hosted surveys
   (2025-12-04)
 
 ## 1.301.2
 
 ### Patch Changes
 
-- [#2690](https://github.com/PostHog/posthog-js/pull/2690) [`e9c00fd`](https://github.com/PostHog/posthog-js/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4) Thanks [@robbie-c](https://github.com/robbie-c)! - Related to https://www.wiz.io/blog/critical-vulnerability-in-react-cve-2025-55182
+- [#2690](https://github.com/hanzoai/@hanzo/insights/pull/2690) [`e9c00fd`](https://github.com/hanzoai/@hanzo/insights/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4) Thanks [@robbie-c](https://github.com/robbie-c)! - Related to https://www.wiz.io/blog/critical-vulnerability-in-react-cve-2025-55182
 
     We didn't include any of the vulnerable deps in any of our packages, however we did have them as dev / test / example project dependencies.
 
@@ -1313,230 +1313,230 @@
 
     Out of an abundance of caution, let's create a new release of all of our packages. (2025-12-04)
 
-- Updated dependencies [[`e9c00fd`](https://github.com/PostHog/posthog-js/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4)]:
-    - @posthog/core@1.7.1
+- Updated dependencies [[`e9c00fd`](https://github.com/hanzoai/@hanzo/insights/commit/e9c00fd451f6ee648ff40dcad538d38bfd5f3ff4)]:
+    - @hanzo/core@1.7.1
 
 ## 1.301.1
 
 ### Patch Changes
 
-- [#2666](https://github.com/PostHog/posthog-js/pull/2666) [`2004d36`](https://github.com/PostHog/posthog-js/commit/2004d369854d1467ae01120340cfa475ea8c42d5) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: session id rotation relied on in-memory cache which would be stale after log idle periods - particularly with multiple windows in play
+- [#2666](https://github.com/hanzoai/@hanzo/insights/pull/2666) [`2004d36`](https://github.com/hanzoai/@hanzo/insights/commit/2004d369854d1467ae01120340cfa475ea8c42d5) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: session id rotation relied on in-memory cache which would be stale after log idle periods - particularly with multiple windows in play
   (2025-12-04)
 
 ## 1.301.0
 
 ### Minor Changes
 
-- [#2676](https://github.com/PostHog/posthog-js/pull/2676) [`973bf70`](https://github.com/PostHog/posthog-js/commit/973bf70e4e9e9ea9dd4761c89c0ba8e1f212e941) Thanks [@adboio](https://github.com/adboio)! - support actions with all filter options
+- [#2676](https://github.com/hanzoai/@hanzo/insights/pull/2676) [`973bf70`](https://github.com/hanzoai/@hanzo/insights/commit/973bf70e4e9e9ea9dd4761c89c0ba8e1f212e941) Thanks [@adboio](https://github.com/adboio)! - support actions with all filter options
   (2025-12-04)
 
 ## 1.300.0
 
 ### Minor Changes
 
-- [#2603](https://github.com/PostHog/posthog-js/pull/2603) [`e1617d9`](https://github.com/PostHog/posthog-js/commit/e1617d91255b23dc39b1dcb15b05ae64c735d9d0) Thanks [@dmarticus](https://github.com/dmarticus)! - add $feature_flag_evaluated_at properties to $feature_flag_called events
+- [#2603](https://github.com/hanzoai/@hanzo/insights/pull/2603) [`e1617d9`](https://github.com/hanzoai/@hanzo/insights/commit/e1617d91255b23dc39b1dcb15b05ae64c735d9d0) Thanks [@dmarticus](https://github.com/dmarticus)! - add $feature_flag_evaluated_at properties to $feature_flag_called events
   (2025-12-03)
 
 ### Patch Changes
 
-- [#2670](https://github.com/PostHog/posthog-js/pull/2670) [`4487d6b`](https://github.com/PostHog/posthog-js/commit/4487d6b28e4f76696f13cea5d08dfceda3aa2cd9) Thanks [@pauldambra](https://github.com/pauldambra)! - A click while holding a modifier key (CTRL, ALT, CMD, Windows) shouldn't ever count as a dead click - so that we don't pick up e.g. open in a new tab as a dead click
+- [#2670](https://github.com/hanzoai/@hanzo/insights/pull/2670) [`4487d6b`](https://github.com/hanzoai/@hanzo/insights/commit/4487d6b28e4f76696f13cea5d08dfceda3aa2cd9) Thanks [@pauldambra](https://github.com/pauldambra)! - A click while holding a modifier key (CTRL, ALT, CMD, Windows) shouldn't ever count as a dead click - so that we don't pick up e.g. open in a new tab as a dead click
   (2025-12-03)
 
-- [#2677](https://github.com/PostHog/posthog-js/pull/2677) [`0e67750`](https://github.com/PostHog/posthog-js/commit/0e6775030aa43d24588f2e6dbe624e8d8a1f6d7c) Thanks [@lucasheriques](https://github.com/lucasheriques)! - chore: allow customizing text input and background for surveys
+- [#2677](https://github.com/hanzoai/@hanzo/insights/pull/2677) [`0e67750`](https://github.com/hanzoai/@hanzo/insights/commit/0e6775030aa43d24588f2e6dbe624e8d8a1f6d7c) Thanks [@lucasheriques](https://github.com/lucasheriques)! - chore: allow customizing text input and background for surveys
   (2025-12-03)
-- Updated dependencies [[`e1617d9`](https://github.com/PostHog/posthog-js/commit/e1617d91255b23dc39b1dcb15b05ae64c735d9d0)]:
-    - @posthog/core@1.7.0
+- Updated dependencies [[`e1617d9`](https://github.com/hanzoai/@hanzo/insights/commit/e1617d91255b23dc39b1dcb15b05ae64c735d9d0)]:
+    - @hanzo/core@1.7.0
 
 ## 1.299.0
 
 ### Minor Changes
 
-- [#2641](https://github.com/PostHog/posthog-js/pull/2641) [`f9c4dba`](https://github.com/PostHog/posthog-js/commit/f9c4dbac52823bafab41b948c59db1ee20c5d16c) Thanks [@adboio](https://github.com/adboio)! - add survey cancellation events
+- [#2641](https://github.com/hanzoai/@hanzo/insights/pull/2641) [`f9c4dba`](https://github.com/hanzoai/@hanzo/insights/commit/f9c4dbac52823bafab41b948c59db1ee20c5d16c) Thanks [@adboio](https://github.com/adboio)! - add survey cancellation events
   (2025-12-01)
 
-- [#2642](https://github.com/PostHog/posthog-js/pull/2642) [`37e4f76`](https://github.com/PostHog/posthog-js/commit/37e4f7600355137285aa98758e530bc01d699d85) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Add new `payload` entry to the `EarlyAccessFeature` type
+- [#2642](https://github.com/hanzoai/@hanzo/insights/pull/2642) [`37e4f76`](https://github.com/hanzoai/@hanzo/insights/commit/37e4f7600355137285aa98758e530bc01d699d85) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Add new `payload` entry to the `EarlyAccessFeature` type
   (2025-12-01)
 
-- [#2661](https://github.com/PostHog/posthog-js/pull/2661) [`aaad806`](https://github.com/PostHog/posthog-js/commit/aaad8061cf90ee37728e6f9c42d41779d6f40902) Thanks [@adboio](https://github.com/adboio)! - add support for surveys triggered by actions with event property filters
+- [#2661](https://github.com/hanzoai/@hanzo/insights/pull/2661) [`aaad806`](https://github.com/hanzoai/@hanzo/insights/commit/aaad8061cf90ee37728e6f9c42d41779d6f40902) Thanks [@adboio](https://github.com/adboio)! - add support for surveys triggered by actions with event property filters
   (2025-12-01)
 
 ### Patch Changes
 
-- [#2582](https://github.com/PostHog/posthog-js/pull/2582) [`21365ff`](https://github.com/PostHog/posthog-js/commit/21365ff0db5d02f4e8b14e5ae81448c2b6526bc7) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: properly cleanup in network plugin
+- [#2582](https://github.com/hanzoai/@hanzo/insights/pull/2582) [`21365ff`](https://github.com/hanzoai/@hanzo/insights/commit/21365ff0db5d02f4e8b14e5ae81448c2b6526bc7) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: properly cleanup in network plugin
   (2025-12-01)
 
 ## 1.298.1
 
 ### Patch Changes
 
-- [#2592](https://github.com/PostHog/posthog-js/pull/2592) [`7782dd9`](https://github.com/PostHog/posthog-js/commit/7782dd97a7093582bf169bd1ad0aec3ed58e1556) Thanks [@marandaneto](https://github.com/marandaneto)! - fix: session replay on react native web
+- [#2592](https://github.com/hanzoai/@hanzo/insights/pull/2592) [`7782dd9`](https://github.com/hanzoai/@hanzo/insights/commit/7782dd97a7093582bf169bd1ad0aec3ed58e1556) Thanks [@marandaneto](https://github.com/marandaneto)! - fix: session replay on react native web
   (2025-11-24)
 
 ## 1.298.0
 
 ### Minor Changes
 
-- [#2619](https://github.com/PostHog/posthog-js/pull/2619) [`86dab38`](https://github.com/PostHog/posthog-js/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86) Thanks [@hpouillot](https://github.com/hpouillot)! - package deprecation
+- [#2619](https://github.com/hanzoai/@hanzo/insights/pull/2619) [`86dab38`](https://github.com/hanzoai/@hanzo/insights/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86) Thanks [@hpouillot](https://github.com/hpouillot)! - package deprecation
   (2025-11-24)
 
 ### Patch Changes
 
-- Updated dependencies [[`86dab38`](https://github.com/PostHog/posthog-js/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86)]:
-    - @posthog/core@1.6.0
+- Updated dependencies [[`86dab38`](https://github.com/hanzoai/@hanzo/insights/commit/86dab38e49eeac9819b1ab5f7f0c8b5df88d9f86)]:
+    - @hanzo/core@1.6.0
 
 ## 1.297.3
 
 ### Patch Changes
 
-- [#2618](https://github.com/PostHog/posthog-js/pull/2618) [`3eed1a4`](https://github.com/PostHog/posthog-js/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe) Thanks [@marandaneto](https://github.com/marandaneto)! - last version was compromised
+- [#2618](https://github.com/hanzoai/@hanzo/insights/pull/2618) [`3eed1a4`](https://github.com/hanzoai/@hanzo/insights/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe) Thanks [@marandaneto](https://github.com/marandaneto)! - last version was compromised
   (2025-11-24)
-- Updated dependencies [[`3eed1a4`](https://github.com/PostHog/posthog-js/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe)]:
-    - @posthog/core@1.5.6
+- Updated dependencies [[`3eed1a4`](https://github.com/hanzoai/@hanzo/insights/commit/3eed1a42a50bff310fde3a91308a0f091b39e3fe)]:
+    - @hanzo/core@1.5.6
 
 ## 1.297.2
 
 ### Patch Changes
 
-- Updated dependencies [[`83f5d07`](https://github.com/PostHog/posthog-js/commit/83f5d07e4ae8c2ae5c6926858b6095ebbfaf319f)]:
-    - @posthog/core@1.5.5
+- Updated dependencies [[`83f5d07`](https://github.com/hanzoai/@hanzo/insights/commit/83f5d07e4ae8c2ae5c6926858b6095ebbfaf319f)]:
+    - @hanzo/core@1.5.5
 
 ## 1.297.1
 
 ### Patch Changes
 
-- Updated dependencies [[`c242702`](https://github.com/PostHog/posthog-js/commit/c2427029d75cba71b78e9822f18f5e73f7442288)]:
-    - @posthog/core@1.5.4
+- Updated dependencies [[`c242702`](https://github.com/hanzoai/@hanzo/insights/commit/c2427029d75cba71b78e9822f18f5e73f7442288)]:
+    - @hanzo/core@1.5.4
 
 ## 1.297.0
 
 ### Minor Changes
 
-- [#2578](https://github.com/PostHog/posthog-js/pull/2578) [`91f41ee`](https://github.com/PostHog/posthog-js/commit/91f41ee39ce1973ed3094e12f279c126b55414b3) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Output confirmation log message to the user when overriding feature flags to improve user feedback on whether the action actually did something or not
+- [#2578](https://github.com/hanzoai/@hanzo/insights/pull/2578) [`91f41ee`](https://github.com/hanzoai/@hanzo/insights/commit/91f41ee39ce1973ed3094e12f279c126b55414b3) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Output confirmation log message to the user when overriding feature flags to improve user feedback on whether the action actually did something or not
   (2025-11-19)
 
 ### Patch Changes
 
-- [#2575](https://github.com/PostHog/posthog-js/pull/2575) [`8acd88f`](https://github.com/PostHog/posthog-js/commit/8acd88f1b71d2c7e1222c43dd121abce78ef2bab) Thanks [@hpouillot](https://github.com/hpouillot)! - fix frame platform property for $exception events
+- [#2575](https://github.com/hanzoai/@hanzo/insights/pull/2575) [`8acd88f`](https://github.com/hanzoai/@hanzo/insights/commit/8acd88f1b71d2c7e1222c43dd121abce78ef2bab) Thanks [@hpouillot](https://github.com/hpouillot)! - fix frame platform property for $exception events
   (2025-11-19)
-- Updated dependencies [[`8acd88f`](https://github.com/PostHog/posthog-js/commit/8acd88f1b71d2c7e1222c43dd121abce78ef2bab)]:
-    - @posthog/core@1.5.3
+- Updated dependencies [[`8acd88f`](https://github.com/hanzoai/@hanzo/insights/commit/8acd88f1b71d2c7e1222c43dd121abce78ef2bab)]:
+    - @hanzo/core@1.5.3
 
 ## 1.296.1
 
 ### Patch Changes
 
-- [#2590](https://github.com/PostHog/posthog-js/pull/2590) [`ab85422`](https://github.com/PostHog/posthog-js/commit/ab85422d2bc0c92658f49faad1f4d938f0282d8b) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't rely on order of method calls to gate calling url
+- [#2590](https://github.com/hanzoai/@hanzo/insights/pull/2590) [`ab85422`](https://github.com/hanzoai/@hanzo/insights/commit/ab85422d2bc0c92658f49faad1f4d938f0282d8b) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't rely on order of method calls to gate calling url
 
 ## 1.296.0
 
 ### Minor Changes
 
-- [#2595](https://github.com/PostHog/posthog-js/pull/2595) [`17d12f5`](https://github.com/PostHog/posthog-js/commit/17d12f5dd076b46a732c2667a2a42429f8c77120) Thanks [@adboio](https://github.com/adboio)! - fix(surveys): clean up popover surveys from dom on close
+- [#2595](https://github.com/hanzoai/@hanzo/insights/pull/2595) [`17d12f5`](https://github.com/hanzoai/@hanzo/insights/commit/17d12f5dd076b46a732c2667a2a42429f8c77120) Thanks [@adboio](https://github.com/adboio)! - fix(surveys): clean up popover surveys from dom on close
 
 ## 1.295.0
 
 ### Minor Changes
 
-- [#2572](https://github.com/PostHog/posthog-js/pull/2572) [`ab6cc9e`](https://github.com/PostHog/posthog-js/commit/ab6cc9e7c7edd876f4ab005b964a75a808545ce0) Thanks [@adboio](https://github.com/adboio)! - survey html rendering bugfix
+- [#2572](https://github.com/hanzoai/@hanzo/insights/pull/2572) [`ab6cc9e`](https://github.com/hanzoai/@hanzo/insights/commit/ab6cc9e7c7edd876f4ab005b964a75a808545ce0) Thanks [@adboio](https://github.com/adboio)! - survey html rendering bugfix
 
 ## 1.294.0
 
 ### Minor Changes
 
-- [#2573](https://github.com/PostHog/posthog-js/pull/2573) [`f9260de`](https://github.com/PostHog/posthog-js/commit/f9260de5a66f6df6b32761d31cb2d0224ba2eedf) Thanks [@adboio](https://github.com/adboio)! - feat: add survey feedback button custom positions
+- [#2573](https://github.com/hanzoai/@hanzo/insights/pull/2573) [`f9260de`](https://github.com/hanzoai/@hanzo/insights/commit/f9260de5a66f6df6b32761d31cb2d0224ba2eedf) Thanks [@adboio](https://github.com/adboio)! - feat: add survey feedback button custom positions
 
 ## 1.293.0
 
 ### Minor Changes
 
-- [#2565](https://github.com/PostHog/posthog-js/pull/2565) [`f2426db`](https://github.com/PostHog/posthog-js/commit/f2426dbd3dca3ac5ffc1934553b4bcff76af0d77) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: ignore rageclicks by content.
+- [#2565](https://github.com/hanzoai/@hanzo/insights/pull/2565) [`f2426db`](https://github.com/hanzoai/@hanzo/insights/commit/f2426dbd3dca3ac5ffc1934553b4bcff76af0d77) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: ignore rageclicks by content.
 
 ### Patch Changes
 
-- [#2570](https://github.com/PostHog/posthog-js/pull/2570) [`de80a41`](https://github.com/PostHog/posthog-js/commit/de80a419a49cb26ee21147bc2241d3c0fec67909) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: rageclick detection should use event timestamp not current time
+- [#2570](https://github.com/hanzoai/@hanzo/insights/pull/2570) [`de80a41`](https://github.com/hanzoai/@hanzo/insights/commit/de80a419a49cb26ee21147bc2241d3c0fec67909) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: rageclick detection should use event timestamp not current time
 
-- [#2561](https://github.com/PostHog/posthog-js/pull/2561) [`4418d60 `](https://github.com/PostHog/posthog-js/commit/4418d605f1846f12824de0e82b42235700512eb6) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: upgrades posthog-rrweb to 0.0.30
+- [#2561](https://github.com/hanzoai/@hanzo/insights/pull/2561) [`4418d60 `](https://github.com/hanzoai/@hanzo/insights/commit/4418d605f1846f12824de0e82b42235700512eb6) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: upgrades insights-rrweb to 0.0.30
 
 ## 1.292.0
 
 ### Minor Changes
 
-- [#2519](https://github.com/PostHog/posthog-js/pull/2519) [`7c16ff7`](https://github.com/PostHog/posthog-js/commit/7c16ff7f3d7d8152ffbdde6839fee6fc513a8c55) Thanks [@rodrigomarcolin](https://github.com/rodrigomarcolin)! - Made rageclick detection fully parametrizable with configurable threshold_px, timeout_ms, and click_count, while preserving previous default behavior.
+- [#2519](https://github.com/hanzoai/@hanzo/insights/pull/2519) [`7c16ff7`](https://github.com/hanzoai/@hanzo/insights/commit/7c16ff7f3d7d8152ffbdde6839fee6fc513a8c55) Thanks [@rodrigomarcolin](https://github.com/rodrigomarcolin)! - Made rageclick detection fully parametrizable with configurable threshold_px, timeout_ms, and click_count, while preserving previous default behavior.
 
 ## 1.291.0
 
 ### Minor Changes
 
-- [#2557](https://github.com/PostHog/posthog-js/pull/2557) [`c8c7de2`](https://github.com/PostHog/posthog-js/commit/c8c7de247eae0a688c6eca49d364b89243b2bac8) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: support strict minimum duration (more accurate on full page load)
+- [#2557](https://github.com/hanzoai/@hanzo/insights/pull/2557) [`c8c7de2`](https://github.com/hanzoai/@hanzo/insights/commit/c8c7de247eae0a688c6eca49d364b89243b2bac8) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: support strict minimum duration (more accurate on full page load)
 
 ## 1.290.0
 
 ### Minor Changes
 
-- [#2553](https://github.com/PostHog/posthog-js/pull/2553) [`8a2b790`](https://github.com/PostHog/posthog-js/commit/8a2b790a61611c54e5e84a2954ae19d89d754afc) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: yield to the main thread during posthog init
+- [#2553](https://github.com/hanzoai/@hanzo/insights/pull/2553) [`8a2b790`](https://github.com/hanzoai/@hanzo/insights/commit/8a2b790a61611c54e5e84a2954ae19d89d754afc) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: yield to the main thread during insights init
 
 ## 1.289.0
 
 ### Minor Changes
 
-- [#2551](https://github.com/PostHog/posthog-js/pull/2551) [`10be1b0`](https://github.com/PostHog/posthog-js/commit/10be1b071ab30da45749b91cfdeff913912e7bbb) Thanks [@dmarticus](https://github.com/dmarticus)! - Support bootstrapping feature flags during SSR in ReactJS
+- [#2551](https://github.com/hanzoai/@hanzo/insights/pull/2551) [`10be1b0`](https://github.com/hanzoai/@hanzo/insights/commit/10be1b071ab30da45749b91cfdeff913912e7bbb) Thanks [@dmarticus](https://github.com/dmarticus)! - Support bootstrapping feature flags during SSR in ReactJS
 
 ## 1.288.1
 
 ### Patch Changes
 
-- Updated dependencies [[`87f9604`](https://github.com/PostHog/posthog-js/commit/87f96047739e67b847fe22137b97fc57f405b8d9)]:
-    - @posthog/core@1.5.2
+- Updated dependencies [[`87f9604`](https://github.com/hanzoai/@hanzo/insights/commit/87f96047739e67b847fe22137b97fc57f405b8d9)]:
+    - @hanzo/core@1.5.2
 
 ## 1.288.0
 
 ### Minor Changes
 
-- [#2433](https://github.com/PostHog/posthog-js/pull/2433) [`392b190`](https://github.com/PostHog/posthog-js/commit/392b19061bcee86926d165ce3cd7742df1c474d5) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Add `flags_api_host` config option
+- [#2433](https://github.com/hanzoai/@hanzo/insights/pull/2433) [`392b190`](https://github.com/hanzoai/@hanzo/insights/commit/392b19061bcee86926d165ce3cd7742df1c474d5) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Add `flags_api_host` config option
 
 ## 1.287.0
 
 ### Minor Changes
 
-- [#2525](https://github.com/PostHog/posthog-js/pull/2525) [`ec65577`](https://github.com/PostHog/posthog-js/commit/ec6557796219502c8d6a04fc5943721dafef140b) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: track flushed size per session
+- [#2525](https://github.com/hanzoai/@hanzo/insights/pull/2525) [`ec65577`](https://github.com/hanzoai/@hanzo/insights/commit/ec6557796219502c8d6a04fc5943721dafef140b) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: track flushed size per session
 
 ## 1.286.0
 
 ### Minor Changes
 
-- [#2547](https://github.com/PostHog/posthog-js/pull/2547) [`cd8bcd7`](https://github.com/PostHog/posthog-js/commit/cd8bcd79e4e41e51bcf9b40890708207ac927e72) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Fixed a bug where configuration overrides for session recording would not be applied if the recorder module was still loading
+- [#2547](https://github.com/hanzoai/@hanzo/insights/pull/2547) [`cd8bcd7`](https://github.com/hanzoai/@hanzo/insights/commit/cd8bcd79e4e41e51bcf9b40890708207ac927e72) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Fixed a bug where configuration overrides for session recording would not be applied if the recorder module was still loading
 
 ## 1.285.2
 
 ### Patch Changes
 
-- Updated dependencies [[`d8d98c9`](https://github.com/PostHog/posthog-js/commit/d8d98c95f24b612110dbf52d228c0c3bd248cd58)]:
-    - @posthog/core@1.5.1
+- Updated dependencies [[`d8d98c9`](https://github.com/hanzoai/@hanzo/insights/commit/d8d98c95f24b612110dbf52d228c0c3bd248cd58)]:
+    - @hanzo/core@1.5.1
 
 ## 1.285.1
 
 ### Patch Changes
 
-- [#2545](https://github.com/PostHog/posthog-js/pull/2545) [`c26a12c`](https://github.com/PostHog/posthog-js/commit/c26a12cc55932ff5a014c57a01a25c06715a24a1) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: allow session ending payload when recording is idle
+- [#2545](https://github.com/hanzoai/@hanzo/insights/pull/2545) [`c26a12c`](https://github.com/hanzoai/@hanzo/insights/commit/c26a12cc55932ff5a014c57a01a25c06715a24a1) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: allow session ending payload when recording is idle
 
 ## 1.285.0
 
 ### Minor Changes
 
-- [#2503](https://github.com/PostHog/posthog-js/pull/2503) [`e95a9d5`](https://github.com/PostHog/posthog-js/commit/e95a9d5075891861982e69ddcf09f1d6241ae088) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: store previous and next session id in session recording
+- [#2503](https://github.com/hanzoai/@hanzo/insights/pull/2503) [`e95a9d5`](https://github.com/hanzoai/@hanzo/insights/commit/e95a9d5075891861982e69ddcf09f1d6241ae088) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: store previous and next session id in session recording
 
 ## 1.284.0
 
 ### Minor Changes
 
-- [#2529](https://github.com/PostHog/posthog-js/pull/2529) [`882d823`](https://github.com/PostHog/posthog-js/commit/882d823ca7bf9b31aa5bdcb0512d9109096bcba7) Thanks [@MattBro](https://github.com/MattBro)! - feat(surveys): add URL prefill and auto-submit support
+- [#2529](https://github.com/hanzoai/@hanzo/insights/pull/2529) [`882d823`](https://github.com/hanzoai/@hanzo/insights/commit/882d823ca7bf9b31aa5bdcb0512d9109096bcba7) Thanks [@MattBro](https://github.com/MattBro)! - feat(surveys): add URL prefill and auto-submit support
 
     Surveys can now be prefilled and automatically submitted via URL parameters.
 
     **New configuration options:**
 
     ```javascript
-    posthog.init('token', {
+    insights.init('token', {
         surveys: {
             prefillFromUrl: true,
             autoSubmitIfComplete: true,
@@ -1565,514 +1565,514 @@
 
 ### Minor Changes
 
-- [#2520](https://github.com/PostHog/posthog-js/pull/2520) [`068d55e`](https://github.com/PostHog/posthog-js/commit/068d55ed4193e82729cd34b42d9e433f85b6e606) Thanks [@lricoy](https://github.com/lricoy)! - Add bot pageview collection behind preview flag. Enables tracking bot traffic as `$bot_pageview` events when the `__preview_capture_bot_pageviews` flag is enabled.
+- [#2520](https://github.com/hanzoai/@hanzo/insights/pull/2520) [`068d55e`](https://github.com/hanzoai/@hanzo/insights/commit/068d55ed4193e82729cd34b42d9e433f85b6e606) Thanks [@lricoy](https://github.com/lricoy)! - Add bot pageview collection behind preview flag. Enables tracking bot traffic as `$bot_pageview` events when the `__preview_capture_bot_pageviews` flag is enabled.
 
 ### Patch Changes
 
-- Updated dependencies [[`068d55e`](https://github.com/PostHog/posthog-js/commit/068d55ed4193e82729cd34b42d9e433f85b6e606)]:
-    - @posthog/core@1.5.0
+- Updated dependencies [[`068d55e`](https://github.com/hanzoai/@hanzo/insights/commit/068d55ed4193e82729cd34b42d9e433f85b6e606)]:
+    - @hanzo/core@1.5.0
 
 ## 1.282.0
 
 ### Minor Changes
 
-- [#2517](https://github.com/PostHog/posthog-js/pull/2517) [`46e3ca6`](https://github.com/PostHog/posthog-js/commit/46e3ca600ca478db1b319b36695dea090aa60f98) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: add a component that will wrap your components and capture an event when they are in view in the browser
+- [#2517](https://github.com/hanzoai/@hanzo/insights/pull/2517) [`46e3ca6`](https://github.com/hanzoai/@hanzo/insights/commit/46e3ca600ca478db1b319b36695dea090aa60f98) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: add a component that will wrap your components and capture an event when they are in view in the browser
 
 ### Patch Changes
 
-- [#2517](https://github.com/PostHog/posthog-js/pull/2517) [`46e3ca6`](https://github.com/PostHog/posthog-js/commit/46e3ca600ca478db1b319b36695dea090aa60f98) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: complete react sdk featureflag component refactor
+- [#2517](https://github.com/hanzoai/@hanzo/insights/pull/2517) [`46e3ca6`](https://github.com/hanzoai/@hanzo/insights/commit/46e3ca600ca478db1b319b36695dea090aa60f98) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: complete react sdk featureflag component refactor
 
 ## 1.281.0
 
 ### Minor Changes
 
-- [#2502](https://github.com/PostHog/posthog-js/pull/2502) [`751b440`](https://github.com/PostHog/posthog-js/commit/751b44040c4c0c55a19df2ad0e5f215943620e51) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: bucketed rate limiter can calculate tokens without a timer
+- [#2502](https://github.com/hanzoai/@hanzo/insights/pull/2502) [`751b440`](https://github.com/hanzoai/@hanzo/insights/commit/751b44040c4c0c55a19df2ad0e5f215943620e51) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: bucketed rate limiter can calculate tokens without a timer
 
 ### Patch Changes
 
-- [#2500](https://github.com/PostHog/posthog-js/pull/2500) [`71ae0d2`](https://github.com/PostHog/posthog-js/commit/71ae0d2a55cbf69a2b60ac3ee29906f379408898) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't poll surveys while the page is hidden
+- [#2500](https://github.com/hanzoai/@hanzo/insights/pull/2500) [`71ae0d2`](https://github.com/hanzoai/@hanzo/insights/commit/71ae0d2a55cbf69a2b60ac3ee29906f379408898) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't poll surveys while the page is hidden
 
-- Updated dependencies [[`751b440`](https://github.com/PostHog/posthog-js/commit/751b44040c4c0c55a19df2ad0e5f215943620e51)]:
-    - @posthog/core@1.4.0
+- Updated dependencies [[`751b440`](https://github.com/hanzoai/@hanzo/insights/commit/751b44040c4c0c55a19df2ad0e5f215943620e51)]:
+    - @hanzo/core@1.4.0
 
 ## 1.280.1
 
 ### Patch Changes
 
-- [#2492](https://github.com/PostHog/posthog-js/pull/2492) [`2b13291`](https://github.com/PostHog/posthog-js/commit/2b13291db4098f076e209caae71019ab10861956) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: extendUrlParams should always replace unless the caller says otherwise
+- [#2492](https://github.com/hanzoai/@hanzo/insights/pull/2492) [`2b13291`](https://github.com/hanzoai/@hanzo/insights/commit/2b13291db4098f076e209caae71019ab10861956) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: extendUrlParams should always replace unless the caller says otherwise
 
-- [#2491](https://github.com/PostHog/posthog-js/pull/2491) [`130c9e0`](https://github.com/PostHog/posthog-js/commit/130c9e0677dbce372986e72fca65075c4a4d78de) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: correctly update the retry count URL parameter
+- [#2491](https://github.com/hanzoai/@hanzo/insights/pull/2491) [`130c9e0`](https://github.com/hanzoai/@hanzo/insights/commit/130c9e0677dbce372986e72fca65075c4a4d78de) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: correctly update the retry count URL parameter
 
-- [#2485](https://github.com/PostHog/posthog-js/pull/2485) [`d7dced1`](https://github.com/PostHog/posthog-js/commit/d7dced1772e9b2954a250c3ace8a21e74a4e8668) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: stop polling when the retry queue is empty
+- [#2485](https://github.com/hanzoai/@hanzo/insights/pull/2485) [`d7dced1`](https://github.com/hanzoai/@hanzo/insights/commit/d7dced1772e9b2954a250c3ace8a21e74a4e8668) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: stop polling when the retry queue is empty
 
 ## 1.280.0
 
 ### Minor Changes
 
-- [#2430](https://github.com/PostHog/posthog-js/pull/2430) [`5c14af2`](https://github.com/PostHog/posthog-js/commit/5c14af20818f8639dbe127de0ef7fddca06ed86b) Thanks [@daibhin](https://github.com/daibhin)! - exclude capture of exceptions thrown from the PostHog SDK
+- [#2430](https://github.com/hanzoai/@hanzo/insights/pull/2430) [`5c14af2`](https://github.com/hanzoai/@hanzo/insights/commit/5c14af20818f8639dbe127de0ef7fddca06ed86b) Thanks [@daibhin](https://github.com/daibhin)! - exclude capture of exceptions thrown from the Insights SDK
 
 ## 1.279.3
 
 ### Patch Changes
 
-- [#2482](https://github.com/PostHog/posthog-js/pull/2482) [`04ba023`](https://github.com/PostHog/posthog-js/commit/04ba0230785ea118fe5016057b97813d1fa76d11) Thanks [@robbie-c](https://github.com/robbie-c)! - Fix https://github.com/PostHog/posthog-js/issues/2471
+- [#2482](https://github.com/hanzoai/@hanzo/insights/pull/2482) [`04ba023`](https://github.com/hanzoai/@hanzo/insights/commit/04ba0230785ea118fe5016057b97813d1fa76d11) Thanks [@robbie-c](https://github.com/robbie-c)! - Fix https://github.com/hanzoai/@hanzo/insights/issues/2471
 
 ## 1.279.2
 
 ### Patch Changes
 
-- Updated dependencies [[`e0a6fe0`](https://github.com/PostHog/posthog-js/commit/e0a6fe013b5a1e92a6e7685f35f715199b716b34)]:
-    - @posthog/core@1.3.1
+- Updated dependencies [[`e0a6fe0`](https://github.com/hanzoai/@hanzo/insights/commit/e0a6fe013b5a1e92a6e7685f35f715199b716b34)]:
+    - @hanzo/core@1.3.1
 
 ## 1.279.1
 
 ### Patch Changes
 
-- [#2469](https://github.com/PostHog/posthog-js/pull/2469) [`b161bb3`](https://github.com/PostHog/posthog-js/commit/b161bb3258b6dae879f76fd828a438ff6c07797f) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: stop heatmap buffer interval when hidden
+- [#2469](https://github.com/hanzoai/@hanzo/insights/pull/2469) [`b161bb3`](https://github.com/hanzoai/@hanzo/insights/commit/b161bb3258b6dae879f76fd828a438ff6c07797f) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: stop heatmap buffer interval when hidden
 
 ## 1.279.0
 
 ### Minor Changes
 
-- [#2463](https://github.com/PostHog/posthog-js/pull/2463) [`3075888`](https://github.com/PostHog/posthog-js/commit/3075888be97e03b0485d2596f9fad2bd2ba7e192) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remove rrweb types as a peer dependency
+- [#2463](https://github.com/hanzoai/@hanzo/insights/pull/2463) [`3075888`](https://github.com/hanzoai/@hanzo/insights/commit/3075888be97e03b0485d2596f9fad2bd2ba7e192) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remove rrweb types as a peer dependency
 
 ## 1.278.0
 
 ### Minor Changes
 
-- [#2467](https://github.com/PostHog/posthog-js/pull/2467) [`b0f1390`](https://github.com/PostHog/posthog-js/commit/b0f1390d66c46c7abd308ffd88397d0ece7d5f82) Thanks [@lricoy](https://github.com/lricoy)! - Includes warning on advanced_disable_flags with extra examples on what it disables
+- [#2467](https://github.com/hanzoai/@hanzo/insights/pull/2467) [`b0f1390`](https://github.com/hanzoai/@hanzo/insights/commit/b0f1390d66c46c7abd308ffd88397d0ece7d5f82) Thanks [@lricoy](https://github.com/lricoy)! - Includes warning on advanced_disable_flags with extra examples on what it disables
 
 ## 1.277.0
 
 ### Minor Changes
 
-- [#2460](https://github.com/PostHog/posthog-js/pull/2460) [`52da336`](https://github.com/PostHog/posthog-js/commit/52da3364ace5b879e1a7c64c8970ffb6fab439b6) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Bump posthog-rrweb
+- [#2460](https://github.com/hanzoai/@hanzo/insights/pull/2460) [`52da336`](https://github.com/hanzoai/@hanzo/insights/commit/52da3364ace5b879e1a7c64c8970ffb6fab439b6) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Bump insights-rrweb
 
 ## 1.276.0
 
 ### Minor Changes
 
-- [#2444](https://github.com/PostHog/posthog-js/pull/2444) [`d50899e`](https://github.com/PostHog/posthog-js/commit/d50899e9e86cd0ad6a43b3f6e840ee9638394992) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: bump posthog rrweb version - not generally used yet
+- [#2444](https://github.com/hanzoai/@hanzo/insights/pull/2444) [`d50899e`](https://github.com/hanzoai/@hanzo/insights/commit/d50899e9e86cd0ad6a43b3f6e840ee9638394992) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: bump insights rrweb version - not generally used yet
 
 ## 1.275.3
 
 ### Patch Changes
 
-- [#2434](https://github.com/PostHog/posthog-js/pull/2434) [`10b3d23`](https://github.com/PostHog/posthog-js/commit/10b3d232b3c6ce38de5500654e6f8aa3e80c280a) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: allow turning off debug mode
+- [#2434](https://github.com/hanzoai/@hanzo/insights/pull/2434) [`10b3d23`](https://github.com/hanzoai/@hanzo/insights/commit/10b3d232b3c6ce38de5500654e6f8aa3e80c280a) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: allow turning off debug mode
 
 ## 1.275.2
 
 ### Patch Changes
 
-- [#2431](https://github.com/PostHog/posthog-js/pull/2431) [`7d45a7a`](https://github.com/PostHog/posthog-js/commit/7d45a7a52c44ba768913d66a4c4363d107042682) Thanks [@marandaneto](https://github.com/marandaneto)! - fix: remove deprecated attribute $exception_personURL from exception events
+- [#2431](https://github.com/hanzoai/@hanzo/insights/pull/2431) [`7d45a7a`](https://github.com/hanzoai/@hanzo/insights/commit/7d45a7a52c44ba768913d66a4c4363d107042682) Thanks [@marandaneto](https://github.com/marandaneto)! - fix: remove deprecated attribute $exception_personURL from exception events
 
-- Updated dependencies [[`daf919b`](https://github.com/PostHog/posthog-js/commit/daf919be225527ee4ad026d806dec195b75e44aa), [`7d45a7a`](https://github.com/PostHog/posthog-js/commit/7d45a7a52c44ba768913d66a4c4363d107042682)]:
-    - @posthog/core@1.3.0
+- Updated dependencies [[`daf919b`](https://github.com/hanzoai/@hanzo/insights/commit/daf919be225527ee4ad026d806dec195b75e44aa), [`7d45a7a`](https://github.com/hanzoai/@hanzo/insights/commit/7d45a7a52c44ba768913d66a4c4363d107042682)]:
+    - @hanzo/core@1.3.0
 
 ## 1.275.1
 
 ### Patch Changes
 
-- [#2422](https://github.com/PostHog/posthog-js/pull/2422) [`4e15fda`](https://github.com/PostHog/posthog-js/commit/4e15fdada76201eaceb407c3260a8fef025c87d0) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: possible memory leak in session id replacement in cookieless mode
+- [#2422](https://github.com/hanzoai/@hanzo/insights/pull/2422) [`4e15fda`](https://github.com/hanzoai/@hanzo/insights/commit/4e15fdada76201eaceb407c3260a8fef025c87d0) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: possible memory leak in session id replacement in cookieless mode
 
 ## 1.275.0
 
 ### Minor Changes
 
-- [#2426](https://github.com/PostHog/posthog-js/pull/2426) [`ae941c2`](https://github.com/PostHog/posthog-js/commit/ae941c27673e50d01cecdbf55364cffa894379c4) Thanks [@thmsobrmlr](https://github.com/thmsobrmlr)! - Apply $current_url masking in web vitals and heatmaps extensions.
+- [#2426](https://github.com/hanzoai/@hanzo/insights/pull/2426) [`ae941c2`](https://github.com/hanzoai/@hanzo/insights/commit/ae941c27673e50d01cecdbf55364cffa894379c4) Thanks [@thmsobrmlr](https://github.com/thmsobrmlr)! - Apply $current_url masking in web vitals and heatmaps extensions.
 
 ## 1.274.3
 
 ### Patch Changes
 
-- [#2423](https://github.com/PostHog/posthog-js/pull/2423) [`2d4eac4`](https://github.com/PostHog/posthog-js/commit/2d4eac4cef765bec996a887f0c1124fe7db759a7) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: another small potential memory leak in the recorder wrapping code"
+- [#2423](https://github.com/hanzoai/@hanzo/insights/pull/2423) [`2d4eac4`](https://github.com/hanzoai/@hanzo/insights/commit/2d4eac4cef765bec996a887f0c1124fe7db759a7) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: another small potential memory leak in the recorder wrapping code"
 
 ## 1.274.2
 
 ### Patch Changes
 
-- [#2421](https://github.com/PostHog/posthog-js/pull/2421) [`43b8029`](https://github.com/PostHog/posthog-js/commit/43b80293301bae1a2b97a3c0b2a967ff88506904) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: potential source of memory leak in recorder mutation throttler
+- [#2421](https://github.com/hanzoai/@hanzo/insights/pull/2421) [`43b8029`](https://github.com/hanzoai/@hanzo/insights/commit/43b80293301bae1a2b97a3c0b2a967ff88506904) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: potential source of memory leak in recorder mutation throttler
 
 ## 1.274.1
 
 ### Patch Changes
 
-- Updated dependencies [[`10da2ee`](https://github.com/PostHog/posthog-js/commit/10da2ee0b8862ad0e32b68e452fae1bc77620bbf)]:
-    - @posthog/core@1.2.4
+- Updated dependencies [[`10da2ee`](https://github.com/hanzoai/@hanzo/insights/commit/10da2ee0b8862ad0e32b68e452fae1bc77620bbf)]:
+    - @hanzo/core@1.2.4
 
 ## 1.274.0
 
 ### Minor Changes
 
-- [#2404](https://github.com/PostHog/posthog-js/pull/2404) [`39ace01`](https://github.com/PostHog/posthog-js/commit/39ace016839ceaf2dac9a224612c78e45e26620c) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: remove eager loaded replay and reduce bundle size by 14.8%
+- [#2404](https://github.com/hanzoai/@hanzo/insights/pull/2404) [`39ace01`](https://github.com/hanzoai/@hanzo/insights/commit/39ace016839ceaf2dac9a224612c78e45e26620c) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: remove eager loaded replay and reduce bundle size by 14.8%
 
 ### Patch Changes
 
-- Updated dependencies [[`e19a384`](https://github.com/PostHog/posthog-js/commit/e19a384468d722c12f4ef21feb684da31f9dcd3b)]:
-    - @posthog/core@1.2.3
+- Updated dependencies [[`e19a384`](https://github.com/hanzoai/@hanzo/insights/commit/e19a384468d722c12f4ef21feb684da31f9dcd3b)]:
+    - @hanzo/core@1.2.3
 
 ## 1.273.1
 
 ### Patch Changes
 
-- [#2412](https://github.com/PostHog/posthog-js/pull/2412) [`25a8846`](https://github.com/PostHog/posthog-js/commit/25a88461136ba453492bb277f8771ad0584873c1) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: rely on 'state' less when reporting replay status
+- [#2412](https://github.com/hanzoai/@hanzo/insights/pull/2412) [`25a8846`](https://github.com/hanzoai/@hanzo/insights/commit/25a88461136ba453492bb277f8771ad0584873c1) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: rely on 'state' less when reporting replay status
 
 ## 1.273.0
 
 ### Minor Changes
 
-- [#2408](https://github.com/PostHog/posthog-js/pull/2408) [`66b12f8`](https://github.com/PostHog/posthog-js/commit/66b12f827c272f878839c3eacbc9783db0ce0916) Thanks [@thmsobrmlr](https://github.com/thmsobrmlr)! - Fixes an issue where the event queue was not started until a page reload after calling `opt_in_capturing()`
+- [#2408](https://github.com/hanzoai/@hanzo/insights/pull/2408) [`66b12f8`](https://github.com/hanzoai/@hanzo/insights/commit/66b12f827c272f878839c3eacbc9783db0ce0916) Thanks [@thmsobrmlr](https://github.com/thmsobrmlr)! - Fixes an issue where the event queue was not started until a page reload after calling `opt_in_capturing()`
 
 ## 1.272.1
 
 ### Patch Changes
 
-- [#2395](https://github.com/PostHog/posthog-js/pull/2395) [`4a39a10`](https://github.com/PostHog/posthog-js/commit/4a39a10efe606170d48a43e5eb97b8c37cb5a182) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: increase max depth for app state diffing
+- [#2395](https://github.com/hanzoai/@hanzo/insights/pull/2395) [`4a39a10`](https://github.com/hanzoai/@hanzo/insights/commit/4a39a10efe606170d48a43e5eb97b8c37cb5a182) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: increase max depth for app state diffing
 
 ## 1.272.0
 
 ### Minor Changes
 
-- [#2405](https://github.com/PostHog/posthog-js/pull/2405) [`cdfbd6d`](https://github.com/PostHog/posthog-js/commit/cdfbd6dba8bf212067d94cf5e3eaae3f0648473e) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: session recording config can be false, correct the types
+- [#2405](https://github.com/hanzoai/@hanzo/insights/pull/2405) [`cdfbd6d`](https://github.com/hanzoai/@hanzo/insights/commit/cdfbd6dba8bf212067d94cf5e3eaae3f0648473e) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: session recording config can be false, correct the types
 
 ## 1.271.0
 
 ### Minor Changes
 
-- [#2385](https://github.com/PostHog/posthog-js/pull/2385) [`7373238`](https://github.com/PostHog/posthog-js/commit/7373238d8b2e0d8777131ffc93caae0ff4dd3bad) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: switch replay to lazy loaded by default"
+- [#2385](https://github.com/hanzoai/@hanzo/insights/pull/2385) [`7373238`](https://github.com/hanzoai/@hanzo/insights/commit/7373238d8b2e0d8777131ffc93caae0ff4dd3bad) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: switch replay to lazy loaded by default"
 
 ## 1.270.1
 
 ### Patch Changes
 
-- [#2390](https://github.com/PostHog/posthog-js/pull/2390) [`244b3ad`](https://github.com/PostHog/posthog-js/commit/244b3ad2f6dea8086747046044245b1514bd658b) Thanks [@hpouillot](https://github.com/hpouillot)! - fix react sourcemaps
+- [#2390](https://github.com/hanzoai/@hanzo/insights/pull/2390) [`244b3ad`](https://github.com/hanzoai/@hanzo/insights/commit/244b3ad2f6dea8086747046044245b1514bd658b) Thanks [@hpouillot](https://github.com/hpouillot)! - fix react sourcemaps
 
 ## 1.270.0
 
 ### Minor Changes
 
-- [#2355](https://github.com/PostHog/posthog-js/pull/2355) [`9eccbab`](https://github.com/PostHog/posthog-js/commit/9eccbabbd219cee062b52fadd3b0c7ba55773f7a) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: use persistence for surveys if localStorage usage is enabled
+- [#2355](https://github.com/hanzoai/@hanzo/insights/pull/2355) [`9eccbab`](https://github.com/hanzoai/@hanzo/insights/commit/9eccbabbd219cee062b52fadd3b0c7ba55773f7a) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: use persistence for surveys if localStorage usage is enabled
 
 ### Patch Changes
 
-- [#2396](https://github.com/PostHog/posthog-js/pull/2396) [`13c6667`](https://github.com/PostHog/posthog-js/commit/13c6667d22edf8b0d1c1ff11ef3e8b32ac5cb2a2) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: no need to estimate the size of all rrweb events before compressing some of them
+- [#2396](https://github.com/hanzoai/@hanzo/insights/pull/2396) [`13c6667`](https://github.com/hanzoai/@hanzo/insights/commit/13c6667d22edf8b0d1c1ff11ef3e8b32ac5cb2a2) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: no need to estimate the size of all rrweb events before compressing some of them
 
 ## 1.269.1
 
 ### Patch Changes
 
-- [#2393](https://github.com/PostHog/posthog-js/pull/2393) [`a3b64e6`](https://github.com/PostHog/posthog-js/commit/a3b64e6788527acca485f0e6bfca8e207b72bb2c) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: variable rename so i can trigger a releas
+- [#2393](https://github.com/hanzoai/@hanzo/insights/pull/2393) [`a3b64e6`](https://github.com/hanzoai/@hanzo/insights/commit/a3b64e6788527acca485f0e6bfca8e207b72bb2c) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: variable rename so i can trigger a releas
 
 ## 1.269.0
 
 ### Minor Changes
 
-- [#2369](https://github.com/PostHog/posthog-js/pull/2369) [`2a6ea65`](https://github.com/PostHog/posthog-js/commit/2a6ea65333460027f163d186ab6b241488c4c750) Thanks [@dmarticus](https://github.com/dmarticus)! - This PR implements support for evaluation environments in the posthog-js SDK, allowing users to specify which environment tags their SDK instance should use when evaluating feature flags.
+- [#2369](https://github.com/hanzoai/@hanzo/insights/pull/2369) [`2a6ea65`](https://github.com/hanzoai/@hanzo/insights/commit/2a6ea65333460027f163d186ab6b241488c4c750) Thanks [@dmarticus](https://github.com/dmarticus)! - This PR implements support for evaluation environments in the @hanzo/insights SDK, allowing users to specify which environment tags their SDK instance should use when evaluating feature flags.
 
 ### Patch Changes
 
-- [#2381](https://github.com/PostHog/posthog-js/pull/2381) [`06a79f9`](https://github.com/PostHog/posthog-js/commit/06a79f99e7bebcbf669e9ce37ef4441224339e9a) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remove xhr event listener when handling it to avoid potential memory leak
-- [#2374](https://github.com/PostHog/posthog-js/pull/2374) [`5af6e2d`](https://github.com/PostHog/posthog-js/commit/5af6e2d1fb1694cecfa4ef515cac192fb194fa4e) Thanks [@hpouillot](https://github.com/hpouillot)! - fix react sourcemaps
+- [#2381](https://github.com/hanzoai/@hanzo/insights/pull/2381) [`06a79f9`](https://github.com/hanzoai/@hanzo/insights/commit/06a79f99e7bebcbf669e9ce37ef4441224339e9a) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remove xhr event listener when handling it to avoid potential memory leak
+- [#2374](https://github.com/hanzoai/@hanzo/insights/pull/2374) [`5af6e2d`](https://github.com/hanzoai/@hanzo/insights/commit/5af6e2d1fb1694cecfa4ef515cac192fb194fa4e) Thanks [@hpouillot](https://github.com/hpouillot)! - fix react sourcemaps
 
 ## 1.268.11
 
 - failed release due to an error in CI, included in 1.269.0
 
-* [#2381](https://github.com/PostHog/posthog-js/pull/2381) [`06a79f9`](https://github.com/PostHog/posthog-js/commit/06a79f99e7bebcbf669e9ce37ef4441224339e9a) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remove xhr event listener when handling it to avoid potential memory leak
+* [#2381](https://github.com/hanzoai/@hanzo/insights/pull/2381) [`06a79f9`](https://github.com/hanzoai/@hanzo/insights/commit/06a79f99e7bebcbf669e9ce37ef4441224339e9a) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: remove xhr event listener when handling it to avoid potential memory leak
 
 ## 1.268.10
 
 - failed release due to an error in CI, included in 1.269.0
 
-* [#2374](https://github.com/PostHog/posthog-js/pull/2374) [`5af6e2d`](https://github.com/PostHog/posthog-js/commit/5af6e2d1fb1694cecfa4ef515cac192fb194fa4e) Thanks [@hpouillot](https://github.com/hpouillot)! - fix react sourcemaps
+* [#2374](https://github.com/hanzoai/@hanzo/insights/pull/2374) [`5af6e2d`](https://github.com/hanzoai/@hanzo/insights/commit/5af6e2d1fb1694cecfa4ef515cac192fb194fa4e) Thanks [@hpouillot](https://github.com/hpouillot)! - fix react sourcemaps
 
 ## 1.268.9
 
 ### Patch Changes
 
-- [#2378](https://github.com/PostHog/posthog-js/pull/2378) [`b920bac`](https://github.com/PostHog/posthog-js/commit/b920bac4f4c561981eb4651dc02a841a5f87cfb0) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't mangle to $ in no external or es5 builds
+- [#2378](https://github.com/hanzoai/@hanzo/insights/pull/2378) [`b920bac`](https://github.com/hanzoai/@hanzo/insights/commit/b920bac4f4c561981eb4651dc02a841a5f87cfb0) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't mangle to $ in no external or es5 builds
 
-- [#2376](https://github.com/PostHog/posthog-js/pull/2376) [`b5eb605`](https://github.com/PostHog/posthog-js/commit/b5eb605f193684c1e6dd9b698717810e8ac233a8) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: rotating buffer while trigger pending
+- [#2376](https://github.com/hanzoai/@hanzo/insights/pull/2376) [`b5eb605`](https://github.com/hanzoai/@hanzo/insights/commit/b5eb605f193684c1e6dd9b698717810e8ac233a8) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: rotating buffer while trigger pending
 
 ## 1.268.8
 
 ### Patch Changes
 
-- Updated dependencies [[`5820942`](https://github.com/PostHog/posthog-js/commit/582094255fa87009b02a4e193c3e63ef4621d9d0)]:
-    - @posthog/core@1.2.2
+- Updated dependencies [[`5820942`](https://github.com/hanzoai/@hanzo/insights/commit/582094255fa87009b02a4e193c3e63ef4621d9d0)]:
+    - @hanzo/core@1.2.2
 
 ## 1.268.7
 
 ### Patch Changes
 
-- [#2373](https://github.com/PostHog/posthog-js/pull/2373) [`aff9455`](https://github.com/PostHog/posthog-js/commit/aff94552ccf9257c73c3704f0ad81815436460e0) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: 2 small conditional recording fixes
+- [#2373](https://github.com/hanzoai/@hanzo/insights/pull/2373) [`aff9455`](https://github.com/hanzoai/@hanzo/insights/commit/aff94552ccf9257c73c3704f0ad81815436460e0) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: 2 small conditional recording fixes
 
 ## 1.268.6
 
 ### Patch Changes
 
-- [#2368](https://github.com/PostHog/posthog-js/pull/2368) [`2102ee4`](https://github.com/PostHog/posthog-js/commit/2102ee4ad300dfa1f6ee9260b332b27d780ff583) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: recorder behaviour when idle session is force terminated then restarted
+- [#2368](https://github.com/hanzoai/@hanzo/insights/pull/2368) [`2102ee4`](https://github.com/hanzoai/@hanzo/insights/commit/2102ee4ad300dfa1f6ee9260b332b27d780ff583) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: recorder behaviour when idle session is force terminated then restarted
 
 ## 1.268.5
 
 ### Patch Changes
 
-- [#2362](https://github.com/PostHog/posthog-js/pull/2362) [`8b570b8`](https://github.com/PostHog/posthog-js/commit/8b570b832532d2827fd03a7da0d5554028ce7d77) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: over eager rename left a couple of old versions trying to call onRemoteConfig that doesn't exist
+- [#2362](https://github.com/hanzoai/@hanzo/insights/pull/2362) [`8b570b8`](https://github.com/hanzoai/@hanzo/insights/commit/8b570b832532d2827fd03a7da0d5554028ce7d77) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: over eager rename left a couple of old versions trying to call onRemoteConfig that doesn't exist
 
 ## 1.268.4
 
 ### Patch Changes
 
-- Updated dependencies [[`caecb94`](https://github.com/PostHog/posthog-js/commit/caecb94493f6b85003ecbd6750a81e27139b1fa5)]:
-    - @posthog/core@1.2.1
+- Updated dependencies [[`caecb94`](https://github.com/hanzoai/@hanzo/insights/commit/caecb94493f6b85003ecbd6750a81e27139b1fa5)]:
+    - @hanzo/core@1.2.1
 
 ## 1.268.3
 
 ### Patch Changes
 
-- [#2357](https://github.com/PostHog/posthog-js/pull/2357) [`d5d523c`](https://github.com/PostHog/posthog-js/commit/d5d523cdd86732827a48a9c7c39e6c5fceccab78) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: app state logging diff performance
+- [#2357](https://github.com/hanzoai/@hanzo/insights/pull/2357) [`d5d523c`](https://github.com/hanzoai/@hanzo/insights/commit/d5d523cdd86732827a48a9c7c39e6c5fceccab78) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: app state logging diff performance
 
 ## 1.268.2
 
 ### Patch Changes
 
-- Updated dependencies [[`ac48d8f`](https://github.com/PostHog/posthog-js/commit/ac48d8fda3a4543f300ced705bce314a206cce6f)]:
-    - @posthog/core@1.2.0
+- Updated dependencies [[`ac48d8f`](https://github.com/hanzoai/@hanzo/insights/commit/ac48d8fda3a4543f300ced705bce314a206cce6f)]:
+    - @hanzo/core@1.2.0
 
 ## 1.268.1
 
 ### Patch Changes
 
-- [#2315](https://github.com/PostHog/posthog-js/pull/2315) [`fd2c51d`](https://github.com/PostHog/posthog-js/commit/fd2c51db4383779aabf9c2dc7fc619bd88ff10f4) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: lazy loaded replay relies on remote config having been persisted in storage to avoid race with config on restart
+- [#2315](https://github.com/hanzoai/@hanzo/insights/pull/2315) [`fd2c51d`](https://github.com/hanzoai/@hanzo/insights/commit/fd2c51db4383779aabf9c2dc7fc619bd88ff10f4) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: lazy loaded replay relies on remote config having been persisted in storage to avoid race with config on restart
 
 ## 1.268.0
 
 ### Minor Changes
 
-- [#2345](https://github.com/PostHog/posthog-js/pull/2345) [`4f37e77`](https://github.com/PostHog/posthog-js/commit/4f37e773107b518d22d29450a11b1439b87a96e7) Thanks [@lucasheriques](https://github.com/lucasheriques)! - feat: surveys matching on event properties
+- [#2345](https://github.com/hanzoai/@hanzo/insights/pull/2345) [`4f37e77`](https://github.com/hanzoai/@hanzo/insights/commit/4f37e773107b518d22d29450a11b1439b87a96e7) Thanks [@lucasheriques](https://github.com/lucasheriques)! - feat: surveys matching on event properties
 
 ## 1.267.0
 
 ### Minor Changes
 
-- [#2347](https://github.com/PostHog/posthog-js/pull/2347) [`5d13bed`](https://github.com/PostHog/posthog-js/commit/5d13beda6661f389bd75c103728c7d45a241e1b1) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: allow ignoring rageclicks on elements by css selector
+- [#2347](https://github.com/hanzoai/@hanzo/insights/pull/2347) [`5d13bed`](https://github.com/hanzoai/@hanzo/insights/commit/5d13beda6661f389bd75c103728c7d45a241e1b1) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: allow ignoring rageclicks on elements by css selector
 
 ## 1.266.3
 
 ### Patch Changes
 
-- [#2344](https://github.com/PostHog/posthog-js/pull/2344) [`3d3fc37`](https://github.com/PostHog/posthog-js/commit/3d3fc37bfe351d9a464e652d8ec347192596769d) Thanks [@lucasheriques](https://github.com/lucasheriques)! - chore: mark renderSurvey as deprecated
+- [#2344](https://github.com/hanzoai/@hanzo/insights/pull/2344) [`3d3fc37`](https://github.com/hanzoai/@hanzo/insights/commit/3d3fc37bfe351d9a464e652d8ec347192596769d) Thanks [@lucasheriques](https://github.com/lucasheriques)! - chore: mark renderSurvey as deprecated
 
 ## 1.266.2
 
 ### Patch Changes
 
-- [#2341](https://github.com/PostHog/posthog-js/pull/2341) [`1cb3b42`](https://github.com/PostHog/posthog-js/commit/1cb3b42ca1db5d2a7824bd506967a00d292ad58f) Thanks [@hpouillot](https://github.com/hpouillot)! - fix exception loop
+- [#2341](https://github.com/hanzoai/@hanzo/insights/pull/2341) [`1cb3b42`](https://github.com/hanzoai/@hanzo/insights/commit/1cb3b42ca1db5d2a7824bd506967a00d292ad58f) Thanks [@hpouillot](https://github.com/hpouillot)! - fix exception loop
 
 ## 1.266.1
 
 ### Patch Changes
 
-- [#2330](https://github.com/PostHog/posthog-js/pull/2330) [`da07e41`](https://github.com/PostHog/posthog-js/commit/da07e41ac2307803c302557a12b459491657a75f) Thanks [@hpouillot](https://github.com/hpouillot)! - use error tracking processing from core
+- [#2330](https://github.com/hanzoai/@hanzo/insights/pull/2330) [`da07e41`](https://github.com/hanzoai/@hanzo/insights/commit/da07e41ac2307803c302557a12b459491657a75f) Thanks [@hpouillot](https://github.com/hpouillot)! - use error tracking processing from core
 
-- Updated dependencies [[`da07e41`](https://github.com/PostHog/posthog-js/commit/da07e41ac2307803c302557a12b459491657a75f)]:
-    - @posthog/core@1.1.0
+- Updated dependencies [[`da07e41`](https://github.com/hanzoai/@hanzo/insights/commit/da07e41ac2307803c302557a12b459491657a75f)]:
+    - @hanzo/core@1.1.0
 
 ## 1.266.0
 
 ### Minor Changes
 
-- [#2321](https://github.com/PostHog/posthog-js/pull/2321) [`b81e152`](https://github.com/PostHog/posthog-js/commit/b81e15236115aec3629f93baa552b768b327904f) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: expose rrweb custom events on the public interface of the recorder. not intended for arbitrary public use but useful for internal purposes
+- [#2321](https://github.com/hanzoai/@hanzo/insights/pull/2321) [`b81e152`](https://github.com/hanzoai/@hanzo/insights/commit/b81e15236115aec3629f93baa552b768b327904f) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: expose rrweb custom events on the public interface of the recorder. not intended for arbitrary public use but useful for internal purposes
 
 ## 1.265.1
 
 ### Patch Changes
 
-- [#2318](https://github.com/PostHog/posthog-js/pull/2318) [`e0f26ff`](https://github.com/PostHog/posthog-js/commit/e0f26ffbda97d36085c8604fdb7bc496642e0c9c) Thanks [@robbie-c](https://github.com/robbie-c)! - Add option to disable sendBeacon and xhr credentials
+- [#2318](https://github.com/hanzoai/@hanzo/insights/pull/2318) [`e0f26ff`](https://github.com/hanzoai/@hanzo/insights/commit/e0f26ffbda97d36085c8604fdb7bc496642e0c9c) Thanks [@robbie-c](https://github.com/robbie-c)! - Add option to disable sendBeacon and xhr credentials
 
 ## 1.265.0
 
 ### Minor Changes
 
-- [#2032](https://github.com/PostHog/posthog-js/pull/2032) [`822d8df`](https://github.com/PostHog/posthog-js/commit/822d8dfb74e0fdbe78a45bc6fc04fb86896ba2eb) Thanks [@lucasheriques](https://github.com/lucasheriques)! - feat: allow display surveys popups on demand
+- [#2032](https://github.com/hanzoai/@hanzo/insights/pull/2032) [`822d8df`](https://github.com/hanzoai/@hanzo/insights/commit/822d8dfb74e0fdbe78a45bc6fc04fb86896ba2eb) Thanks [@lucasheriques](https://github.com/lucasheriques)! - feat: allow display surveys popups on demand
 
 ## 1.264.2
 
 ### Patch Changes
 
-- [#2314](https://github.com/PostHog/posthog-js/pull/2314) [`5836a2f`](https://github.com/PostHog/posthog-js/commit/5836a2f6bbc32fa8717157edf1a29da29549691a) Thanks [@ordehi](https://github.com/ordehi)! - Fixed a bug that prevented surveys from loading in cookieless mode using the on_reject option. Surveys now correctly initialize when consent is given.
+- [#2314](https://github.com/hanzoai/@hanzo/insights/pull/2314) [`5836a2f`](https://github.com/hanzoai/@hanzo/insights/commit/5836a2f6bbc32fa8717157edf1a29da29549691a) Thanks [@ordehi](https://github.com/ordehi)! - Fixed a bug that prevented surveys from loading in cookieless mode using the on_reject option. Surveys now correctly initialize when consent is given.
 
 ## 1.264.1
 
 ### Patch Changes
 
-- [#2312](https://github.com/PostHog/posthog-js/pull/2312) [`dff84c6`](https://github.com/PostHog/posthog-js/commit/dff84c6c21af9a8f4e3bfb58b4fb85ae2cbcdbc6) Thanks [@daibhin](https://github.com/daibhin)! - chore: allow PostHog exception capture to be skipped in Sentry integration
+- [#2312](https://github.com/hanzoai/@hanzo/insights/pull/2312) [`dff84c6`](https://github.com/hanzoai/@hanzo/insights/commit/dff84c6c21af9a8f4e3bfb58b4fb85ae2cbcdbc6) Thanks [@daibhin](https://github.com/daibhin)! - chore: allow Insights exception capture to be skipped in Sentry integration
 
 ## 1.264.0
 
 ### Minor Changes
 
-- [#2310](https://github.com/PostHog/posthog-js/pull/2310) [`2eace6f`](https://github.com/PostHog/posthog-js/commit/2eace6f7efce6901ac8b51060bb2e6be834571b5) Thanks [@robbie-c](https://github.com/robbie-c)! - Add support for partitioned cookies
+- [#2310](https://github.com/hanzoai/@hanzo/insights/pull/2310) [`2eace6f`](https://github.com/hanzoai/@hanzo/insights/commit/2eace6f7efce6901ac8b51060bb2e6be834571b5) Thanks [@robbie-c](https://github.com/robbie-c)! - Add support for partitioned cookies
 
 ## 1.263.0
 
 ### Minor Changes
 
-- [#2294](https://github.com/PostHog/posthog-js/pull/2294) [`5137440`](https://github.com/PostHog/posthog-js/commit/513744038f99b533f97c68235a730a1fefb6c330) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: add a redux logging middleware to posthog-js
+- [#2294](https://github.com/hanzoai/@hanzo/insights/pull/2294) [`5137440`](https://github.com/hanzoai/@hanzo/insights/commit/513744038f99b533f97c68235a730a1fefb6c330) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: add a redux logging middleware to @hanzo/insights
 
 ## 1.262.1
 
 ### Patch Changes
 
-- [#2309](https://github.com/PostHog/posthog-js/pull/2309) [`28223c1`](https://github.com/PostHog/posthog-js/commit/28223c149a965882e4a47a50a29f8cb4eb322d30) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: default to eager loading replay while investigating trigger bug reports
+- [#2309](https://github.com/hanzoai/@hanzo/insights/pull/2309) [`28223c1`](https://github.com/hanzoai/@hanzo/insights/commit/28223c149a965882e4a47a50a29f8cb4eb322d30) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: default to eager loading replay while investigating trigger bug reports
 
 ## 1.262.0
 
 ### Minor Changes
 
-- [#2296](https://github.com/PostHog/posthog-js/pull/2296) [`f9fe3ba`](https://github.com/PostHog/posthog-js/commit/f9fe3ba56c96ae3b6c0716ec24de68123422643f) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: switch replay default to lazy loading
+- [#2296](https://github.com/hanzoai/@hanzo/insights/pull/2296) [`f9fe3ba`](https://github.com/hanzoai/@hanzo/insights/commit/f9fe3ba56c96ae3b6c0716ec24de68123422643f) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: switch replay default to lazy loading
 
 ## 1.261.8
 
 ### Patch Changes
 
-- [#2276](https://github.com/PostHog/posthog-js/pull/2276) [`97961e4`](https://github.com/PostHog/posthog-js/commit/97961e4b7a0914385bcb200cc0c32302ce911cae) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - `isFeatureEnabled` now returns `undefined` (instead of `false`) for missing or disabled feature flags, aligning with the documentation. Previously, `undefined` was returned only before flags had loaded, and missing/disabled flags returned `false`. This change clarifies the difference between flags that exist but don't match (`false`) and flags that don’t exist or are disabled (`undefined`).
+- [#2276](https://github.com/hanzoai/@hanzo/insights/pull/2276) [`97961e4`](https://github.com/hanzoai/@hanzo/insights/commit/97961e4b7a0914385bcb200cc0c32302ce911cae) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - `isFeatureEnabled` now returns `undefined` (instead of `false`) for missing or disabled feature flags, aligning with the documentation. Previously, `undefined` was returned only before flags had loaded, and missing/disabled flags returned `false`. This change clarifies the difference between flags that exist but don't match (`false`) and flags that don’t exist or are disabled (`undefined`).
 
 ## 1.261.7
 
 ### Patch Changes
 
-- [#2284](https://github.com/PostHog/posthog-js/pull/2284) [`bdfe450`](https://github.com/PostHog/posthog-js/commit/bdfe4501899e57879cbda677f84d2a21a4ea9a7c) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: order of operations when replay does pageview fallback
+- [#2284](https://github.com/hanzoai/@hanzo/insights/pull/2284) [`bdfe450`](https://github.com/hanzoai/@hanzo/insights/commit/bdfe4501899e57879cbda677f84d2a21a4ea9a7c) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: order of operations when replay does pageview fallback
 
 ## 1.261.6
 
 ### Patch Changes
 
-- [#2274](https://github.com/PostHog/posthog-js/pull/2274) [`50fe70a`](https://github.com/PostHog/posthog-js/commit/50fe70ae4f22c08c7afe6fabd4430dbe7b946c67) Thanks [@robbie-c](https://github.com/robbie-c)! - Fix initial pageview not firing when using cookieless_mode: "always"
+- [#2274](https://github.com/hanzoai/@hanzo/insights/pull/2274) [`50fe70a`](https://github.com/hanzoai/@hanzo/insights/commit/50fe70ae4f22c08c7afe6fabd4430dbe7b946c67) Thanks [@robbie-c](https://github.com/robbie-c)! - Fix initial pageview not firing when using cookieless_mode: "always"
 
 ## 1.261.5
 
 ### Patch Changes
 
-- [#2270](https://github.com/PostHog/posthog-js/pull/2270) [`980f5c4`](https://github.com/PostHog/posthog-js/commit/980f5c483f059bc3551975c9094f19ff04a985b0) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: hosted surveys should ignore any delays
+- [#2270](https://github.com/hanzoai/@hanzo/insights/pull/2270) [`980f5c4`](https://github.com/hanzoai/@hanzo/insights/commit/980f5c483f059bc3551975c9094f19ff04a985b0) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: hosted surveys should ignore any delays
 
 ## 1.261.4
 
 ### Patch Changes
 
-- [#2268](https://github.com/PostHog/posthog-js/pull/2268) [`999c63f`](https://github.com/PostHog/posthog-js/commit/999c63f56dea80efc32d45ffbdf897b20aa97547) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: session recorder wrapper had private field that should be public"
+- [#2268](https://github.com/hanzoai/@hanzo/insights/pull/2268) [`999c63f`](https://github.com/hanzoai/@hanzo/insights/commit/999c63f56dea80efc32d45ffbdf897b20aa97547) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: session recorder wrapper had private field that should be public"
 
 ## 1.261.3
 
 ### Patch Changes
 
-- [#2267](https://github.com/PostHog/posthog-js/pull/2267) [`f2ac956`](https://github.com/PostHog/posthog-js/commit/f2ac9569d80a10961919d51a8132e0153b471a69) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: allow testing of the new lazy loaded session recorder
+- [#2267](https://github.com/hanzoai/@hanzo/insights/pull/2267) [`f2ac956`](https://github.com/hanzoai/@hanzo/insights/commit/f2ac9569d80a10961919d51a8132e0153b471a69) Thanks [@pauldambra](https://github.com/pauldambra)! - feat: allow testing of the new lazy loaded session recorder
 
 ## 1.261.2
 
 ### Patch Changes
 
-- [#2266](https://github.com/PostHog/posthog-js/pull/2266) [`9470d97`](https://github.com/PostHog/posthog-js/commit/9470d974dde28648559b3d853ab20331f6ef36b1) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't mangle variables to `# posthog-js
+- [#2266](https://github.com/hanzoai/@hanzo/insights/pull/2266) [`9470d97`](https://github.com/hanzoai/@hanzo/insights/commit/9470d974dde28648559b3d853ab20331f6ef36b1) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: don't mangle variables to `# @hanzo/insights
 
-- [#2265](https://github.com/PostHog/posthog-js/pull/2265) [`2487d12`](https://github.com/PostHog/posthog-js/commit/2487d12548699e10f7a7f0f6917b3ae602bf80d9) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: update to latest rollup and terser
+- [#2265](https://github.com/hanzoai/@hanzo/insights/pull/2265) [`2487d12`](https://github.com/hanzoai/@hanzo/insights/commit/2487d12548699e10f7a7f0f6917b3ae602bf80d9) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: update to latest rollup and terser
 
 ## 1.261.1
 
 ### Patch Changes
 
-- [#2263](https://github.com/PostHog/posthog-js/pull/2263) [`41d3890`](https://github.com/PostHog/posthog-js/commit/41d3890b72b880576a57d1e1133fdd16744835d4) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: add unused lazy loaded session recorder to prime CDN
+- [#2263](https://github.com/hanzoai/@hanzo/insights/pull/2263) [`41d3890`](https://github.com/hanzoai/@hanzo/insights/commit/41d3890b72b880576a57d1e1133fdd16744835d4) Thanks [@pauldambra](https://github.com/pauldambra)! - chore: add unused lazy loaded session recorder to prime CDN
 
 ## 1.261.0
 
 ### Minor Changes
 
-- [#2238](https://github.com/PostHog/posthog-js/pull/2238) [`be2104b`](https://github.com/PostHog/posthog-js/commit/be2104bbafc0a78dfd5c735aae4ae126e3a3253e) Thanks [@robbie-c](https://github.com/robbie-c)! - Improve Consent APIs
+- [#2238](https://github.com/hanzoai/@hanzo/insights/pull/2238) [`be2104b`](https://github.com/hanzoai/@hanzo/insights/commit/be2104bbafc0a78dfd5c735aae4ae126e3a3253e) Thanks [@robbie-c](https://github.com/robbie-c)! - Improve Consent APIs
 
 ### Patch Changes
 
-- Updated dependencies [[`1981815`](https://github.com/PostHog/posthog-js/commit/19818159b7074098150bc79cfa2962761a14cb46)]:
-    - @posthog/core@1.0.2
+- Updated dependencies [[`1981815`](https://github.com/hanzoai/@hanzo/insights/commit/19818159b7074098150bc79cfa2962761a14cb46)]:
+    - @hanzo/core@1.0.2
 
 ## 1.260.3
 
 ### Patch Changes
 
-- [#2219](https://github.com/PostHog/posthog-js/pull/2219) [`44d10c4`](https://github.com/PostHog/posthog-js/commit/44d10c46c5378fa046320b7c50bd046eb1e75994) Thanks [@daibhin](https://github.com/daibhin)! - add @posthog/core dependency
+- [#2219](https://github.com/hanzoai/@hanzo/insights/pull/2219) [`44d10c4`](https://github.com/hanzoai/@hanzo/insights/commit/44d10c46c5378fa046320b7c50bd046eb1e75994) Thanks [@daibhin](https://github.com/daibhin)! - add @hanzo/core dependency
 
-- Updated dependencies [[`44d10c4`](https://github.com/PostHog/posthog-js/commit/44d10c46c5378fa046320b7c50bd046eb1e75994)]:
-    - @posthog/core@1.0.1
+- Updated dependencies [[`44d10c4`](https://github.com/hanzoai/@hanzo/insights/commit/44d10c46c5378fa046320b7c50bd046eb1e75994)]:
+    - @hanzo/core@1.0.1
 
 ## 1.260.2
 
 ### Patch Changes
 
-- [#2236](https://github.com/PostHog/posthog-js/pull/2236) [`f3269f3`](https://github.com/PostHog/posthog-js/commit/f3269f3f26447ef7f032f925de7b1082b213867a) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: set survey person properties on SDK <1.249.2
+- [#2236](https://github.com/hanzoai/@hanzo/insights/pull/2236) [`f3269f3`](https://github.com/hanzoai/@hanzo/insights/commit/f3269f3f26447ef7f032f925de7b1082b213867a) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: set survey person properties on SDK <1.249.2
 
 ## 1.260.1
 
 ### Patch Changes
 
-- [#2215](https://github.com/PostHog/posthog-js/pull/2215) [`1e95d47`](https://github.com/PostHog/posthog-js/commit/1e95d47669af8c5824c4105906f0727bd67610c1) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: always set surveySeen on local storage for old posthog-js versions
+- [#2215](https://github.com/hanzoai/@hanzo/insights/pull/2215) [`1e95d47`](https://github.com/hanzoai/@hanzo/insights/commit/1e95d47669af8c5824c4105906f0727bd67610c1) Thanks [@lucasheriques](https://github.com/lucasheriques)! - fix: always set surveySeen on local storage for old @hanzo/insights versions
 
 ## 1.260.0
 
 ### Minor Changes
 
-- [#2185](https://github.com/PostHog/posthog-js/pull/2185) [`fda2932`](https://github.com/PostHog/posthog-js/commit/fda2932d0c4835d205fe0e0d0efb724b964f9f9b) Thanks [@robbie-c](https://github.com/robbie-c)! - Support 2 cookieless modes - 'always' and 'on_reject'
+- [#2185](https://github.com/hanzoai/@hanzo/insights/pull/2185) [`fda2932`](https://github.com/hanzoai/@hanzo/insights/commit/fda2932d0c4835d205fe0e0d0efb724b964f9f9b) Thanks [@robbie-c](https://github.com/robbie-c)! - Support 2 cookieless modes - 'always' and 'on_reject'
 
 ### Patch Changes
 
-- [#2200](https://github.com/PostHog/posthog-js/pull/2200) [`4387da4`](https://github.com/PostHog/posthog-js/commit/4387da42148a6b96c7bf1f9f5a2c529a3eb4dd8a) Thanks [@daibhin](https://github.com/daibhin)! - expose captured exception to React error boundary fallback
+- [#2200](https://github.com/hanzoai/@hanzo/insights/pull/2200) [`4387da4`](https://github.com/hanzoai/@hanzo/insights/commit/4387da42148a6b96c7bf1f9f5a2c529a3eb4dd8a) Thanks [@daibhin](https://github.com/daibhin)! - expose captured exception to React error boundary fallback
 
 ## 1.259.0
 
 ### Minor Changes
 
-- [#2192](https://github.com/PostHog/posthog-js/pull/2192) [`dec3f44`](https://github.com/PostHog/posthog-js/commit/dec3f443465787216ee3015aa254c5312659ad3f) Thanks [@marandaneto](https://github.com/marandaneto)! - survey support for feature flag variants
+- [#2192](https://github.com/hanzoai/@hanzo/insights/pull/2192) [`dec3f44`](https://github.com/hanzoai/@hanzo/insights/commit/dec3f443465787216ee3015aa254c5312659ad3f) Thanks [@marandaneto](https://github.com/marandaneto)! - survey support for feature flag variants
 
 ## 1.258.6
 
 ### Patch Changes
 
-- [#2194](https://github.com/PostHog/posthog-js/pull/2194) [`faa2f28`](https://github.com/PostHog/posthog-js/commit/faa2f2868762c527148d9a59098d4eae7f0b3ffb) Thanks [@realguse](https://github.com/realguse)! - block vercel screenshot bot
+- [#2194](https://github.com/hanzoai/@hanzo/insights/pull/2194) [`faa2f28`](https://github.com/hanzoai/@hanzo/insights/commit/faa2f2868762c527148d9a59098d4eae7f0b3ffb) Thanks [@realguse](https://github.com/realguse)! - block vercel screenshot bot
 
 ## 1.258.5
 
 ### Patch Changes
 
-- [#2178](https://github.com/PostHog/posthog-js/pull/2178) [`db569fa`](https://github.com/PostHog/posthog-js/commit/db569fa952b4536280602db87bc12a0fa51923fa) Thanks [@lucasheriques](https://github.com/lucasheriques)! - - Fix surveys loading with advanced_enable_surveys config
+- [#2178](https://github.com/hanzoai/@hanzo/insights/pull/2178) [`db569fa`](https://github.com/hanzoai/@hanzo/insights/commit/db569fa952b4536280602db87bc12a0fa51923fa) Thanks [@lucasheriques](https://github.com/lucasheriques)! - - Fix surveys loading with advanced_enable_surveys config
 
 ## 1.258.4
 
 ### Patch Changes
 
-- [#2172](https://github.com/PostHog/posthog-js/pull/2172) [`ac254d9`](https://github.com/PostHog/posthog-js/commit/ac254d945be598314c365310ed7c13047edc9ead) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Adds a new config, `advanced_enable_surveys`, to always enable surveys funcionality in the SDK
+- [#2172](https://github.com/hanzoai/@hanzo/insights/pull/2172) [`ac254d9`](https://github.com/hanzoai/@hanzo/insights/commit/ac254d945be598314c365310ed7c13047edc9ead) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Adds a new config, `advanced_enable_surveys`, to always enable surveys funcionality in the SDK
 
 ## 1.258.3
 
 ### Patch Changes
 
-- [#2171](https://github.com/PostHog/posthog-js/pull/2171) [`14adc01`](https://github.com/PostHog/posthog-js/commit/14adc01875c87f6be10e70204307003d9d0f941c) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Fix early access features accumulation in persistence
+- [#2171](https://github.com/hanzoai/@hanzo/insights/pull/2171) [`14adc01`](https://github.com/hanzoai/@hanzo/insights/commit/14adc01875c87f6be10e70204307003d9d0f941c) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Fix early access features accumulation in persistence
 
-- [#2170](https://github.com/PostHog/posthog-js/pull/2170) [`262cc5c`](https://github.com/PostHog/posthog-js/commit/262cc5cc9364605e31788e5370b0663507e4c832) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Removes the `_renderExternalSurvey` method which is not needed anymore
+- [#2170](https://github.com/hanzoai/@hanzo/insights/pull/2170) [`262cc5c`](https://github.com/hanzoai/@hanzo/insights/commit/262cc5cc9364605e31788e5370b0663507e4c832) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Removes the `_renderExternalSurvey` method which is not needed anymore
 
 ## 1.258.2
 
 ### Patch Changes
 
-- [#2111](https://github.com/PostHog/posthog-js/pull/2111) [`7114593`](https://github.com/PostHog/posthog-js/commit/711459317bf807fa1d21be2f7067182952ea2a5e) Thanks [@pauldambra](https://github.com/pauldambra)! - checks for session activity in other windows when timing out in any particular window, avoids a race condition when proactively marking a session as idle
+- [#2111](https://github.com/hanzoai/@hanzo/insights/pull/2111) [`7114593`](https://github.com/hanzoai/@hanzo/insights/commit/711459317bf807fa1d21be2f7067182952ea2a5e) Thanks [@pauldambra](https://github.com/pauldambra)! - checks for session activity in other windows when timing out in any particular window, avoids a race condition when proactively marking a session as idle
 
 ## 1.258.1
 
 ### Patch Changes
 
-- [#2120](https://github.com/PostHog/posthog-js/pull/2120) [`c7b03cd`](https://github.com/PostHog/posthog-js/commit/c7b03cddb621988323238b22acdf8faefd93742e) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Updates the renderSurvey and getActiveMatchingSurveys methods to not take any external surveys into consideration
+- [#2120](https://github.com/hanzoai/@hanzo/insights/pull/2120) [`c7b03cd`](https://github.com/hanzoai/@hanzo/insights/commit/c7b03cddb621988323238b22acdf8faefd93742e) Thanks [@lucasheriques](https://github.com/lucasheriques)! - Updates the renderSurvey and getActiveMatchingSurveys methods to not take any external surveys into consideration
 
 ## 1.258.0
 
 ### Minor Changes
 
-- [#2089](https://github.com/PostHog/posthog-js/pull/2089) [`0a19df2`](https://github.com/PostHog/posthog-js/commit/0a19df28d6a62b97949f0e99bfadf33b7aadcb45) Thanks [@daibhin](https://github.com/daibhin)! - feat: exclude exceptions autocaptured by extensions
+- [#2089](https://github.com/hanzoai/@hanzo/insights/pull/2089) [`0a19df2`](https://github.com/hanzoai/@hanzo/insights/commit/0a19df28d6a62b97949f0e99bfadf33b7aadcb45) Thanks [@daibhin](https://github.com/daibhin)! - feat: exclude exceptions autocaptured by extensions
 
 ## 1.257.2 - 2025-07-22
 
@@ -2081,17 +2081,17 @@
 ## 1.257.1 - 2025-07-21
 
 - return capture results from captureException (#2081)
-- update posthog-js at workspace level (#2096)
+- update @hanzo/insights at workspace level (#2096)
 - chore(tests): use playwright for integration tests (#2093)
 - fix: Sync consent with persistence immediately (#2082)
-- Use posthog consent in next playground (#2083)
+- Use insights consent in next playground (#2083)
 
 ## 1.257.0 - 2025-07-08
 
 - one for flags and flags for all (#2079)
 - Fix comment (#2078)
 - feat: Enhance AssignableWindow type with additional properties for better SDK integration (#2077)
-- reset flags internal state when posthog.reset is called (#2066)
+- reset flags internal state when insights.reset is called (#2066)
 
 ## 1.256.2 - 2025-07-04
 
@@ -2194,7 +2194,7 @@
 ## 1.249.2 - 2025-06-03
 
 - fix: hide feedback tab if survey is not recurring (#1988)
-- chore: apply survey seen attributes on posthog capture (#1987)
+- chore: apply survey seen attributes on insights capture (#1987)
 
 ## 1.249.1 - 2025-06-02
 
@@ -2259,7 +2259,7 @@
 
 ## 1.242.1 - 2025-05-14
 
-- fix: retrieve survey shadow should include posthog ref (#1955)
+- fix: retrieve survey shadow should include insights ref (#1955)
 
 ## 1.242.0 - 2025-05-13
 
@@ -2323,7 +2323,7 @@
 ## 1.237.0 - 2025-04-29
 
 - fix: prevent survey events to affect multiple surveys (#1924)
-- chore: Add homepage fields and copy LICENSE to posthog-js-react (#1928)
+- chore: Add homepage fields and copy LICENSE to @hanzo/insights-react (#1928)
 - feat: Allow mangling of storage function names (#1927)
 
 ## 1.236.8 - 2025-04-29
@@ -2374,7 +2374,7 @@
 
 ## 1.235.6 - 2025-04-11
 
-- feat: Improve how PostHogProvider works with SSR (#1893)
+- feat: Improve how InsightsProvider works with SSR (#1893)
 - feat(err): add react error boundary (#1884)
 
 ## 1.235.5 - 2025-04-10
@@ -2498,7 +2498,7 @@
 
 ## 1.231.1 - 2025-03-18
 
-- chore: update posthog rrweb (#1831)
+- chore: update insights rrweb (#1831)
 - chore: add a regression example for toolbar z-index highlighting (#1827)
 
 ## 1.231.0 - 2025-03-14
@@ -2577,7 +2577,7 @@
 
 ## 1.227.1 - 2025-03-05
 
-- feat: posthog feature component should report variant too (#1783)
+- feat: insights feature component should report variant too (#1783)
 - chore: image blocking example (#1789)
 - chore(): set all github actions to run on ubuntu-22.04 (#1784)
 - fix(flags): Make sure flags are loaded when identify is called (#1785)
@@ -2597,7 +2597,7 @@
 ## 1.225.1 - 2025-03-03
 
 - fix: add semrush audit bot (#1775)
-- chore: add posthog built rrweb (#1770)
+- chore: add insights built rrweb (#1770)
 
 ## 1.225.0 - 2025-03-02
 
@@ -2746,7 +2746,7 @@
 
 ## 1.215.3 - 2025-02-04
 
-- refactor: Simplify `Posthog.init()` signature (#1712)
+- refactor: Simplify `Insights.init()` signature (#1712)
 
 ## 1.215.2 - 2025-02-03
 
@@ -2834,7 +2834,7 @@
 
 ## 1.209.0 - 2025-01-23
 
-- feat: Enhance PostHogProvider to prevent double initialization on `React.StrictMode` (#1676)
+- feat: Enhance InsightsProvider to prevent double initialization on `React.StrictMode` (#1676)
 
 ## 1.208.1 - 2025-01-23
 
@@ -2876,7 +2876,7 @@
 
 ## 1.207.1 - 2025-01-21
 
-- fix: expose getNextSurveyStep to use in posthog (#1661)
+- fix: expose getNextSurveyStep to use in insights (#1661)
 - chore: upgrade rrweb to alpha.18 (#1592)
 
 ## 1.207.0 - 2025-01-16
@@ -3128,7 +3128,7 @@
 
 ## 1.184.2 - 2024-11-13
 
-- fix(flags): support multiple children prop in PostHogFeature (#1516)
+- fix(flags): support multiple children prop in InsightsFeature (#1516)
 - fix: Don't use session storage in memory mode (#1521)
 
 ## 1.184.1 - 2024-11-12
@@ -3181,7 +3181,7 @@
 
 ## 1.176.0 - 2024-10-24
 
-- fix(surveys): Reset Survey storage after posthog.reset is called (#1494)
+- fix(surveys): Reset Survey storage after insights.reset is called (#1494)
 
 ## 1.175.1 - 2024-10-24
 
@@ -3262,7 +3262,7 @@
 
 ## 1.166.2 - 2024-10-07
 
-- fix: Remove posthog error capture from replay (#1454)
+- fix: Remove insights error capture from replay (#1454)
 
 ## 1.166.1 - 2024-10-01
 
@@ -3302,7 +3302,7 @@
 
 ## 1.163.0 - 2024-09-20
 
-- feat: type safe posthog extensions (#1407)
+- feat: type safe insights extensions (#1407)
 
 ## 1.162.0 - 2024-09-19
 
@@ -3377,7 +3377,7 @@
 
 ## 1.158.0 - 2024-08-26
 
-- fix(segment): Posthog can identify after segment identifies a user, not just during bootstrap. (#1373)
+- fix(segment): Insights can identify after segment identifies a user, not just during bootstrap. (#1373)
 - fix: Revert cypress back to 13.6.3 (#1384)
 
 ## 1.157.2 - 2024-08-20
@@ -3420,7 +3420,7 @@
 
 ## 1.155.2 - 2024-08-13
 
-- remove x-posthog-token header (#1354)
+- remove x-insights-token header (#1354)
 
 ## 1.155.1 - 2024-08-13
 
@@ -3454,7 +3454,7 @@
 ## 1.154.1 - 2024-08-01
 
 - fix(surveys): fix textarea, and make it easier to query the survey question description in the DOM (#1337)
-- feat: Add debug logging for the initial props that posthog was started with (#1335)
+- feat: Add debug logging for the initial props that insights was started with (#1335)
 
 ## 1.154.0 - 2024-07-31
 
@@ -3509,7 +3509,7 @@
 ## 1.148.2 - 2024-07-22
 
 - fix: don't load preact until you have to (#1311)
-- chore: one less posthog mock and two fewer given tests (#1312)
+- chore: one less insights mock and two fewer given tests (#1312)
 
 ## 1.148.1 - 2024-07-22
 
@@ -3665,7 +3665,7 @@
 
 ## 1.138.0 - 2024-06-06
 
-- feat(surveys): `posthog-js` changes to support valid HTML question rendering (#1206)
+- feat(surveys): `@hanzo/insights` changes to support valid HTML question rendering (#1206)
 
 ## 1.137.0 - 2024-06-05
 
@@ -3896,7 +3896,7 @@
 
 ## 1.120.1 - 2024-04-08
 
-- chore: Add workflow to update the posthog.com repo with new posthog-js versions (#1120)
+- chore: Add workflow to update the insights.hanzo.ai repo with new @hanzo/insights versions (#1120)
 
 ## 1.120.0 - 2024-04-08
 
@@ -3908,7 +3908,7 @@
 
 ## 1.119.1 - 2024-04-08
 
-- fix: Default api host to us.i.posthog.com (#1087)
+- fix: Default api host to us.i.insights.hanzo.ai (#1087)
 
 ## 1.119.0 - 2024-04-08
 
@@ -3916,7 +3916,7 @@
 
 ## 1.118.1 - 2024-04-05
 
-- Fix nextjs playground version of posthog-js (#1117)
+- Fix nextjs playground version of @hanzo/insights (#1117)
 - Fix $is_identified (#1116)
 
 ## 1.118.0 - 2024-04-04
@@ -3934,7 +3934,7 @@
 
 ## 1.117.0 - 2024-04-03
 
-- feat: Add \_\_posthog_debug query string (#1108)
+- feat: Add \_\_insights_debug query string (#1108)
 
 ## 1.116.7 - 2024-04-03
 
@@ -3946,7 +3946,7 @@
 
 ## 1.116.5 - 2024-03-23
 
-- fix: posthog init should reject invalid config in TypeScript (#1097)
+- fix: insights init should reject invalid config in TypeScript (#1097)
 
 ## 1.116.4 - 2024-03-22
 
@@ -3995,11 +3995,11 @@
 
 - feat: report browser visibility state in replay (#1071)
 - fix: typo in deny list (#1073)
-- fix(posthog-js): manually bump patch (#1072)
+- fix(@hanzo/insights): manually bump patch (#1072)
 
 ## 1.113.4 - 2024-03-12
 
-- fix(posthog-js): manually bump patch (#1072)
+- fix(@hanzo/insights): manually bump patch (#1072)
 - fix: no empty requests (#1063)
 
 ## 1.113.2 - 2024-03-11
@@ -4035,7 +4035,7 @@
 ## 1.111.1 - 2024-03-06
 
 - chore: Removed jsc callbacks (#1052)
-- fix: posthog path to ignore (#1054)
+- fix: insights path to ignore (#1054)
 - chore: add some privacy examples to the copy autocapture demo (#1053)
 
 ## 1.111.0 - 2024-03-05
@@ -4112,7 +4112,7 @@
 
 ## 1.105.6 - 2024-02-08
 
-- feat: save posthog config at start of session recording (#1005)
+- feat: save insights config at start of session recording (#1005)
 - chore: test stopping and starting (#1009)
 
 ## 1.105.5 - 2024-02-08
@@ -4136,7 +4136,7 @@ identical to 1.105.1 - bug in CI scripts
 ## 1.105.1 - 2024-02-07
 
 - fix: autocapture allowlist should consider the tree (#1000)
-- chore: move posthog test instance helper (#999)
+- chore: move insights test instance helper (#999)
 - chore: nit pick log message (#997)
 - chore: copy most recent changelog entry when creating a release (#995)
 
@@ -4206,7 +4206,7 @@ identical to 1.105.1 - bug in CI scripts
 
 ## 1.98.2 - 2024-01-11
 
-- fix: Don't allow us.posthog.com to be used (#957)
+- fix: Don't allow us.insights.hanzo.ai to be used (#957)
 
 ## 1.98.1 - 2024-01-11
 
@@ -4516,7 +4516,7 @@ identical to 1.105.1 - bug in CI scripts
 
 ## 1.81.0 - 2023-09-25
 
-- feat(surveys): Make surveys site app native to posthog-js (#801)
+- feat(surveys): Make surveys site app native to @hanzo/insights (#801)
 
 ## 1.80.0 - 2023-09-25
 
@@ -4639,7 +4639,7 @@ identical to 1.105.1 - bug in CI scripts
 
 ## 1.70.2 - 2023-07-11
 
-- feat: allow moving to UUID v7 by config in posthog-js (#731)
+- feat: allow moving to UUID v7 by config in @hanzo/insights (#731)
 
 ## 1.70.1 - 2023-07-10
 
@@ -4664,7 +4664,7 @@ identical to 1.105.1 - bug in CI scripts
 
 ## 1.68.3 - 2023-06-22
 
-- fix: PosthogProvider doesn't need to have the client be optional (#705)
+- fix: InsightsProvider doesn't need to have the client be optional (#705)
 
 ## 1.68.2 - 2023-06-20
 
@@ -4833,7 +4833,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 - fix: Track referrer/search params per browser session (#496)
   _**Note:** This change improves the accuracy of properties `$referrer` and `$referring_domain` in a major way. Previously, the values of these properties often represented pure backlinks in non-SPAs (non-single-page applications). Now those values will represent the true referrer for the current browser-level session (effectively: for the tab). Due to this, referrer data after this update \_may_ look different. It will be significantly more accurate though.\_
 - ci: Point out and close stale issues/PRs (#602)
-- docs(testcafe): update docs removing posthog server requirements (#594)
+- docs(testcafe): update docs removing insights server requirements (#594)
 
 ## 1.51.5 - 2023-03-23
 
@@ -4858,7 +4858,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.51.0 - 2023-03-14
 
-- added types for PostHog provider `options` (#581)
+- added types for Insights provider `options` (#581)
 - ci(testcafe): run browser tests in parallel (#579)
 
 ## 1.50.9 - 2023-03-13
@@ -5015,7 +5015,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 - feat: Adds performance capture (#488)
 - fix(options): Add capture_pageleave option (#491)
-- fix(cd): use pnpm to install posthog-js version in main repo (#495)
+- fix(cd): use pnpm to install @hanzo/insights version in main repo (#495)
 
 ## 1.38.1 - 2022-12-15
 
@@ -5055,7 +5055,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.34.0 - 2022-10-25
 
-- feat(toolbar): posthog.loadToolbar({ temporaryToken: 'key' }) (#464)
+- feat(toolbar): insights.loadToolbar({ temporaryToken: 'key' }) (#464)
 - chore(deps): Bump node-fetch from 2.6.1 to 2.6.7 (#361)
 - chore(deps): bump glob-parent from 5.1.1 to 5.1.2 (#462)
 - chore(deps): Bump browserslist from 4.16.1 to 4.21.4 (#463)
@@ -5136,7 +5136,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 ## 1.26.1 - 2022-07-28
 
 - fix(storage): Fix cross subdomain cookies for localpluscookie (#429)
-- fix: Testcafe using Posthog cloud (#428)
+- fix: Testcafe using Insights cloud (#428)
 
 ## 1.26.0 - 2022-07-19
 
@@ -5307,7 +5307,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.15.4 - 2021-10-27
 
-- pass toolbar to posthog (#327)
+- pass toolbar to insights (#327)
 
 ## 1.15.3 - 2021-10-19
 
@@ -5323,7 +5323,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.15.0 - 2021-10-18
 
-- Revert "Add posthog.people.increment" (#320)
+- Revert "Add insights.people.increment" (#320)
 
 ## 1.14.4 - 2021-10-14
 
@@ -5345,7 +5345,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 ## 1.14.0 - 2021-10-05
 
 - Bump build and a readme change (#306)
-- Add posthog.people.increment (#254)
+- Add insights.people.increment (#254)
 - Send initial pageview immediately (#295)
 - add a test for init-ing and reading the on xhr error handler (#308)
 
@@ -5357,13 +5357,13 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 - Allow injection from config of a function to call when xhr requests fail (#296)
 - add instructions for developing with Yalc (#303)
-- Revert "Speculative logging for PostHog/posthog#4816 (#293)" (#302)
+- Revert "Speculative logging for Insights/insights#4816 (#293)" (#302)
 - Filter out \_ngcontent attributes in autocapture (#298)
 - corrects a test where assertion and setup didn't match test name (#299)
 
 ## 1.13.15 - 2021-09-29
 
-- Speculative logging for PostHog/posthog#4816 (#293)
+- Speculative logging for Insights/insights#4816 (#293)
 - Bump tmpl from 1.0.4 to 1.0.5 in /react (#287)
 - Bump ansi-regex from 5.0.0 to 5.0.1 in /react (#294)
 
@@ -5410,7 +5410,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.13.3 - 2021-09-02
 
-- add posthog.group (#270)
+- add insights.group (#270)
 
 ## 1.13.2 - 2021-09-02
 
@@ -5526,7 +5526,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.9.1 - 2021-03-08
 
-- Add posthog.debug() to types, remove bad docstring (#201)
+- Add insights.debug() to types, remove bad docstring (#201)
 - Fix ".identify" docstrings (#200)
 
 ## 1.9.0 - 2021-03-03
@@ -5564,7 +5564,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.8.3 - 2021-01-11
 
-- Event names must be strings in `posthog.capture` (#171)
+- Event names must be strings in `insights.capture` (#171)
 
 ## 1.8.1 - 2021-01-08
 
@@ -5572,10 +5572,10 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.8.0 - 2020-12-14
 
-- Using gzip-based compression over lzstring using the fflate library: [fflate](https://github.com/101arrowz/fflate). This reduces the amount of data transferred, and makes posthog servers respond faster (requires posthog 1.19.0). https://github.com/PostHog/posthog/issues/2560
-- Support last touch $referrer and $referring_domain user properties https://github.com/PostHog/posthog-js/pull/139
-- Publish a ES dist file https://github.com/PostHog/posthog-js/pull/157
-- Publish a react integration for feature flags https://github.com/PostHog/posthog-js/pull/154
+- Using gzip-based compression over lzstring using the fflate library: [fflate](https://github.com/101arrowz/fflate). This reduces the amount of data transferred, and makes insights servers respond faster (requires insights 1.19.0). https://github.com/hanzoai/insights/issues/2560
+- Support last touch $referrer and $referring_domain user properties https://github.com/hanzoai/@hanzo/insights/pull/139
+- Publish a ES dist file https://github.com/hanzoai/@hanzo/insights/pull/157
+- Publish a react integration for feature flags https://github.com/hanzoai/@hanzo/insights/pull/154
 
 ## 1.7.2 - 2020-11-28
 
@@ -5583,41 +5583,41 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.7.1 - 2020-11-27
 
-- Force session recording to use lz64 compression (https://github.com/PostHog/posthog-js/pull/134)
-- Bundle module.js in es5 (https://github.com/PostHog/posthog-js/pull/132)
+- Force session recording to use lz64 compression (https://github.com/hanzoai/@hanzo/insights/pull/134)
+- Bundle module.js in es5 (https://github.com/hanzoai/@hanzo/insights/pull/132)
 
 ## 1.7.0 - 2020-11-26
 
-- Send session recording events to posthog in (short) batches, separate from rest of events to make sure we drop fewer events (#126)
-- Send session recording events to a separate endpoint for newer versions of posthog (#118)
-- Send correct LIB_VERSION to posthog with captures (#119)
+- Send session recording events to insights in (short) batches, separate from rest of events to make sure we drop fewer events (#126)
+- Send session recording events to a separate endpoint for newer versions of insights (#118)
+- Send correct LIB_VERSION to insights with captures (#119)
 - Handle capturing self-referential objects (#123)
 - Make the library smaller by dropping unneeded code (#123, #128)
 - Update request batching logic (#118, #126)
 - Notify rrweb when $pageview events happen (#127)
 - Fix 'this.people.delete_user is undefined' (issue #39, #113)
 - Update rrweb block class to use `ph-no-capture` and `ph-ignore-input` (#112)
-- Deprecate calling posthog.capture with a callback (#129)
-- Attempted to re-add support for including posthog-js in server-side rendering. (#131)
+- Deprecate calling insights.capture with a callback (#129)
+- Attempted to re-add support for including @hanzo/insights in server-side rendering. (#131)
 - Bugfix: Don't truncate session recording data (#121)
-- Bugfix: Kill `posthog.capture_links()` and `posthog.capture_forms()`. They were broken since initial release - you can use autocapture instead. (#128)
+- Bugfix: Kill `insights.capture_links()` and `insights.capture_forms()`. They were broken since initial release - you can use autocapture instead. (#128)
 
 ## 1.6.0 - 2020-11-05
 
-- Allow updating user properties when calling `posthog.identify('identity, { some: 'value' })` (#105)
-- Allow disabling $feature_flag_called event: `posthog.isFeatureEnabled('flag', { send_event: false }) (#100)
-- Make cookieless analytics possible by passing `persistence: 'memory'` to posthog.init (#82)
-- Avoid sending $pageleave events when `capture_pageview: false` passed to posthog.init (#109)
+- Allow updating user properties when calling `insights.identify('identity, { some: 'value' })` (#105)
+- Allow disabling $feature_flag_called event: `insights.isFeatureEnabled('flag', { send_event: false }) (#100)
+- Make cookieless analytics possible by passing `persistence: 'memory'` to insights.init (#82)
+- Avoid sending $pageleave events when `capture_pageview: false` passed to insights.init (#109)
 - Code cleanup, bug fixes, integration test suite and more tech debt work
 
 ## 1.5.2 - 2020-10-22
 
 - Autocapture bugfix: Ignore extra spaces in classnames #99
-- Improve typing of posthog-js (#103)
+- Improve typing of @hanzo/insights (#103)
 
 ## 1.5.1 - 2020-10-22
 
-- Improve typing of posthog.js #97 (thanks @stonesthatwhisper)
+- Improve typing of insights.js #97 (thanks @stonesthatwhisper)
 - Improve session recording, generate $session_id fields #91 #96
 - Fix a bug with session recording events not being saved #95
 - Improve test coverage #94
@@ -5653,8 +5653,8 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 - Have `.onFeatureFlags(callback)` register multiple callbacks, which get called when feature flags are loaded or updated
 - Update feature flags when `identify` is called.
-- Add option `.reloadFeatureFlags()`. Call it to trigger a reload of feature flags. (See [#71](https://github.com/PostHog/posthog-js/pull/71))
-- Add config option `sanitize_properties` that accepts a function which sanitizes parameters of events (See [#75](https://github.com/PostHog/posthog-js/issues/75))
+- Add option `.reloadFeatureFlags()`. Call it to trigger a reload of feature flags. (See [#71](https://github.com/hanzoai/@hanzo/insights/pull/71))
+- Add config option `sanitize_properties` that accepts a function which sanitizes parameters of events (See [#75](https://github.com/hanzoai/@hanzo/insights/issues/75))
 
 ## 1.3.8 - 2020-08-07
 
@@ -5686,7 +5686,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.3.1 - 2020-07-13
 
-- Support loading the toolbar with a `__posthog` has param (was: `state`) and `ph_authorize` action.
+- Support loading the toolbar with a `__insights` has param (was: `state`) and `ph_authorize` action.
 
 ## 1.3.0 - 2020-07-03
 
@@ -5694,7 +5694,7 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.2.4 - 2020-07-01
 
-- Add support for feature flags (`posthog.isFeatureEnabled('keyword')`)
+- Add support for feature flags (`insights.isFeatureEnabled('keyword')`)
 
 ## 1.2.3 - 2020-07-01
 
@@ -5716,15 +5716,15 @@ Manual addition of version 1.66.0 because CI failed to automatically bump the ve
 
 ## 1.1.2 - 2020-06-04
 
-- Fix another error when using a new posthog-js version with an old posthog version
+- Fix another error when using a new @hanzo/insights version with an old insights version
 
 ## 1.1.1 - 2020-06-04
 
-- Show a error if calling `posthog.identify` with `null` user (#34 by @rushabhnagda11)
+- Show a error if calling `insights.identify` with `null` user (#34 by @rushabhnagda11)
 
 ## 1.1.0 - 2020-06-04
 
-- Support loading new PostHog toolbar
+- Support loading new Insights toolbar
 
 ## 1.0.6 - 2020-03-09
 

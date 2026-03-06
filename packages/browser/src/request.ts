@@ -57,7 +57,7 @@ export const extendURLParams = (url: string, params: Record<string, any>, replac
 
 export const jsonStringify = (data: any, space?: string | number): string => {
     // With plain JSON.stringify, we get an exception when a property is a BigInt. This has caused problems for some users,
-    // see https://github.com/PostHog/posthog-js/issues/1440
+    // see https://github.com/Insights/@hanzo/insights/issues/1440
     // To work around this, we convert BigInts to strings before stringifying the data. This is not ideal, as we lose
     // information that this was originally a number, but given ClickHouse doesn't support BigInts, the customer
     // would not be able to operate on these numerically anyway.

@@ -1,20 +1,20 @@
 import { useCallback, useEffect } from 'react'
 import { OptionalReactNativeNavigation } from '../optional/OptionalReactNativeNavigation'
-import type { PostHog } from '../posthog-rn'
-import { PostHogAutocaptureNavigationTrackerOptions } from '../types'
-import { useOverridablePostHog } from './utils'
-import { PostHogNavigationRef } from '../types'
+import type { Insights } from '../insights-rn'
+import { InsightsAutocaptureNavigationTrackerOptions } from '../types'
+import { useOverridableInsights } from './utils'
+import { InsightsNavigationRef } from '../types'
 
 function _useNavigationTrackerDisabled(): void {
   return
 }
 
 function _useNavigationTracker(
-  options?: PostHogAutocaptureNavigationTrackerOptions,
-  navigationRef?: PostHogNavigationRef,
-  client?: PostHog
+  options?: InsightsAutocaptureNavigationTrackerOptions,
+  navigationRef?: InsightsNavigationRef,
+  client?: Insights
 ): void {
-  const posthog = useOverridablePostHog(client, 'useNavigationTracker')
+  const insights = useOverridableInsights(client, 'useNavigationTracker')
 
   if (!OptionalReactNativeNavigation) {
     // NOTE: This is taken care of by the export, but we keep this here for TS
@@ -47,7 +47,7 @@ function _useNavigationTracker(
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const trackRoute = useCallback((): void => {
-    if (!navigation || !posthog) {
+    if (!navigation || !insights) {
       return
     }
 
@@ -96,9 +96,9 @@ function _useNavigationTracker(
 
     if (currentRouteName) {
       const properties = options?.routeToProperties?.(currentRouteName, params)
-      posthog.screen(currentRouteName, properties)
+      insights.screen(currentRouteName, properties)
     }
-  }, [navigation, options, posthog])
+  }, [navigation, options, insights])
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {

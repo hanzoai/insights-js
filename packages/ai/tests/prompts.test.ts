@@ -21,13 +21,13 @@ describe('Prompts', () => {
     deleted: false,
   }
 
-  const createMockPostHog = (options: { personalApiKey?: string; projectApiKey?: string; host?: string } = {}) => {
+  const createMockInsights = (options: { personalApiKey?: string; projectApiKey?: string; host?: string } = {}) => {
     return {
       options: {
         personalApiKey: 'personalApiKey' in options ? options.personalApiKey : 'phx_test_key',
       },
       apiKey: 'projectApiKey' in options ? options.projectApiKey : 'phc_test_key',
-      host: options.host ?? 'https://us.posthog.com',
+      host: options.host ?? 'https://us.insights.com',
     } as any
   }
 
@@ -51,14 +51,14 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = await prompts.get('test-prompt')
 
       expect(result).toBe(mockPromptResponse.prompt)
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key',
+        'https://us.insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key',
         {
           method: 'GET',
           headers: {
@@ -75,8 +75,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call - fetches from API
       const result1 = await prompts.get('test-prompt', { cacheTtlSeconds: 300 })
@@ -110,8 +110,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve(updatedPromptResponse),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call - fetches from API
       const result1 = await prompts.get('test-prompt', { cacheTtlSeconds: 60 })
@@ -136,8 +136,8 @@ describe('Prompts', () => {
         })
         .mockRejectedValueOnce(new Error('Network error'))
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call - populates cache
       const result1 = await prompts.get('test-prompt', { cacheTtlSeconds: 60 })
@@ -158,8 +158,8 @@ describe('Prompts', () => {
     it('should use fallback when no cache and fetch fails with warning', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const fallback = 'Default system prompt.'
       const result = await prompts.get('test-prompt', { fallback })
@@ -174,8 +174,8 @@ describe('Prompts', () => {
     it('should throw when no cache, no fallback, and fetch fails', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('test-prompt')).rejects.toThrow('Network error')
     })
@@ -186,11 +186,11 @@ describe('Prompts', () => {
         status: 404,
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('nonexistent-prompt')).rejects.toThrow(
-        '[PostHog Prompts] Prompt "nonexistent-prompt" not found'
+        '[Insights Prompts] Prompt "nonexistent-prompt" not found'
       )
     })
 
@@ -200,29 +200,29 @@ describe('Prompts', () => {
         status: 403,
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('restricted-prompt')).rejects.toThrow(
-        '[PostHog Prompts] Access denied for prompt "restricted-prompt"'
+        '[Insights Prompts] Access denied for prompt "restricted-prompt"'
       )
     })
 
     it('should throw when no personalApiKey is configured', async () => {
-      const posthog = createMockPostHog({ personalApiKey: undefined })
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights({ personalApiKey: undefined })
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('test-prompt')).rejects.toThrow(
-        '[PostHog Prompts] personalApiKey is required to fetch prompts'
+        '[Insights Prompts] personalApiKey is required to fetch prompts'
       )
     })
 
     it('should throw when no projectApiKey is configured', async () => {
-      const posthog = createMockPostHog({ projectApiKey: undefined })
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights({ projectApiKey: undefined })
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('test-prompt')).rejects.toThrow(
-        '[PostHog Prompts] projectApiKey is required to fetch prompts'
+        '[Insights Prompts] projectApiKey is required to fetch prompts'
       )
     })
 
@@ -233,28 +233,28 @@ describe('Prompts', () => {
         json: () => Promise.resolve({ invalid: 'response' }),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('test-prompt')).rejects.toThrow(
-        '[PostHog Prompts] Invalid response format for prompt "test-prompt"'
+        '[Insights Prompts] Invalid response format for prompt "test-prompt"'
       )
     })
 
-    it('should use custom host from PostHog options', async () => {
+    it('should use custom host from Insights options', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog({ host: 'https://eu.posthog.com' })
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights({ host: 'https://eu.insights.com' })
+      const prompts = new Prompts({ insights })
 
       await prompts.get('test-prompt')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key',
+        'https://eu.insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key',
         expect.any(Object)
       )
     })
@@ -266,8 +266,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call
       await prompts.get('test-prompt')
@@ -301,8 +301,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog, defaultCacheTtlSeconds: 60 })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights, defaultCacheTtlSeconds: 60 })
 
       // First call
       await prompts.get('test-prompt')
@@ -329,18 +329,18 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await prompts.get('prompt with spaces/and/slashes')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://us.posthog.com/api/environments/@current/llm_prompts/name/prompt%20with%20spaces%2Fand%2Fslashes/?token=phc_test_key',
+        'https://us.insights.com/api/environments/@current/llm_prompts/name/prompt%20with%20spaces%2Fand%2Fslashes/?token=phc_test_key',
         expect.any(Object)
       )
     })
 
-    it('should work with direct options (no PostHog client)', async () => {
+    it('should work with direct options (no Insights client)', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -356,7 +356,7 @@ describe('Prompts', () => {
 
       expect(result).toBe(mockPromptResponse.prompt)
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key',
+        'https://us.insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key',
         {
           method: 'GET',
           headers: {
@@ -376,13 +376,13 @@ describe('Prompts', () => {
       const prompts = new Prompts({
         personalApiKey: 'phx_direct_key',
         projectApiKey: 'phc_direct_key',
-        host: 'https://eu.posthog.com',
+        host: 'https://eu.insights.com',
       })
 
       await prompts.get('test-prompt')
 
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://eu.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key',
+        'https://eu.insights.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_direct_key',
         expect.any(Object)
       )
     })
@@ -421,8 +421,8 @@ describe('Prompts', () => {
 
   describe('compile()', () => {
     it('should replace a single variable', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('Hello, {{name}}!', { name: 'World' })
 
@@ -430,8 +430,8 @@ describe('Prompts', () => {
     })
 
     it('should replace multiple variables', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('Hello, {{name}}! Welcome to {{company}}. Your tier is {{tier}}.', {
         name: 'John',
@@ -443,8 +443,8 @@ describe('Prompts', () => {
     })
 
     it('should handle numbers', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('You have {{count}} items.', { count: 42 })
 
@@ -452,8 +452,8 @@ describe('Prompts', () => {
     })
 
     it('should handle booleans', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('Feature enabled: {{enabled}}', { enabled: true })
 
@@ -461,8 +461,8 @@ describe('Prompts', () => {
     })
 
     it('should leave unmatched variables unchanged', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('Hello, {{name}}! Your {{unknown}} is ready.', { name: 'World' })
 
@@ -470,8 +470,8 @@ describe('Prompts', () => {
     })
 
     it('should handle prompts with no variables', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('You are a helpful assistant.', {})
 
@@ -479,8 +479,8 @@ describe('Prompts', () => {
     })
 
     it('should handle empty variables object', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('Hello, {{name}}!', {})
 
@@ -488,8 +488,8 @@ describe('Prompts', () => {
     })
 
     it('should handle multiple occurrences of the same variable', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = prompts.compile('Hello, {{name}}! Goodbye, {{name}}!', { name: 'World' })
 
@@ -540,8 +540,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve(mockPromptResponse),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // Populate cache with two prompts
       await prompts.get('test-prompt')
@@ -583,8 +583,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, name: 'other-prompt' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // Populate cache with two prompts
       await prompts.get('test-prompt')

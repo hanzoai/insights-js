@@ -13,10 +13,10 @@ const API_TEST_INPUT = JSON.stringify({
     {
       event: 'custom-event',
       distinct_id: 'user-distinct-id',
-      library: 'posthog-core-tests',
+      library: 'insights-core-tests',
       library_version: '2.0.0-alpha',
       properties: {
-        $lib: 'posthog-core-tests',
+        $lib: 'insights-core-tests',
         $lib_version: '2.0.0-alpha',
         $session_id: 'session.id',
       },

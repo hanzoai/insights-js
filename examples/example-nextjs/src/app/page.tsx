@@ -1,5 +1,5 @@
 'use client'
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from '@hanzo/insights/react'
 import { captureServerError } from './actions'
 
 function randomID() {
@@ -7,7 +7,7 @@ function randomID() {
 }
 
 export default function Home() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     return (
         <div>
             <main>
@@ -20,7 +20,7 @@ export default function Home() {
                         gap: '30px',
                     }}
                 >
-                    <button onClick={() => posthog.captureException(new Error('exception captured'))}>
+                    <button onClick={() => insights.captureException(new Error('exception captured'))}>
                         Capture error manually
                     </button>
                     <button
@@ -37,11 +37,11 @@ export default function Home() {
                     >
                         Capture promise rejection automatically
                     </button>
-                    <button onClick={() => posthog.capture('$exception')}>Capture exception via capture()</button>
+                    <button onClick={() => insights.capture('$exception')}>Capture exception via capture()</button>
                     <button onClick={() => captureServerError()}>Create server exception!</button>
                     <button
                         onClick={() =>
-                            posthog.captureException(new Error('custom fingerprint'), {
+                            insights.captureException(new Error('custom fingerprint'), {
                                 $exception_fingerprint: randomID(),
                             })
                         }

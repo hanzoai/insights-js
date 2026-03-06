@@ -6,48 +6,48 @@ import {
   GenerateContentResponseUsageMetadata,
 } from '@google/genai'
 import type { GoogleGenAIOptions } from '@google/genai'
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import {
   MonitoringParams,
-  sendEventToPosthog,
+  sendEventToInsights,
   extractAvailableToolCalls,
   formatResponseGemini,
-  extractPosthogParams,
+  extractInsightsParams,
   toContentString,
-  sendEventWithErrorToPosthog,
+  sendEventWithErrorToInsights,
 } from '../utils'
 import { sanitizeGemini } from '../sanitization'
 import type { TokenUsage, FormattedContent, FormattedContentItem, FormattedMessage } from '../types'
 import { isString } from '../typeGuards'
 
 interface MonitoringGeminiConfig extends GoogleGenAIOptions {
-  posthog: PostHog
+  insights: Insights
 }
 
-export class PostHogGoogleGenAI {
-  private readonly phClient: PostHog
+export class InsightsGoogleGenAI {
+  private readonly phClient: Insights
   private readonly client: GoogleGenAI
   public models: WrappedModels
 
   constructor(config: MonitoringGeminiConfig) {
-    const { posthog, ...geminiConfig } = config
-    this.phClient = posthog
+    const { insights, ...geminiConfig } = config
+    this.phClient = insights
     this.client = new GoogleGenAI(geminiConfig)
     this.models = new WrappedModels(this.client, this.phClient)
   }
 }
 
 export class WrappedModels {
-  private readonly phClient: PostHog
+  private readonly phClient: Insights
   private readonly client: GoogleGenAI
 
-  constructor(client: GoogleGenAI, phClient: PostHog) {
+  constructor(client: GoogleGenAI, phClient: Insights) {
     this.client = client
     this.phClient = phClient
   }
 
   public async generateContent(params: GenerateContentParameters & MonitoringParams): Promise<GeminiResponse> {
-    const { providerParams: geminiParams, posthogParams } = extractPosthogParams(params)
+    const { providerParams: geminiParams, insightsParams } = extractInsightsParams(params)
     const startTime = Date.now()
 
     try {
@@ -57,12 +57,12 @@ export class WrappedModels {
       const availableTools = extractAvailableToolCalls('gemini', geminiParams)
 
       const metadata = response.usageMetadata
-      await sendEventToPosthog({
+      await sendEventToInsights({
         client: this.phClient,
-        ...posthogParams,
+        ...insightsParams,
         model: geminiParams.model,
         provider: 'gemini',
-        input: this.formatInputForPostHog(geminiParams),
+        input: this.formatInputForInsights(geminiParams),
         output: formatResponseGemini(response),
         latency,
         baseURL: 'https://generativelanguage.googleapis.com',
@@ -84,12 +84,12 @@ export class WrappedModels {
       return response
     } catch (error: unknown) {
       const latency = (Date.now() - startTime) / 1000
-      const enrichedError = await sendEventWithErrorToPosthog({
+      const enrichedError = await sendEventWithErrorToInsights({
         client: this.phClient,
-        ...posthogParams,
+        ...insightsParams,
         model: geminiParams.model,
         provider: 'gemini',
-        input: this.formatInputForPostHog(geminiParams),
+        input: this.formatInputForInsights(geminiParams),
         output: [],
         latency,
         baseURL: 'https://generativelanguage.googleapis.com',
@@ -107,7 +107,7 @@ export class WrappedModels {
   public async *generateContentStream(
     params: GenerateContentParameters & MonitoringParams
   ): AsyncGenerator<GeminiResponse, void, unknown> {
-    const { providerParams: geminiParams, posthogParams } = extractPosthogParams(params)
+    const { providerParams: geminiParams, insightsParams } = extractInsightsParams(params)
     const startTime = Date.now()
     const accumulatedContent: FormattedContent = []
     let firstTokenTime: number | undefined
@@ -200,12 +200,12 @@ export class WrappedModels {
       // Format output similar to formatResponseGemini
       const output = accumulatedContent.length > 0 ? [{ role: 'assistant', content: accumulatedContent }] : []
 
-      await sendEventToPosthog({
+      await sendEventToInsights({
         client: this.phClient,
-        ...posthogParams,
+        ...insightsParams,
         model: geminiParams.model,
         provider: 'gemini',
-        input: this.formatInputForPostHog(geminiParams),
+        input: this.formatInputForInsights(geminiParams),
         output,
         latency,
         timeToFirstToken,
@@ -221,12 +221,12 @@ export class WrappedModels {
       })
     } catch (error: unknown) {
       const latency = (Date.now() - startTime) / 1000
-      const enrichedError = await sendEventWithErrorToPosthog({
+      const enrichedError = await sendEventWithErrorToInsights({
         client: this.phClient,
-        ...posthogParams,
+        ...insightsParams,
         model: geminiParams.model,
         provider: 'gemini',
-        input: this.formatInputForPostHog(geminiParams),
+        input: this.formatInputForInsights(geminiParams),
         output: [],
         latency,
         baseURL: 'https://generativelanguage.googleapis.com',
@@ -365,7 +365,7 @@ export class WrappedModels {
     return null
   }
 
-  private formatInputForPostHog(params: GenerateContentParameters): FormattedMessage[] {
+  private formatInputForInsights(params: GenerateContentParameters): FormattedMessage[] {
     const sanitized = sanitizeGemini(params.contents)
     const messages = this.formatInput(sanitized)
 
@@ -461,5 +461,5 @@ function calculateGoogleWebSearchCount(response: unknown): number {
   return hasGrounding ? 1 : 0
 }
 
-export default PostHogGoogleGenAI
-export { PostHogGoogleGenAI as Gemini }
+export default InsightsGoogleGenAI
+export { InsightsGoogleGenAI as Gemini }

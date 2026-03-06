@@ -3,7 +3,7 @@
 
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 
-type ErrorHandler = { _posthogErrorHandler: boolean } & ((error: Error) => void)
+type ErrorHandler = { _insightsErrorHandler: boolean } & ((error: Error) => void)
 
 function makeUncaughtExceptionHandler(
   captureFn: (exception: Error, hint: CoreErrorTracking.EventHint) => void,
@@ -24,7 +24,7 @@ function makeUncaughtExceptionHandler(
           // as soon as we're using domains this listener is attached by node itself
           listener.name !== 'domainUncaughtExceptionClear' &&
           // the handler we register in this integration
-          (listener as ErrorHandler)._posthogErrorHandler !== true
+          (listener as ErrorHandler)._insightsErrorHandler !== true
         )
       }).length
 
@@ -42,7 +42,7 @@ function makeUncaughtExceptionHandler(
         onFatalFn(error)
       }
     },
-    { _posthogErrorHandler: true }
+    { _insightsErrorHandler: true }
   )
 }
 

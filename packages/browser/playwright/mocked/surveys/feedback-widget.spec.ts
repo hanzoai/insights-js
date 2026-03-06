@@ -1,6 +1,6 @@
-import { SurveySchedule } from '@/posthog-surveys-types'
+import { SurveySchedule } from '@/insights-surveys-types'
 import { pollUntilEventCaptured } from '../utils/event-capture-utils'
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const startOptions = {
@@ -84,16 +84,16 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeVisible()
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText('Feedback for us?')
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText('Feedback for us?')
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
             'tab feedback widget'
         )
 
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('textarea').fill('hello posthog!')
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('textarea').fill('hello insights!')
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
         await pollUntilEventCaptured(page, 'survey sent')
     })
 
@@ -133,7 +133,7 @@ test.describe('surveys - feedback widget', () => {
             await start(startOptions, page, context)
             await surveysAPICall
 
-            const tabButton = page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab')
+            const tabButton = page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab')
             await expect(tabButton).toBeVisible()
 
             await expect(tabButton).toHaveCSS(cssProperty, expectedValue)
@@ -141,17 +141,17 @@ test.describe('surveys - feedback widget', () => {
                 await expect(tabButton).toHaveClass(new RegExp(hasClass))
             }
 
-            await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeVisible()
+            await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeVisible()
 
             await tabButton.click()
-            await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-            await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText('Feedback for us?')
-            await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+            await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+            await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText('Feedback for us?')
+            await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
                 'tab feedback widget'
             )
 
-            await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('textarea').fill('hello posthog!')
-            await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+            await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('textarea').fill('hello insights!')
+            await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
             await pollUntilEventCaptured(page, 'survey sent')
         })
     })
@@ -185,10 +185,10 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
         await page.setViewportSize({ width: 375, height: 667 })
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeInViewport()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeInViewport()
     })
 
     test('widgetType is custom selector', async ({ page, context }) => {
@@ -225,18 +225,18 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab')).not.toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab')).not.toBeVisible()
         await page.locator('.test-surveys').click()
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible({ timeout: 8000 })
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible({ timeout: 8000 })
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText('Feedback for us?')
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText('Feedback for us?')
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
             'custom selector widget'
         )
 
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('textarea').fill('hello posthog!')
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('textarea').fill('hello insights!')
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
         await pollUntilEventCaptured(page, 'survey sent')
     })
 
@@ -265,15 +265,15 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
-        await page.locator('.PostHogSurvey-123').locator('#surveyQuestion0Choice1').click()
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('#surveyQuestion0Choice1').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
 
-        await page.locator('.PostHogSurvey-123 textarea').first().type('Because I want to learn more about posthog')
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
-        await page.locator('.PostHogSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 textarea').first().type('Because I want to learn more about insights')
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
+        await page.locator('.InsightsSurvey-123 .form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey shown')
         await pollUntilEventCaptured(page, 'survey sent')
@@ -304,10 +304,10 @@ test.describe('surveys - feedback widget', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab')).toBeVisible()
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab')).toHaveCSS('color', black)
-        await expect(page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab')).toHaveCSS(
+        await expect(page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab')).toHaveCSS('color', black)
+        await expect(page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab')).toHaveCSS(
             'background-color',
             white
         )
@@ -346,40 +346,40 @@ test.describe('surveys - feedback widget', () => {
         await surveysAPICall
 
         // 1. Check that the survey widget is rendered
-        await expect(page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab')).toBeVisible()
 
         // 2. Open the survey
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
         // 3. Answer the survey
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('textarea').fill('first submission')
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('textarea').fill('first submission')
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
 
         // 4. Check for thank you message
-        await expect(page.locator('.PostHogSurvey-123').locator('.thank-you-message-header')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.thank-you-message-header')).toHaveText('Thank you!')
+        await expect(page.locator('.InsightsSurvey-123').locator('.thank-you-message-header')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.thank-you-message-header')).toHaveText('Thank you!')
 
         // Verify the event was sent
         await pollUntilEventCaptured(page, 'survey sent')
 
         // 5. Close the thank you message and click the survey tab again
-        await page.locator('.PostHogSurvey-123').locator('.form-submit').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.form-submit').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeVisible()
         await page.waitForTimeout(300)
 
         // Open the survey again
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
 
         // 6. Verify survey is rendered again
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
         // Submit again with different text
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('textarea').fill('second submission')
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('textarea').fill('second submission')
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
 
         // Verify thank you message appears again
-        await expect(page.locator('.PostHogSurvey-123').locator('.thank-you-message-header')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.thank-you-message-header')).toBeVisible()
 
         // Verify second event was sent
         await pollUntilEventCaptured(page, 'survey sent')
@@ -430,23 +430,23 @@ test.describe('surveys - feedback widget', () => {
 
         // click on the second survey trigger
         await page.locator('.test-surveys').click()
-        await expect(page.locator('.PostHogSurvey-456').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-456').locator('.survey-form')).toBeVisible()
 
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
         // fill in first survey
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('textarea').fill('first submission')
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('textarea').fill('first submission')
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
 
         // click on the first survey confirmation message
-        await page.locator('.PostHogSurvey-123').locator('.form-submit').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.form-submit').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeVisible()
 
         // check if the second survey is still visible
-        await expect(page.locator('.PostHogSurvey-456').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-456').locator('.survey-form')).toBeVisible()
     })
 
     test('if multiple surveys being shown, closing one does not close the other', async ({ page, context }) => {
@@ -491,17 +491,17 @@ test.describe('surveys - feedback widget', () => {
 
         // click on the second survey trigger
         await page.locator('.test-surveys').click()
-        await expect(page.locator('.PostHogSurvey-456').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-456').locator('.survey-form')).toBeVisible()
 
-        await page.locator('.PostHogSurvey-123').locator('.ph-survey-widget-tab').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
+        await page.locator('.InsightsSurvey-123').locator('.ph-survey-widget-tab').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
 
         // close first survey
-        await page.locator('.PostHogSurvey-123').locator('.survey-form').locator('.form-cancel').click()
+        await page.locator('.InsightsSurvey-123').locator('.survey-form').locator('.form-cancel').click()
 
         await pollUntilEventCaptured(page, 'survey dismissed')
 
         // check if the second survey is still visible
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).not.toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).not.toBeVisible()
     })
 })

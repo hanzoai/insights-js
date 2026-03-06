@@ -75,7 +75,7 @@ export const DEFAULT_BLOCKED_UA_STRS = [
   // headless browsers
   'headlesschrome',
   'cypress',
-  // we don't block electron here, as many customers use posthog-js in electron apps
+  // we don't block electron here, as many customers use @hanzo/insights in electron apps
 
   // a whole bunch of goog-specific crawlers
   // https://developers.google.com/search/docs/advanced/crawling/overview-google-crawlers

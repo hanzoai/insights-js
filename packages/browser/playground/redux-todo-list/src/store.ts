@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { posthogReduxLogger } from 'posthog-js/lib/src/customizations'
+import { insightsReduxLogger } from '@hanzo/insights/lib/src/customizations'
 
 // Types
 export interface Todo {
@@ -184,7 +184,7 @@ const initialState: TodoState = {
     todos: [
         { id: 1, text: 'Learn Redux with TypeScript', completed: false },
         { id: 2, text: 'Build a todo app', completed: false },
-        { id: 3, text: 'Test with PostHog', completed: false },
+        { id: 3, text: 'Test with Insights', completed: false },
     ],
     filter: 'all',
     user: {
@@ -318,8 +318,8 @@ export const todoReducer = (state: TodoState = initialState, action: TodoAction)
     }
 }
 
-// Create PostHog Redux logger middleware
-const posthogMiddleware = posthogReduxLogger<TodoState>({
+// Create Insights Redux logger middleware
+const insightsMiddleware = insightsReduxLogger<TodoState>({
     // Example: optionally mask sensitive data from actions
     // maskReduxAction: (action) => {
     //     // Return null to skip logging this action entirely
@@ -349,7 +349,7 @@ const posthogMiddleware = posthogReduxLogger<TodoState>({
 export const store = configureStore({
     reducer: todoReducer,
     preloadedState: initialState,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(posthogMiddleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(insightsMiddleware),
     devTools: true,
 })
 

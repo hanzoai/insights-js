@@ -13,7 +13,7 @@
     <div id="root"><div class="app"><h1>SSR Hydration Test</h1><p>This content simulates server-rendered HTML</p><button id="test-btn">Click me</button></div></div>
 
     <!-- This script simulates a framework bundle that was server-rendered -->
-    <!-- The bug was: PostHog's insertBefore would insert BEFORE this script -->
+    <!-- The bug was: Insights's insertBefore would insert BEFORE this script -->
     <script id="framework-bundle">
         console.log('[Framework] Framework bundle loaded');
     </script>
@@ -38,7 +38,7 @@
             originalWarn.apply(console, args);
         };
 
-        // Store DOM state BEFORE PostHog loads
+        // Store DOM state BEFORE Insights loads
         window.initialBodyChildCount = document.body.children.length;
         window.initialFirstScriptId = document.querySelector('body > script')?.id;
     </script>
@@ -46,7 +46,7 @@
     <script src="/dist/array.js"></script>
 
     <script>
-        // Define performHydration BEFORE posthog.init() since loaded callback may fire synchronously
+        // Define performHydration BEFORE insights.init() since loaded callback may fire synchronously
         window.performHydration = function() {
             console.log('[Preact] Starting hydration...');
 
@@ -76,14 +76,14 @@
             window.testComplete = true;
         };
 
-        window.posthog.init('test-token', {
+        window.insights.init('test-token', {
             api_host: 'https://localhost:1234',
             persistence: 'memory',
             external_scripts_inject_target: 'head',
             bootstrap: {
                 distinctID: 'test-user'
             },
-            loaded: function(posthog) {
+            loaded: function(insights) {
                 // Check if body DOM was mutated
                 const currentFirstScriptId = document.querySelector('body > script')?.id;
                 const currentBodyChildCount = document.body.children.length;
@@ -92,7 +92,7 @@
                 window.newScriptsAdded = currentBodyChildCount > window.initialBodyChildCount ||
                                          document.querySelectorAll('head > script').length > 0;
 
-                console.log('[PostHog] Loaded, DOM state:', {
+                console.log('[Insights] Loaded, DOM state:', {
                     domMutated: window.domMutated,
                     newScriptsAdded: window.newScriptsAdded
                 });

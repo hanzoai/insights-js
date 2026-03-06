@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from './utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 import { BeforeSendFn } from '@/types'
 
@@ -20,19 +20,19 @@ test.describe('before_send', () => {
         await start(startOptions, page, context)
 
         await page.evaluate(() => {
-            const posthog = (window as WindowWithPostHog).posthog
-            if (!posthog) {
-                throw new Error('PostHog is not initialized')
+            const insights = (window as WindowWithInsights).insights
+            if (!insights) {
+                throw new Error('Insights is not initialized')
             }
             let counter = 0
             // box the original before_send function
-            const og: BeforeSendFn[] = Array.isArray(posthog.config.before_send)
-                ? posthog.config.before_send
-                : posthog.config.before_send !== undefined
-                  ? [posthog.config.before_send]
+            const og: BeforeSendFn[] = Array.isArray(insights.config.before_send)
+                ? insights.config.before_send
+                : insights.config.before_send !== undefined
+                  ? [insights.config.before_send]
                   : []
 
-            posthog.config.before_send = [
+            insights.config.before_send = [
                 (cr) => {
                     if (!cr) {
                         return null

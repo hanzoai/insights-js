@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node';
+import { Insights } from 'insights-node';
 /**
  * Welcome to Cloudflare Workers! This is your first worker.
  *
@@ -10,22 +10,22 @@ import { PostHog } from 'posthog-node';
  */
 
 export interface Env {
-	POSTHOG_PROJECT_API_KEY: string;
-	POSTHOG_API_HOST: string;
-	POSTHOG_PERSONAL_API_KEY: string;
+	INSIGHTS_PROJECT_API_KEY: string;
+	INSIGHTS_API_HOST: string;
+	INSIGHTS_PERSONAL_API_KEY: string;
 }
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
-		const posthog = new PostHog(env.POSTHOG_PROJECT_API_KEY, {
-			host: env.POSTHOG_API_HOST,
-			personalApiKey: env.POSTHOG_PERSONAL_API_KEY,
+		const insights = new Insights(env.INSIGHTS_PROJECT_API_KEY, {
+			host: env.INSIGHTS_API_HOST,
+			personalApiKey: env.INSIGHTS_PERSONAL_API_KEY,
 			featureFlagsPollingInterval: 10000,
 		});
 
-		posthog.capture({ distinctId: `user-${Date.now()}`, event: 'test event', properties: { test: 'test' } });
+		insights.capture({ distinctId: `user-${Date.now()}`, event: 'test event', properties: { test: 'test' } });
 
-		await posthog.flush();
+		await insights.flush();
 
 		return new Response('Success!');
 	},

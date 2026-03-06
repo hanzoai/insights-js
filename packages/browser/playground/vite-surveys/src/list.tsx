@@ -6,7 +6,7 @@ import {
     SurveyQuestionType,
     SurveyType,
     MultipleSurveyQuestion,
-} from '../../../src/posthog-surveys-types'
+} from '../../../src/insights-surveys-types'
 
 const surveys = [
     {
@@ -78,7 +78,7 @@ const surveys = [
         questions: [
             {
                 type: SurveyQuestionType.SingleChoice,
-                question: 'How would you feel if you could no longer use PostHog?',
+                question: 'How would you feel if you could no longer use Insights?',
                 choices: ['Not disappointed', 'Somewhat disappointed', 'Very disappointed'],
             } as MultipleSurveyQuestion,
         ],
@@ -97,7 +97,7 @@ const surveys = [
         questions: [
             {
                 type: SurveyQuestionType.Rating,
-                question: 'How satisfied are you with PostHog surveys?',
+                question: 'How satisfied are you with Insights surveys?',
                 description: '',
                 display: 'emoji',
                 scale: 5,

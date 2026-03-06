@@ -1,4 +1,4 @@
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import LazyLoadedDeadClicksAutocapture from '../../entrypoints/dead-clicks-autocapture'
 import { assignableWindow, document } from '../../utils/globals'
 import { autocaptureCompatibleElements } from '../../autocapture-utils'
@@ -25,16 +25,16 @@ const triggerMouseEvent = function (
 }
 
 describe('LazyLoadedDeadClicksAutocapture', () => {
-    let fakeInstance: PostHog
+    let fakeInstance: Insights
     let lazyLoadedDeadClicksAutocapture: LazyLoadedDeadClicksAutocapture
 
     beforeEach(async () => {
         jest.setSystemTime(1000)
 
-        assignableWindow.__PosthogExtensions__ = assignableWindow.__PosthogExtensions__ || {}
-        assignableWindow.__PosthogExtensions__.loadExternalDependency = jest
+        assignableWindow.__InsightsExtensions__ = assignableWindow.__InsightsExtensions__ || {}
+        assignableWindow.__InsightsExtensions__.loadExternalDependency = jest
             .fn()
-            .mockImplementation(() => (_ph: PostHog, _name: string, cb: (err?: Error) => void) => {
+            .mockImplementation(() => (_ph: Insights, _name: string, cb: (err?: Error) => void) => {
                 cb()
             })
 
@@ -46,7 +46,7 @@ describe('LazyLoadedDeadClicksAutocapture', () => {
                 props: {},
             },
             capture: jest.fn(),
-        } as unknown as Partial<PostHog> as PostHog
+        } as unknown as Partial<Insights> as Insights
 
         lazyLoadedDeadClicksAutocapture = new LazyLoadedDeadClicksAutocapture(fakeInstance)
         lazyLoadedDeadClicksAutocapture.start(document)

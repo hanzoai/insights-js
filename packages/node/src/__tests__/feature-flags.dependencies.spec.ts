@@ -1,35 +1,35 @@
-import { PostHogOptions } from '@/types'
-import { PostHog } from '@/entrypoints/index.node'
+import { InsightsOptions } from '@/types'
+import { Insights } from '@/entrypoints/index.node'
 import { anyFlagsCall, anyLocalEvalCall, apiImplementation } from './utils'
 
 jest.spyOn(console, 'debug').mockImplementation()
 
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
 
-const posthogImmediateResolveOptions: PostHogOptions = {
+const insightsImmediateResolveOptions: InsightsOptions = {
   fetchRetryCount: 0,
 }
 
-type LocalPostHog = Omit<PostHog, 'featureFlagsPoller'> & {
-  featureFlagsPoller: PostHog['featureFlagsPoller']
+type LocalInsights = Omit<Insights, 'featureFlagsPoller'> & {
+  featureFlagsPoller: Insights['featureFlagsPoller']
 }
 
-function buildClient(options: Partial<PostHogOptions> = posthogImmediateResolveOptions): LocalPostHog {
-  return new PostHog('TEST_API_KEY', {
+function buildClient(options: Partial<InsightsOptions> = insightsImmediateResolveOptions): LocalInsights {
+  return new Insights('TEST_API_KEY', {
     host: 'http://example.com',
     personalApiKey: 'TEST_PERSONAL_API_KEY',
     ...options,
-  }) as unknown as LocalPostHog
+  }) as unknown as LocalInsights
 }
 
 describe('feature flag dependencies', () => {
-  let posthog: LocalPostHog
+  let insights: LocalInsights
 
   jest.useFakeTimers()
 
   afterEach(async () => {
     // ensure clean shutdown & no test interdependencies
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   describe('flag dependencies', () => {
@@ -76,9 +76,9 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
-      expect(await posthog.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(true)
+      expect(await insights.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(true)
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
 
@@ -123,14 +123,14 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // Without group context, dependency evaluation cannot match the group flag.
-      expect(await posthog.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(false)
+      expect(await insights.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(false)
 
       // With group context, dependency should evaluate the group flag by group key, not $device_id.
       expect(
-        await posthog.getFeatureFlag('dependent-flag', 'distinct-id', {
+        await insights.getFeatureFlag('dependent-flag', 'distinct-id', {
           groups: { company: 'acme' },
           groupProperties: { company: {} },
         })
@@ -197,27 +197,27 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       expect(
-        await posthog.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
+        await insights.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
           personProperties: { email: 'anybody@example.com' },
         })
       ).toEqual('kiwi')
 
       expect(
-        await posthog.getFeatureFlag('dependent-flag', 'test-user', {
+        await insights.getFeatureFlag('dependent-flag', 'test-user', {
           personProperties: { email: 'anybody@example.com' },
         })
       ).toEqual(true)
 
-      const negativeLeafResult = await posthog.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
+      const negativeLeafResult = await insights.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
         personProperties: { email: 'nobody@not-example.com' },
       })
       expect(negativeLeafResult).toEqual(false)
 
       expect(
-        await posthog.getFeatureFlag('dependent-flag', 'test-user', {
+        await insights.getFeatureFlag('dependent-flag', 'test-user', {
           personProperties: { email: 'nobody@not-example.com' },
         })
       ).toEqual(false)
@@ -266,10 +266,10 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
-      expect(await posthog.getFeatureFlag('base-flag', 'distinct-id')).toEqual(false)
-      expect(await posthog.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(false)
+      expect(await insights.getFeatureFlag('base-flag', 'distinct-id')).toEqual(false)
+      expect(await insights.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(false)
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
 
@@ -316,9 +316,9 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
-      expect(await posthog.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(undefined)
+      expect(await insights.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(undefined)
       expect(mockedFetch).toHaveBeenCalledWith(...anyFlagsCall)
     })
 
@@ -351,9 +351,9 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
-      expect(await posthog.getFeatureFlag('dependent-flag', 'distinct-id')).toBeUndefined()
+      expect(await insights.getFeatureFlag('dependent-flag', 'distinct-id')).toBeUndefined()
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
 
@@ -422,14 +422,14 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // flag-c depends on flag-b, which depends on flag-a - all should be true
-      expect(await posthog.getFeatureFlag('flag-c', 'distinct-id')).toEqual(true)
+      expect(await insights.getFeatureFlag('flag-c', 'distinct-id')).toEqual(true)
 
       // Verify individual flags work as expected
-      expect(await posthog.getFeatureFlag('flag-a', 'distinct-id')).toEqual(true)
-      expect(await posthog.getFeatureFlag('flag-b', 'distinct-id')).toEqual(true)
+      expect(await insights.getFeatureFlag('flag-a', 'distinct-id')).toEqual(true)
+      expect(await insights.getFeatureFlag('flag-b', 'distinct-id')).toEqual(true)
 
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
@@ -499,12 +499,12 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // When base flag (flag-a) is disabled, the whole chain should fail
-      expect(await posthog.getFeatureFlag('flag-a', 'distinct-id')).toEqual(false)
-      expect(await posthog.getFeatureFlag('flag-b', 'distinct-id')).toEqual(false)
-      expect(await posthog.getFeatureFlag('flag-c', 'distinct-id')).toEqual(false)
+      expect(await insights.getFeatureFlag('flag-a', 'distinct-id')).toEqual(false)
+      expect(await insights.getFeatureFlag('flag-b', 'distinct-id')).toEqual(false)
+      expect(await insights.getFeatureFlag('flag-c', 'distinct-id')).toEqual(false)
 
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
@@ -558,18 +558,18 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // Both conditions satisfied
       expect(
-        await posthog.getFeatureFlag('mixed-flag', 'user-1', {
+        await insights.getFeatureFlag('mixed-flag', 'user-1', {
           personProperties: { email: 'test@example.com' },
         })
       ).toEqual(true)
 
       // Flag dependency satisfied but email condition not satisfied
       expect(
-        await posthog.getFeatureFlag('mixed-flag', 'user-2', {
+        await insights.getFeatureFlag('mixed-flag', 'user-2', {
           personProperties: { email: 'test@other.com' },
         })
       ).toEqual(false)
@@ -620,10 +620,10 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // base-flag returns false, so exact match with false should return true
-      expect(await posthog.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(true)
+      expect(await insights.getFeatureFlag('dependent-flag', 'distinct-id')).toEqual(true)
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
     })
 
@@ -720,18 +720,18 @@ describe('feature flag dependencies', () => {
       }
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // All dependencies satisfied - should return true
       expect(
-        await posthog.getFeatureFlag('flag-d', 'distinct-id', {
+        await insights.getFeatureFlag('flag-d', 'distinct-id', {
           personProperties: { email: 'test@example.com' },
         })
       ).toEqual(true)
 
       // Break the chain by changing flag-a condition - should return false
       expect(
-        await posthog.getFeatureFlag('flag-d', 'distinct-id', {
+        await insights.getFeatureFlag('flag-d', 'distinct-id', {
           personProperties: { email: 'test@other.com' },
         })
       ).toEqual(false)
@@ -769,10 +769,10 @@ describe('feature flag dependencies', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      const posthog = buildClient()
+      const insights = buildClient()
 
       // Should return undefined since the dependency chain is missing (InconclusiveMatchError)
-      const result = await posthog.getFeatureFlag('dependent-flag', 'some-distinct-id')
+      const result = await insights.getFeatureFlag('dependent-flag', 'some-distinct-id')
       expect(result).toBe(undefined)
     })
 
@@ -943,16 +943,16 @@ describe('feature flag dependencies', () => {
 
       mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-      posthog = buildClient()
+      insights = buildClient()
 
       // Test successful pineapple -> blue -> breaking-bad chain
-      const leafResult = await posthog.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
+      const leafResult = await insights.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
         personProperties: { email: 'pineapple@example.com' },
       })
-      const intermediateResult = await posthog.getFeatureFlag('multivariate-intermediate-flag', 'test-user', {
+      const intermediateResult = await insights.getFeatureFlag('multivariate-intermediate-flag', 'test-user', {
         personProperties: { email: 'pineapple@example.com' },
       })
-      const rootResult = await posthog.getFeatureFlag('multivariate-root-flag', 'test-user', {
+      const rootResult = await insights.getFeatureFlag('multivariate-root-flag', 'test-user', {
         personProperties: { email: 'pineapple@example.com' },
       })
 
@@ -961,13 +961,13 @@ describe('feature flag dependencies', () => {
       expect(rootResult).toEqual('breaking-bad')
 
       // Test successful mango -> red -> the-wire chain
-      const mangoLeafResult = await posthog.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
+      const mangoLeafResult = await insights.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
         personProperties: { email: 'mango@example.com' },
       })
-      const mangoIntermediateResult = await posthog.getFeatureFlag('multivariate-intermediate-flag', 'test-user', {
+      const mangoIntermediateResult = await insights.getFeatureFlag('multivariate-intermediate-flag', 'test-user', {
         personProperties: { email: 'mango@example.com' },
       })
-      const mangoRootResult = await posthog.getFeatureFlag('multivariate-root-flag', 'test-user', {
+      const mangoRootResult = await insights.getFeatureFlag('multivariate-root-flag', 'test-user', {
         personProperties: { email: 'mango@example.com' },
       })
 
@@ -976,13 +976,13 @@ describe('feature flag dependencies', () => {
       expect(mangoRootResult).toEqual('the-wire')
 
       // Test broken chain - user without matching email gets default/false results
-      const unknownLeafResult = await posthog.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
+      const unknownLeafResult = await insights.getFeatureFlag('multivariate-leaf-flag', 'test-user', {
         personProperties: { email: 'unknown@example.com' },
       })
-      const unknownIntermediateResult = await posthog.getFeatureFlag('multivariate-intermediate-flag', 'test-user', {
+      const unknownIntermediateResult = await insights.getFeatureFlag('multivariate-intermediate-flag', 'test-user', {
         personProperties: { email: 'unknown@example.com' },
       })
-      const unknownRootResult = await posthog.getFeatureFlag('multivariate-root-flag', 'test-user', {
+      const unknownRootResult = await insights.getFeatureFlag('multivariate-root-flag', 'test-user', {
         personProperties: { email: 'unknown@example.com' },
       })
 
@@ -1009,11 +1009,11 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
         // Access the private method for testing
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', 'control')).toBe(true)
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('Control', 'Control')).toBe(true)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', 'control')).toBe(true)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('Control', 'Control')).toBe(true)
       })
 
       it('does not match different cases', async () => {
@@ -1030,10 +1030,10 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', 'Control')).toBe(false)
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('Control', 'CONTROL')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', 'Control')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('Control', 'CONTROL')).toBe(false)
       })
 
       it('does not match different strings', async () => {
@@ -1050,9 +1050,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', 'test')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', 'test')).toBe(false)
       })
     })
 
@@ -1071,10 +1071,10 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, 'control')).toBe(true)
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, 'test')).toBe(true)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, 'control')).toBe(true)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, 'test')).toBe(true)
       })
 
       it('does not match false when flag has string variant', async () => {
@@ -1091,9 +1091,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(false, 'control')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(false, 'control')).toBe(false)
       })
     })
 
@@ -1112,9 +1112,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, true)).toBe(true)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, true)).toBe(true)
       })
 
       it('matches false with false', async () => {
@@ -1131,9 +1131,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(false, false)).toBe(true)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(false, false)).toBe(true)
       })
 
       it('does not match false with true', async () => {
@@ -1150,9 +1150,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(false, true)).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(false, true)).toBe(false)
       })
 
       it('does not match true with false', async () => {
@@ -1169,9 +1169,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, false)).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, false)).toBe(false)
       })
     })
 
@@ -1190,9 +1190,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, '')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(true, '')).toBe(false)
       })
 
       it('does not match string with empty string', async () => {
@@ -1209,9 +1209,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', '')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', '')).toBe(false)
       })
     })
 
@@ -1230,9 +1230,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue(123, 'control')).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue(123, 'control')).toBe(false)
       })
 
       it('does not match string with boolean true', async () => {
@@ -1249,9 +1249,9 @@ describe('feature flag dependencies', () => {
         }
         mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-        posthog = buildClient()
+        insights = buildClient()
 
-        expect((posthog.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', true)).toBe(false)
+        expect((insights.featureFlagsPoller as any).flagEvaluatesToExpectedValue('control', true)).toBe(false)
       })
     })
   })

@@ -10,9 +10,9 @@
  */
 import { getPersonInfo, getPersonPropsFromInfo } from './utils/event-utils'
 import type { SessionIdManager } from './sessionid'
-import type { PostHogPersistence } from './posthog-persistence'
+import type { InsightsPersistence } from './insights-persistence'
 import { CLIENT_SESSION_PROPS } from './constants'
-import type { PostHog } from './posthog-core'
+import type { Insights } from './insights-core'
 import { each, stripEmptyProperties } from './utils'
 import { stripLeadingDollar } from '@hanzo/insights-core'
 
@@ -36,23 +36,23 @@ interface StoredSessionSourceProps {
     props: LegacySessionSourceProps | CurrentSessionSourceProps
 }
 
-const generateSessionSourceParams = (posthog?: PostHog): LegacySessionSourceProps | CurrentSessionSourceProps => {
-    return getPersonInfo(posthog?.config.mask_personal_data_properties, posthog?.config.custom_personal_data_properties)
+const generateSessionSourceParams = (insights?: Insights): LegacySessionSourceProps | CurrentSessionSourceProps => {
+    return getPersonInfo(insights?.config.mask_personal_data_properties, insights?.config.custom_personal_data_properties)
 }
 
 export class SessionPropsManager {
-    private readonly _instance: PostHog
+    private readonly _instance: Insights
     private readonly _sessionIdManager: SessionIdManager
-    private readonly _persistence: PostHogPersistence
+    private readonly _persistence: InsightsPersistence
     private readonly _sessionSourceParamGenerator: (
-        instance?: PostHog
+        instance?: Insights
     ) => LegacySessionSourceProps | CurrentSessionSourceProps
 
     constructor(
-        instance: PostHog,
+        instance: Insights,
         sessionIdManager: SessionIdManager,
-        persistence: PostHogPersistence,
-        sessionSourceParamGenerator?: (instance?: PostHog) => LegacySessionSourceProps | CurrentSessionSourceProps
+        persistence: InsightsPersistence,
+        sessionSourceParamGenerator?: (instance?: Insights) => LegacySessionSourceProps | CurrentSessionSourceProps
     ) {
         this._instance = instance
         this._sessionIdManager = sessionIdManager

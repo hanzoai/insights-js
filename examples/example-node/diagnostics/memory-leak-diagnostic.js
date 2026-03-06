@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Memory Leak Diagnostic Script for PostHog Node.js SDK
+ * Memory Leak Diagnostic Script for Insights Node.js SDK
  *
  * This script tests individual methods in isolation to pinpoint
  * the exact source of memory leaks in feature flag functionality.
@@ -10,7 +10,7 @@
  * - node --inspect --expose-gc memory-leak-diagnostic.js
  */
 
-const { PostHog } = require('../../../packages/node/dist/node/index.cjs')
+const { Insights } = require('../../../packages/node/dist/node/index.cjs')
 const { readFileSync, existsSync, writeFileSync } = require('fs')
 const { join } = require('path')
 
@@ -34,10 +34,10 @@ function loadEnvFile() {
 loadEnvFile()
 
 const CONFIG = {
-    PROJECT_API_KEY: process.env.POSTHOG_PROJECT_API_KEY || '',
-    PERSONAL_API_KEY: process.env.POSTHOG_PERSONAL_API_KEY || '',
-    HOST: process.env.POSTHOG_HOST || 'https://app.posthog.com',
-    FLAG_KEY: process.env.POSTHOG_TEST_FLAG_KEY || 'beta-feature',
+    PROJECT_API_KEY: process.env.INSIGHTS_PROJECT_API_KEY || '',
+    PERSONAL_API_KEY: process.env.INSIGHTS_PERSONAL_API_KEY || '',
+    HOST: process.env.INSIGHTS_HOST || 'https://app.insights.com',
+    FLAG_KEY: process.env.INSIGHTS_TEST_FLAG_KEY || 'beta-feature',
     TEST_ITERATIONS: 5000, // Smaller iterations for isolated testing
 }
 
@@ -46,7 +46,7 @@ class MemoryLeakDiagnostic {
         this.memorySnapshots = []
         this.testResults = []
 
-        this.posthog = new PostHog(CONFIG.PROJECT_API_KEY, {
+        this.insights = new Insights(CONFIG.PROJECT_API_KEY, {
             personalApiKey: CONFIG.PERSONAL_API_KEY,
             host: CONFIG.HOST,
             maxCacheSize: 1000,
@@ -113,7 +113,7 @@ class MemoryLeakDiagnostic {
         // Wait for local evaluation to be ready
         if (CONFIG.PERSONAL_API_KEY) {
             console.log('\n⏳ Waiting for local evaluation to be ready...')
-            const isReady = await this.posthog.waitForLocalEvaluationReady(10000)
+            const isReady = await this.insights.waitForLocalEvaluationReady(10000)
             console.log(`Local evaluation ready: ${isReady}`)
         }
 
@@ -142,7 +142,7 @@ class MemoryLeakDiagnostic {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
+                await this.insights.getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
                     personProperties: personProps,
                     sendFeatureFlagEvents: false, // Isolate from event cache
                 })
@@ -171,7 +171,7 @@ class MemoryLeakDiagnostic {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.isFeatureEnabled(CONFIG.FLAG_KEY, distinctId, {
+                await this.insights.isFeatureEnabled(CONFIG.FLAG_KEY, distinctId, {
                     personProperties: personProps,
                     sendFeatureFlagEvents: false,
                 })
@@ -200,7 +200,7 @@ class MemoryLeakDiagnostic {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.getAllFlags(distinctId, {
+                await this.insights.getAllFlags(distinctId, {
                     personProperties: personProps,
                     onlyEvaluateLocally: true,
                 })
@@ -229,7 +229,7 @@ class MemoryLeakDiagnostic {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.getFeatureFlagPayload(CONFIG.FLAG_KEY, distinctId, undefined, {
+                await this.insights.getFeatureFlagPayload(CONFIG.FLAG_KEY, distinctId, undefined, {
                     personProperties: personProps,
                     onlyEvaluateLocally: true,
                 })
@@ -258,7 +258,7 @@ class MemoryLeakDiagnostic {
             const personProps = this.personProperties[i % this.personProperties.length]
 
             try {
-                await this.posthog.getAllFlagsAndPayloads(distinctId, {
+                await this.insights.getAllFlagsAndPayloads(distinctId, {
                     personProperties: personProps,
                     onlyEvaluateLocally: true,
                 })
@@ -288,7 +288,7 @@ class MemoryLeakDiagnostic {
 
             try {
                 // This should populate the distinctIdHasSentFlagCalls cache
-                await this.posthog.getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
+                await this.insights.getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
                     sendFeatureFlagEvents: true, // Enable event reporting to populate cache
                 })
             } catch (error) {
@@ -321,7 +321,7 @@ class MemoryLeakDiagnostic {
                 const distinctId = this.distinctIds[(batch * batchSize + i) % this.distinctIds.length]
                 const personProps = this.personProperties[i % this.personProperties.length]
 
-                const promise = this.posthog
+                const promise = this.insights
                     .getFeatureFlag(CONFIG.FLAG_KEY, distinctId, {
                         personProperties: personProps,
                         sendFeatureFlagEvents: false,
@@ -425,8 +425,8 @@ class MemoryLeakDiagnostic {
     async cleanup() {
         console.log('\n🧹 Cleaning up...')
         try {
-            await this.posthog._shutdown(5000)
-            console.log('PostHog client shut down successfully.')
+            await this.insights._shutdown(5000)
+            console.log('Insights client shut down successfully.')
         } catch (error) {
             console.error('Error during cleanup:', error)
         }
@@ -437,8 +437,8 @@ class MemoryLeakDiagnostic {
 // Run diagnostics
 if (require.main === module) {
     if (!CONFIG.PROJECT_API_KEY) {
-        console.error('❌ Missing PostHog Project API Key!')
-        console.log('   Please set POSTHOG_PROJECT_API_KEY environment variable')
+        console.error('❌ Missing Insights Project API Key!')
+        console.log('   Please set INSIGHTS_PROJECT_API_KEY environment variable')
         console.log('   or copy .env.example to .env and fill in your values')
         process.exit(1)
     }

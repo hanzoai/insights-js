@@ -1,4 +1,4 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 import { Request } from '@playwright/test'
 
@@ -34,12 +34,12 @@ test.describe('retry queue', () => {
             }
         })
 
-        // Initialize PostHog without pageview to avoid extra requests
+        // Initialize Insights without pageview to avoid extra requests
         await start({ ...startOptions, options: { capture_pageview: false } }, page, context)
 
         // Capture a custom event which will initially fail
         await page.evaluate(() => {
-            window.posthog.capture('test-retry-event', { test: 'data' })
+            window.insights.capture('test-retry-event', { test: 'data' })
         })
 
         // Wait for the initial request and the retries
@@ -99,12 +99,12 @@ test.describe('retry queue', () => {
             })
         })
 
-        // Initialize PostHog without pageview
+        // Initialize Insights without pageview
         await start({ ...startOptions, options: { capture_pageview: false } }, page, context)
 
         // Capture a custom event which will fail
         await page.evaluate(() => {
-            window.posthog.capture('test-max-retries-event', { test: 'data' })
+            window.insights.capture('test-max-retries-event', { test: 'data' })
         })
 
         // Wait for several retries
@@ -153,12 +153,12 @@ test.describe('retry queue', () => {
             }
         })
 
-        // Initialize PostHog without pageview
+        // Initialize Insights without pageview
         await start({ ...startOptions, options: { capture_pageview: false } }, page, context)
 
         // Capture an event that will fail
         await page.evaluate(() => {
-            window.posthog.capture('test-offline-event', { test: 'data' })
+            window.insights.capture('test-offline-event', { test: 'data' })
         })
 
         // Wait for initial request to be queued and sent

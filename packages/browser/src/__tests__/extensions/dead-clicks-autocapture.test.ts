@@ -1,6 +1,6 @@
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 import { assignableWindow } from '../../utils/globals'
-import { createPosthogInstance } from '../helpers/posthog-instance'
+import { createInsightsInstance } from '../helpers/insights-instance'
 import { uuidv7 } from '../../uuidv7'
 import { DeadClicksAutocapture, isDeadClicksEnabledForAutocapture } from '../../extensions/dead-clicks-autocapture'
 import { DEAD_CLICKS_ENABLED_SERVER_SIDE } from '../../constants'
@@ -11,20 +11,20 @@ describe('DeadClicksAutocapture', () => {
 
     beforeEach(() => {
         mockStart = jest.fn()
-        assignableWindow.__PosthogExtensions__ = assignableWindow.__PosthogExtensions__ || {}
-        assignableWindow.__PosthogExtensions__.initDeadClicksAutocapture = () => ({
+        assignableWindow.__InsightsExtensions__ = assignableWindow.__InsightsExtensions__ || {}
+        assignableWindow.__InsightsExtensions__.initDeadClicksAutocapture = () => ({
             start: mockStart,
             stop: jest.fn(),
         })
-        assignableWindow.__PosthogExtensions__.loadExternalDependency = jest
+        assignableWindow.__InsightsExtensions__.loadExternalDependency = jest
             .fn()
-            .mockImplementation(() => (_ph: PostHog, _name: string, cb: (err?: Error) => void) => {
+            .mockImplementation(() => (_ph: Insights, _name: string, cb: (err?: Error) => void) => {
                 cb()
             })
     })
 
     it('should call initDeadClicksAutocapture if isEnabled is true', async () => {
-        await createPosthogInstance(uuidv7(), {
+        await createInsightsInstance(uuidv7(), {
             api_host: 'https://test.com',
             token: 'testtoken',
             autocapture: true,
@@ -35,7 +35,7 @@ describe('DeadClicksAutocapture', () => {
     })
 
     it('should not call initDeadClicksAutocapture if isEnabled is false', async () => {
-        await createPosthogInstance(uuidv7(), {
+        await createInsightsInstance(uuidv7(), {
             api_host: 'https://test.com',
             token: 'testtoken',
             autocapture: true,
@@ -46,19 +46,19 @@ describe('DeadClicksAutocapture', () => {
     })
 
     it('should call loadExternalDependency if script is not already loaded', async () => {
-        assignableWindow.__PosthogExtensions__.initDeadClicksAutocapture = undefined
+        assignableWindow.__InsightsExtensions__.initDeadClicksAutocapture = undefined
 
-        const mockLoader = assignableWindow.__PosthogExtensions__.loadExternalDependency as jest.Mock
+        const mockLoader = assignableWindow.__InsightsExtensions__.loadExternalDependency as jest.Mock
         mockLoader.mockClear()
 
-        const instance = await createPosthogInstance(uuidv7(), { capture_dead_clicks: true })
+        const instance = await createInsightsInstance(uuidv7(), { capture_dead_clicks: true })
         new DeadClicksAutocapture(instance, () => true).startIfEnabledOrStop()
 
         expect(mockLoader).toHaveBeenCalledWith(instance, 'dead-clicks-autocapture', expect.any(Function))
     })
 
     it('should call lazy loaded stop when stopping', async () => {
-        const instance = await createPosthogInstance(uuidv7(), {
+        const instance = await createInsightsInstance(uuidv7(), {
             api_host: 'https://test.com',
             token: 'testtoken',
             autocapture: true,
@@ -73,7 +73,7 @@ describe('DeadClicksAutocapture', () => {
     })
 
     it('should stop dead clicks when remote config disables a previously enabled setting', async () => {
-        const instance = await createPosthogInstance(uuidv7(), {
+        const instance = await createInsightsInstance(uuidv7(), {
             api_host: 'https://test.com',
             token: 'testtoken',
             autocapture: true,
@@ -97,10 +97,10 @@ describe('DeadClicksAutocapture', () => {
     })
 
     describe('config', () => {
-        let instance: PostHog
+        let instance: Insights
 
         beforeEach(async () => {
-            instance = await createPosthogInstance(uuidv7(), {
+            instance = await createInsightsInstance(uuidv7(), {
                 api_host: 'https://test.com',
                 token: 'testtoken',
                 autocapture: true,
@@ -131,10 +131,10 @@ describe('DeadClicksAutocapture', () => {
     })
 
     describe('onRemoteConfig', () => {
-        let instance: PostHog
+        let instance: Insights
 
         beforeEach(async () => {
-            instance = await createPosthogInstance(uuidv7(), {
+            instance = await createInsightsInstance(uuidv7(), {
                 api_host: 'https://test.com',
                 token: 'testtoken',
                 autocapture: true,

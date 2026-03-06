@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { PostHogCaptureOnViewed } from '@posthog/react'
+import { InsightsCaptureOnViewed } from '@insights/react'
 
 const catImages = Array.from({ length: 120 }, (_, i) => ({
     id: i + 1,
@@ -21,10 +21,10 @@ export default function Home() {
                         color: '#333',
                     }}
                 >
-                    Cat Gallery - PostHog React Demo
+                    Cat Gallery - Insights React Demo
                 </h1>
                 <p style={{ fontSize: '1.125rem', marginBottom: '2rem', color: '#666' }}>
-                    Scroll down to see the cat gallery. When it comes into view, PostHog will track the event and
+                    Scroll down to see the cat gallery. When it comes into view, Insights will track the event and
                     display it in the top right corner.
                 </p>
 
@@ -32,7 +32,7 @@ export default function Home() {
                     <h2 style={{ fontSize: '1.5rem', color: '#555' }}>Scroll down to see the gallery...</h2>
                 </div>
 
-                <PostHogCaptureOnViewed
+                <InsightsCaptureOnViewed
                     name="cat-gallery"
                     properties={{ gallery_size: catImages.length, gallery_type: 'cats' }}
                     trackAllChildren
@@ -68,9 +68,9 @@ export default function Home() {
                             />
                         </div>
                     ))}
-                </PostHogCaptureOnViewed>
+                </InsightsCaptureOnViewed>
 
-                <PostHogCaptureOnViewed
+                <InsightsCaptureOnViewed
                     name="test-element"
                     properties={{ test: true }}
                     observerOptions={{ threshold: 0.1 }}
@@ -83,7 +83,7 @@ export default function Home() {
                     }}
                 >
                     <p style={{ color: '#666' }}>End of page</p>
-                </PostHogCaptureOnViewed>
+                </InsightsCaptureOnViewed>
             </div>
         </main>
     )

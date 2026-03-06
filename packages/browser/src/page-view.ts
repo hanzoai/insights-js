@@ -1,5 +1,5 @@
 import { window } from './utils/globals'
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 import { clampToRange, isUndefined } from '@hanzo/insights-core'
 import { extend } from './utils'
 import { logger } from './utils/logger'
@@ -31,10 +31,10 @@ interface PageViewEventProperties {
 
 export class PageViewManager {
     _currentPageview?: { timestamp: Date; pageViewId: string | undefined; pathname: string | undefined }
-    _instance: PostHog
+    _instance: Insights
     private _unsubscribeSessionId?: () => void
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this._instance = instance
         this._setupSessionRotationHandler()
     }
@@ -50,7 +50,7 @@ export class PageViewManager {
         }
 
         // Clear state when session changes for any of these reasons:
-        // - noSessionId: after posthog.reset() or forced idle reset
+        // - noSessionId: after insights.reset() or forced idle reset
         // - activityTimeout: 30 min idle (default, configurable up to 10 hours)
         // - sessionPastMaximumLength: 24 hour max session
         if (changeReason.noSessionId || changeReason.activityTimeout || changeReason.sessionPastMaximumLength) {

@@ -1,12 +1,12 @@
 import './helpers/mock-logger'
 
-import { PostHog } from '../posthog-core'
-import { defaultPostHog } from './helpers/posthog-instance'
+import { Insights } from '../insights-core'
+import { defaultInsights } from './helpers/insights-instance'
 import { uuidv7 } from '../uuidv7'
 
 import { isNull } from '@hanzo/insights-core'
 import { document, assignableWindow, navigator } from '../utils/globals'
-import { PostHogConfig } from '../types'
+import { InsightsConfig } from '../types'
 
 const DEFAULT_PERSISTENCE_PREFIX = `__ph_opt_in_out_`
 const CUSTOM_PERSISTENCE_PREFIX = `𝓶𝓶𝓶𝓬𝓸𝓸𝓴𝓲𝓮𝓼`
@@ -26,20 +26,20 @@ function deleteAllCookies() {
 jest.retryTimes(3)
 
 describe('consentManager', () => {
-    const createPostHog = async (config: Partial<PostHogConfig> = {}) => {
-        const posthog = await new Promise<PostHog>(
+    const createInsights = async (config: Partial<InsightsConfig> = {}) => {
+        const insights = await new Promise<Insights>(
             (resolve) =>
-                defaultPostHog().init('testtoken', { ...config, loaded: (posthog) => resolve(posthog) }, uuidv7())!
+                defaultInsights().init('testtoken', { ...config, loaded: (insights) => resolve(insights) }, uuidv7())!
         )
-        posthog.debug()
-        return posthog
+        insights.debug()
+        return insights
     }
 
-    let posthog: PostHog
+    let insights: Insights
 
     beforeEach(async () => {
-        posthog = await createPostHog()
-        posthog.reset()
+        insights = await createInsights()
+        insights.reset()
 
         // we don't want unexpected console errors/warnings to fail these tests
         console.error = jest.fn()
@@ -53,65 +53,65 @@ describe('consentManager', () => {
     })
 
     it('should start default opted in', () => {
-        expect(posthog.has_opted_in_capturing()).toBe(true)
-        expect(posthog.has_opted_out_capturing()).toBe(false)
-        expect(posthog.get_explicit_consent_status()).toBe('pending')
+        expect(insights.has_opted_in_capturing()).toBe(true)
+        expect(insights.has_opted_out_capturing()).toBe(false)
+        expect(insights.get_explicit_consent_status()).toBe('pending')
 
-        expect(posthog.persistence?._disabled).toBe(false)
-        expect(posthog.sessionPersistence?._disabled).toBe(false)
+        expect(insights.persistence?._disabled).toBe(false)
+        expect(insights.sessionPersistence?._disabled).toBe(false)
     })
 
     it('should start default opted out if setting given', async () => {
-        posthog = await createPostHog({ opt_out_capturing_by_default: true })
-        expect(posthog.has_opted_in_capturing()).toBe(false)
-        expect(posthog.has_opted_out_capturing()).toBe(true)
-        expect(posthog.get_explicit_consent_status()).toBe('pending')
+        insights = await createInsights({ opt_out_capturing_by_default: true })
+        expect(insights.has_opted_in_capturing()).toBe(false)
+        expect(insights.has_opted_out_capturing()).toBe(true)
+        expect(insights.get_explicit_consent_status()).toBe('pending')
 
-        expect(posthog.persistence?._disabled).toBe(false)
-        expect(posthog.sessionPersistence?._disabled).toBe(false)
+        expect(insights.persistence?._disabled).toBe(false)
+        expect(insights.sessionPersistence?._disabled).toBe(false)
     })
 
     it('should start default opted out if setting given and disable storage', async () => {
-        posthog = await createPostHog({ opt_out_capturing_by_default: true, opt_out_persistence_by_default: true })
-        expect(posthog.has_opted_in_capturing()).toBe(false)
-        expect(posthog.has_opted_out_capturing()).toBe(true)
-        expect(posthog.get_explicit_consent_status()).toBe('pending')
+        insights = await createInsights({ opt_out_capturing_by_default: true, opt_out_persistence_by_default: true })
+        expect(insights.has_opted_in_capturing()).toBe(false)
+        expect(insights.has_opted_out_capturing()).toBe(true)
+        expect(insights.get_explicit_consent_status()).toBe('pending')
 
-        expect(posthog.persistence?._disabled).toBe(true)
-        expect(posthog.sessionPersistence?._disabled).toBe(true)
+        expect(insights.persistence?._disabled).toBe(true)
+        expect(insights.sessionPersistence?._disabled).toBe(true)
     })
 
     it('should enable or disable persistence when changing opt out status', async () => {
-        posthog = await createPostHog({ opt_out_capturing_by_default: true, opt_out_persistence_by_default: true })
-        expect(posthog.has_opted_in_capturing()).toBe(false)
-        expect(posthog.persistence?._disabled).toBe(true)
-        expect(posthog.get_explicit_consent_status()).toBe('pending')
+        insights = await createInsights({ opt_out_capturing_by_default: true, opt_out_persistence_by_default: true })
+        expect(insights.has_opted_in_capturing()).toBe(false)
+        expect(insights.persistence?._disabled).toBe(true)
+        expect(insights.get_explicit_consent_status()).toBe('pending')
 
-        posthog.opt_in_capturing()
-        expect(posthog.has_opted_in_capturing()).toBe(true)
-        expect(posthog.persistence?._disabled).toBe(false)
-        expect(posthog.get_explicit_consent_status()).toBe('granted')
+        insights.opt_in_capturing()
+        expect(insights.has_opted_in_capturing()).toBe(true)
+        expect(insights.persistence?._disabled).toBe(false)
+        expect(insights.get_explicit_consent_status()).toBe('granted')
 
-        posthog.opt_out_capturing()
-        expect(posthog.has_opted_in_capturing()).toBe(false)
-        expect(posthog.persistence?._disabled).toBe(true)
-        expect(posthog.get_explicit_consent_status()).toBe('denied')
+        insights.opt_out_capturing()
+        expect(insights.has_opted_in_capturing()).toBe(false)
+        expect(insights.persistence?._disabled).toBe(true)
+        expect(insights.get_explicit_consent_status()).toBe('denied')
     })
 
     describe('opt out event', () => {
         let beforeSendMock = jest.fn().mockImplementation((...args) => args)
         beforeEach(async () => {
             beforeSendMock = jest.fn().mockImplementation((e) => e)
-            posthog = await createPostHog({ opt_out_capturing_by_default: true, before_send: beforeSendMock })
+            insights = await createInsights({ opt_out_capturing_by_default: true, before_send: beforeSendMock })
         })
 
         it('should send opt in event if not disabled', () => {
-            posthog.opt_in_capturing()
+            insights.opt_in_capturing()
             expect(beforeSendMock).toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
         })
 
         it('should send opt in event with overrides', () => {
-            posthog.opt_in_capturing({
+            insights.opt_in_capturing({
                 captureEventName: 'override-opt-in',
                 captureProperties: {
                     foo: 'bar',
@@ -128,31 +128,31 @@ describe('consentManager', () => {
         })
 
         it('should not send opt in event if false', () => {
-            posthog.opt_in_capturing({ captureEventName: false })
+            insights.opt_in_capturing({ captureEventName: false })
             expect(beforeSendMock).toHaveBeenCalledTimes(1)
             expect(beforeSendMock).not.toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
             expect(beforeSendMock).lastCalledWith(expect.objectContaining({ event: '$pageview' }))
         })
 
         it('should not send opt in event if false', () => {
-            posthog.opt_in_capturing({ captureEventName: false })
+            insights.opt_in_capturing({ captureEventName: false })
             expect(beforeSendMock).toHaveBeenCalledTimes(1)
             expect(beforeSendMock).not.toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
             expect(beforeSendMock).lastCalledWith(expect.objectContaining({ event: '$pageview' }))
         })
 
         it('should not send $pageview on opt in if capturing is disabled', async () => {
-            posthog = await createPostHog({
+            insights = await createInsights({
                 opt_out_capturing_by_default: true,
                 before_send: beforeSendMock,
                 capture_pageview: false,
             })
-            posthog.opt_in_capturing({ captureEventName: false })
+            insights.opt_in_capturing({ captureEventName: false })
             expect(beforeSendMock).toHaveBeenCalledTimes(0)
         })
 
         it('should not send $pageview on opt in if is has already been captured', async () => {
-            posthog = await createPostHog({
+            insights = await createInsights({
                 before_send: beforeSendMock,
             })
             // Wait for the initial $pageview to be captured
@@ -160,7 +160,7 @@ describe('consentManager', () => {
             await new Promise((r) => setTimeout(r, 10))
             expect(beforeSendMock).toHaveBeenCalledTimes(1)
             expect(beforeSendMock).lastCalledWith(expect.objectContaining({ event: '$pageview' }))
-            posthog.opt_in_capturing()
+            insights.opt_in_capturing()
             expect(beforeSendMock).toHaveBeenCalledTimes(2)
             expect(beforeSendMock).toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
         })
@@ -168,9 +168,9 @@ describe('consentManager', () => {
         it('should send $pageview on opt in if is has not been captured', async () => {
             // Some other tests might call setTimeout after they've passed, so creating a new instance here.
             const beforeSendMock = jest.fn().mockImplementation((e) => e)
-            const posthog = await createPostHog({ before_send: beforeSendMock })
+            const insights = await createInsights({ before_send: beforeSendMock })
 
-            posthog.opt_in_capturing()
+            insights.opt_in_capturing()
             expect(beforeSendMock).toHaveBeenCalledTimes(2)
             expect(beforeSendMock).toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
             expect(beforeSendMock).lastCalledWith(expect.objectContaining({ event: '$pageview' }))
@@ -183,16 +183,16 @@ describe('consentManager', () => {
         it('should not send $pageview on subsequent opt in', async () => {
             // Some other tests might call setTimeout after they've passed, so creating a new instance here.
             const beforeSendMock = jest.fn().mockImplementation((e) => e)
-            const posthog = await createPostHog({ before_send: beforeSendMock })
+            const insights = await createInsights({ before_send: beforeSendMock })
 
-            posthog.opt_in_capturing()
+            insights.opt_in_capturing()
             expect(beforeSendMock).toHaveBeenCalledTimes(2)
             expect(beforeSendMock).toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
             expect(beforeSendMock).lastCalledWith(expect.objectContaining({ event: '$pageview' }))
             // Wait for the $pageview timeout to be called
             // eslint-disable-next-line compat/compat
             await new Promise((r) => setTimeout(r, 10))
-            posthog.opt_in_capturing()
+            insights.opt_in_capturing()
             expect(beforeSendMock).toHaveBeenCalledTimes(3)
             expect(beforeSendMock).not.lastCalledWith(expect.objectContaining({ event: '$pageview' }))
         })
@@ -204,23 +204,23 @@ describe('consentManager', () => {
         })
 
         it('should respect it if explicitly set', async () => {
-            posthog = await createPostHog({ respect_dnt: true })
-            expect(posthog.has_opted_in_capturing()).toBe(false)
+            insights = await createInsights({ respect_dnt: true })
+            expect(insights.has_opted_in_capturing()).toBe(false)
         })
 
         it('should not respect it if not explicitly set', () => {
-            expect(posthog.has_opted_in_capturing()).toBe(true)
+            expect(insights.has_opted_in_capturing()).toBe(true)
         })
     })
 
-    describe.each([`cookie`, `localStorage`] as PostHogConfig['opt_out_capturing_persistence_type'][])(
+    describe.each([`cookie`, `localStorage`] as InsightsConfig['opt_out_capturing_persistence_type'][])(
         `%s`,
         (persistenceType) => {
             function assertPersistenceValue(
                 value: string | number | null,
                 persistencePrefix = DEFAULT_PERSISTENCE_PREFIX
             ) {
-                const token = posthog.config.token
+                const token = insights.config.token
                 const expected = persistencePrefix + token
                 if (persistenceType === `cookie`) {
                     if (isNull(value)) {
@@ -238,7 +238,7 @@ describe('consentManager', () => {
             }
 
             beforeEach(async () => {
-                posthog = await createPostHog({
+                insights = await createInsights({
                     opt_out_capturing_persistence_type: persistenceType,
                     persistence: persistenceType,
                 })
@@ -246,27 +246,27 @@ describe('consentManager', () => {
 
             describe(`common consent functions`, () => {
                 it(`should set a persistent value marking the user as opted-in for a given token`, () => {
-                    posthog.opt_in_capturing()
+                    insights.opt_in_capturing()
                     assertPersistenceValue(1)
                 })
 
                 it(`should set a persistent value marking the user as opted-out for a given token`, () => {
-                    posthog.opt_out_capturing()
+                    insights.opt_out_capturing()
                     assertPersistenceValue(0)
                 })
 
                 it(`should capture an event recording the opt-in action`, () => {
                     const beforeSendMock = jest.fn()
-                    posthog.on('eventCaptured', beforeSendMock)
+                    insights.on('eventCaptured', beforeSendMock)
 
-                    posthog.opt_in_capturing()
+                    insights.opt_in_capturing()
                     expect(beforeSendMock).toHaveBeenCalledWith(expect.objectContaining({ event: '$opt_in' }))
 
                     beforeSendMock.mockClear()
                     const captureEventName = `єνєηт`
                     const captureProperties = { '𝖕𝖗𝖔𝖕𝖊𝖗𝖙𝖞': `𝓿𝓪𝓵𝓾𝓮` }
 
-                    posthog.opt_in_capturing({ captureEventName, captureProperties })
+                    insights.opt_in_capturing({ captureEventName, captureProperties })
                     expect(beforeSendMock).toHaveBeenCalledWith(
                         expect.objectContaining({
                             event: captureEventName,
@@ -276,26 +276,26 @@ describe('consentManager', () => {
                 })
 
                 it(`should allow use of a custom "persistence prefix" string (with correct default behavior)`, async () => {
-                    posthog = await createPostHog({
+                    insights = await createInsights({
                         opt_out_capturing_persistence_type: persistenceType,
                         opt_out_capturing_cookie_prefix: CUSTOM_PERSISTENCE_PREFIX,
                     })
-                    posthog.opt_out_capturing()
-                    posthog.opt_in_capturing()
+                    insights.opt_out_capturing()
+                    insights.opt_in_capturing()
 
                     assertPersistenceValue(null)
                     assertPersistenceValue(1, CUSTOM_PERSISTENCE_PREFIX)
 
-                    posthog.opt_out_capturing()
+                    insights.opt_out_capturing()
 
                     assertPersistenceValue(null)
                     assertPersistenceValue(0, CUSTOM_PERSISTENCE_PREFIX)
                 })
 
                 it(`should clear the persisted value`, () => {
-                    posthog.opt_in_capturing()
+                    insights.opt_in_capturing()
                     assertPersistenceValue(1)
-                    posthog.reset()
+                    insights.reset()
                     assertPersistenceValue(null)
                 })
             })

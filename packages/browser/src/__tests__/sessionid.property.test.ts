@@ -2,9 +2,9 @@ import * as fc from 'fast-check'
 import { DEFAULT_SESSION_IDLE_TIMEOUT_SECONDS, SessionIdManager } from '../sessionid'
 import { SESSION_ID } from '../constants'
 import { sessionStore } from '../storage'
-import { PostHogConfig, Properties } from '../types'
-import { PostHogPersistence } from '../posthog-persistence'
-import { createMockPostHog } from './helpers/posthog-instance'
+import { InsightsConfig, Properties } from '../types'
+import { InsightsPersistence } from '../insights-persistence'
+import { createMockInsights } from './helpers/insights-instance'
 
 jest.mock('../uuidv7')
 jest.mock('../storage')
@@ -16,17 +16,17 @@ const arbitraryRecentTimestamp = fc.integer({ min: 1600000000000, max: 200000000
 
 describe('SessionIdManager property-based tests', () => {
     let uuidCounter: number
-    let persistence: { props: Properties } & Partial<PostHogPersistence>
+    let persistence: { props: Properties } & Partial<InsightsPersistence>
 
-    const config: Partial<PostHogConfig> = {
+    const config: Partial<InsightsConfig> = {
         persistence_name: 'test-persistence',
     }
 
-    const sessionIdMgr = (phPersistence: Partial<PostHogPersistence>) =>
+    const sessionIdMgr = (phPersistence: Partial<InsightsPersistence>) =>
         new SessionIdManager(
-            createMockPostHog({
-                config: config as PostHogConfig,
-                persistence: phPersistence as PostHogPersistence,
+            createMockInsights({
+                config: config as InsightsConfig,
+                persistence: phPersistence as InsightsPersistence,
                 register: jest.fn(),
             }),
             () => `session-${++uuidCounter}`,

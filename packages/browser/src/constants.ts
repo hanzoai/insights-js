@@ -69,14 +69,14 @@ export const INITIAL_CAMPAIGN_PARAMS = '$initial_campaign_params'
 export const INITIAL_REFERRER_INFO = '$initial_referrer_info'
 export const INITIAL_PERSON_INFO = '$initial_person_info'
 export const ENABLE_PERSON_PROCESSING = '$epp'
-export const TOOLBAR_ID = '__POSTHOG_TOOLBAR__'
+export const TOOLBAR_ID = '__INSIGHTS_TOOLBAR__'
 export const TOOLBAR_CONTAINER_CLASS = 'toolbar-global-fade-container'
 
 /**
  * PREVIEW - MAY CHANGE WITHOUT WARNING - DO NOT USE IN PRODUCTION
  * Sentinel value for distinct id, device id, session id. Signals that the server should generate the value
  * */
-export const COOKIELESS_SENTINEL_VALUE = '$posthog_cookieless'
+export const COOKIELESS_SENTINEL_VALUE = '$insights_cookieless'
 export const COOKIELESS_MODE_FLAG_PROPERTY = '$cookieless_mode'
 
 export const WEB_EXPERIMENTS = '$web_experiments'

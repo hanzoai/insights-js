@@ -4,17 +4,17 @@ import { LoggerProvider, BatchLogRecordProcessor } from '@opentelemetry/sdk-logs
 import { resourceFromAttributes } from '@opentelemetry/resources'
 
 import { assignableWindow } from '../utils/globals'
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 import { isNull, isObject } from '@hanzo/insights-core'
 
-const setupOpenTelemetry = (posthog: PostHog) => {
+const setupOpenTelemetry = (insights: Insights) => {
     let attributes: Record<string, string> = {
-        'service.name': 'posthog-browser-logs',
+        'service.name': 'insights-browser-logs',
         host: assignableWindow.location.host,
     }
 
-    if (posthog.sessionManager) {
-        const { sessionId, windowId } = posthog.sessionManager.checkAndGetSessionAndWindowId(true)
+    if (insights.sessionManager) {
+        const { sessionId, windowId } = insights.sessionManager.checkAndGetSessionAndWindowId(true)
         attributes = {
             ...attributes,
             'session.id': sessionId,
@@ -28,7 +28,7 @@ const setupOpenTelemetry = (posthog: PostHog) => {
             processors: [
                 new BatchLogRecordProcessor(
                     new OTLPLogExporter({
-                        url: `${posthog.config.api_host}/i/v1/logs?token=${posthog.config.token}`,
+                        url: `${insights.config.api_host}/i/v1/logs?token=${insights.config.token}`,
                         // 1. Force the content type to text/plain to avoid OPTIONS preflight
                         headers: {
                             'Content-Type': 'text/plain',
@@ -92,14 +92,14 @@ const SEVERITY_MAP = {
     info: 'INFO',
 }
 
-const initializeLogs = (posthog: PostHog) => {
-    setupOpenTelemetry(posthog)
+const initializeLogs = (insights: Insights) => {
+    setupOpenTelemetry(insights)
 
     const logger = logs.getLogger('console')
     let attributes: Record<string, string> = {}
-    if (posthog.sessionManager) {
+    if (insights.sessionManager) {
         const { sessionStartTimestamp, lastActivityTimestamp } =
-            posthog.sessionManager.checkAndGetSessionAndWindowId(true)
+            insights.sessionManager.checkAndGetSessionAndWindowId(true)
         attributes = {
             sessionStartTimestamp: sessionStartTimestamp.toString(),
             lastActivityTimestamp: lastActivityTimestamp.toString(),
@@ -141,7 +141,7 @@ const initializeLogs = (posthog: PostHog) => {
                         body: body,
                         attributes: {
                             'log.source': `console.${level}`,
-                            distinct_id: posthog.get_distinct_id(),
+                            distinct_id: insights.get_distinct_id(),
                             'location.href': assignableWindow.location.href,
                             ...attributes,
                             ...(isObject(args[0]) ? flattenObject(args[0]) : {}),
@@ -156,5 +156,5 @@ const initializeLogs = (posthog: PostHog) => {
     }
 }
 
-assignableWindow.__PosthogExtensions__ = assignableWindow.__PosthogExtensions__ || {}
-assignableWindow.__PosthogExtensions__.logs = { initializeLogs }
+assignableWindow.__InsightsExtensions__ = assignableWindow.__InsightsExtensions__ || {}
+assignableWindow.__InsightsExtensions__.logs = { initializeLogs }

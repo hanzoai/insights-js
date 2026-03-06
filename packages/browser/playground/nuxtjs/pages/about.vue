@@ -9,9 +9,9 @@
 </template>
 
 <script setup lang="ts">
-  const { $posthog } = useNuxtApp();
-  if ($posthog) {
-    const posthog = $posthog()
-    posthog?.capture('<event_name>')
+  const { $insights } = useNuxtApp();
+  if ($insights) {
+    const insights = $insights()
+    insights?.capture('<event_name>')
   }
 </script>

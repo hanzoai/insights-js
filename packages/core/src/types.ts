@@ -1,7 +1,7 @@
-export type PostHogCoreOptions = {
-  /** PostHog API host, usually 'https://us.i.posthog.com' or 'https://eu.i.posthog.com' */
+export type InsightsCoreOptions = {
+  /** Insights API host, usually 'https://us.i.insights.com' or 'https://eu.i.insights.com' */
   host?: string
-  /** The number of events to queue before sending to PostHog (flushing) */
+  /** The number of events to queue before sending to Insights (flushing) */
   flushAt?: number
   /** The interval in milliseconds between periodic flushes */
   flushInterval?: number
@@ -28,7 +28,7 @@ export type PostHogCoreOptions = {
   /**
    * Whether to load surveys when initialized or not
    * Experimental support
-   * Default: false - Surveys are loaded by default, but requires the `PostHogSurveyProvider` to be used
+   * Default: false - Surveys are loaded by default, but requires the `InsightsSurveyProvider` to be used
    */
   disableSurveys?: boolean
   /** Option to bootstrap the library with given distinctId and feature flags */
@@ -85,18 +85,18 @@ export type PostHogCoreOptions = {
    * @example
    * ```ts
    * // Only create profiles when users are identified (recommended for most apps)
-   * const posthog = new PostHog('<api_key>', {
+   * const insights = new Insights('<api_key>', {
    *   personProfiles: 'identified_only',
    * })
    *
    * // Later when user logs in:
-   * posthog.identify('user-123', { email: 'user@example.com' })
+   * insights.identify('user-123', { email: 'user@example.com' })
    * ```
    *
    * @example
    * ```ts
    * // Always create profiles (for apps where you want to track all users)
-   * const posthog = new PostHog('<api_key>', {
+   * const insights = new Insights('<api_key>', {
    *   personProfiles: 'always',
    * })
    * ```
@@ -104,7 +104,7 @@ export type PostHogCoreOptions = {
    * @example
    * ```ts
    * // Never create profiles (anonymous analytics only)
-   * const posthog = new PostHog('<api_key>', {
+   * const insights = new Insights('<api_key>', {
    *   personProfiles: 'never',
    * })
    * ```
@@ -112,14 +112,14 @@ export type PostHogCoreOptions = {
   personProfiles?: 'always' | 'identified_only' | 'never'
 
   /**
-   * Allows modification or dropping of events before they're sent to PostHog.
+   * Allows modification or dropping of events before they're sent to Insights.
    * If an array is provided, the functions are run in order.
    * If a function returns null, the event will be dropped.
    */
   before_send?: BeforeSendFn | BeforeSendFn[]
 }
 
-export enum PostHogPersistedProperty {
+export enum InsightsPersistedProperty {
   AnonymousId = 'anonymous_id',
   DistinctId = 'distinct_id',
   Props = 'props',
@@ -139,17 +139,17 @@ export enum PostHogPersistedProperty {
   SessionLastTimestamp = 'session_timestamp',
   PersonProperties = 'person_properties',
   GroupProperties = 'group_properties',
-  InstalledAppBuild = 'installed_app_build', // only used by posthog-react-native
-  InstalledAppVersion = 'installed_app_version', // only used by posthog-react-native
-  SessionReplay = 'session_replay', // only used by posthog-react-native
-  SurveyLastSeenDate = 'survey_last_seen_date', // only used by posthog-react-native
-  SurveysSeen = 'surveys_seen', // only used by posthog-react-native
-  Surveys = 'surveys', // only used by posthog-react-native
+  InstalledAppBuild = 'installed_app_build', // only used by insights-react-native
+  InstalledAppVersion = 'installed_app_version', // only used by insights-react-native
+  SessionReplay = 'session_replay', // only used by insights-react-native
+  SurveyLastSeenDate = 'survey_last_seen_date', // only used by insights-react-native
+  SurveysSeen = 'surveys_seen', // only used by insights-react-native
+  Surveys = 'surveys', // only used by insights-react-native
   RemoteConfig = 'remote_config',
-  FlagsEndpointWasHit = 'flags_endpoint_was_hit', // only used by posthog-react-native
+  FlagsEndpointWasHit = 'flags_endpoint_was_hit', // only used by insights-react-native
 }
 
-export type PostHogFetchOptions = {
+export type InsightsFetchOptions = {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH'
   mode?: 'no-cors'
   credentials?: 'omit'
@@ -158,8 +158,8 @@ export type PostHogFetchOptions = {
   signal?: AbortSignal
 }
 
-// Check out posthog-js for these additional options and try to keep them in sync
-export type PostHogCaptureOptions = {
+// Check out @hanzo/insights for these additional options and try to keep them in sync
+export type InsightsCaptureOptions = {
   /** If provided overrides the auto-generated event ID */
   uuid?: string
   /** If provided overrides the auto-generated timestamp */
@@ -173,7 +173,7 @@ export type PostHogCaptureOptions = {
   _originatedFromCaptureException?: boolean
 }
 
-export type PostHogFetchResponse = {
+export type InsightsFetchResponse = {
   status: number
   text: () => Promise<string>
   json: () => Promise<any>
@@ -182,27 +182,27 @@ export type PostHogFetchResponse = {
   }
 }
 
-export type PostHogQueueItem = {
+export type InsightsQueueItem = {
   message: any
   callback?: (err: any) => void
 }
 
-export type PostHogEventProperties = {
+export type InsightsEventProperties = {
   [key: string]: JsonType
 }
 
-export type PostHogGroupProperties = {
+export type InsightsGroupProperties = {
   [type: string]: string | number
 }
 
-export type PostHogAutocaptureElement = {
+export type InsightsAutocaptureElement = {
   $el_text?: string
   tag_name: string
   href?: string
   nth_child?: number
   nth_of_type?: number
   order?: number
-} & PostHogEventProperties
+} & InsightsEventProperties
 // Any key prefixed with `attr__` can be added
 
 export enum Compression {
@@ -210,7 +210,7 @@ export enum Compression {
   Base64 = 'base64',
 }
 
-export type PostHogRemoteConfig = {
+export type InsightsRemoteConfig = {
   sessionRecording?:
     | boolean
     | {
@@ -272,7 +272,7 @@ export type FeatureFlagResultOptions = {
   sendEvent?: boolean
 }
 
-export type PostHogFlagsResponse = Omit<PostHogRemoteConfig, 'hasFeatureFlags'> & {
+export type InsightsFlagsResponse = Omit<InsightsRemoteConfig, 'hasFeatureFlags'> & {
   featureFlags: {
     [key: string]: FeatureFlagValue
   }
@@ -293,8 +293,8 @@ export type PostHogFlagsResponse = Omit<PostHogRemoteConfig, 'hasFeatureFlags'> 
   evaluatedAt?: number // Unix timestamp in milliseconds
 }
 
-export type PostHogFeatureFlagsResponse = PartialWithRequired<
-  PostHogFlagsResponse,
+export type InsightsFeatureFlagsResponse = PartialWithRequired<
+  InsightsFlagsResponse,
   'flags' | 'featureFlags' | 'featureFlagPayloads' | 'requestId'
 >
 
@@ -328,31 +328,31 @@ export type PartialWithRequired<T, K extends keyof T> = {
 }
 
 /**
- * These are the fields we care about from PostHogFlagsResponse for feature flags.
+ * These are the fields we care about from InsightsFlagsResponse for feature flags.
  */
-export type PostHogFeatureFlagDetails = PartialWithRequired<
-  PostHogFlagsResponse,
+export type InsightsFeatureFlagDetails = PartialWithRequired<
+  InsightsFlagsResponse,
   'flags' | 'featureFlags' | 'featureFlagPayloads' | 'requestId'
 >
 
 /**
  * Models the response from the v1 `/flags` endpoint.
  */
-export type PostHogV1FlagsResponse = Omit<PostHogFlagsResponse, 'flags'>
+export type InsightsV1FlagsResponse = Omit<InsightsFlagsResponse, 'flags'>
 
 /**
  * Models the response from the v2 `/flags` endpoint.
  */
-export type PostHogV2FlagsResponse = Omit<PostHogFlagsResponse, 'featureFlags' | 'featureFlagPayloads'>
+export type InsightsV2FlagsResponse = Omit<InsightsFlagsResponse, 'featureFlags' | 'featureFlagPayloads'>
 
 /**
  * The format of the flags object in persisted storage
  *
- * When we pull flags from persistence, we can normalize them to PostHogFeatureFlagDetails
+ * When we pull flags from persistence, we can normalize them to InsightsFeatureFlagDetails
  * so that we can support v1 and v2 of the API.
  */
-export type PostHogFlagsStorageFormat = Pick<PostHogFeatureFlagDetails, 'flags'> &
-  Partial<Pick<PostHogFlagsResponse, 'requestId' | 'evaluatedAt'>> & {
+export type InsightsFlagsStorageFormat = Pick<InsightsFeatureFlagDetails, 'flags'> &
+  Partial<Pick<InsightsFlagsResponse, 'requestId' | 'evaluatedAt'>> & {
     errorsWhileComputingFlags?: boolean
     quotaLimited?: string[]
     requestError?: FeatureFlagRequestError
@@ -361,13 +361,13 @@ export type PostHogFlagsStorageFormat = Pick<PostHogFeatureFlagDetails, 'flags'>
 /**
  * Models legacy flags and payloads return type for many public methods.
  */
-export type PostHogFlagsAndPayloadsResponse = Partial<
-  Pick<PostHogFlagsResponse, 'featureFlags' | 'featureFlagPayloads'>
+export type InsightsFlagsAndPayloadsResponse = Partial<
+  Pick<InsightsFlagsResponse, 'featureFlags' | 'featureFlagPayloads'>
 >
 
 export type JsonType = string | number | boolean | null | { [key: string]: JsonType } | Array<JsonType> | JsonType[]
 
-export type FetchLike = (url: string, options: PostHogFetchOptions) => Promise<PostHogFetchResponse>
+export type FetchLike = (url: string, options: InsightsFetchOptions) => Promise<InsightsFetchResponse>
 
 /**
  * Error type constants for the $feature_flag_error property.
@@ -411,7 +411,7 @@ export type FeatureFlagRequestError = {
  * Result type for getFlags that includes either a successful response or error information.
  */
 export type GetFlagsResult =
-  | { success: true; response: PostHogFeatureFlagsResponse }
+  | { success: true; response: InsightsFeatureFlagsResponse }
   | { success: false; error: FeatureFlagRequestError }
 
 export type FeatureFlagDetail = {
@@ -727,12 +727,12 @@ export const knownUnsafeEditableEvent = [
  * These events can be processed by the `beforeCapture` function
  * but can cause unexpected confusion in data.
  *
- * Some features of PostHog rely on receiving 100% of these events
+ * Some features of Insights rely on receiving 100% of these events
  */
 export type KnownUnsafeEditableEvent = (typeof knownUnsafeEditableEvent)[number]
 
 /**
- * Represents an event before it's sent to PostHog.
+ * Represents an event before it's sent to Insights.
  * This is the interface exposed to the `before_send` hook, matching the web SDK's `CaptureResult`.
  */
 export type CaptureEvent = {
@@ -741,11 +741,11 @@ export type CaptureEvent = {
   /** The name of the event */
   event: string
   /** Properties associated with the event (optional to allow compatibility with Node SDK's EventMessage) */
-  properties?: PostHogEventProperties
+  properties?: InsightsEventProperties
   /** Properties to set on the person (overrides existing values) */
-  $set?: PostHogEventProperties
+  $set?: InsightsEventProperties
   /** Properties to set on the person only once (does not override existing values) */
-  $set_once?: PostHogEventProperties
+  $set_once?: InsightsEventProperties
   /** Timestamp for the event */
   timestamp?: Date
 }

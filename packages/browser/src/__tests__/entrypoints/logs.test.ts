@@ -1,5 +1,5 @@
 import { assignableWindow } from '../../utils/globals'
-import { PostHog } from '../../posthog-core'
+import { Insights } from '../../insights-core'
 
 // Mock external OpenTelemetry dependencies
 jest.mock('@opentelemetry/api-logs', () => ({
@@ -38,7 +38,7 @@ jest.mock('@opentelemetry/resources', () => ({
 }))
 
 describe('logs entrypoint', () => {
-    let mockPostHog: PostHog
+    let mockInsights: Insights
     let originalConsole: Console
     let mockLogger: any
     let mockEmit: jest.Mock
@@ -58,10 +58,10 @@ describe('logs entrypoint', () => {
         const { logs } = require('@opentelemetry/api-logs')
         logs.getLogger.mockReturnValue(mockLogger)
 
-        // Mock PostHog instance
-        mockPostHog = {
+        // Mock Insights instance
+        mockInsights = {
             config: {
-                api_host: 'https://app.posthog.com',
+                api_host: 'https://app.insights.com',
                 token: 'test-token',
             },
             sessionManager: {
@@ -73,7 +73,7 @@ describe('logs entrypoint', () => {
                 })),
             },
             get_distinct_id: jest.fn(() => 'user-123'),
-        } as unknown as PostHog
+        } as unknown as Insights
 
         // Mock assignableWindow
         Object.defineProperty(assignableWindow, 'location', {
@@ -96,7 +96,7 @@ describe('logs entrypoint', () => {
         })
 
         // Clear existing extensions
-        assignableWindow.__PosthogExtensions__ = {}
+        assignableWindow.__InsightsExtensions__ = {}
     })
 
     afterEach(() => {
@@ -110,9 +110,9 @@ describe('logs entrypoint', () => {
             require('../../entrypoints/logs')
         })
 
-        it('should use PostHog config for exporter URL', () => {
-            const customPostHog = {
-                ...mockPostHog,
+        it('should use Insights config for exporter URL', () => {
+            const customInsights = {
+                ...mockInsights,
                 config: {
                     api_host: 'https://custom.example.com',
                     token: 'custom-token-123',
@@ -121,8 +121,8 @@ describe('logs entrypoint', () => {
 
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { OTLPLogExporter } = require('@opentelemetry/exporter-logs-otlp-http')
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(customPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(customInsights)
 
             expect(OTLPLogExporter).toHaveBeenCalledWith({
                 url: 'https://custom.example.com/i/v1/logs?token=custom-token-123',
@@ -140,8 +140,8 @@ describe('logs entrypoint', () => {
 
             // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { resourceFromAttributes } = require('@opentelemetry/resources')
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             expect(resourceFromAttributes).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -158,8 +158,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should truncate log body when it exceeds size limit', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             // Create a large string that exceeds LOG_BODY_SIZE_LIMIT (100,000 chars)
             const largeString = 'a'.repeat(10001)
@@ -178,8 +178,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should not truncate log body when within size limit', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const normalString = 'test message'
 
@@ -196,8 +196,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle large objects in body without crashing', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             // Create an object with many keys to test body handling
             const largeObject: Record<string, string> = {}
@@ -219,8 +219,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle objects with large values in body without crashing', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             // Create an object with large values
             const largeValueObject = {
@@ -242,8 +242,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle nested objects in flattenObject correctly', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const nestedObject = {
                 level1: {
@@ -269,8 +269,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle objects with null and undefined values without crashing', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const objectWithNullish = {
                 message: 'Something went wrong',
@@ -296,8 +296,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should not add attributes_truncated when within limits', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const smallObject = {
                 key1: 'value1',
@@ -319,8 +319,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle mixed content with truncation', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             // Test with multiple arguments including a large string
             const largeString = 'x'.repeat(10001)
@@ -339,8 +339,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle Error objects properly in truncation', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const error = new Error('x'.repeat(10001)) // Large error message
 
@@ -364,13 +364,13 @@ describe('logs entrypoint', () => {
         })
 
         it('should not take more than 50ms to log a 2MB object with big body', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
 
             // Create a 2MB object with a large body (single large string)
             const largeString = 'x'.repeat(2 * 1024 * 1024) // 2MB string
             const largeBodyObject = { data: largeString }
 
-            initializeLogs(mockPostHog)
+            initializeLogs(mockInsights)
             // initial log to warm up the jit
             assignableWindow.console.log(largeBodyObject)
 
@@ -387,7 +387,7 @@ describe('logs entrypoint', () => {
         })
 
         it('should not take more than 100ms to log a 2MB object with lots of keys', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
 
             // Create a 2MB object with lots of keys (each key-value pair ~40 bytes)
             const lotsOfKeysObject: Record<string, string> = {}
@@ -398,7 +398,7 @@ describe('logs entrypoint', () => {
                 lotsOfKeysObject[`key${i.toString().padStart(8, '0')}`] = `value${i.toString().padStart(8, '0')}`
             }
 
-            initializeLogs(mockPostHog)
+            initializeLogs(mockInsights)
             // initial log to warm up the jit
             assignableWindow.console.log(lotsOfKeysObject)
 
@@ -416,11 +416,11 @@ describe('logs entrypoint', () => {
         })
 
         it('should not take more than 0.1ms to log a small object', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
 
             const smallObject = { key: 'value' }
 
-            initializeLogs(mockPostHog)
+            initializeLogs(mockInsights)
 
             // Test wrapped console.log performance
             const wrappedStart = performance.now()
@@ -436,11 +436,11 @@ describe('logs entrypoint', () => {
         })
 
         it('should not take more than 0.1ms to log a medium object', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
 
             const mediumObject = { body: 'x'.repeat(1000), key: 'value', key2: 'value2', key3: 'value3' }
 
-            initializeLogs(mockPostHog)
+            initializeLogs(mockInsights)
 
             // Test wrapped console.log performance
             const wrappedStart = performance.now()

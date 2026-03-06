@@ -1,7 +1,7 @@
 {
     "name": "csp-violations-playground",
     "version": "1.0.0",
-    "description": "A playground for testing CSP violation reports with PostHog",
+    "description": "A playground for testing CSP violation reports with Insights",
     "main": "server.js",
     "scripts": {
         "build": "NODE_ENV=production rollup -c",
@@ -17,7 +17,7 @@
         "concurrently": "^9.1.2",
         "dotenv": "^16.5.0",
         "express": "^4.18.2",
-        "posthog-js": "file:../..",
+        "@hanzo/insights": "file:../..",
         "uuid": "^11.1.0"
     },
     "devDependencies": {

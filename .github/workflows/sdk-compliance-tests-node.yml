@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   test-node-sdk:
-    uses: PostHog/posthog-sdk-test-harness/.github/workflows/test-sdk-action.yml@main
+    uses: Insights/insights-sdk-test-harness/.github/workflows/test-sdk-action.yml@main
     with:
       adapter-dockerfile: compliance/node/Dockerfile
       adapter-context: .

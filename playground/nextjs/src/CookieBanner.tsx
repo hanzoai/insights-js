@@ -1,6 +1,6 @@
-/* eslint-disable posthog-js/no-direct-null-check */
+/* eslint-disable @hanzo/insights/no-direct-null-check */
 import { ReactElement, useEffect, useState } from 'react'
-import { ConsentState, cookieConsentGiven, posthog, updatePostHogConsent } from './posthog'
+import { ConsentState, cookieConsentGiven, insights, updateInsightsConsent } from './insights'
 
 export function useCookieConsent(): [ConsentState, (consentGiven: 'granted' | 'denied' | 'pending') => void] {
     const [consentGiven, setConsentGiven] = useState<ConsentState>(undefined)
@@ -10,11 +10,11 @@ export function useCookieConsent(): [ConsentState, (consentGiven: 'granted' | 'd
     }, [])
 
     useEffect(() => {
-        if (consentGiven === undefined || posthog.config.cookieless_mode === 'always') {
+        if (consentGiven === undefined || insights.config.cookieless_mode === 'always') {
             return
         }
 
-        updatePostHogConsent(consentGiven)
+        updateInsightsConsent(consentGiven)
     }, [consentGiven])
 
     return [consentGiven, setConsentGiven]
@@ -23,8 +23,8 @@ export function useCookieConsent(): [ConsentState, (consentGiven: 'granted' | 'd
 export function CookieBanner(): ReactElement | null {
     const [consentGiven, setConsentGiven] = useCookieConsent()
 
-    // eslint-disable-next-line posthog-js/no-direct-undefined-check
-    if (consentGiven === undefined || posthog.config.cookieless_mode === 'always') {
+    // eslint-disable-next-line @hanzo/insights/no-direct-undefined-check
+    if (consentGiven === undefined || insights.config.cookieless_mode === 'always') {
         return null
     }
 

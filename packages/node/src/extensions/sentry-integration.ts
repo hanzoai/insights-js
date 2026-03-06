@@ -1,30 +1,30 @@
 /**
- * @file Adapted from [posthog-js](https://github.com/PostHog/posthog-js/blob/8157df935a4d0e71d2fefef7127aa85ee51c82d1/src/extensions/sentry-integration.ts) with modifications for the Node SDK.
+ * @file Adapted from [@hanzo/insights](https://github.com/Insights/@hanzo/insights/blob/8157df935a4d0e71d2fefef7127aa85ee51c82d1/src/extensions/sentry-integration.ts) with modifications for the Node SDK.
  */
 /**
- * Integrate Sentry with PostHog. This will add a direct link to the person in Sentry, and an $exception event in PostHog.
+ * Integrate Sentry with Insights. This will add a direct link to the person in Sentry, and an $exception event in Insights.
  *
  * ### Usage
  *
  *     Sentry.init({
  *          dsn: 'https://example',
  *          integrations: [
- *              new PostHogSentryIntegration(posthog)
+ *              new InsightsSentryIntegration(insights)
  *          ]
  *     })
  *
- *     Sentry.setTag(PostHogSentryIntegration.POSTHOG_ID_TAG, 'some distinct id');
+ *     Sentry.setTag(InsightsSentryIntegration.INSIGHTS_ID_TAG, 'some distinct id');
  *
- * @param {Object} [posthog] The posthog object
- * @param {string} [organization] Optional: The Sentry organization, used to send a direct link from PostHog to Sentry
- * @param {Number} [projectId] Optional: The Sentry project id, used to send a direct link from PostHog to Sentry
+ * @param {Object} [insights] The insights object
+ * @param {string} [organization] Optional: The Sentry organization, used to send a direct link from Insights to Sentry
+ * @param {Number} [projectId] Optional: The Sentry project id, used to send a direct link from Insights to Sentry
  * @param {string} [prefix] Optional: Url of a self-hosted sentry instance (default: https://sentry.io/organizations/)
  * @param {SeverityLevel[] | '*'} [severityAllowList] Optional: send events matching the provided levels. Use '*' to send all events (default: ['error'])
- * @param {boolean} [sendExceptionsToPostHog] Optional: capture exceptions as events in PostHog (default: true)
+ * @param {boolean} [sendExceptionsToInsights] Optional: capture exceptions as events in Insights (default: true)
  */
 
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
-import { type PostHogBackendClient } from '../client'
+import { type InsightsBackendClient } from '../client'
 
 // NOTE - we can't import from @sentry/types because it changes frequently and causes clashes
 // We only use a small subset of the types, so we can just define the integration overall and use any for the rest
@@ -71,19 +71,19 @@ export type SentryIntegrationOptions = {
   projectId?: number
   prefix?: string
   severityAllowList?: CoreErrorTracking.SeverityLevel[] | '*'
-  sendExceptionsToPostHog?: boolean
+  sendExceptionsToInsights?: boolean
 }
 
-const NAME = 'posthog-node'
+const NAME = 'insights-node'
 
 export function createEventProcessor(
-  _posthog: PostHogBackendClient,
+  _insights: InsightsBackendClient,
   {
     organization,
     projectId,
     prefix,
     severityAllowList = ['error'],
-    sendExceptionsToPostHog = true,
+    sendExceptionsToInsights = true,
   }: SentryIntegrationOptions = {}
 ): (event: _SentryEvent) => _SentryEvent {
   return (event) => {
@@ -95,17 +95,17 @@ export function createEventProcessor(
       event.tags = {}
     }
 
-    // Get the PostHog user ID from a specific tag, which users can set on their Sentry scope as they need.
-    const userId = event.tags[PostHogSentryIntegration.POSTHOG_ID_TAG]
+    // Get the Insights user ID from a specific tag, which users can set on their Sentry scope as they need.
+    const userId = event.tags[InsightsSentryIntegration.INSIGHTS_ID_TAG]
     if (userId === undefined) {
-      // If we can't find a user ID, don't bother linking the event. We won't be able to send anything meaningful to PostHog without it.
+      // If we can't find a user ID, don't bother linking the event. We won't be able to send anything meaningful to Insights without it.
       return event
     }
 
-    const uiHost = _posthog.options.host ?? 'https://us.i.posthog.com'
-    const personUrl = new URL(`/project/${_posthog.apiKey}/person/${userId}`, uiHost).toString()
+    const uiHost = _insights.options.host ?? 'https://us.i.insights.com'
+    const personUrl = new URL(`/project/${_insights.apiKey}/person/${userId}`, uiHost).toString()
 
-    event.tags['PostHog Person URL'] = personUrl
+    event.tags['Insights Person URL'] = personUrl
 
     const exceptions: _SentryException[] = event.exception?.values || []
 
@@ -130,7 +130,7 @@ export function createEventProcessor(
       $exception_list: any
       $exception_level: CoreErrorTracking.SeverityLevel
     } = {
-      // PostHog Exception Properties,
+      // Insights Exception Properties,
       $exception_message: exceptions[0]?.value || event.message,
       $exception_type: exceptions[0]?.type,
       $exception_level: event.level,
@@ -153,8 +153,8 @@ export function createEventProcessor(
         event.event_id
     }
 
-    if (sendExceptionsToPostHog) {
-      _posthog.capture({ event: '$exception', distinctId: userId, properties })
+    if (sendExceptionsToInsights) {
+      _insights.capture({ event: '$exception', distinctId: userId, properties })
     }
 
     return event
@@ -163,10 +163,10 @@ export function createEventProcessor(
 
 // V8 integration - function based
 export function sentryIntegration(
-  _posthog: PostHogBackendClient,
+  _insights: InsightsBackendClient,
   options?: SentryIntegrationOptions
 ): _SentryIntegration {
-  const processor = createEventProcessor(_posthog, options)
+  const processor = createEventProcessor(_insights, options)
   return {
     name: NAME,
     processEvent(event) {
@@ -176,10 +176,10 @@ export function sentryIntegration(
 }
 
 // V7 integration - class based
-export class PostHogSentryIntegration implements _SentryIntegrationClass {
+export class InsightsSentryIntegration implements _SentryIntegrationClass {
   public readonly name = NAME
 
-  public static readonly POSTHOG_ID_TAG = 'posthog_distinct_id'
+  public static readonly INSIGHTS_ID_TAG = 'insights_distinct_id'
 
   public setupOnce: (
     addGlobalEventProcessor: (callback: _SentryEventProcessor) => void,
@@ -187,11 +187,11 @@ export class PostHogSentryIntegration implements _SentryIntegrationClass {
   ) => void
 
   constructor(
-    _posthog: PostHogBackendClient,
+    _insights: InsightsBackendClient,
     organization?: string,
     prefix?: string,
     severityAllowList?: CoreErrorTracking.SeverityLevel[] | '*',
-    sendExceptionsToPostHog?: boolean
+    sendExceptionsToInsights?: boolean
   ) {
     // setupOnce gets called by Sentry when it intializes the plugin
     this.name = NAME
@@ -201,12 +201,12 @@ export class PostHogSentryIntegration implements _SentryIntegrationClass {
     ) {
       const projectId = getCurrentHub()?.getClient()?.getDsn()?.projectId
       addGlobalEventProcessor(
-        createEventProcessor(_posthog, {
+        createEventProcessor(_insights, {
           organization,
           projectId,
           prefix,
           severityAllowList,
-          sendExceptionsToPostHog: sendExceptionsToPostHog ?? true,
+          sendExceptionsToInsights: sendExceptionsToInsights ?? true,
         })
       )
     }

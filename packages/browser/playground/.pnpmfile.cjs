@@ -6,7 +6,7 @@ module.exports = {
             function rewriteLocalDeps(deps) {
                 if (deps) {
                     for (const dep in deps) {
-                        if (dep.startsWith('posthog') || dep.startsWith('@posthog')) {
+                        if (dep.startsWith('insights') || dep.startsWith('@insights')) {
                             const tarballName = dep.replace('@', '').replace('/', '-')
                             deps[dep] = `file:${repoRoot}/target/${tarballName}.tgz`
                         }

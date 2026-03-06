@@ -1,6 +1,6 @@
 import { defineNuxtModule, addPlugin, createResolver, addServerPlugin, addImportsDir } from '@nuxt/kit'
-import type { PostHogConfig } from '@hanzo/insights'
-import type { PostHogOptions } from '@hanzo/insights-node'
+import type { InsightsConfig } from '@hanzo/insights'
+import type { InsightsOptions } from '@hanzo/insights-node'
 import type {} from 'nuxt/app'
 import { resolveBinaryPath, spawnLocal } from '@hanzo/insights-core/process'
 import { fileURLToPath } from 'node:url'
@@ -33,30 +33,30 @@ export interface ModuleOptions {
   publicKey: string
   debug?: boolean
   cliBinaryPath?: string
-  clientConfig?: PostHogClientConfig
-  serverConfig?: PostHogServerConfig
+  clientConfig?: InsightsClientConfig
+  serverConfig?: InsightsServerConfig
   sourcemaps: SourcemapsConfig | undefined
 }
 
-export interface PostHogCommon {
+export interface InsightsCommon {
   publicKey: string
   host: string
   debug?: boolean
 }
 
-export type PostHogServerConfig = PostHogOptions
-export type PostHogClientConfig = Partial<PostHogConfig>
+export type InsightsServerConfig = InsightsOptions
+export type InsightsClientConfig = Partial<InsightsConfig>
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
-    name: '@posthog/nuxt',
-    configKey: 'posthogConfig',
+    name: '@insights/nuxt',
+    configKey: 'insightsConfig',
     compatibility: {
       nuxt: '>=3.7.0',
     },
   },
   defaults: () => ({
-    host: 'https://us.i.posthog.com',
+    host: 'https://us.i.insights.com',
     debug: false,
     clientConfig: {},
     serverConfig: {},
@@ -69,16 +69,16 @@ export default defineNuxtModule<ModuleOptions>({
     addImportsDir(resolver.resolve('./runtime/composables'))
 
     Object.assign(nuxt.options.runtimeConfig.public, {
-      posthog: {
+      insights: {
         publicKey: options.publicKey,
         host: options.host,
         debug: options.debug,
       },
-      posthogClientConfig: options.clientConfig,
+      insightsClientConfig: options.clientConfig,
     })
 
     Object.assign(nuxt.options.runtimeConfig, {
-      posthogServerConfig: options.serverConfig,
+      insightsServerConfig: options.serverConfig,
     })
 
     if (!options.sourcemaps?.enabled || nuxt.options.dev) {
@@ -115,10 +115,10 @@ export default defineNuxtModule<ModuleOptions>({
 
     let isBuildProcess = false
 
-    const posthogCliRunner = () => {
+    const insightsCliRunner = () => {
       const cliBinaryPath =
         options.cliBinaryPath ||
-        resolveBinaryPath('posthog-cli', {
+        resolveBinaryPath('insights-cli', {
           path: process.env.PATH ?? '',
           cwd: resolvedDirname,
         })
@@ -126,10 +126,10 @@ export default defineNuxtModule<ModuleOptions>({
       const projectId = sourcemapsConfig.projectId ?? sourcemapsConfig.envId
       const cliEnv = {
         ...process.env,
-        RUST_LOG: `posthog_cli=${logLevel}`,
-        POSTHOG_CLI_HOST: options.host,
-        POSTHOG_CLI_PROJECT_ID: projectId,
-        POSTHOG_CLI_API_KEY: sourcemapsConfig.personalApiKey,
+        RUST_LOG: `insights_cli=${logLevel}`,
+        INSIGHTS_CLI_HOST: options.host,
+        INSIGHTS_CLI_PROJECT_ID: projectId,
+        INSIGHTS_CLI_API_KEY: sourcemapsConfig.personalApiKey,
       }
       return (args: string[]) => {
         return spawnLocal(cliBinaryPath, args, {
@@ -140,14 +140,14 @@ export default defineNuxtModule<ModuleOptions>({
       }
     }
 
-    const cliRunner = posthogCliRunner()
+    const cliRunner = insightsCliRunner()
 
     nuxt.hook('nitro:build:public-assets', async () => {
       isBuildProcess = true
       if (!publicDir) return
       try {
         // Inject public sourcemaps
-        // This cannot be done in the close hook. https://github.com/PostHog/posthog/issues/30957#issuecomment-2824545454
+        // This cannot be done in the close hook. https://github.com/Insights/insights/issues/30957#issuecomment-2824545454
         await cliRunner(getInjectArgs(publicDir, sourcemapsConfig))
       } catch (error) {
         console.error('Failed to process public sourcemaps:', error)

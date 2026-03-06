@@ -13,7 +13,7 @@
         "nuxt": "^3.16.2"
     },
     "dependencies": {
-        "posthog-js": "file:../../dist/"
+        "@hanzo/insights": "file:../../dist/"
     },
     "packageManager": "pnpm@10.12.4",
     "pnpm": {

@@ -1,5 +1,5 @@
 import { pollUntilEventCaptured } from '../utils/event-capture-utils'
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const startOptions = {
@@ -28,7 +28,7 @@ const questionWithLargeHtmlContent = {
 const linkQuestionWithHTMLContentType = {
     type: 'link',
     question: 'Book an interview with us',
-    link: 'https://posthog.com',
+    link: 'https://insights.com',
     description: '<h2>html description</h2>',
     descriptionContentType: 'html',
     id: 'link_html_1',
@@ -37,7 +37,7 @@ const linkQuestionWithHTMLContentType = {
 const linkQuestionWithNoContentType = {
     type: 'link',
     question: 'Book an interview with us',
-    link: 'https://posthog.com',
+    link: 'https://insights.com',
     description: '<h2>html description</h2>',
     id: 'link_no_content_1',
 }
@@ -45,7 +45,7 @@ const linkQuestionWithNoContentType = {
 const linkQuestionWithTextContentType = {
     type: 'link',
     question: 'Book an interview with us',
-    link: 'https://posthog.com',
+    link: 'https://insights.com',
     description: '<h2>html description</h2>',
     descriptionContentType: 'text',
     id: 'link_text_1',
@@ -85,27 +85,27 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText(
             'What feedback do you have for us?'
         )
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
             'plain text description'
         )
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.footer-branding')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.footer-branding')).toBeVisible()
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toHaveCSS('background-color', black)
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toHaveCSS('color', white)
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toHaveCSS('background-color', black)
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toHaveCSS('color', white)
 
-        await page.locator('.PostHogSurvey-123').locator('textarea').type('This is great!')
+        await page.locator('.InsightsSurvey-123').locator('textarea').type('This is great!')
 
-        await page.locator('.PostHogSurvey-123').locator('.form-submit').click()
+        await page.locator('.InsightsSurvey-123').locator('.form-submit').click()
 
         await pollUntilEventCaptured(page, 'survey sent')
     })
 
-    test('does not show posthog logo if whiteLabel exists', async ({ page, context }) => {
+    test('does not show insights logo if whiteLabel exists', async ({ page, context }) => {
         const surveysAPICall = page.route('**/surveys/**', async (route) => {
             await route.fulfill({
                 json: {
@@ -126,8 +126,8 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.footer-branding')).not.toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.footer-branding')).not.toBeVisible()
     })
 
     test('allows html customization for question and thank you element description', async ({ page, context }) => {
@@ -150,11 +150,11 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText(
             'Book an interview with us'
         )
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description h2')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description h2')).toHaveText(
             'html description'
         )
     })
@@ -182,11 +182,11 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText(
             'Book an interview with us'
         )
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description h2')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description h2')).toHaveText(
             'html description'
         )
     })
@@ -216,16 +216,16 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText(
             'What feedback do you have for us?'
         )
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
             'plain text description'
         )
-        await page.locator('.PostHogSurvey-123').locator('textarea').type('This is great!')
-        await page.locator('.PostHogSurvey-123').locator('.form-submit').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.thank-you-message-body h3')).toHaveText(
+        await page.locator('.InsightsSurvey-123').locator('textarea').type('This is great!')
+        await page.locator('.InsightsSurvey-123').locator('.form-submit').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.thank-you-message-body h3')).toHaveText(
             'html thank you message!'
         )
         await pollUntilEventCaptured(page, 'survey sent')
@@ -254,12 +254,12 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText(
             'Book an interview with us'
         )
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description h2')).toHaveCount(0)
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description h2')).toHaveCount(0)
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
             '<h2>html description</h2>'
         )
     })
@@ -292,17 +292,17 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-form')).toBeVisible()
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-form')).toBeVisible()
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question')).toHaveText(
             'What feedback do you have for us?'
         )
-        await expect(page.locator('.PostHogSurvey-123').locator('.survey-question-description')).toHaveText(
+        await expect(page.locator('.InsightsSurvey-123').locator('.survey-question-description')).toHaveText(
             'plain text description'
         )
-        await page.locator('.PostHogSurvey-123').locator('textarea').type('This is great!')
-        await page.locator('.PostHogSurvey-123').locator('.form-submit').click()
-        await expect(page.locator('.PostHogSurvey-123').locator('.thank-you-message-body h3')).toHaveCount(0)
-        await expect(page.locator('.PostHogSurvey-123').locator('.thank-you-message-body')).toHaveText(
+        await page.locator('.InsightsSurvey-123').locator('textarea').type('This is great!')
+        await page.locator('.InsightsSurvey-123').locator('.form-submit').click()
+        await expect(page.locator('.InsightsSurvey-123').locator('.thank-you-message-body h3')).toHaveCount(0)
+        await expect(page.locator('.InsightsSurvey-123').locator('.thank-you-message-body')).toHaveText(
             '<h3>html thank you message!</h3>'
         )
         await pollUntilEventCaptured(page, 'survey sent')
@@ -332,9 +332,9 @@ test.describe('surveys - customization', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        const questionDesc = page.locator('.PostHogSurvey-123 .survey-question-description')
-        const svg = page.locator('.PostHogSurvey-123 .survey-question-description svg')
-        const paragraph = page.locator('.PostHogSurvey-123 .survey-question-description p')
+        const questionDesc = page.locator('.InsightsSurvey-123 .survey-question-description')
+        const svg = page.locator('.InsightsSurvey-123 .survey-question-description svg')
+        const paragraph = page.locator('.InsightsSurvey-123 .survey-question-description p')
 
         await expect(questionDesc).toBeVisible()
         await expect(svg).toBeVisible()
@@ -345,7 +345,7 @@ test.describe('surveys - customization', () => {
 
         const descBox = await questionDesc.boundingBox()
         const svgBox = await svg.boundingBox()
-        const surveyFormBox = await page.locator('.PostHogSurvey-123 .survey-form').boundingBox()
+        const surveyFormBox = await page.locator('.InsightsSurvey-123 .survey-form').boundingBox()
 
         expect(descBox).not.toBeNull()
         expect(svgBox).not.toBeNull()

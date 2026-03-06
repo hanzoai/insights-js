@@ -1,17 +1,17 @@
 /* eslint-env node */
 
-import { withPostHogConfig } from '@posthog/nextjs-config'
+import { withInsightsConfig } from '@insights/nextjs-config'
 import packageJson from './package.json' with { type: 'json' }
 
 const nextConfig = {
     /* config options here */
 }
 
-export default withPostHogConfig(nextConfig, {
-    personalApiKey: process.env.POSTHOG_PERSONAL_API_KEY!,
-    projectId: process.env.POSTHOG_PROJECT_ID!,
-    host: process.env.NEXT_PUBLIC_POSTHOG_API_HOST,
-    cliBinaryPath: process.env.POSTHOG_CLI_PATH, // Optional
+export default withInsightsConfig(nextConfig, {
+    personalApiKey: process.env.INSIGHTS_PERSONAL_API_KEY!,
+    projectId: process.env.INSIGHTS_PROJECT_ID!,
+    host: process.env.NEXT_PUBLIC_INSIGHTS_API_HOST,
+    cliBinaryPath: process.env.INSIGHTS_CLI_PATH, // Optional
     logLevel: 'debug',
     sourcemaps: {
         releaseName: 'example-nextjs',

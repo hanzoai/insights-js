@@ -1,4 +1,4 @@
-import { PostHog } from '../posthog-core'
+import { Insights } from '../insights-core'
 
 /**
  * The request router helps simplify the logic to determine which endpoints should be called for which things
@@ -14,20 +14,20 @@ export enum RequestRouterRegion {
 
 export type RequestRouterTarget = 'api' | 'ui' | 'assets' | 'flags'
 
-const ingestionDomain = 'i.posthog.com'
+const ingestionDomain = 'i.insights.com'
 
 export class RequestRouter {
-    instance: PostHog
+    instance: Insights
     private _regionCache: Record<string, RequestRouterRegion> = {}
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this.instance = instance
     }
 
     get apiHost(): string {
         const host = this.instance.config.api_host.trim().replace(/\/$/, '')
-        if (host === 'https://app.posthog.com') {
-            return 'https://us.i.posthog.com'
+        if (host === 'https://app.insights.com') {
+            return 'https://us.i.insights.com'
         }
         return host
     }
@@ -46,12 +46,12 @@ export class RequestRouter {
 
         if (!host) {
             // No ui_host set, get it from the api_host. But api_host differs
-            // from the actual UI host, so replace the ingestion subdomain with just posthog.com
-            host = this.apiHost.replace(`.${ingestionDomain}`, '.posthog.com')
+            // from the actual UI host, so replace the ingestion subdomain with just insights.com
+            host = this.apiHost.replace(`.${ingestionDomain}`, '.insights.com')
         }
 
-        if (host === 'https://app.posthog.com') {
-            return 'https://us.posthog.com'
+        if (host === 'https://app.insights.com') {
+            return 'https://us.insights.com'
         }
 
         return host
@@ -60,9 +60,9 @@ export class RequestRouter {
     get region(): RequestRouterRegion {
         // We don't need to compute this every time so we cache the result
         if (!this._regionCache[this.apiHost]) {
-            if (/https:\/\/(app|us|us-assets)(\.i)?\.posthog\.com/i.test(this.apiHost)) {
+            if (/https:\/\/(app|us|us-assets)(\.i)?\.insights\.com/i.test(this.apiHost)) {
                 this._regionCache[this.apiHost] = RequestRouterRegion.US
-            } else if (/https:\/\/(eu|eu-assets)(\.i)?\.posthog\.com/i.test(this.apiHost)) {
+            } else if (/https:\/\/(eu|eu-assets)(\.i)?\.insights\.com/i.test(this.apiHost)) {
                 this._regionCache[this.apiHost] = RequestRouterRegion.EU
             } else {
                 this._regionCache[this.apiHost] = RequestRouterRegion.CUSTOM

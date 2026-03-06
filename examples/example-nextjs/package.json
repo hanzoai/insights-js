@@ -12,11 +12,11 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@posthog/nextjs-config": "*",
-        "@posthog/react": "*",
-        "posthog-node": "*",
+        "@hanzo/nextjs-config": "*",
+        "@hanzo/react": "*",
+        "@hanzo/insights-node": "*",
         "next": "^15",
-        "posthog-js": "*",
+        "@hanzo/insights": "*",
         "react": "^19.2.1",
         "react-dom": "^19.2.1"
     },

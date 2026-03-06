@@ -1,4 +1,4 @@
-import { Breaker, PostHogConfig, Properties } from '../types'
+import { Breaker, InsightsConfig, Properties } from '../types'
 import { nativeForEach, nativeIndexOf } from './globals'
 import { logger } from './logger'
 import { isFormData, isNull, isNullish, isNumber, isString, hasOwnProperty, isArray } from '@hanzo/insights-core'
@@ -123,7 +123,7 @@ export const safewrap = function <F extends (...args: any[]) => any = (...args: 
             return f.apply(this, args)
         } catch (e) {
             logger.critical(
-                'Implementation error. Please turn on debug mode and open a ticket on https://app.posthog.com/home#panel=support%3Asupport%3A.'
+                'Implementation error. Please turn on debug mode and open a ticket on https://app.insights.com/home#panel=support%3Asupport%3A.'
             )
             logger.critical(e)
         }
@@ -199,7 +199,7 @@ export function _copyAndTruncateStrings<T extends Record<string, any> = Record<s
     }) as T
 }
 
-// NOTE: Update PostHogConfig docs if you change this list
+// NOTE: Update InsightsConfig docs if you change this list
 // We will not try to catch all bullets here, but we should make an effort to catch the most common ones
 // You should be highly against adding more to this list, because ultimately customers can configure
 // their `cross_subdomain_cookie` setting to anything they want.
@@ -245,7 +245,7 @@ export function addEventListener(
 
     // This is the only place where we are allowed to call this function
     // because the whole idea is that we should be calling this instead of the built-in one
-    // eslint-disable-next-line posthog-js/no-add-event-listener
+    // eslint-disable-next-line @hanzo/insights/no-add-event-listener
     element?.addEventListener(event, callback, { capture, passive })
 }
 
@@ -287,6 +287,6 @@ export function migrateConfigField<T>(
 
 const TOOLBAR_INTERNAL_INSTANCE_NAME = 'ph_toolbar_internal'
 
-export function isToolbarInstance(config: Pick<PostHogConfig, 'name'>): boolean {
+export function isToolbarInstance(config: Pick<InsightsConfig, 'name'>): boolean {
     return config.name === TOOLBAR_INTERNAL_INSTANCE_NAME
 }

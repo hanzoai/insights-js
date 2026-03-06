@@ -7,7 +7,7 @@ import {
     RequestRestoreLinkResponse,
     UserProvidedTraits,
     Ticket,
-} from '../../../../posthog-conversations-types'
+} from '../../../../insights-conversations-types'
 import { createLogger } from '../../../../utils/logger'
 import { getStyles } from './styles'
 import { OpenChatButton } from './OpenChatButton'
@@ -107,8 +107,8 @@ export class ConversationsWidget extends Component<WidgetProps, WidgetState> {
         traits: UserProvidedTraits | null,
         isUserIdentified?: boolean
     ): boolean {
-        // If user is already identified via PostHog, no form needed
-        // They've called posthog.identify() so we have their identity
+        // If user is already identified via Insights, no form needed
+        // They've called insights.identify() so we have their identity
         if (isUserIdentified) {
             return false
         }
@@ -422,7 +422,7 @@ export class ConversationsWidget extends Component<WidgetProps, WidgetState> {
     }
 
     /**
-     * Called when user identifies via posthog.identify()
+     * Called when user identifies via insights.identify()
      * Navigates away from identification form since we now know who they are
      */
     setUserIdentified(): void {

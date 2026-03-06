@@ -8,8 +8,8 @@ import {
     hasWaitPeriodPassed,
     sendSurveyEvent,
 } from '../../extensions/surveys/surveys-extension-utils'
-import { PostHog } from '../../posthog-core'
-import { Survey, SurveySchedule, SurveyType } from '../../posthog-surveys-types'
+import { Insights } from '../../insights-core'
+import { Survey, SurveySchedule, SurveyType } from '../../insights-surveys-types'
 import { SURVEY_IN_PROGRESS_PREFIX, SURVEY_SEEN_PREFIX } from '../../utils/survey-utils'
 
 describe('hasWaitPeriodPassed', () => {
@@ -654,14 +654,14 @@ describe('sendSurveyEvent', () => {
 
     it('includes custom properties in captured event', () => {
         const mockCapture = jest.fn()
-        const mockPostHog = { capture: mockCapture } as unknown as PostHog
+        const mockInsights = { capture: mockCapture } as unknown as Insights
 
         sendSurveyEvent({
             responses: { $survey_response_q1: 'Great!' },
             survey: baseSurvey,
             surveySubmissionId: 'submission-123',
             isSurveyCompleted: true,
-            posthog: mockPostHog,
+            insights: mockInsights,
             properties: {
                 $ai_generation_id: 'gen-456',
                 $ai_trace_id: 'trace-789',
@@ -681,14 +681,14 @@ describe('sendSurveyEvent', () => {
 
     it('works without custom properties', () => {
         const mockCapture = jest.fn()
-        const mockPostHog = { capture: mockCapture } as unknown as PostHog
+        const mockInsights = { capture: mockCapture } as unknown as Insights
 
         sendSurveyEvent({
             responses: { $survey_response_q1: 'Great!' },
             survey: baseSurvey,
             surveySubmissionId: 'submission-123',
             isSurveyCompleted: true,
-            posthog: mockPostHog,
+            insights: mockInsights,
         })
 
         expect(mockCapture).toHaveBeenCalledTimes(1)

@@ -1,4 +1,4 @@
-import { EventMessage, PostHog } from '@hanzo/insights-node'
+import { EventMessage, Insights } from '@hanzo/insights-node'
 import OpenAIOrignal from 'openai'
 import AnthropicOriginal from '@anthropic-ai/sdk'
 import type { ChatCompletionTool } from 'openai/resources/chat/completions'
@@ -27,8 +27,8 @@ const TOKEN_PROPERTY_KEYS = new Set([
   '$ai_reasoning_tokens',
 ])
 
-export function getTokensSource(posthogProperties?: Record<string, unknown>): string {
-  if (posthogProperties && Object.keys(posthogProperties).some((key) => TOKEN_PROPERTY_KEYS.has(key))) {
+export function getTokensSource(insightsProperties?: Record<string, unknown>): string {
+  if (insightsProperties && Object.keys(insightsProperties).some((key) => TOKEN_PROPERTY_KEYS.has(key))) {
     return 'passthrough'
   }
   return 'sdk'
@@ -79,7 +79,7 @@ export interface MonitoringEventPropertiesWithDefaults {
 export type MonitoringEventProperties = Partial<MonitoringEventPropertiesWithDefaults>
 
 export type MonitoringParams = {
-  [K in keyof MonitoringEventProperties as `posthog${Capitalize<string & K>}`]: MonitoringEventProperties[K]
+  [K in keyof MonitoringEventProperties as `insights${Capitalize<string & K>}`]: MonitoringEventProperties[K]
 }
 
 export interface CostOverride {
@@ -353,7 +353,7 @@ export const mergeSystemPrompt = (params: MessageCreateParams & MonitoringParams
   return params.messages
 }
 
-export const withPrivacyMode = (client: PostHog, privacyMode: boolean, input: any): any => {
+export const withPrivacyMode = (client: Insights, privacyMode: boolean, input: any): any => {
   return (client as any).privacy_mode || privacyMode ? null : input
 }
 
@@ -557,8 +557,8 @@ export enum AIEvent {
   Embedding = '$ai_embedding',
 }
 
-export type SendEventToPosthogParams = {
-  client: PostHog
+export type SendEventToInsightsParams = {
+  client: Insights
   eventType?: AIEvent
   distinctId?: string
   traceId: string
@@ -602,30 +602,30 @@ function sanitizeValues(obj: any): any {
   return jsonSafe
 }
 
-const POSTHOG_PARAMS_MAP: Record<keyof MonitoringParams, string> = {
-  posthogDistinctId: 'distinctId',
-  posthogTraceId: 'traceId',
-  posthogProperties: 'properties',
-  posthogPrivacyMode: 'privacyMode',
-  posthogGroups: 'groups',
-  posthogModelOverride: 'modelOverride',
-  posthogProviderOverride: 'providerOverride',
-  posthogCostOverride: 'costOverride',
-  posthogCaptureImmediate: 'captureImmediate',
+const INSIGHTS_PARAMS_MAP: Record<keyof MonitoringParams, string> = {
+  insightsDistinctId: 'distinctId',
+  insightsTraceId: 'traceId',
+  insightsProperties: 'properties',
+  insightsPrivacyMode: 'privacyMode',
+  insightsGroups: 'groups',
+  insightsModelOverride: 'modelOverride',
+  insightsProviderOverride: 'providerOverride',
+  insightsCostOverride: 'costOverride',
+  insightsCaptureImmediate: 'captureImmediate',
 }
 
-export function extractPosthogParams<T>(body: T & MonitoringParams): {
+export function extractInsightsParams<T>(body: T & MonitoringParams): {
   providerParams: T
-  posthogParams: MonitoringEventPropertiesWithDefaults
+  insightsParams: MonitoringEventPropertiesWithDefaults
 } {
   const providerParams: Record<string, unknown> = {}
-  const posthogParams: Record<string, unknown> = {}
+  const insightsParams: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(body)) {
-    if (POSTHOG_PARAMS_MAP[key as keyof MonitoringParams]) {
-      posthogParams[POSTHOG_PARAMS_MAP[key as keyof MonitoringParams]] = value
-    } else if (key.startsWith('posthog')) {
-      console.warn(`Unknown Posthog parameter ${key}`)
+    if (INSIGHTS_PARAMS_MAP[key as keyof MonitoringParams]) {
+      insightsParams[INSIGHTS_PARAMS_MAP[key as keyof MonitoringParams]] = value
+    } else if (key.startsWith('insights')) {
+      console.warn(`Unknown Insights parameter ${key}`)
     } else {
       providerParams[key] = value
     }
@@ -633,7 +633,7 @@ export function extractPosthogParams<T>(body: T & MonitoringParams): {
 
   return {
     providerParams: providerParams as T,
-    posthogParams: addDefaults(posthogParams),
+    insightsParams: addDefaults(insightsParams),
   }
 }
 
@@ -645,13 +645,13 @@ function addDefaults(params: MonitoringEventProperties): MonitoringEventProperti
   }
 }
 
-export const sendEventWithErrorToPosthog = async ({
+export const sendEventWithErrorToInsights = async ({
   client,
   traceId,
   error,
   ...args
-}: Omit<SendEventToPosthogParams, 'error' | 'httpStatus'> &
-  Required<Pick<SendEventToPosthogParams, 'error'>>): Promise<unknown> => {
+}: Omit<SendEventToInsightsParams, 'error' | 'httpStatus'> &
+  Required<Pick<SendEventToInsightsParams, 'error'>>): Promise<unknown> => {
   const httpStatus =
     error && typeof error === 'object' && 'status' in error ? ((error as { status?: number }).status ?? 500) : 500
 
@@ -662,16 +662,16 @@ export const sendEventWithErrorToPosthog = async ({
     // assign a uuid that can be used to link the trace and exception events
     const exceptionId = uuidv7()
     client.captureException(error, undefined, { $ai_trace_id: traceId }, exceptionId)
-    enrichedError.__posthog_previously_captured_error = true
+    enrichedError.__insights_previously_captured_error = true
     properties.exceptionId = exceptionId
   }
 
-  await sendEventToPosthog(properties)
+  await sendEventToInsights(properties)
 
   return enrichedError
 }
 
-export const sendEventToPosthog = async ({
+export const sendEventToInsights = async ({
   client,
   eventType = AIEvent.Generation,
   distinctId,
@@ -690,7 +690,7 @@ export const sendEventToPosthog = async ({
   exceptionId,
   tools,
   captureImmediate = false,
-}: SendEventToPosthogParams): Promise<void> => {
+}: SendEventToInsightsParams): Promise<void> => {
   if (!client.capture) {
     return Promise.resolve()
   }
@@ -708,9 +708,9 @@ export const sendEventToPosthog = async ({
     }
   }
   let costOverrideData = {}
-  if (params.posthogCostOverride) {
-    const inputCostUSD = (params.posthogCostOverride.inputCost ?? 0) * (usage.inputTokens ?? 0)
-    const outputCostUSD = (params.posthogCostOverride.outputCost ?? 0) * (usage.outputTokens ?? 0)
+  if (params.insightsCostOverride) {
+    const inputCostUSD = (params.insightsCostOverride.inputCost ?? 0) * (usage.inputTokens ?? 0)
+    const outputCostUSD = (params.insightsCostOverride.outputCost ?? 0) * (usage.outputTokens ?? 0)
     costOverrideData = {
       $ai_input_cost_usd: inputCostUSD,
       $ai_output_cost_usd: outputCostUSD,
@@ -727,13 +727,13 @@ export const sendEventToPosthog = async ({
   }
 
   const properties = {
-    $ai_lib: 'posthog-ai',
+    $ai_lib: 'insights-ai',
     $ai_lib_version: version,
-    $ai_provider: params.posthogProviderOverride ?? provider,
-    $ai_model: params.posthogModelOverride ?? model,
+    $ai_provider: params.insightsProviderOverride ?? provider,
+    $ai_model: params.insightsModelOverride ?? model,
     $ai_model_parameters: getModelParams(params),
-    $ai_input: withPrivacyMode(client, params.posthogPrivacyMode ?? false, safeInput),
-    $ai_output_choices: withPrivacyMode(client, params.posthogPrivacyMode ?? false, safeOutput),
+    $ai_input: withPrivacyMode(client, params.insightsPrivacyMode ?? false, safeInput),
+    $ai_output_choices: withPrivacyMode(client, params.insightsPrivacyMode ?? false, safeOutput),
     $ai_http_status: httpStatus,
     $ai_input_tokens: usage.inputTokens ?? 0,
     ...(usage.outputTokens !== undefined ? { $ai_output_tokens: usage.outputTokens } : {}),
@@ -742,8 +742,8 @@ export const sendEventToPosthog = async ({
     ...(timeToFirstToken !== undefined ? { $ai_time_to_first_token: timeToFirstToken } : {}),
     $ai_trace_id: traceId,
     $ai_base_url: baseURL,
-    ...params.posthogProperties,
-    $ai_tokens_source: getTokensSource(params.posthogProperties),
+    ...params.insightsProperties,
+    $ai_tokens_source: getTokensSource(params.insightsProperties),
     ...(distinctId ? {} : { $process_person_profile: false }),
     ...(tools ? { $ai_tools: tools } : {}),
     ...errorData,
@@ -754,7 +754,7 @@ export const sendEventToPosthog = async ({
     distinctId: distinctId ?? traceId,
     event: eventType,
     properties,
-    groups: params.posthogGroups,
+    groups: params.insightsGroups,
   }
 
   if (captureImmediate) {

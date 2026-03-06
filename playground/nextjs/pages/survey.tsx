@@ -1,9 +1,9 @@
-import { DisplaySurveyType, type Survey } from 'posthog-js'
-import { usePostHog } from 'posthog-js/react'
+import { DisplaySurveyType, type Survey } from '@hanzo/insights'
+import { useInsights } from '@hanzo/insights/react'
 import { useEffect, useState } from 'react'
 
 export default function SurveyForm() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [surveys, setSurveys] = useState([] as unknown as Survey[])
     const [selectedSurvey, setSelectedSurvey] = useState('')
     const [eventInput, setEventInput] = useState('')
@@ -13,7 +13,7 @@ export default function SurveyForm() {
     }
 
     useEffect(() => {
-        posthog.surveys.getSurveys((surveys: Survey[]) => {
+        insights.surveys.getSurveys((surveys: Survey[]) => {
             setSurveys(surveys)
             if (surveys.length > 0) {
                 setSelectedSurvey(surveys[0].id)
@@ -37,7 +37,7 @@ export default function SurveyForm() {
                 </select>
                 <button
                     onClick={() =>
-                        posthog.displaySurvey(selectedSurvey, {
+                        insights.displaySurvey(selectedSurvey, {
                             displayType: DisplaySurveyType.Inline,
                             selector: '#survey-container',
                             ignoreConditions: true,
@@ -53,7 +53,7 @@ export default function SurveyForm() {
                 </button>
                 <button
                     onClick={async () => {
-                        const renderReason = await posthog.canRenderSurveyAsync(selectedSurvey)
+                        const renderReason = await insights.canRenderSurveyAsync(selectedSurvey)
                         const message = renderReason?.visible
                             ? `Survey can be rendered: Yes`
                             : `Survey cannot be rendered: ${renderReason?.disabledReason || 'No reason provided'}`
@@ -66,7 +66,7 @@ export default function SurveyForm() {
             <div className="flex items-center gap-2 flex-wrap">
                 <p>
                     read{' '}
-                    <a href="https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/surveys/CONTRIBUTING.md">
+                    <a href="https://github.com/Insights/insights/blob/master/frontend/src/scenes/surveys/CONTRIBUTING.md">
                         CONTRIBUTING.md
                     </a>{' '}
                     for a guide on how to test surveys locally!
@@ -88,11 +88,11 @@ export default function SurveyForm() {
                         className="border border-1 p-2"
                         onChange={(e) => setEventInput(e.target.value)}
                     />
-                    <button onClick={() => posthog.capture(eventInput)}>send event</button>
+                    <button onClick={() => insights.capture(eventInput)}>send event</button>
                 </div>
                 <span className="flex">
                     <em>
-                        calls <pre className="inline">posthog.capture('{eventInput}')</pre>
+                        calls <pre className="inline">insights.capture('{eventInput}')</pre>
                     </em>
                 </span>
             </div>

@@ -14,8 +14,8 @@
 #/   react, rollup-plugin, web, webpack-plugin
 #/
 #/ Examples:
-#/   bin/test node              Run all tests for posthog-node
-#/   bin/test browser --unit    Run unit tests for posthog-js (browser)
+#/   bin/test node              Run all tests for @hanzo/insights-node
+#/   bin/test browser --unit    Run unit tests for @hanzo/insights (browser)
 #/   bin/test --all             Run tests for all packages
 #/   bin/test                   Interactive package selection
 
@@ -43,17 +43,17 @@ PACKAGES=(
 
 # Package display names for the menu
 declare -A PACKAGE_NAMES=(
-    ["ai"]="@posthog/ai"
-    ["convex"]="@posthog/convex"
-    ["browser"]="posthog-js"
-    ["core"]="@posthog/core"
-    ["nextjs-config"]="@posthog/nextjs-config"
-    ["node"]="posthog-node"
-    ["react-native"]="posthog-react-native"
-    ["react"]="@posthog/react"
-    ["rollup-plugin"]="@posthog/rollup-plugin"
-    ["web"]="posthog-js-lite"
-    ["webpack-plugin"]="@posthog/webpack-plugin"
+    ["ai"]="@hanzo/ai"
+    ["convex"]="@hanzo/convex"
+    ["browser"]="@hanzo/insights"
+    ["core"]="@hanzo/core"
+    ["nextjs-config"]="@hanzo/nextjs-config"
+    ["node"]="@hanzo/insights-node"
+    ["react-native"]="@hanzo/insights-react-native"
+    ["react"]="@hanzo/react"
+    ["rollup-plugin"]="@hanzo/rollup-plugin"
+    ["web"]="@hanzo/insights-lite"
+    ["webpack-plugin"]="@hanzo/webpack-plugin"
 )
 
 run_all=false
@@ -107,21 +107,21 @@ done
 normalize_package() {
     local input="$1"
     case "$input" in
-        posthog-js|js)
+        @hanzo/insights|js)
             echo "browser"
             ;;
-        posthog-node)
+        @hanzo/insights-node)
             echo "node"
             ;;
-        posthog-react-native|rn)
+        @hanzo/insights-react-native|rn)
             echo "react-native"
             ;;
-        posthog-js-lite|lite)
+        @hanzo/insights-lite|lite)
             echo "web"
             ;;
-        @posthog/*)
-            # Strip @posthog/ prefix
-            echo "${input#@posthog/}"
+        @hanzo/*)
+            # Strip @hanzo/ prefix
+            echo "${input#@hanzo/}"
             ;;
         *)
             echo "$input"

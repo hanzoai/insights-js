@@ -1,6 +1,6 @@
-import { PostHogOptions } from './types'
+import { InsightsOptions } from './types'
 
-export type PostHogStorage = {
+export type InsightsStorage = {
   getItem: (key: string) => string | null | undefined
   setItem: (key: string, value: string) => void
   removeItem: (key: string) => void
@@ -9,7 +9,7 @@ export type PostHogStorage = {
 }
 
 // Methods partially borrowed from quirksmode.org/js/cookies.html
-export const cookieStore: PostHogStorage = {
+export const cookieStore: InsightsStorage = {
   getItem(key) {
     try {
       const nameEQ = key + '='
@@ -66,7 +66,7 @@ export const cookieStore: PostHogStorage = {
   },
 }
 
-const createStorageLike = (store: any): PostHogStorage => {
+const createStorageLike = (store: any): InsightsStorage => {
   return {
     getItem(key) {
       return store.getItem(key)
@@ -92,7 +92,7 @@ const createStorageLike = (store: any): PostHogStorage => {
   }
 }
 
-const checkStoreIsSupported = (storage: PostHogStorage, key = '__mplssupport__'): boolean => {
+const checkStoreIsSupported = (storage: InsightsStorage, key = '__mplssupport__'): boolean => {
   try {
     const val = 'xyz'
     storage.setItem(key, val)
@@ -106,13 +106,13 @@ const checkStoreIsSupported = (storage: PostHogStorage, key = '__mplssupport__')
   }
 }
 
-let localStore: PostHogStorage | undefined = undefined
-let sessionStore: PostHogStorage | undefined = undefined
+let localStore: InsightsStorage | undefined = undefined
+let sessionStore: InsightsStorage | undefined = undefined
 
-const createMemoryStorage = (): PostHogStorage => {
+const createMemoryStorage = (): InsightsStorage => {
   const _cache: { [key: string]: any | undefined } = {}
 
-  const store: PostHogStorage = {
+  const store: InsightsStorage = {
     getItem(key) {
       return _cache[key]
     },
@@ -140,7 +140,7 @@ const createMemoryStorage = (): PostHogStorage => {
   return store
 }
 
-export const getStorage = (type: PostHogOptions['persistence'], window: Window | undefined): PostHogStorage => {
+export const getStorage = (type: InsightsOptions['persistence'], window: Window | undefined): InsightsStorage => {
   if (window) {
     if (!localStore) {
       const _localStore = createStorageLike(window.localStorage)

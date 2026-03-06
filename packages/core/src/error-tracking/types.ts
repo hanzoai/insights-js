@@ -23,7 +23,7 @@ export interface EventHint {
 }
 
 export interface PreviouslyCapturedError {
-  __posthog_previously_captured_error?: boolean
+  __insights_previously_captured_error?: boolean
 }
 
 export interface ErrorProperties {

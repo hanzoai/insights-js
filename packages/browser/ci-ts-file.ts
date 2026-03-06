@@ -1,6 +1,6 @@
 /* eslint-disable */
-import { posthog } from './dist/module'
+import { insights } from './dist/module'
 import * as ts from 'typescript'
 
-console.log(posthog)
+console.log(insights)
 console.log(ts.version)

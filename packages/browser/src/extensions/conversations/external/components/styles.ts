@@ -1,6 +1,6 @@
-// Inline styles following PostHog design system
+// Inline styles following Insights design system
 
-import type { WidgetPosition } from '../../../../posthog-conversations-types'
+import type { WidgetPosition } from '../../../../insights-conversations-types'
 import { Z_INDEX_CONVERSATIONS } from '../../../../constants'
 
 /**

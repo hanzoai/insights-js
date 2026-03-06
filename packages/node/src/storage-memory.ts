@@ -1,13 +1,13 @@
-import { PostHogPersistedProperty } from '@hanzo/insights-core'
+import { InsightsPersistedProperty } from '@hanzo/insights-core'
 
-export class PostHogMemoryStorage {
+export class InsightsMemoryStorage {
   private _memoryStorage: { [key: string]: any | undefined } = {}
 
-  getProperty(key: PostHogPersistedProperty): any | undefined {
+  getProperty(key: InsightsPersistedProperty): any | undefined {
     return this._memoryStorage[key]
   }
 
-  setProperty(key: PostHogPersistedProperty, value: any | null): void {
+  setProperty(key: InsightsPersistedProperty, value: any | null): void {
     this._memoryStorage[key] = value !== null ? value : undefined
   }
 }

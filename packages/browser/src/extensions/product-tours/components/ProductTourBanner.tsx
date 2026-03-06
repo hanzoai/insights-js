@@ -1,5 +1,5 @@
 import { h, ComponentChildren } from 'preact'
-import { ProductTourDisplayFrequency, ProductTourStep } from '../../../posthog-product-tours-types'
+import { ProductTourDisplayFrequency, ProductTourStep } from '../../../insights-product-tours-types'
 import { getStepHtml } from '../product-tours-utils'
 import { cancelSVG } from '../../surveys/icons'
 

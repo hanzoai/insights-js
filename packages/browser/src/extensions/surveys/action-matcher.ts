@@ -1,5 +1,5 @@
-import { PostHog } from '../../posthog-core'
-import { ActionStepType, PropertyFilters, SurveyActionType, SurveyElement } from '../../posthog-surveys-types'
+import { Insights } from '../../insights-core'
+import { ActionStepType, PropertyFilters, SurveyActionType, SurveyElement } from '../../insights-surveys-types'
 import { SimpleEventEmitter } from '../../utils/simple-event-emitter'
 import { CaptureResult, PropertyMatchType } from '../../types'
 import { isArray, isUndefined } from '@hanzo/insights-core'
@@ -8,11 +8,11 @@ import { extractTexts, extractHref, matchString, matchTexts } from '../../utils/
 
 export class ActionMatcher {
     private readonly _actionRegistry?: Set<SurveyActionType>
-    private readonly _instance?: PostHog
+    private readonly _instance?: Insights
     private readonly _actionEvents: Set<string>
     private _debugEventEmitter = new SimpleEventEmitter()
 
-    constructor(instance?: PostHog) {
+    constructor(instance?: Insights) {
         this._instance = instance
         this._actionEvents = new Set<string>()
         this._actionRegistry = new Set<SurveyActionType>()

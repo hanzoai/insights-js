@@ -1,5 +1,5 @@
-export { PostHogSurveyProvider } from './PostHogSurveyProvider'
-export type { PostHogSurveyProviderProps } from './PostHogSurveyProvider'
+export { InsightsSurveyProvider } from './InsightsSurveyProvider'
+export type { InsightsSurveyProviderProps } from './InsightsSurveyProvider'
 export { SurveyModal } from './components/SurveyModal'
 export type { SurveyModalProps } from './components/SurveyModal'
 export type { Survey, SurveyAppearance } from '@hanzo/insights-core'

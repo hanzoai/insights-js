@@ -1,4 +1,4 @@
-import { CaptureResult } from 'posthog-js'
+import { CaptureResult } from '@hanzo/insights'
 
 export function EventDisplay({ events }: { events: CaptureResult[] }) {
     return (

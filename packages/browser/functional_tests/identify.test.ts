@@ -2,25 +2,25 @@ import '../src/__tests__/helpers/mock-logger'
 
 import { waitFor } from '@testing-library/dom'
 import 'regenerator-runtime/runtime'
-import { createPosthogInstance } from '../src/__tests__/helpers/posthog-instance'
-import { PostHog } from '../src/posthog-core'
+import { createInsightsInstance } from '../src/__tests__/helpers/insights-instance'
+import { Insights } from '../src/insights-core'
 import { logger } from '../src/utils/logger'
 import { uuidv7 } from '../src/uuidv7'
 import { getRequests } from './mock-server'
 
 describe('FunctionalTests / Identify', () => {
     let token: string
-    let posthog: PostHog
+    let insights: Insights
     let anonymousId: string
 
     beforeEach(async () => {
         token = uuidv7()
-        posthog = await createPosthogInstance(token, { disable_surveys: true, before_send: (cr) => cr })
-        anonymousId = posthog.get_distinct_id()
+        insights = await createInsightsInstance(token, { disable_surveys: true, before_send: (cr) => cr })
+        anonymousId = insights.get_distinct_id()
     })
 
     test('identify sends a identify event', async () => {
-        posthog.identify('test-id')
+        insights.identify('test-id')
 
         await waitFor(() =>
             expect(getRequests(token)['/e/']).toContainEqual(
@@ -29,7 +29,7 @@ describe('FunctionalTests / Identify', () => {
                     properties: expect.objectContaining({
                         distinct_id: 'test-id',
                         $anon_distinct_id: anonymousId,
-                        token: posthog.config.token,
+                        token: insights.config.token,
                     }),
                 })
             )
@@ -42,7 +42,7 @@ describe('FunctionalTests / Identify', () => {
         // The intention here is to reduce the number of unncecessary $identify
         // requests to process.
         // The first time we identify, it calls the /e/ endpoint with an $identify
-        posthog.identify('test-id', { email: 'first@email.com' }, { location: 'first' })
+        insights.identify('test-id', { email: 'first@email.com' }, { location: 'first' })
 
         await waitFor(() =>
             expect(getRequests(token)['/e/']).toContainEqual(
@@ -61,7 +61,7 @@ describe('FunctionalTests / Identify', () => {
         )
 
         // The second time we identify, it instead sents an event of type "$set".
-        posthog.identify('test-id', { email: 'test@email.com' }, { location: 'second' })
+        insights.identify('test-id', { email: 'test@email.com' }, { location: 'second' })
 
         await waitFor(() =>
             expect(getRequests(token)['/e/']).toContainEqual(
@@ -75,7 +75,7 @@ describe('FunctionalTests / Identify', () => {
                         $set: { email: 'test@email.com' },
                         $set_once: { location: 'second' },
                         distinct_id: 'test-id',
-                        token: posthog.config.token,
+                        token: insights.config.token,
                     }),
                 })
             )
@@ -85,7 +85,7 @@ describe('FunctionalTests / Identify', () => {
     test('identify sends an $set event if identify called twice with a different distinct_id', async () => {
         // This is due to $identify only being called for anonymous users.
         // The first time we identify, it calls the /e/ endpoint with an $identify
-        posthog.identify('test-id', { email: 'first@email.com' }, { location: 'first' })
+        insights.identify('test-id', { email: 'first@email.com' }, { location: 'first' })
 
         await waitFor(() =>
             expect(getRequests(token)['/e/']).toContainEqual(
@@ -105,7 +105,7 @@ describe('FunctionalTests / Identify', () => {
 
         // The second time we identify, it sends a $set event instead, with no
         // reference to the anonymous id(?)
-        posthog.identify('another-test-id', { email: 'test@email.com' }, { location: 'second' })
+        insights.identify('another-test-id', { email: 'test@email.com' }, { location: 'second' })
 
         await waitFor(() =>
             expect(getRequests(token)['/e/']).toContainEqual(

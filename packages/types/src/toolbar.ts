@@ -7,10 +7,10 @@ export type ToolbarSource = 'url' | 'localstorage'
 export type ToolbarVersion = 'toolbar'
 
 /**
- * Parameters for loading the PostHog toolbar
+ * Parameters for loading the Insights toolbar
  */
 export interface ToolbarParams {
-    /** Public posthog-js token */
+    /** Public @hanzo/insights token */
     token?: string
     /** Private temporary user token */
     temporaryToken?: string

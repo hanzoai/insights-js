@@ -1,17 +1,17 @@
-import { PostHogFeatureFlags } from '../posthog-featureflags'
-import { PostHog } from '../posthog-core'
-import { PostHogConfig } from '../types'
+import { InsightsFeatureFlags } from '../insights-featureflags'
+import { Insights } from '../insights-core'
+import { InsightsConfig } from '../types'
 import { assignableWindow } from '../utils/globals'
 
 describe('Evaluation Tags/Contexts', () => {
-    let posthog: PostHog
-    let featureFlags: PostHogFeatureFlags
+    let insights: Insights
+    let featureFlags: InsightsFeatureFlags
     let mockSendRequest: jest.Mock
 
     beforeEach(() => {
-        // Create a mock PostHog instance
-        posthog = {
-            config: {} as PostHogConfig,
+        // Create a mock Insights instance
+        insights = {
+            config: {} as InsightsConfig,
             persistence: {
                 get_distinct_id: jest.fn().mockReturnValue('test-distinct-id'),
                 get_initial_props: jest.fn().mockReturnValue({}),
@@ -26,26 +26,26 @@ describe('Evaluation Tags/Contexts', () => {
             _shouldDisableFlags: jest.fn().mockReturnValue(false),
         } as any
 
-        mockSendRequest = posthog._send_request as jest.Mock
+        mockSendRequest = insights._send_request as jest.Mock
 
-        featureFlags = new PostHogFeatureFlags(posthog)
+        featureFlags = new InsightsFeatureFlags(insights)
     })
 
     describe('_getValidEvaluationEnvironments', () => {
         it('should return empty array when no contexts configured', () => {
-            posthog.config.evaluation_contexts = undefined
+            insights.config.evaluation_contexts = undefined
             const result = (featureFlags as any)._getValidEvaluationEnvironments()
             expect(result).toEqual([])
         })
 
         it('should return empty array when contexts is empty', () => {
-            posthog.config.evaluation_contexts = []
+            insights.config.evaluation_contexts = []
             const result = (featureFlags as any)._getValidEvaluationEnvironments()
             expect(result).toEqual([])
         })
 
         it('should filter out invalid contexts', () => {
-            posthog.config.evaluation_contexts = [
+            insights.config.evaluation_contexts = [
                 'production',
                 '',
                 'staging',
@@ -61,16 +61,16 @@ describe('Evaluation Tags/Contexts', () => {
 
         it('should handle readonly array of valid contexts', () => {
             const contexts: readonly string[] = ['production', 'staging', 'development']
-            posthog.config.evaluation_contexts = contexts
+            insights.config.evaluation_contexts = contexts
 
             const result = (featureFlags as any)._getValidEvaluationEnvironments()
             expect(result).toEqual(['production', 'staging', 'development'])
         })
 
         it('should support deprecated evaluation_environments field', () => {
-            assignableWindow.POSTHOG_DEBUG = true
+            assignableWindow.INSIGHTS_DEBUG = true
             const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
-            posthog.config.evaluation_environments = ['production', 'staging']
+            insights.config.evaluation_environments = ['production', 'staging']
 
             // Call multiple times
             ;(featureFlags as any)._getValidEvaluationEnvironments()
@@ -82,17 +82,17 @@ describe('Evaluation Tags/Contexts', () => {
             // Warning should be logged only once
             expect(warnSpy).toHaveBeenCalledTimes(1)
             expect(warnSpy).toHaveBeenCalledWith(
-                '[PostHog.js] [FeatureFlags]',
+                '[Insights.js] [FeatureFlags]',
                 'evaluation_environments is deprecated. Use evaluation_contexts instead. evaluation_environments will be removed in a future version.'
             )
 
             warnSpy.mockRestore()
-            assignableWindow.POSTHOG_DEBUG = false
+            assignableWindow.INSIGHTS_DEBUG = false
         })
 
         it('should prioritize evaluation_contexts over evaluation_environments', () => {
-            posthog.config.evaluation_contexts = ['new-context']
-            posthog.config.evaluation_environments = ['old-environment']
+            insights.config.evaluation_contexts = ['new-context']
+            insights.config.evaluation_environments = ['old-environment']
             const result = (featureFlags as any)._getValidEvaluationEnvironments()
             expect(result).toEqual(['new-context'])
         })
@@ -100,13 +100,13 @@ describe('Evaluation Tags/Contexts', () => {
 
     describe('_shouldIncludeEvaluationEnvironments', () => {
         it('should return false when no valid contexts', () => {
-            posthog.config.evaluation_contexts = ['', '   ']
+            insights.config.evaluation_contexts = ['', '   ']
             const result = (featureFlags as any)._shouldIncludeEvaluationEnvironments()
             expect(result).toBe(false)
         })
 
         it('should return true when valid contexts exist', () => {
-            posthog.config.evaluation_contexts = ['production']
+            insights.config.evaluation_contexts = ['production']
             const result = (featureFlags as any)._shouldIncludeEvaluationEnvironments()
             expect(result).toBe(true)
         })
@@ -114,7 +114,7 @@ describe('Evaluation Tags/Contexts', () => {
 
     describe('_callFlagsEndpoint', () => {
         it('should include evaluation_contexts in request when configured', () => {
-            posthog.config.evaluation_contexts = ['production', 'experiment-A']
+            insights.config.evaluation_contexts = ['production', 'experiment-A']
             ;(featureFlags as any)._callFlagsEndpoint()
 
             expect(mockSendRequest).toHaveBeenCalledWith(
@@ -127,7 +127,7 @@ describe('Evaluation Tags/Contexts', () => {
         })
 
         it('should not include evaluation_contexts when not configured', () => {
-            posthog.config.evaluation_contexts = undefined
+            insights.config.evaluation_contexts = undefined
             ;(featureFlags as any)._callFlagsEndpoint()
 
             expect(mockSendRequest).toHaveBeenCalledWith(
@@ -140,7 +140,7 @@ describe('Evaluation Tags/Contexts', () => {
         })
 
         it('should not include evaluation_contexts when empty array', () => {
-            posthog.config.evaluation_contexts = []
+            insights.config.evaluation_contexts = []
             ;(featureFlags as any)._callFlagsEndpoint()
 
             expect(mockSendRequest).toHaveBeenCalledWith(
@@ -153,7 +153,7 @@ describe('Evaluation Tags/Contexts', () => {
         })
 
         it('should filter out invalid contexts before sending', () => {
-            posthog.config.evaluation_contexts = ['production', '', null as any, 'staging']
+            insights.config.evaluation_contexts = ['production', '', null as any, 'staging']
             ;(featureFlags as any)._callFlagsEndpoint()
 
             expect(mockSendRequest).toHaveBeenCalledWith(
@@ -166,7 +166,7 @@ describe('Evaluation Tags/Contexts', () => {
         })
 
         it('should support deprecated evaluation_environments field', () => {
-            posthog.config.evaluation_environments = ['production', 'experiment-A']
+            insights.config.evaluation_environments = ['production', 'experiment-A']
             ;(featureFlags as any)._callFlagsEndpoint()
 
             expect(mockSendRequest).toHaveBeenCalledWith(

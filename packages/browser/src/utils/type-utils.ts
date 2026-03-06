@@ -6,6 +6,6 @@ export const isAngularZonePresent = (): boolean => {
 }
 
 export const isDocument = (x: unknown): x is Document => {
-    // eslint-disable-next-line posthog-js/no-direct-document-check
+    // eslint-disable-next-line @hanzo/insights/no-direct-document-check
     return x instanceof Document
 }

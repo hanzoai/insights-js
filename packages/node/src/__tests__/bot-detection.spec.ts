@@ -1,4 +1,4 @@
-import { PostHog } from '@/entrypoints/index.node'
+import { Insights } from '@/entrypoints/index.node'
 import { waitForPromises } from './utils'
 
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
@@ -15,7 +15,7 @@ const waitForFlushTimer = async (): Promise<void> => {
 }
 
 describe('bot detection and pageview collection (Node SDK)', () => {
-  let client: PostHog
+  let client: Insights
 
   beforeEach(() => {
     mockedFetch.mockResolvedValue({
@@ -34,7 +34,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
 
   describe('default behavior (without preview flag)', () => {
     it('should allow events with bot user agents by default', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -60,7 +60,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
     })
 
     it('should allow events without user agent', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -86,7 +86,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
 
   describe('with __preview_capture_bot_pageviews enabled', () => {
     it('should rename bot pageviews to $bot_pageview', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -117,7 +117,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
     })
 
     it('should keep normal browser pageviews as $pageview', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -147,7 +147,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
     })
 
     it('should not rename non-pageview bot events', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -185,7 +185,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
 
       for (const ua of botUserAgents) {
         mockedFetch.mockClear()
-        client = new PostHog('test-api-key', {
+        client = new Insights('test-api-key', {
           host: 'http://example.com',
           flushAt: 1,
           flushInterval: 0,
@@ -216,7 +216,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
     })
 
     it('should handle events without user agent gracefully', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -241,7 +241,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
     })
 
     it('should support custom_blocked_useragents', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,
@@ -270,7 +270,7 @@ describe('bot detection and pageview collection (Node SDK)', () => {
     })
 
     it('should preserve other event properties when renaming', async () => {
-      client = new PostHog('test-api-key', {
+      client = new Insights('test-api-key', {
         host: 'http://example.com',
         flushAt: 1,
         flushInterval: 0,

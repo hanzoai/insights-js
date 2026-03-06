@@ -1,21 +1,21 @@
 // copied from https://github.com/getsentry/sentry-react-native/blob/73f2455090a375857fe115ed135e524c70324cdd/packages/core/src/js/tools/metroconfig.ts
 
 import type { MetroConfig, MixedOutput, Module, ReadOnlyGraph } from 'metro'
-import { unstableBeforeAssetSerializationDebugIdPlugin } from './posthogMetroSerializer'
+import { unstableBeforeAssetSerializationDebugIdPlugin } from './insightsMetroSerializer'
 import type { DefaultConfigOptions } from './vendor/expo/expoconfig'
 
-export * from './posthogMetroSerializer'
+export * from './insightsMetroSerializer'
 
-export interface PostHogMetroConfigOptions {
+export interface InsightsMetroConfigOptions {
   /**
    * Whether the plugin is enabled.
-   * Set to `false` to disable PostHog's Metro plugins (useful for local development).
+   * Set to `false` to disable Insights's Metro plugins (useful for local development).
    * @default true
    */
   enabled?: boolean
 }
 
-export interface PostHogExpoConfigOptions {
+export interface InsightsExpoConfigOptions {
   /**
    * Pass a custom `getDefaultConfig` function to override the default Expo configuration getter.
    */
@@ -23,11 +23,11 @@ export interface PostHogExpoConfigOptions {
 }
 
 /**
- * This function returns Default Expo configuration with PostHog plugins.
+ * This function returns Default Expo configuration with Insights plugins.
  */
-export function getPostHogExpoConfig(
+export function getInsightsExpoConfig(
   projectRoot: string,
-  options: DefaultConfigOptions & PostHogExpoConfigOptions & PostHogMetroConfigOptions = {}
+  options: DefaultConfigOptions & InsightsExpoConfigOptions & InsightsMetroConfigOptions = {}
 ): MetroConfig {
   const enabled = options.enabled ?? true
   const getDefaultConfig = options.getDefaultConfig || loadExpoMetroConfigModule().getDefaultConfig

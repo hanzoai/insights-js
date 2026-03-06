@@ -1,11 +1,11 @@
-# PostHog State Management Logging Examples
+# Insights State Management Logging Examples
 
-This is a comparison of PostHog logging integrations with different state management libraries using a todo list application built with Next.js.
+This is a comparison of Insights logging integrations with different state management libraries using a todo list application built with Next.js.
 
 ## Examples Included
 
-- **Redux**: Uses Redux Toolkit with `posthogReduxLogger` middleware
-- **Kea**: Uses Kea with `posthogKeaLogger` plugin (cleaner API)
+- **Redux**: Uses Redux Toolkit with `insightsReduxLogger` middleware
+- **Kea**: Uses Kea with `insightsKeaLogger` plugin (cleaner API)
 
 ## To run it
 
@@ -16,12 +16,12 @@ pnpm i && pnpm dev
 Then visit:
 
 - **Home**: http://localhost:3000/ - Overview and links to examples
-- **Redux**: http://localhost:3000/redux - Redux Toolkit + PostHog logging
-- **Kea**: http://localhost:3000/kea - Kea + PostHog logging
+- **Redux**: http://localhost:3000/redux - Redux Toolkit + Insights logging
+- **Kea**: http://localhost:3000/kea - Kea + Insights logging
 
 ## Features Demonstrated
 
-- Action and state logging with PostHog
+- Action and state logging with Insights
 - Rate limiting to prevent log flooding
 - State diffing (only log changed values)
 - Action/state masking for sensitive data

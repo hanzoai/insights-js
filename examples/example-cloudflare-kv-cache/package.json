@@ -7,7 +7,7 @@
         "build": "pnpm exec tsc",
         "dev": "wrangler dev",
         "dev:local": "node dist/index.js",
-        "kv:create": "wrangler kv:namespace create POSTHOG_CACHE"
+        "kv:create": "wrangler kv:namespace create INSIGHTS_CACHE"
     },
     "devDependencies": {
         "@cloudflare/workers-types": "^4.20251119.0",
@@ -17,6 +17,6 @@
         "wrangler": "^4.49.0"
     },
     "dependencies": {
-        "posthog-node": "*"
+        "@hanzo/insights-node": "*"
     }
 }

@@ -1,10 +1,10 @@
 import type { FeatureFlagValue, JsonType } from '@hanzo/insights-core'
-import { PostHog } from '@hanzo/insights-node/edge'
+import { Insights } from '@hanzo/insights-node/edge'
 import { action } from './_generated/server.js'
 import { v } from 'convex/values'
 
 function createClient(apiKey: string, host: string) {
-  return new PostHog(apiKey, { host, flushAt: 1, flushInterval: 0 })
+  return new Insights(apiKey, { host, flushAt: 1, flushInterval: 0 })
 }
 
 export const capture = action({

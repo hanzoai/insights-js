@@ -2,7 +2,7 @@
 import { render } from '@testing-library/preact'
 import '@testing-library/jest-dom'
 import { RichContent } from '../../../extensions/conversations/external/components/RichContent'
-import { TipTapDoc } from '../../../posthog-conversations-types'
+import { TipTapDoc } from '../../../insights-conversations-types'
 
 describe('RichContent', () => {
     const defaultProps = {

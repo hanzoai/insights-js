@@ -1,6 +1,6 @@
-# PostHog Nuxt module Example
+# Insights Nuxt module Example
 
-This interactive example demonstrates error tracking capabilities of PostHog's Nuxt module.
+This interactive example demonstrates error tracking capabilities of Insights's Nuxt module.
 
 ## How to run
 

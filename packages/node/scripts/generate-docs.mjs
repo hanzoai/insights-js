@@ -9,12 +9,12 @@ const version = packageJson.version;
 
 // Node-specific configuration
 const NODE_SPEC_INFO = {
-  id: 'posthog-node',
-  title: 'PostHog Node.js SDK',
+  id: 'insights-node',
+  title: 'Insights Node.js SDK',
   description:
-    'PostHog Node.js SDK allows you to capture events and send them to PostHog from your Node.js applications.',
-  slugPrefix: 'posthog-node',
-  specUrl: 'https://github.com/PostHog/posthog-js',
+    'Insights Node.js SDK allows you to capture events and send them to Insights from your Node.js applications.',
+  slugPrefix: 'insights-node',
+  specUrl: 'https://github.com/Insights/@hanzo/insights',
 }
 
 // Node-specific type examples (can be customized as needed)
@@ -38,14 +38,14 @@ const __dirname = import.meta.dirname
 
 const config = {
   packageDir: path.resolve(import.meta.dirname, '..'), // packages/node
-  apiJsonPath: path.resolve(import.meta.dirname, '../docs/posthog-node.api.json'),
-  outputPath: path.resolve(import.meta.dirname, `../references/posthog-node-references-${version}.json`),
+  apiJsonPath: path.resolve(import.meta.dirname, '../docs/insights-node.api.json'),
+  outputPath: path.resolve(import.meta.dirname, `../references/insights-node-references-${version}.json`),
   version: version,
   id: NODE_SPEC_INFO.id,
   hogRef: HOG_REF,
   specInfo: NODE_SPEC_INFO,
   typeExamples: NODE_TYPE_EXAMPLES,
-  parentClass: 'PostHog',
+  parentClass: 'Insights',
 }
 
 // Ensure references directory exists
@@ -58,9 +58,9 @@ if (!fs.existsSync(referencesDir)) {
 const output = generateApiSpecs(config)
 
 // Write versioned file
-const versionedPath = path.resolve(__dirname, `../references/posthog-node-references-${version}.json`);
+const versionedPath = path.resolve(__dirname, `../references/insights-node-references-${version}.json`);
 fs.writeFileSync(versionedPath, JSON.stringify(output, null, 2));
 
 // Copy to latest file
-const latestPath = path.resolve(__dirname, '../references/posthog-node-references-latest.json');
+const latestPath = path.resolve(__dirname, '../references/insights-node-references-latest.json');
 fs.writeFileSync(latestPath, JSON.stringify(output, null, 2));

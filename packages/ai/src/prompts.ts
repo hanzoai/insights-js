@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import type { PostHog } from '@hanzo/insights-node'
+import type { Insights } from '@hanzo/insights-node'
 import type { CachedPrompt, GetPromptOptions, PromptApiResponse, PromptVariables, PromptsDirectOptions } from './types'
 
 const DEFAULT_CACHE_TTL_SECONDS = 300 // 5 minutes
@@ -14,30 +14,30 @@ function isPromptApiResponse(data: unknown): data is PromptApiResponse {
   )
 }
 
-export interface PromptsWithPostHogOptions {
-  posthog: PostHog
+export interface PromptsWithInsightsOptions {
+  insights: Insights
   defaultCacheTtlSeconds?: number
 }
 
-export type PromptsOptions = PromptsWithPostHogOptions | PromptsDirectOptions
+export type PromptsOptions = PromptsWithInsightsOptions | PromptsDirectOptions
 
-function isPromptsWithPostHog(options: PromptsOptions): options is PromptsWithPostHogOptions {
-  return 'posthog' in options
+function isPromptsWithInsights(options: PromptsOptions): options is PromptsWithInsightsOptions {
+  return 'insights' in options
 }
 
 /**
- * Prompts class for fetching and compiling LLM prompts from PostHog
+ * Prompts class for fetching and compiling LLM prompts from Insights
  *
  * @example
  * ```ts
- * // With PostHog client
- * const prompts = new Prompts({ posthog })
+ * // With Insights client
+ * const prompts = new Prompts({ insights })
  *
- * // Or with direct options (no PostHog client needed)
+ * // Or with direct options (no Insights client needed)
  * const prompts = new Prompts({
  *   personalApiKey: 'phx_xxx',
  *   projectApiKey: 'phc_xxx',
- *   host: 'https://us.posthog.com',
+ *   host: 'https://us.insights.com',
  * })
  *
  * // Fetch with caching and fallback
@@ -63,20 +63,20 @@ export class Prompts {
   constructor(options: PromptsOptions) {
     this.defaultCacheTtlSeconds = options.defaultCacheTtlSeconds ?? DEFAULT_CACHE_TTL_SECONDS
 
-    if (isPromptsWithPostHog(options)) {
-      this.personalApiKey = options.posthog.options.personalApiKey ?? ''
-      this.projectApiKey = options.posthog.apiKey ?? ''
-      this.host = options.posthog.host
+    if (isPromptsWithInsights(options)) {
+      this.personalApiKey = options.insights.options.personalApiKey ?? ''
+      this.projectApiKey = options.insights.apiKey ?? ''
+      this.host = options.insights.host
     } else {
       // Direct options
       this.personalApiKey = options.personalApiKey
       this.projectApiKey = options.projectApiKey
-      this.host = options.host ?? 'https://us.posthog.com'
+      this.host = options.host ?? 'https://us.insights.com'
     }
   }
 
   /**
-   * Fetch a prompt by name from the PostHog API
+   * Fetch a prompt by name from the Insights API
    *
    * @param name - The name of the prompt to fetch
    * @param options - Optional settings for caching and fallback
@@ -115,13 +115,13 @@ export class Prompts {
       // Fallback order:
       // 1. Return stale cache (with warning)
       if (cached) {
-        console.warn(`[PostHog Prompts] Failed to fetch prompt "${name}", using stale cache:`, error)
+        console.warn(`[Insights Prompts] Failed to fetch prompt "${name}", using stale cache:`, error)
         return cached.prompt
       }
 
       // 2. Return fallback (with warning)
       if (fallback !== undefined) {
-        console.warn(`[PostHog Prompts] Failed to fetch prompt "${name}", using fallback:`, error)
+        console.warn(`[Insights Prompts] Failed to fetch prompt "${name}", using fallback:`, error)
         return fallback
       }
 
@@ -166,13 +166,13 @@ export class Prompts {
   private async fetchPromptFromApi(name: string): Promise<string> {
     if (!this.personalApiKey) {
       throw new Error(
-        '[PostHog Prompts] personalApiKey is required to fetch prompts. ' +
+        '[Insights Prompts] personalApiKey is required to fetch prompts. ' +
           'Please provide it when initializing the Prompts instance.'
       )
     }
     if (!this.projectApiKey) {
       throw new Error(
-        '[PostHog Prompts] projectApiKey is required to fetch prompts. ' +
+        '[Insights Prompts] projectApiKey is required to fetch prompts. ' +
           'Please provide it when initializing the Prompts instance.'
       )
     }
@@ -190,23 +190,23 @@ export class Prompts {
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw new Error(`[PostHog Prompts] Prompt "${name}" not found`)
+        throw new Error(`[Insights Prompts] Prompt "${name}" not found`)
       }
 
       if (response.status === 403) {
         throw new Error(
-          `[PostHog Prompts] Access denied for prompt "${name}". ` +
+          `[Insights Prompts] Access denied for prompt "${name}". ` +
             'Check that your personalApiKey has the correct permissions and the LLM prompts feature is enabled.'
         )
       }
 
-      throw new Error(`[PostHog Prompts] Failed to fetch prompt "${name}": HTTP ${response.status}`)
+      throw new Error(`[Insights Prompts] Failed to fetch prompt "${name}": HTTP ${response.status}`)
     }
 
     const data: unknown = await response.json()
 
     if (!isPromptApiResponse(data)) {
-      throw new Error(`[PostHog Prompts] Invalid response format for prompt "${name}"`)
+      throw new Error(`[Insights Prompts] Invalid response format for prompt "${name}"`)
     }
 
     return data.prompt

@@ -1,14 +1,14 @@
-import { PostHog } from '../../posthog-core'
-import { createPosthogInstance } from '../helpers/posthog-instance'
+import { Insights } from '../../insights-core'
+import { createInsightsInstance } from '../helpers/insights-instance'
 import { uuidv7 } from '../../uuidv7'
 import { EXCEPTION_CAPTURE_ENABLED_SERVER_SIDE } from '../../constants'
 import { RemoteConfig } from '../../types'
 
 describe('ExceptionObserver', () => {
-    let instance: PostHog
+    let instance: Insights
 
     beforeEach(async () => {
-        instance = await createPosthogInstance(uuidv7(), {
+        instance = await createInsightsInstance(uuidv7(), {
             api_host: 'https://test.com',
             token: 'testtoken',
         })

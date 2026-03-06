@@ -15,9 +15,9 @@
  *   node examples/etag-polling-test.mjs
  *
  * Create a .env file with:
- *   POSTHOG_PROJECT_API_KEY=your_project_api_key
- *   POSTHOG_PERSONAL_API_KEY=your_personal_api_key
- *   POSTHOG_HOST=https://us.i.posthog.com  # optional
+ *   INSIGHTS_PROJECT_API_KEY=your_project_api_key
+ *   INSIGHTS_PERSONAL_API_KEY=your_personal_api_key
+ *   INSIGHTS_HOST=https://us.i.insights.com  # optional
  */
 
 import { readFileSync, existsSync } from 'fs'
@@ -63,23 +63,23 @@ function loadEnvFile() {
 
 loadEnvFile()
 
-const API_KEY = process.env.POSTHOG_PROJECT_API_KEY
-const PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY
-const HOST = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
+const API_KEY = process.env.INSIGHTS_PROJECT_API_KEY
+const PERSONAL_API_KEY = process.env.INSIGHTS_PERSONAL_API_KEY
+const HOST = process.env.INSIGHTS_HOST || 'https://us.i.insights.com'
 const POLL_INTERVAL_MS = 5000
 
 if (!API_KEY || !PERSONAL_API_KEY) {
   console.error('Missing required environment variables.')
   console.error('')
   console.error('Create a .env file with:')
-  console.error('  POSTHOG_PROJECT_API_KEY=your_project_api_key')
-  console.error('  POSTHOG_PERSONAL_API_KEY=your_personal_api_key')
-  console.error('  POSTHOG_HOST=https://us.i.posthog.com  # optional')
+  console.error('  INSIGHTS_PROJECT_API_KEY=your_project_api_key')
+  console.error('  INSIGHTS_PERSONAL_API_KEY=your_personal_api_key')
+  console.error('  INSIGHTS_HOST=https://us.i.insights.com  # optional')
   process.exit(1)
 }
 
-// Import PostHog from the built output
-const { PostHog } = await import('../dist/entrypoints/index.node.mjs')
+// Import Insights from the built output
+const { Insights } = await import('../dist/entrypoints/index.node.mjs')
 
 console.log('='.repeat(60))
 console.log('ETag Polling Test')
@@ -126,8 +126,8 @@ const loggingFetch = async (url, options) => {
   return originalFetch(url, options)
 }
 
-// Initialize PostHog with custom fetch
-const posthog = new PostHog(API_KEY, {
+// Initialize Insights with custom fetch
+const insights = new Insights(API_KEY, {
   host: HOST,
   personalApiKey: PERSONAL_API_KEY,
   featureFlagsPollingInterval: POLL_INTERVAL_MS,
@@ -138,7 +138,7 @@ const posthog = new PostHog(API_KEY, {
 // Log flags after each poll
 async function logFlags() {
   // Access internal state to get the flags
-  const poller = posthog.featureFlagsPoller
+  const poller = insights.featureFlagsPoller
   if (!poller) {
     console.log('Poller not initialized yet')
     return
@@ -167,7 +167,7 @@ async function logFlags() {
 // Wait for initial load
 console.log('Waiting for initial flag load...\n')
 
-posthog.on('featureFlagsLoaded', async () => {
+insights.on('featureFlagsLoaded', async () => {
   console.log('Initial flags loaded!\n')
   await logFlags()
 })
@@ -180,7 +180,7 @@ setInterval(async () => {
 // Handle graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\nShutting down...')
-  await posthog.shutdown()
+  await insights.shutdown()
   process.exit(0)
 })
 

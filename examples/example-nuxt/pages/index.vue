@@ -39,16 +39,16 @@
 <script setup lang="ts">
 import { throwSimpleError as utilThrowError } from '~/utils/errorUtils'
 
-const { $posthog } = useNuxtApp()
+const { $insights } = useNuxtApp()
 
 // 0. Test manual capture
 const testCaptureEvent = () => {
-  $posthog()?.capture('test_event')
+  $insights()?.capture('test_event')
 }
 
 // 0. Test event
 const testCaptureException = () => {
-  $posthog()?.captureException(new Error('Test exception'))
+  $insights()?.captureException(new Error('Test exception'))
 }
 
 // 1. Simple synchronous error

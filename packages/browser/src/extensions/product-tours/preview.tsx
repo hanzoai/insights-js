@@ -1,6 +1,6 @@
 import { render, JSX } from 'preact'
 
-import { ProductTourStep, ProductTourAppearance } from '../../posthog-product-tours-types'
+import { ProductTourStep, ProductTourAppearance } from '../../insights-product-tours-types'
 import { document as _document } from '../../utils/globals'
 import { ProductTourBanner } from './components/ProductTourBanner'
 import { ProductTourSurveyStepInner } from './components/ProductTourSurveyStepInner'

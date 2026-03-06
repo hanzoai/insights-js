@@ -1,4 +1,4 @@
-import { test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 import { assertThatRecordingStarted, pollUntilEventCaptured } from '../utils/event-capture-utils'
 
@@ -36,7 +36,7 @@ test.describe('Session recording - multiple ingestion controls', () => {
             urlPatternsToWaitFor: ['**/*recorder.js*'],
             action: async () => {
                 await page.evaluate(() => {
-                    const ph = (window as WindowWithPostHog).posthog
+                    const ph = (window as WindowWithInsights).insights
                     ph?.opt_in_capturing()
                     // this won't start recording because of the linked flag and sample rate
                     ph?.startSessionRecording()
@@ -47,10 +47,10 @@ test.describe('Session recording - multiple ingestion controls', () => {
         await page.expectCapturedEventsToBe(['$opt_in', '$pageview'])
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.startSessionRecording({ linked_flag: true })
         })
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         // there's nothing to wait for... so, just wait a bit
         await page.waitForTimeout(250)
         // no new events
@@ -58,11 +58,11 @@ test.describe('Session recording - multiple ingestion controls', () => {
         await page.resetCapturedEvents()
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             // override all controls
             ph?.startSessionRecording(true)
         })
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await pollUntilEventCaptured(page, '$snapshot')
         await assertThatRecordingStarted(page)
     })

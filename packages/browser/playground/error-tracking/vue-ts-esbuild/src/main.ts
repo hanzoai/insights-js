@@ -1,9 +1,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import { posthog } from '@hanzo/insights'
+import { insights } from '@hanzo/insights'
 
-posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST || 'http://localhost:8010/',
+insights.init(import.meta.env.VITE_INSIGHTS_KEY, {
+    api_host: import.meta.env.VITE_INSIGHTS_HOST || 'http://localhost:8010/',
     defaults: '2025-11-30',
 })
 

@@ -1,7 +1,7 @@
 export * from '../exports'
 
 import ErrorTracking from '../extensions/error-tracking'
-import { PostHogBackendClient } from '../client'
+import { InsightsBackendClient } from '../client'
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 
 ErrorTracking.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuilder(
@@ -15,9 +15,9 @@ ErrorTracking.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuil
   CoreErrorTracking.createStackParser('node:javascript', CoreErrorTracking.nodeStackLineParser)
 )
 
-export class PostHog extends PostHogBackendClient {
+export class Insights extends InsightsBackendClient {
   getLibraryId(): string {
-    return 'posthog-edge'
+    return 'insights-edge'
   }
 
   protected initializeContext(): undefined {

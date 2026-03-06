@@ -1,15 +1,14 @@
-import { PostHog } from './posthog-rn'
+import { Insights } from './insights-rn'
 
-export default PostHog
-export * from './posthog-rn'
-export { PostHog as Insights } from './posthog-rn'
+export default Insights
+export * from './insights-rn'
 export * from './hooks/useNavigationTracker'
 export * from './hooks/useFeatureFlags'
 export * from './hooks/useFeatureFlag'
 export * from './hooks/useFeatureFlagResult'
-export * from './hooks/usePostHog'
-export * from './PostHogMaskView'
-export * from './PostHogProvider'
-export * from './PostHogErrorBoundary'
+export * from './hooks/useInsights'
+export * from './InsightsMaskView'
+export * from './InsightsProvider'
+export * from './InsightsErrorBoundary'
 export * from './types'
 export * from './surveys'

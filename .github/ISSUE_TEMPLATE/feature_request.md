@@ -15,17 +15,17 @@ _Please describe._
 ## Related sub-libraries
 
 - [ ] All of them
-- [ ] posthog-js (web)
-- [ ] posthog-js-lite (web lite)
-- [ ] posthog-node
-- [ ] posthog-react-native
-- [ ] @posthog/react
-- [ ] @posthog/ai
-- [ ] @posthog/convex
-- [ ] @posthog/nextjs-config
-- [ ] @posthog/nuxt
-- [ ] @posthog/rollup-plugin
-- [ ] @posthog/webpack-plugin
+- [ ] @hanzo/insights (web)
+- [ ] @hanzo/insights-lite (web lite)
+- [ ] @hanzo/insights-node
+- [ ] @hanzo/insights-react-native
+- [ ] @hanzo/react
+- [ ] @hanzo/ai
+- [ ] @hanzo/convex
+- [ ] @hanzo/nextjs-config
+- [ ] @hanzo/nuxt
+- [ ] @hanzo/rollup-plugin
+- [ ] @hanzo/webpack-plugin
 
 ## Additional context
 

@@ -10,7 +10,7 @@
         "typecheck": "tsc --noEmit && tsc -p convex"
     },
     "dependencies": {
-        "@posthog/convex": "*",
+        "@hanzo/convex": "*",
         "convex": "^1.31.7",
         "react": "^19.2.1",
         "react-dom": "^19.2.1"

@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from './utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 
 const startOptions = {
@@ -19,7 +19,7 @@ test.describe('User Agent Blocking', () => {
         await start(startOptions, page, context)
 
         const isLikelyBot = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?._is_bot()
         })
         expect(isLikelyBot).toEqual(true)

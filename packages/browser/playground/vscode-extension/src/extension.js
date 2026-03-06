@@ -6,10 +6,10 @@ const runningLocally = true
 
 function activate(context) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('posthog.start', () => {
+        vscode.commands.registerCommand('insights.start', () => {
             const panel = vscode.window.createWebviewPanel(
-                'posthogPlayground',
-                'PostHog Playground',
+                'insightsPlayground',
+                'Insights Playground',
                 vscode.ViewColumn.One,
                 {
                     enableScripts: true,
@@ -45,13 +45,13 @@ function getWebviewContent(context, webview) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PostHog Playground</title>
+    <title>Insights Playground</title>
     <script>
-        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=${snippetSrc},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-        posthog.init(
-       '${process.env.POSTHOG_PROJECT_API_KEY || 'YOUR_PROJECT_KEY_HERE'}',
+        !function(t,e){var o,n,p,r;e.__SV||(window.hi=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=${snippetSrc},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="insights",u.people=u.people||[],u.toString=function(t){var e="insights";return"insights"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.hi||[]);
+        insights.init(
+       '${process.env.INSIGHTS_PROJECT_API_KEY || 'YOUR_PROJECT_KEY_HERE'}',
         {
-        api_host: '${process.env.POSTHOG_API_HOST || 'http://localhost:8010'}',
+        api_host: '${process.env.INSIGHTS_API_HOST || 'http://localhost:8010'}',
         defaults: '2025-05-24',
         debug: true,
         enable_recording_console_log: true,
@@ -62,7 +62,7 @@ function getWebviewContent(context, webview) {
     </script>
 </head>
 <body>
-    <h1>PostHog VS Code Extension Playground</h1>
+    <h1>Insights VS Code Extension Playground</h1>
     <input type="text" id="text-input" placeholder="Enter some text" />
     <button id="test-button">test</button>
 
@@ -70,10 +70,10 @@ function getWebviewContent(context, webview) {
         const vscode = acquireVsCodeApi();
         document.getElementById('test-button').addEventListener('click', () => {
             const text = document.getElementById('text-input').value;
-            posthog.capture('test-button-clicked', { text_input: text });
+            insights.capture('test-button-clicked', { text_input: text });
             vscode.postMessage({
                 command: 'alert',
-                text: 'PostHog event captured!'
+                text: 'Insights event captured!'
             });
         });
     </script>

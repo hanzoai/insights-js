@@ -1,5 +1,5 @@
 import ErrorTracking from './error-tracking'
-import { PostHogBackendClient } from '../client'
+import { InsightsBackendClient } from '../client'
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import type { Request, Response } from 'express'
 
@@ -22,27 +22,27 @@ interface MiddlewareError extends Error {
 }
 
 export function setupExpressErrorHandler(
-  _posthog: PostHogBackendClient,
+  _insights: InsightsBackendClient,
   app: {
     use: (middleware: ExpressMiddleware | ExpressErrorMiddleware) => unknown
   }
 ): void {
-  app.use(posthogErrorHandler(_posthog))
+  app.use(insightsErrorHandler(_insights))
 }
 
-function posthogErrorHandler(posthog: PostHogBackendClient): ExpressErrorMiddleware {
+function insightsErrorHandler(insights: InsightsBackendClient): ExpressErrorMiddleware {
   return (error: MiddlewareError, req, res, next: (error: MiddlewareError) => void): void => {
     if (ErrorTracking.isPreviouslyCapturedError(error)) {
       next(error)
       return
     }
 
-    const sessionId: string | undefined = req.headers['x-posthog-session-id'] as string | undefined
-    const distinctId: string | undefined = req.headers['x-posthog-distinct-id'] as string | undefined
+    const sessionId: string | undefined = req.headers['x-insights-session-id'] as string | undefined
+    const distinctId: string | undefined = req.headers['x-insights-distinct-id'] as string | undefined
     const syntheticException = new Error('Synthetic exception')
     const hint: CoreErrorTracking.EventHint = { mechanism: { type: 'middleware', handled: false }, syntheticException }
 
-    posthog.addPendingPromise(
+    insights.addPendingPromise(
       ErrorTracking.buildEventMessage(error, hint, distinctId, {
         $session_id: sessionId,
         $current_url: req.url,
@@ -52,7 +52,7 @@ function posthogErrorHandler(posthog: PostHogBackendClient): ExpressErrorMiddlew
         $response_status_code: res.statusCode,
         $ip: req.headers['x-forwarded-for'] || req?.socket?.remoteAddress,
       }).then((msg) => {
-        posthog.capture(msg)
+        insights.capture(msg)
       })
     )
 

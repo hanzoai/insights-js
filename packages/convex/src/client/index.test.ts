@@ -1,5 +1,5 @@
 import { describe, expect, test, jest } from '@jest/globals'
-import { PostHog, normalizeError } from './index.js'
+import { Insights, normalizeError } from './index.js'
 import type { BeforeSendFn, IdentifyFn } from './index.js'
 
 function mockSchedulerCtx() {
@@ -10,45 +10,45 @@ function mockSchedulerCtx() {
   }
 }
 
-describe('PostHog client', () => {
+describe('Insights client', () => {
   test('constructor uses defaults from env', () => {
-    process.env.POSTHOG_API_KEY = 'test-key'
-    process.env.POSTHOG_HOST = 'https://test.posthog.com'
+    process.env.INSIGHTS_API_KEY = 'test-key'
+    process.env.INSIGHTS_HOST = 'https://test.insights.com'
 
-    const posthog = new PostHog({} as never)
-    expect(posthog).toBeInstanceOf(PostHog)
+    const insights = new Insights({} as never)
+    expect(insights).toBeInstanceOf(Insights)
 
-    delete process.env.POSTHOG_API_KEY
-    delete process.env.POSTHOG_HOST
+    delete process.env.INSIGHTS_API_KEY
+    delete process.env.INSIGHTS_HOST
   })
 
   test('constructor accepts explicit options', () => {
-    const posthog = new PostHog({} as never, {
+    const insights = new Insights({} as never, {
       apiKey: 'explicit-key',
-      host: 'https://custom.posthog.com',
+      host: 'https://custom.insights.com',
     })
-    expect(posthog).toBeInstanceOf(PostHog)
+    expect(insights).toBeInstanceOf(Insights)
   })
 
   test('exposes capture, identify, groupIdentify, alias, captureException methods', () => {
-    const posthog = new PostHog({} as never, { apiKey: 'test' })
+    const insights = new Insights({} as never, { apiKey: 'test' })
 
-    expect(typeof posthog.capture).toBe('function')
-    expect(typeof posthog.identify).toBe('function')
-    expect(typeof posthog.groupIdentify).toBe('function')
-    expect(typeof posthog.alias).toBe('function')
-    expect(typeof posthog.captureException).toBe('function')
+    expect(typeof insights.capture).toBe('function')
+    expect(typeof insights.identify).toBe('function')
+    expect(typeof insights.groupIdentify).toBe('function')
+    expect(typeof insights.alias).toBe('function')
+    expect(typeof insights.captureException).toBe('function')
   })
 
   test('exposes feature flag methods', () => {
-    const posthog = new PostHog({} as never, { apiKey: 'test' })
+    const insights = new Insights({} as never, { apiKey: 'test' })
 
-    expect(typeof posthog.getFeatureFlag).toBe('function')
-    expect(typeof posthog.isFeatureEnabled).toBe('function')
-    expect(typeof posthog.getFeatureFlagPayload).toBe('function')
-    expect(typeof posthog.getFeatureFlagResult).toBe('function')
-    expect(typeof posthog.getAllFlags).toBe('function')
-    expect(typeof posthog.getAllFlagsAndPayloads).toBe('function')
+    expect(typeof insights.getFeatureFlag).toBe('function')
+    expect(typeof insights.isFeatureEnabled).toBe('function')
+    expect(typeof insights.getFeatureFlagPayload).toBe('function')
+    expect(typeof insights.getFeatureFlagResult).toBe('function')
+    expect(typeof insights.getAllFlags).toBe('function')
+    expect(typeof insights.getAllFlagsAndPayloads).toBe('function')
   })
 })
 
@@ -107,10 +107,10 @@ describe('captureException', () => {
     const component = {
       lib: { captureException: 'captureException_ref' },
     }
-    const posthog = new PostHog(component as never, { apiKey: 'key' })
+    const insights = new Insights(component as never, { apiKey: 'key' })
     const ctx = mockSchedulerCtx()
 
-    await posthog.captureException(ctx as never, {
+    await insights.captureException(ctx as never, {
       error: new TypeError('bad type'),
       distinctId: 'user-1',
       additionalProperties: { context: 'signup' },
@@ -131,10 +131,10 @@ describe('captureException', () => {
     const component = {
       lib: { captureException: 'captureException_ref' },
     }
-    const posthog = new PostHog(component as never, { apiKey: 'key' })
+    const insights = new Insights(component as never, { apiKey: 'key' })
     const ctx = mockSchedulerCtx()
 
-    await posthog.captureException(ctx as never, {
+    await insights.captureException(ctx as never, {
       error: 'string error',
     })
 
@@ -148,10 +148,10 @@ describe('captureException', () => {
 describe('beforeSend', () => {
   test('allows events through when no beforeSend is configured', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, { apiKey: 'key' })
+    const insights = new Insights(component as never, { apiKey: 'key' })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'page_view',
     })
@@ -162,13 +162,13 @@ describe('beforeSend', () => {
   test('blocks events when beforeSend returns null', async () => {
     const component = { lib: { capture: 'capture_ref' } }
     const beforeSend: BeforeSendFn = () => null
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'page_view',
     })
@@ -182,13 +182,13 @@ describe('beforeSend', () => {
       ...event,
       properties: { ...event.properties, injected: true },
     })
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'page_view',
       properties: { page: '/home' },
@@ -208,13 +208,13 @@ describe('beforeSend', () => {
       ...event,
       properties: { ...event.properties, second: true },
     })
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend: [fn1, fn2],
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'test',
     })
@@ -227,13 +227,13 @@ describe('beforeSend', () => {
     const component = { lib: { capture: 'capture_ref' } }
     const fn1: BeforeSendFn = () => null
     const fn2: BeforeSendFn = jest.fn((event) => event)
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend: [fn1, fn2],
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'test',
     })
@@ -248,13 +248,13 @@ describe('beforeSend', () => {
       expect(event.event).toBe('$identify')
       return null
     }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.identify(ctx as never, {
+    await insights.identify(ctx as never, {
       distinctId: 'user-1',
     })
 
@@ -267,13 +267,13 @@ describe('beforeSend', () => {
       expect(event.event).toBe('$create_alias')
       return event
     }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.alias(ctx as never, {
+    await insights.alias(ctx as never, {
       distinctId: 'user-1',
       alias: 'alias-1',
     })
@@ -289,13 +289,13 @@ describe('beforeSend', () => {
       expect(event.event).toBe('$exception')
       return null
     }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.captureException(ctx as never, {
+    await insights.captureException(ctx as never, {
       error: new Error('test'),
     })
 
@@ -310,13 +310,13 @@ describe('beforeSend', () => {
       expect(event.event).toBe('$groupidentify')
       return event
     }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       beforeSend,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.groupIdentify(ctx as never, {
+    await insights.groupIdentify(ctx as never, {
       groupType: 'company',
       groupKey: 'acme',
     })
@@ -332,13 +332,13 @@ describe('identify callback', () => {
 
   test('uses identify callback result for capture', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturning('auth-user-1'),
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, { event: 'test_event' })
+    await insights.capture(ctx as never, { event: 'test_event' })
 
     const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
     expect(args.distinctId).toBe('auth-user-1')
@@ -346,13 +346,13 @@ describe('identify callback', () => {
 
   test('falls back to explicit distinctId when identify returns null', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturningNull,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'explicit-user',
       event: 'test_event',
     })
@@ -363,32 +363,32 @@ describe('identify callback', () => {
 
   test('throws when neither identify nor explicit distinctId resolves', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturningNull,
     })
     const ctx = mockSchedulerCtx()
 
-    await expect(posthog.capture(ctx as never, { event: 'test_event' })).rejects.toThrow('Could not resolve distinctId')
+    await expect(insights.capture(ctx as never, { event: 'test_event' })).rejects.toThrow('Could not resolve distinctId')
   })
 
   test('throws when no identify configured and no explicit distinctId', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, { apiKey: 'key' })
+    const insights = new Insights(component as never, { apiKey: 'key' })
     const ctx = mockSchedulerCtx()
 
-    await expect(posthog.capture(ctx as never, { event: 'test_event' })).rejects.toThrow('Could not resolve distinctId')
+    await expect(insights.capture(ctx as never, { event: 'test_event' })).rejects.toThrow('Could not resolve distinctId')
   })
 
   test('identify callback takes precedence over explicit distinctId', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturning('auth-user'),
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'explicit-user',
       event: 'test_event',
     })
@@ -400,26 +400,26 @@ describe('identify callback', () => {
   test('passes ctx to identify callback', async () => {
     const component = { lib: { capture: 'capture_ref' } }
     const identify = jest.fn(async () => ({ distinctId: 'resolved' }))
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify,
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, { event: 'test_event' })
+    await insights.capture(ctx as never, { event: 'test_event' })
 
     expect(identify).toHaveBeenCalledWith(ctx)
   })
 
   test('works with identify method', async () => {
     const component = { lib: { identify: 'identify_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturning('auth-user'),
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.identify(ctx as never, {})
+    await insights.identify(ctx as never, {})
 
     const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
     expect(args.distinctId).toBe('auth-user')
@@ -427,13 +427,13 @@ describe('identify callback', () => {
 
   test('works with alias method', async () => {
     const component = { lib: { alias: 'alias_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturning('auth-user'),
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.alias(ctx as never, { alias: 'new-alias' })
+    await insights.alias(ctx as never, { alias: 'new-alias' })
 
     const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
     expect(args.distinctId).toBe('auth-user')
@@ -443,10 +443,10 @@ describe('identify callback', () => {
     const component = {
       lib: { captureException: 'captureException_ref' },
     }
-    const posthog = new PostHog(component as never, { apiKey: 'key' })
+    const insights = new Insights(component as never, { apiKey: 'key' })
     const ctx = mockSchedulerCtx()
 
-    await posthog.captureException(ctx as never, {
+    await insights.captureException(ctx as never, {
       error: new Error('test'),
     })
 
@@ -459,13 +459,13 @@ describe('identify callback', () => {
     const component = {
       lib: { captureException: 'captureException_ref' },
     }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturning('auth-user'),
     })
     const ctx = mockSchedulerCtx()
 
-    await posthog.captureException(ctx as never, {
+    await insights.captureException(ctx as never, {
       error: new Error('test'),
     })
 
@@ -475,7 +475,7 @@ describe('identify callback', () => {
 
   test('works with feature flag methods', async () => {
     const component = { lib: { getFeatureFlag: 'getFeatureFlag_ref' } }
-    const posthog = new PostHog(component as never, {
+    const insights = new Insights(component as never, {
       apiKey: 'key',
       identify: identifyReturning('auth-user'),
     })
@@ -483,7 +483,7 @@ describe('identify callback', () => {
       runAction: jest.fn(async (_ref: unknown, _args: Record<string, unknown>) => true),
     }
 
-    await posthog.getFeatureFlag(ctx as never, { key: 'my-flag' })
+    await insights.getFeatureFlag(ctx as never, { key: 'my-flag' })
 
     const [, args] = ctx.runAction.mock.calls[0]
     expect(args.distinctId).toBe('auth-user')
@@ -491,10 +491,10 @@ describe('identify callback', () => {
 
   test('explicit distinctId still works without identify callback', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never, { apiKey: 'key' })
+    const insights = new Insights(component as never, { apiKey: 'key' })
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'explicit-user',
       event: 'test_event',
     })

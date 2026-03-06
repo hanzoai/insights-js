@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PostHog Evaluation Tags Example</title>
+    <title>Insights Evaluation Tags Example</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -194,7 +194,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚀 PostHog Evaluation Tags Testing</h1>
+        <h1>🚀 Insights Evaluation Tags Testing</h1>
         
         <div class="status" id="status">
             <strong>Status:</strong> <span id="statusText">Not initialized</span>
@@ -210,7 +210,7 @@
             
             <div class="config-row">
                 <label for="apiHost">API Host:</label>
-                <input type="text" id="apiHost" placeholder="https://app.posthog.com" value="https://app.posthog.com">
+                <input type="text" id="apiHost" placeholder="https://app.insights.hanzo.ai" value="https://app.insights.hanzo.ai">
             </div>
             
             <div class="config-row">
@@ -240,7 +240,7 @@
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" onclick="initializePostHog()">Initialize PostHog</button>
+            <button class="btn btn-primary" onclick="initializeInsights()">Initialize Insights</button>
             <button class="btn btn-secondary" onclick="testFeatureFlags()">Test Feature Flags</button>
             <button class="btn btn-secondary" onclick="reloadFeatureFlags()">Reload Flags</button>
             <button class="btn btn-secondary" onclick="getAllFlags()">Get All Flags</button>
@@ -257,17 +257,17 @@
         </div>
     </div>
 
-    <!-- PostHog Library -->
+    <!-- Insights Library -->
     <!-- Option 1: Use CDN (recommended for quick testing) -->
     <script>
-        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+        !function(t,e){var o,n,p,r;e.__SV||(window.insights=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.insights.hanzo.ai","-assets.i.insights.hanzo.ai")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="insights",u.people=u.people||[],u.toString=function(t){var e="insights";return"insights"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId setPersonProperties".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.insights||[]);
     </script>
     
     <!-- Option 2: Use local build (after running pnpm build) -->
     <!-- <script src="../../packages/browser/dist/array.full.js"></script> -->
     
     <script>
-        let posthogInstance = null;
+        let insightsInstance = null;
         let evaluationTags = [];
 
         // Initialize tags UI
@@ -355,7 +355,7 @@
             logContainer.innerHTML = '<div class="log-entry info">Logs cleared</div>';
         }
 
-        function initializePostHog() {
+        function initializeInsights() {
             const apiKey = document.getElementById('apiKey').value;
             const apiHost = document.getElementById('apiHost').value;
             const personalKey = document.getElementById('personalKey').value;
@@ -373,10 +373,10 @@
                 const config = {
                     api_host: apiHost,
                     debug: debugMode,
-                    loaded: function(posthog) {
-                        posthogInstance = posthog;
-                        log('PostHog loaded successfully', 'success');
-                        updateStatus('PostHog initialized and ready', 'success');
+                    loaded: function(insights) {
+                        insightsInstance = insights;
+                        log('Insights loaded successfully', 'success');
+                        updateStatus('Insights initialized and ready', 'success');
                     },
                     // Add evaluation environments if tags are present
                     ...(evaluationTags.length > 0 && {
@@ -389,15 +389,15 @@
                     config.personal_api_key = personalKey;
                 }
 
-                log('Initializing PostHog with config:', 'info');
+                log('Initializing Insights with config:', 'info');
                 log(JSON.stringify(config, null, 2), 'info');
 
-                // Initialize PostHog
-                if (window.posthog) {
-                    window.posthog.init(apiKey, config);
+                // Initialize Insights
+                if (window.insights) {
+                    window.insights.init(apiKey, config);
                     
                     // Identify the user
-                    posthogInstance.identify(distinctId);
+                    insightsInstance.identify(distinctId);
                     log(`Identified user: ${distinctId}`, 'info');
                     
                     // Log the evaluation environments being used
@@ -405,18 +405,18 @@
                         log('Evaluation environments configured: ' + JSON.stringify(evaluationTags), 'info');
                     }
                 } else {
-                    throw new Error('PostHog library not loaded');
+                    throw new Error('Insights library not loaded');
                 }
             } catch (error) {
-                log(`Error initializing PostHog: ${error.message}`, 'error');
-                updateStatus('Failed to initialize PostHog', 'error');
+                log(`Error initializing Insights: ${error.message}`, 'error');
+                updateStatus('Failed to initialize Insights', 'error');
             }
         }
 
         function testFeatureFlags() {
-            if (!posthogInstance) {
-                log('Error: PostHog not initialized', 'error');
-                updateStatus('PostHog not initialized', 'error');
+            if (!insightsInstance) {
+                log('Error: Insights not initialized', 'error');
+                updateStatus('Insights not initialized', 'error');
                 return;
             }
 
@@ -434,8 +434,8 @@
             const results = [];
             
             testFlags.forEach(flagKey => {
-                const value = posthogInstance.getFeatureFlag(flagKey);
-                const payload = posthogInstance.getFeatureFlagPayload(flagKey);
+                const value = insightsInstance.getFeatureFlag(flagKey);
+                const payload = insightsInstance.getFeatureFlagPayload(flagKey);
                 
                 results.push({
                     key: flagKey,
@@ -451,26 +451,26 @@
         }
 
         function reloadFeatureFlags() {
-            if (!posthogInstance) {
-                log('Error: PostHog not initialized', 'error');
-                updateStatus('PostHog not initialized', 'error');
+            if (!insightsInstance) {
+                log('Error: Insights not initialized', 'error');
+                updateStatus('Insights not initialized', 'error');
                 return;
             }
 
             log('Reloading feature flags...', 'info');
             
-            // Note: To change evaluation environments, you need to reinitialize PostHog
+            // Note: To change evaluation environments, you need to reinitialize Insights
             // The evaluation_environments are set during initialization and cannot be changed dynamically
             if (evaluationTags.length > 0) {
                 log('Note: Evaluation environments are set during initialization.', 'warning');
-                log('To use different tags, reinitialize PostHog with new config.', 'warning');
+                log('To use different tags, reinitialize Insights with new config.', 'warning');
                 log('Current tags: ' + JSON.stringify(evaluationTags), 'info');
             }
             
-            posthogInstance.reloadFeatureFlags();
+            insightsInstance.reloadFeatureFlags();
             
             // Listen for flags to be loaded
-            posthogInstance.onFeatureFlags(function() {
+            insightsInstance.onFeatureFlags(function() {
                 log('Feature flags reloaded successfully', 'success');
                 updateStatus('Feature flags reloaded', 'success');
                 
@@ -480,21 +480,21 @@
         }
 
         function getAllFlags() {
-            if (!posthogInstance) {
-                log('Error: PostHog not initialized', 'error');
-                updateStatus('PostHog not initialized', 'error');
+            if (!insightsInstance) {
+                log('Error: Insights not initialized', 'error');
+                updateStatus('Insights not initialized', 'error');
                 return;
             }
 
             log('Getting all feature flags...', 'info');
             
             // Get all flags
-            const allFlags = posthogInstance.getFeatureFlags();
+            const allFlags = insightsInstance.getFeatureFlags();
             const results = [];
             
             if (allFlags && Object.keys(allFlags).length > 0) {
                 Object.entries(allFlags).forEach(([key, value]) => {
-                    const payload = posthogInstance.getFeatureFlagPayload(key);
+                    const payload = insightsInstance.getFeatureFlagPayload(key);
                     results.push({
                         key: key,
                         value: value,
@@ -531,9 +531,9 @@
         // Initialize on page load
         window.addEventListener('DOMContentLoaded', function() {
             initializeTagsUI();
-            log('Page loaded. Ready to initialize PostHog.', 'info');
+            log('Page loaded. Ready to initialize Insights.', 'info');
             log('Evaluation tags feature allows you to pass additional context for feature flag evaluation.', 'info');
-            log('Add tags above and initialize PostHog to test the feature.', 'info');
+            log('Add tags above and initialize Insights to test the feature.', 'info');
         });
     </script>
 </body>

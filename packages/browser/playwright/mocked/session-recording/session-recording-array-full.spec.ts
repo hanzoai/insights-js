@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 
 const startOptions = {
@@ -26,12 +26,12 @@ test.describe('session recording in array.full.js', () => {
         await page.waitingForNetworkCausedBy({
             urlPatternsToWaitFor: ['**/ses/*'],
             action: async () => {
-                await page.locator('[data-cy-input]').fill('hello posthog!')
+                await page.locator('[data-cy-input]').fill('hello insights!')
             },
         })
 
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('test_registered_property')
         })
 
@@ -46,7 +46,7 @@ test.describe('session recording in array.full.js', () => {
         expect(snapshotData[1].type).toEqual(2) // full_snapshot
         expect(snapshotData[2].type).toEqual(5) // custom event with remote config
         expect(snapshotData[3].type).toEqual(5) // custom event with options
-        expect(snapshotData[4].type).toEqual(5) // custom event with posthog config
+        expect(snapshotData[4].type).toEqual(5) // custom event with insights config
         expect(snapshotData[5].type).toEqual(5) // custom event with recording_started
         // Making a set from the rest should all be 3 - incremental snapshots
         const incrementalSnapshots = snapshotData.slice(6)

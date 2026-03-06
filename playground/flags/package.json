@@ -1,7 +1,7 @@
 {
     "name": "flags",
     "version": "1.0.0",
-    "description": "PostHog Node.js flags playground",
+    "description": "Insights Node.js flags playground",
     "main": "index.js",
     "scripts": {
         "start": "node index.js",

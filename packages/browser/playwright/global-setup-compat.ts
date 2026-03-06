@@ -19,8 +19,8 @@ async function downloadNpmVersion(): Promise<void> {
 
     const registryUrl =
         targetVersion === 'latest'
-            ? 'https://registry.npmjs.org/posthog-js/latest'
-            : `https://registry.npmjs.org/posthog-js/${targetVersion}`
+            ? 'https://registry.npmjs.org/@hanzo/insights/latest'
+            : `https://registry.npmjs.org/@hanzo/insights/${targetVersion}`
     const registryResponse = await fetch(registryUrl)
     if (!registryResponse.ok) {
         throw new Error(`Failed to fetch NPM registry: ${registryResponse.status}`)
@@ -29,11 +29,11 @@ async function downloadNpmVersion(): Promise<void> {
     const version = packageInfo.version
 
     // eslint-disable-next-line no-console
-    console.log(`Compat tests using posthog-js@${version} from NPM`)
+    console.log(`Compat tests using @hanzo/insights@${version} from NPM`)
 
     await Promise.all([
-        downloadFile(`https://unpkg.com/posthog-js@${version}/dist/array.js`, NPM_ARRAY_FILE),
-        downloadFile(`https://unpkg.com/posthog-js@${version}/dist/array.full.js`, NPM_ARRAY_FULL_FILE),
+        downloadFile(`https://unpkg.com/@hanzo/insights@${version}/dist/array.js`, NPM_ARRAY_FILE),
+        downloadFile(`https://unpkg.com/@hanzo/insights@${version}/dist/array.full.js`, NPM_ARRAY_FULL_FILE),
     ])
 }
 

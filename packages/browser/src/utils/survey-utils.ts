@@ -1,4 +1,4 @@
-import { DisplaySurveyOptions, DisplaySurveyType, Survey, SurveyType } from '../posthog-surveys-types'
+import { DisplaySurveyOptions, DisplaySurveyType, Survey, SurveyType } from '../insights-surveys-types'
 import { createLogger } from '../utils/logger'
 
 export const SURVEY_LOGGER = createLogger('[Surveys]')

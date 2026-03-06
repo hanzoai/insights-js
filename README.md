@@ -1,6 +1,6 @@
 # Hanzo Insights JS
 
-Hanzo Insights JS SDK — fork of [posthog-js](https://github.com/PostHog/posthog-js).
+Hanzo Insights JS SDK — fork of [@hanzo/insights](https://github.com/hanzoai/@hanzo/insights).
 
 Provides analytics, feature flags, session replay, and A/B testing for web and Node.js applications connected to [Hanzo Insights](https://insights.hanzo.ai).
 
@@ -36,13 +36,13 @@ insights.capture('user_signed_up', { plan: 'pro' })
 
 ## Upstream
 
-This is a branded fork of [PostHog/posthog-js](https://github.com/PostHog/posthog-js).
-The `Insights` class is an alias for `PostHog` — all PostHog APIs work unchanged.
+This is a branded fork of [Insights/@hanzo/insights](https://github.com/hanzoai/@hanzo/insights).
+The `Insights` class is an alias for `Insights` — all Insights APIs work unchanged.
 
 To sync upstream changes:
 
 ```bash
-git remote add upstream https://github.com/PostHog/posthog-js.git
+git remote add upstream https://github.com/hanzoai/@hanzo/insights.git
 git fetch upstream
 git merge upstream/main
 ```

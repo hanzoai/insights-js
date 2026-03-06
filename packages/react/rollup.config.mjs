@@ -42,13 +42,13 @@ const buildUmd = {
     input: './src/index.ts',
     output: {
         file: 'dist/umd/index.js',
-        name: 'PosthogReact',
+        name: 'InsightsReact',
         format: 'umd',
         sourcemap: true,
         esModule: false,
         globals: {
             react: 'React',
-            '@hanzo/insights': 'posthog',
+            '@hanzo/insights': 'insights',
         },
     },
     plugins,
@@ -80,13 +80,13 @@ const buildSurveysUmd = {
     input: 'src/surveys/index.ts',
     output: {
         file: 'dist/umd/surveys/index.js',
-        name: 'PosthogReactSurveys',
+        name: 'InsightsReactSurveys',
         format: 'umd',
         sourcemap: true,
         esModule: false,
         globals: {
             react: 'React',
-            '@hanzo/insights': 'posthog',
+            '@hanzo/insights': 'insights',
         },
     },
     plugins,

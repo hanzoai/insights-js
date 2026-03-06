@@ -1,7 +1,7 @@
 import { initConversations } from '../extensions/conversations/external'
 import { assignableWindow } from '../utils/globals'
 
-assignableWindow.__PosthogExtensions__ = assignableWindow.__PosthogExtensions__ || {}
-assignableWindow.__PosthogExtensions__.initConversations = initConversations
+assignableWindow.__InsightsExtensions__ = assignableWindow.__InsightsExtensions__ || {}
+assignableWindow.__InsightsExtensions__.initConversations = initConversations
 
 export default initConversations

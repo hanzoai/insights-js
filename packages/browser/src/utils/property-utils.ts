@@ -1,6 +1,6 @@
 import { isNull, isUndefined } from '@hanzo/insights-core'
 import { jsonStringify } from '../request'
-import { PropertyFilters, PropertyOperator } from '../posthog-surveys-types'
+import { PropertyFilters, PropertyOperator } from '../insights-surveys-types'
 import type { Properties } from '../types'
 import { isMatchingRegex } from './regex-utils'
 

@@ -1,23 +1,23 @@
 /* eslint-disable compat/compat */
 import { ConversationsPersistence } from '../../../extensions/conversations/external/persistence'
-import { UserProvidedTraits } from '../../../posthog-conversations-types'
-import { PostHog } from '../../../posthog-core'
+import { UserProvidedTraits } from '../../../insights-conversations-types'
+import { Insights } from '../../../insights-core'
 
 const TEST_TOKEN = 'phc_test_token_123'
 const STORAGE_KEY = 'ph_conv_' + TEST_TOKEN
 
-// Legacy PostHog persistence keys (for migration tests)
+// Legacy Insights persistence keys (for migration tests)
 const LEGACY_WIDGET_SESSION_ID = '$conversations_widget_session_id'
 const LEGACY_TICKET_ID = '$conversations_ticket_id'
 const LEGACY_WIDGET_STATE = '$conversations_widget_state'
 const LEGACY_USER_TRAITS = '$conversations_user_traits'
 
-// Legacy PostHog persistence blob key
-const LEGACY_PH_KEY = 'ph_' + TEST_TOKEN + '_posthog'
+// Legacy Insights persistence blob key
+const LEGACY_PH_KEY = 'ph_' + TEST_TOKEN + '_insights'
 
 describe('ConversationsPersistence', () => {
     let persistence: ConversationsPersistence
-    let mockPosthog: PostHog
+    let mockInsights: Insights
     let localStorageData: Record<string, string>
 
     beforeEach(() => {
@@ -38,7 +38,7 @@ describe('ConversationsPersistence', () => {
         }
         Object.defineProperty(window, 'localStorage', { value: localStorageMock, writable: true })
 
-        mockPosthog = {
+        mockInsights = {
             get_distinct_id: jest.fn().mockReturnValue('test-distinct-id'),
             config: { token: TEST_TOKEN },
             persistence: {
@@ -48,9 +48,9 @@ describe('ConversationsPersistence', () => {
                 unregister: jest.fn(),
                 isDisabled: jest.fn().mockReturnValue(false),
             },
-        } as unknown as PostHog
+        } as unknown as Insights
 
-        persistence = new ConversationsPersistence(mockPosthog)
+        persistence = new ConversationsPersistence(mockInsights)
     })
 
     afterEach(() => {
@@ -84,7 +84,7 @@ describe('ConversationsPersistence', () => {
             localStorageData[STORAGE_KEY] = JSON.stringify({ widgetSessionId: existingSessionId })
 
             // Create fresh instance so cache is empty
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             const sessionId = persistence.getOrCreateWidgetSessionId()
 
             expect(sessionId).toBe(existingSessionId)
@@ -93,7 +93,7 @@ describe('ConversationsPersistence', () => {
         it('should return same widget_session_id even after distinct_id changes', () => {
             const sessionIdBefore = persistence.getOrCreateWidgetSessionId()
 
-            ;(mockPosthog.get_distinct_id as jest.Mock).mockReturnValue('new-user@example.com')
+            ;(mockInsights.get_distinct_id as jest.Mock).mockReturnValue('new-user@example.com')
 
             const sessionIdAfter = persistence.getOrCreateWidgetSessionId()
             expect(sessionIdBefore).toBe(sessionIdAfter)
@@ -120,7 +120,7 @@ describe('ConversationsPersistence', () => {
             persistence.clearWidgetSessionId()
 
             // Create new persistence instance to clear internal cache
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             const sessionId2 = persistence.getOrCreateWidgetSessionId()
 
             expect(sessionId1).not.toBe(sessionId2)
@@ -131,7 +131,7 @@ describe('ConversationsPersistence', () => {
                 throw new Error('Storage error')
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             const sessionId = persistence.getOrCreateWidgetSessionId()
             expect(sessionId).toMatch(/^[0-9a-f-]{36}$/i)
         })
@@ -141,7 +141,7 @@ describe('ConversationsPersistence', () => {
                 throw new Error('Storage error')
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             const sessionId1 = persistence.getOrCreateWidgetSessionId()
             const sessionId2 = persistence.getOrCreateWidgetSessionId()
 
@@ -149,9 +149,9 @@ describe('ConversationsPersistence', () => {
         })
 
         it('should handle missing token gracefully', () => {
-            ;(mockPosthog as any).config = { token: undefined }
+            ;(mockInsights as any).config = { token: undefined }
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             const sessionId = persistence.getOrCreateWidgetSessionId()
             expect(sessionId).toMatch(/^[0-9a-f-]{36}$/i)
         })
@@ -171,7 +171,7 @@ describe('ConversationsPersistence', () => {
 
         it('should keep same ticket after distinct_id changes (identify)', () => {
             persistence.saveTicketId('ticket-123')
-            ;(mockPosthog.get_distinct_id as jest.Mock).mockReturnValue('new-user@example.com')
+            ;(mockInsights.get_distinct_id as jest.Mock).mockReturnValue('new-user@example.com')
 
             expect(persistence.loadTicketId()).toBe('ticket-123')
         })
@@ -197,7 +197,7 @@ describe('ConversationsPersistence', () => {
                 throw new Error('Storage error')
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             expect(persistence.loadTicketId()).toBeNull()
         })
     })
@@ -219,7 +219,7 @@ describe('ConversationsPersistence', () => {
 
         it('should return null for invalid state values', () => {
             localStorageData[STORAGE_KEY] = JSON.stringify({ widgetState: 'invalid' })
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
             expect(persistence.loadWidgetState()).toBeNull()
         })
@@ -234,7 +234,7 @@ describe('ConversationsPersistence', () => {
                 throw new Error('Storage error')
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             expect(persistence.loadWidgetState()).toBeNull()
         })
     })
@@ -283,7 +283,7 @@ describe('ConversationsPersistence', () => {
                 throw new Error('Storage error')
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             expect(persistence.loadUserTraits()).toBeNull()
         })
     })
@@ -307,7 +307,7 @@ describe('ConversationsPersistence', () => {
 
             persistence.clearAll()
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
             const sessionIdAfter = persistence.getOrCreateWidgetSessionId()
             expect(sessionIdBefore).not.toBe(sessionIdAfter)
         })
@@ -321,25 +321,25 @@ describe('ConversationsPersistence', () => {
         })
     })
 
-    describe('migration from legacy PostHog persistence', () => {
-        it('should migrate widget_session_id from PostHog persistence props', () => {
+    describe('migration from legacy Insights persistence', () => {
+        it('should migrate widget_session_id from Insights persistence props', () => {
             const existingId = 'legacy-session-id-456'
-            ;(mockPosthog.persistence!.get_property as jest.Mock).mockImplementation((key: string) => {
+            ;(mockInsights.persistence!.get_property as jest.Mock).mockImplementation((key: string) => {
                 if (key === LEGACY_WIDGET_SESSION_ID) {
                     return existingId
                 }
                 return undefined
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
             expect(readStorage()?.widgetSessionId).toBe(existingId)
             expect(persistence.getOrCreateWidgetSessionId()).toBe(existingId)
         })
 
-        it('should migrate all legacy data from PostHog persistence', () => {
+        it('should migrate all legacy data from Insights persistence', () => {
             const traits = { name: 'Legacy User', email: 'legacy@example.com' }
-            ;(mockPosthog.persistence!.get_property as jest.Mock).mockImplementation((key: string) => {
+            ;(mockInsights.persistence!.get_property as jest.Mock).mockImplementation((key: string) => {
                 switch (key) {
                     case LEGACY_WIDGET_SESSION_ID:
                         return 'legacy-session-id'
@@ -354,7 +354,7 @@ describe('ConversationsPersistence', () => {
                 }
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
             const stored = readStorage()
             expect(stored?.widgetSessionId).toBe('legacy-session-id')
@@ -363,35 +363,35 @@ describe('ConversationsPersistence', () => {
             expect(stored?.userTraits).toEqual(traits)
         })
 
-        it('should clean up old keys from PostHog persistence after migration', () => {
-            ;(mockPosthog.persistence!.get_property as jest.Mock).mockImplementation((key: string) => {
+        it('should clean up old keys from Insights persistence after migration', () => {
+            ;(mockInsights.persistence!.get_property as jest.Mock).mockImplementation((key: string) => {
                 if (key === LEGACY_WIDGET_SESSION_ID) {
                     return 'legacy-session-id'
                 }
                 return undefined
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
-            expect(mockPosthog.persistence!.unregister).toHaveBeenCalledWith(LEGACY_WIDGET_SESSION_ID)
-            expect(mockPosthog.persistence!.unregister).toHaveBeenCalledWith(LEGACY_TICKET_ID)
-            expect(mockPosthog.persistence!.unregister).toHaveBeenCalledWith(LEGACY_WIDGET_STATE)
-            expect(mockPosthog.persistence!.unregister).toHaveBeenCalledWith(LEGACY_USER_TRAITS)
+            expect(mockInsights.persistence!.unregister).toHaveBeenCalledWith(LEGACY_WIDGET_SESSION_ID)
+            expect(mockInsights.persistence!.unregister).toHaveBeenCalledWith(LEGACY_TICKET_ID)
+            expect(mockInsights.persistence!.unregister).toHaveBeenCalledWith(LEGACY_WIDGET_STATE)
+            expect(mockInsights.persistence!.unregister).toHaveBeenCalledWith(LEGACY_USER_TRAITS)
         })
 
         it('should skip migration if dedicated storage already has data', () => {
             localStorageData[STORAGE_KEY] = JSON.stringify({ widgetSessionId: 'already-migrated-id' })
             jest.clearAllMocks()
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
             expect(persistence.getOrCreateWidgetSessionId()).toBe('already-migrated-id')
-            expect(mockPosthog.persistence!.get_property).not.toHaveBeenCalled()
+            expect(mockInsights.persistence!.get_property).not.toHaveBeenCalled()
         })
 
         it('should fall back to raw localStorage when persistence.props lost the key', () => {
-            // PostHog persistence.props doesn't have the key (the bug scenario)
-            ;(mockPosthog.persistence!.get_property as jest.Mock).mockReturnValue(undefined)
+            // Insights persistence.props doesn't have the key (the bug scenario)
+            ;(mockInsights.persistence!.get_property as jest.Mock).mockReturnValue(undefined)
 
             // But raw localStorage still has it
             localStorageData[LEGACY_PH_KEY] = JSON.stringify({
@@ -400,7 +400,7 @@ describe('ConversationsPersistence', () => {
                 distinct_id: 'some-user',
             })
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
             const stored = readStorage()
             expect(stored?.widgetSessionId).toBe('raw-recovered-id')
@@ -408,10 +408,10 @@ describe('ConversationsPersistence', () => {
         })
 
         it('should not migrate if persistence is disabled', () => {
-            ;(mockPosthog.persistence!.isDisabled as jest.Mock).mockReturnValue(true)
-            ;(mockPosthog.persistence!.get_property as jest.Mock).mockReturnValue('should-not-be-used')
+            ;(mockInsights.persistence!.isDisabled as jest.Mock).mockReturnValue(true)
+            ;(mockInsights.persistence!.get_property as jest.Mock).mockReturnValue('should-not-be-used')
 
-            persistence = new ConversationsPersistence(mockPosthog)
+            persistence = new ConversationsPersistence(mockInsights)
 
             expect(readStorage()).toBeNull()
         })

@@ -2,12 +2,12 @@
 
 import '@testing-library/jest-dom'
 
-import { PostHogPersistence } from '../../../posthog-persistence'
+import { InsightsPersistence } from '../../../insights-persistence'
 import { SESSION_RECORDING_REMOTE_CONFIG } from '../../../constants'
 import { SessionIdManager } from '../../../sessionid'
 import { FULL_SNAPSHOT_EVENT_TYPE, META_EVENT_TYPE } from '../../../extensions/replay/external/sessionrecording-utils'
-import { PostHog } from '../../../posthog-core'
-import { FlagsResponse, PostHogConfig, Property } from '../../../types'
+import { Insights } from '../../../insights-core'
+import { FlagsResponse, InsightsConfig, Property } from '../../../types'
 import { uuidv7 } from '../../../uuidv7'
 import { SessionRecording } from '../../../extensions/replay/session-recording'
 import { assignableWindow, window } from '../../../utils/globals'
@@ -23,7 +23,7 @@ import {
     OrTriggerMatching,
 } from '../../../extensions/replay/external/triggerMatching'
 import { LazyLoadedSessionRecording } from '../../../extensions/replay/external/lazy-loaded-session-recorder'
-import { createMockPostHog, createMockConfig } from '../../helpers/posthog-instance'
+import { createMockInsights, createMockConfig } from '../../helpers/insights-instance'
 
 // Type and source defined here designate a non-user-generated recording event
 
@@ -62,31 +62,31 @@ describe('SessionRecording', () => {
     const _addCustomEvent = jest.fn()
     const loadScriptMock = jest.fn()
     let _emit: any
-    let posthog: PostHog
+    let insights: Insights
     let sessionRecording: SessionRecording
     let sessionId: string
     let sessionManager: SessionIdManager
-    let config: PostHogConfig
+    let config: InsightsConfig
     let sessionIdGeneratorMock: Mock
     let windowIdGeneratorMock: Mock
     let removePageviewCaptureHookMock: Mock
     let simpleEventEmitter: SimpleEventEmitter
 
     const addRRwebToWindow = () => {
-        assignableWindow.__PosthogExtensions__.rrweb = {
+        assignableWindow.__InsightsExtensions__.rrweb = {
             record: jest.fn(({ emit }) => {
                 _emit = emit
                 return () => {}
             }),
             version: 'fake',
         }
-        assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot = jest.fn(() => {
+        assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot = jest.fn(() => {
             // we pretend to be rrweb and call emit
             _emit(createFullSnapshot())
         })
-        assignableWindow.__PosthogExtensions__.rrweb.record.addCustomEvent = _addCustomEvent
+        assignableWindow.__InsightsExtensions__.rrweb.record.addCustomEvent = _addCustomEvent
 
-        assignableWindow.__PosthogExtensions__.rrwebPlugins = {
+        assignableWindow.__InsightsExtensions__.rrwebPlugins = {
             getRecordConsolePlugin: jest.fn(),
         }
     }
@@ -107,7 +107,7 @@ describe('SessionRecording', () => {
             persistence: 'memory',
         })
 
-        assignableWindow.__PosthogExtensions__ = {
+        assignableWindow.__InsightsExtensions__ = {
             rrweb: undefined,
             rrwebPlugins: {
                 getRecordConsolePlugin: undefined,
@@ -118,24 +118,24 @@ describe('SessionRecording', () => {
         sessionIdGeneratorMock = jest.fn().mockImplementation(() => sessionId)
         windowIdGeneratorMock = jest.fn().mockImplementation(() => 'windowId')
 
-        const postHogPersistence = new PostHogPersistence(config)
-        postHogPersistence.clear()
+        const insightsPersistence = new InsightsPersistence(config)
+        insightsPersistence.clear()
 
         sessionManager = new SessionIdManager(
-            createMockPostHog({ config, persistence: postHogPersistence, register: jest.fn() }),
+            createMockInsights({ config, persistence: insightsPersistence, register: jest.fn() }),
             sessionIdGeneratorMock,
             windowIdGeneratorMock
         )
 
         simpleEventEmitter = new SimpleEventEmitter()
-        // TODO we really need to make this a real posthog instance :cry:
-        posthog = {
+        // TODO we really need to make this a real insights instance :cry:
+        insights = {
             get_property: (property_key: string): Property | undefined => {
-                return postHogPersistence?.['props'][property_key]
+                return insightsPersistence?.['props'][property_key]
             },
             config: config,
             capture: jest.fn(),
-            persistence: postHogPersistence,
+            persistence: insightsPersistence,
             onFeatureFlags: (): (() => void) => {
                 return () => {}
             },
@@ -152,20 +152,20 @@ describe('SessionRecording', () => {
                 const unsubscribe = simpleEventEmitter.on(event, cb)
                 return removePageviewCaptureHookMock.mockImplementation(unsubscribe)
             }),
-        } as Partial<PostHog> as PostHog
+        } as Partial<Insights> as Insights
 
         loadScriptMock.mockImplementation((_ph, _path, callback) => {
             addRRwebToWindow()
             callback()
         })
 
-        assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+        assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
-        assignableWindow.__PosthogExtensions__.initSessionRecording = () => {
-            return new LazyLoadedSessionRecording(posthog)
+        assignableWindow.__InsightsExtensions__.initSessionRecording = () => {
+            return new LazyLoadedSessionRecording(insights)
         }
 
-        sessionRecording = new SessionRecording(posthog)
+        sessionRecording = new SessionRecording(insights)
     })
 
     afterEach(() => {
@@ -184,7 +184,7 @@ describe('SessionRecording', () => {
                     sessionRecording: { endpoint: '/s/', scriptConfig: { script: 'experimental-recorder' } },
                 })
             )
-            expect(loadScriptMock).toHaveBeenCalledWith(posthog, 'experimental-recorder', expect.any(Function))
+            expect(loadScriptMock).toHaveBeenCalledWith(insights, 'experimental-recorder', expect.any(Function))
         })
 
         it('uses anyMatchSessionRecordingStatus when triggerMatching is "any"', () => {
@@ -295,15 +295,15 @@ describe('SessionRecording', () => {
         })
 
         it('stores true in persistence if recording is enabled from the server', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
 
             sessionRecording.onRemoteConfig(makeFlagsResponse({ sessionRecording: { endpoint: '/s/' } }))
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(true)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(true)
         })
 
         it('stores true in persistence if canvas is enabled from the server', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -311,13 +311,13 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).recordCanvas).toBe(true)
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).canvasFps).toBe(6)
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).canvasQuality).toBe('0.2')
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).recordCanvas).toBe(true)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).canvasFps).toBe(6)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).canvasQuality).toBe('0.2')
         })
 
         it('stores masking config in persistence if set on the server', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -325,23 +325,23 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).masking).toEqual({
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).masking).toEqual({
                 maskAllInputs: true,
                 maskTextSelector: '*',
             })
         })
 
         it('stores nothing in persistence if recording is not returned from the server', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
 
             sessionRecording.onRemoteConfig(makeFlagsResponse({}))
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBe(undefined)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBe(undefined)
             expect(sessionRecording.status).toBe('pending_config')
         })
 
         it('stores response in persistence if recording is false from the server', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
 
             sessionRecording.onRemoteConfig(makeFlagsResponse({ sessionRecording: false }))
 
@@ -349,7 +349,7 @@ describe('SessionRecording', () => {
         })
 
         it('stores sample rate', () => {
-            posthog.persistence?.register({ SESSION_RECORDING_REMOTE_CONFIG: undefined })
+            insights.persistence?.register({ SESSION_RECORDING_REMOTE_CONFIG: undefined })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -357,12 +357,12 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.7)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.7)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sampleRate']).toBe(0.7)
         })
 
         it('local sampleRate takes precedence over remote config', () => {
-            posthog.config.session_recording.sampleRate = 0.3
+            insights.config.session_recording.sampleRate = 0.3
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -370,12 +370,12 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.3)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.3)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sampleRate']).toBe(0.3)
         })
 
         it('local sampleRate of 0 takes precedence over remote config', () => {
-            posthog.config.session_recording.sampleRate = 0
+            insights.config.session_recording.sampleRate = 0
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -383,12 +383,12 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sampleRate']).toBe(0)
         })
 
         it('falls back to remote config when local sampleRate is undefined', () => {
-            posthog.config.session_recording.sampleRate = undefined
+            insights.config.session_recording.sampleRate = undefined
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -396,12 +396,12 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.5)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.5)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sampleRate']).toBe(0.5)
         })
 
         it('ignores local sampleRate greater than 1 and falls back to remote config', () => {
-            posthog.config.session_recording.sampleRate = 1.5
+            insights.config.session_recording.sampleRate = 1.5
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -409,12 +409,12 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.7)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.7)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sampleRate']).toBe(0.7)
         })
 
         it('ignores local sampleRate less than 0 and falls back to remote config', () => {
-            posthog.config.session_recording.sampleRate = -0.5
+            insights.config.session_recording.sampleRate = -0.5
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -422,12 +422,12 @@ describe('SessionRecording', () => {
                 })
             )
 
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.7)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).sampleRate).toBe(0.7)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_sampleRate']).toBe(0.7)
         })
 
         it('starts session recording, saves setting and endpoint when enabled', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
                     sessionRecording: { endpoint: '/ses/' },
@@ -436,13 +436,13 @@ describe('SessionRecording', () => {
 
             expect(sessionRecording.startIfEnabledOrStop).toHaveBeenCalled()
             expect(loadScriptMock).toHaveBeenCalled()
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(true)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(true)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_endpoint']).toEqual('/ses/')
         })
 
         it('does not start recording before remote config is received', () => {
             // Set stale config in persistence (simulating cached/CDN config)
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -471,7 +471,7 @@ describe('SessionRecording', () => {
 
         it('discards buffer on beforeunload if status is buffering', () => {
             // Set persistence to simulate config exists
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',

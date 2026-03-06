@@ -1,6 +1,6 @@
 import RageClick from './extensions/rageclick'
 import { DeadClickCandidate, Properties, RemoteConfig } from './types'
-import { PostHog } from './posthog-core'
+import { Insights } from './insights-core'
 
 import { document, window } from './utils/globals'
 import { getEventTarget, getParentElement } from './autocapture-utils'
@@ -51,7 +51,7 @@ function shouldPoll(document: Document | undefined): boolean {
 }
 
 export class Heatmaps {
-    instance: PostHog
+    instance: Insights
     rageclicks: RageClick
     _enabledServerSide: boolean = false
     _initialized = false
@@ -65,7 +65,7 @@ export class Heatmaps {
     private _flushHandler: (() => void) | undefined
     private _onVisibilityChange_handler: (() => void) | undefined
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this.instance = instance
         this._enabledServerSide = !!this.instance.persistence?.props[HEATMAPS_ENABLED_SERVER_SIDE]
         this.rageclicks = new RageClick(instance.config.rageclick)

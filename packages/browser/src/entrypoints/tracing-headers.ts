@@ -27,11 +27,11 @@ const addTracingHeaders = (
 
     if (sessionManager) {
         const { sessionId, windowId } = sessionManager.checkAndGetSessionAndWindowId(true)
-        req.headers.set('X-POSTHOG-SESSION-ID', sessionId)
-        req.headers.set('X-POSTHOG-WINDOW-ID', windowId)
+        req.headers.set('X-INSIGHTS-SESSION-ID', sessionId)
+        req.headers.set('X-INSIGHTS-WINDOW-ID', windowId)
     }
     if (distinctId !== COOKIELESS_SENTINEL_VALUE) {
-        req.headers.set('X-POSTHOG-DISTINCT-ID', distinctId)
+        req.headers.set('X-INSIGHTS-DISTINCT-ID', distinctId)
     }
 }
 
@@ -83,18 +83,18 @@ const patchXHR = (hostnames: string[], distinctId: string, sessionManager?: Sess
     )
 }
 
-assignableWindow.__PosthogExtensions__ = assignableWindow.__PosthogExtensions__ || {}
+assignableWindow.__InsightsExtensions__ = assignableWindow.__InsightsExtensions__ || {}
 const patchFns = {
     _patchFetch: patchFetch,
     _patchXHR: patchXHR,
 }
-assignableWindow.__PosthogExtensions__.tracingHeadersPatchFns = patchFns
+assignableWindow.__InsightsExtensions__.tracingHeadersPatchFns = patchFns
 
-// we used to put tracingHeadersPatchFns on window, and now we put it on __PosthogExtensions__
+// we used to put tracingHeadersPatchFns on window, and now we put it on __InsightsExtensions__
 // but that means that old clients which lazily load this extension are looking in the wrong place
 // yuck,
 // so we also put it directly on the window
 // when 1.161.1 is the oldest version seen in production we can remove this
-assignableWindow.postHogTracingHeadersPatchFns = patchFns
+assignableWindow.insightsTracingHeadersPatchFns = patchFns
 
 export default patchFns

@@ -1,4 +1,4 @@
-import { posthog } from './posthog.js'
+import { insights } from './insights.js'
 import { action, mutation } from './_generated/server.js'
 import { v } from 'convex/values'
 
@@ -19,7 +19,7 @@ export const testCapture = mutation({
     disableGeoip: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await posthog.capture(ctx, {
+    await insights.capture(ctx, {
       distinctId: args.distinctId,
       event: args.event,
       properties: args.properties,
@@ -40,7 +40,7 @@ export const testIdentify = mutation({
     disableGeoip: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await posthog.identify(ctx, {
+    await insights.identify(ctx, {
       distinctId: args.distinctId,
       properties: args.properties,
       disableGeoip: args.disableGeoip,
@@ -58,7 +58,7 @@ export const testGroupIdentify = mutation({
     disableGeoip: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await posthog.groupIdentify(ctx, {
+    await insights.groupIdentify(ctx, {
       groupType: args.groupType,
       groupKey: args.groupKey,
       properties: args.properties,
@@ -76,7 +76,7 @@ export const testAlias = mutation({
     disableGeoip: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    await posthog.alias(ctx, {
+    await insights.alias(ctx, {
       distinctId: args.distinctId,
       alias: args.alias,
       disableGeoip: args.disableGeoip,
@@ -106,7 +106,7 @@ export const testCaptureException = mutation({
         break
     }
 
-    await posthog.captureException(ctx, {
+    await insights.captureException(ctx, {
       error,
       distinctId: args.distinctId || undefined,
       additionalProperties: args.additionalProperties,
@@ -146,7 +146,7 @@ function featureFlagOptions(args: {
 export const testGetFeatureFlag = action({
   args: featureFlagArgs,
   handler: async (ctx, args) => {
-    const value = await posthog.getFeatureFlag(ctx, {
+    const value = await insights.getFeatureFlag(ctx, {
       key: args.flagKey,
       distinctId: args.distinctId,
       ...featureFlagOptions(args),
@@ -158,7 +158,7 @@ export const testGetFeatureFlag = action({
 export const testIsFeatureEnabled = action({
   args: featureFlagArgs,
   handler: async (ctx, args) => {
-    const enabled = await posthog.isFeatureEnabled(ctx, {
+    const enabled = await insights.isFeatureEnabled(ctx, {
       key: args.flagKey,
       distinctId: args.distinctId,
       ...featureFlagOptions(args),
@@ -173,7 +173,7 @@ export const testGetFeatureFlagPayload = action({
     matchValue: v.optional(v.union(v.boolean(), v.string())),
   },
   handler: async (ctx, args) => {
-    const payload = await posthog.getFeatureFlagPayload(ctx, {
+    const payload = await insights.getFeatureFlagPayload(ctx, {
       key: args.flagKey,
       distinctId: args.distinctId,
       matchValue: args.matchValue,
@@ -186,7 +186,7 @@ export const testGetFeatureFlagPayload = action({
 export const testGetFeatureFlagResult = action({
   args: featureFlagArgs,
   handler: async (ctx, args) => {
-    const result = await posthog.getFeatureFlagResult(ctx, {
+    const result = await insights.getFeatureFlagResult(ctx, {
       key: args.flagKey,
       distinctId: args.distinctId,
       ...featureFlagOptions(args),
@@ -205,7 +205,7 @@ export const testGetAllFlags = action({
     flagKeys: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const flags = await posthog.getAllFlags(ctx, {
+    const flags = await insights.getAllFlags(ctx, {
       distinctId: args.distinctId,
       groups: args.groups as Record<string, string> | undefined,
       personProperties: args.personProperties as Record<string, string> | undefined,
@@ -227,7 +227,7 @@ export const testGetAllFlagsAndPayloads = action({
     flagKeys: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const result = await posthog.getAllFlagsAndPayloads(ctx, {
+    const result = await insights.getAllFlagsAndPayloads(ctx, {
       distinctId: args.distinctId,
       groups: args.groups as Record<string, string> | undefined,
       personProperties: args.personProperties as Record<string, string> | undefined,

@@ -67,7 +67,7 @@
    *
    *   "bundledPackages": [ "@my-company/*" ],
    */
-  "bundledPackages": ["@posthog/core"],
+  "bundledPackages": ["@hanzo/core"],
 
   /**
    * Specifies what type of newlines API Extractor should use when writing output files.  By default, the output files
@@ -112,7 +112,7 @@
      */
     "tsconfigFilePath": "<projectFolder>/tsconfig.build.json",
     /**
-     * Include DOM lib so bundled @posthog/core types (e.g. ErrorEvent) resolve when inlining.
+     * Include DOM lib so bundled @hanzo/core types (e.g. ErrorEvent) resolve when inlining.
      */
     "overrideTsconfig": {
       "compilerOptions": {

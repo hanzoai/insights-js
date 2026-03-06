@@ -15,7 +15,7 @@ export function Header() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem 1rem' }}>
                 <Link to="/" style={{ textDecoration: 'none' }}>
                     <h1 style={{ margin: 0, fontSize: '1.5rem' }}>
-                        <b>PostHog</b> remix playground
+                        <b>Insights</b> remix playground
                     </h1>
                 </Link>
 

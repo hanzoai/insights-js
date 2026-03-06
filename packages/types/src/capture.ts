@@ -5,9 +5,9 @@
 import type { Properties } from './common'
 
 /**
- * These are known events PostHog events that can be processed by the `beforeCapture` function
- * That means PostHog functionality does not rely on receiving 100% of these for calculations
- * So, it is safe to sample them to reduce the volume of events sent to PostHog
+ * These are known events Insights events that can be processed by the `beforeCapture` function
+ * That means Insights functionality does not rely on receiving 100% of these for calculations
+ * So, it is safe to sample them to reduce the volume of events sent to Insights
  */
 export type KnownEventName =
     | '$heatmaps_data'
@@ -21,7 +21,7 @@ export type KnownEventName =
     | '$rageclick'
 
 /**
- * Known events that can be safely edited in beforeCapture without breaking PostHog functionality
+ * Known events that can be safely edited in beforeCapture without breaking Insights functionality
  */
 export type KnownUnsafeEditableEvent =
     | '$set'

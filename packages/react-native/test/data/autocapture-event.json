@@ -68,7 +68,7 @@
                             "elementType": { "displayName": "ScrollView" },
                             "memoizedProps": { "style": { "flex": 1 } },
                             "return": {
-                              "elementType": { "name": "PostHogDemoScreen" },
+                              "elementType": { "name": "InsightsDemoScreen" },
                               "memoizedProps": {},
                               "return": {
                                 "elementType": { "name": "StaticContainer" },
@@ -607,7 +607,7 @@
                                                                                                                                                                                           "return": {
                                                                                                                                                                                             "elementType": {},
                                                                                                                                                                                             "memoizedProps": {
-                                                                                                                                                                                              "ph-label": "PostHogProvider",
+                                                                                                                                                                                              "ph-label": "InsightsProvider",
                                                                                                                                                                                               "style": {
                                                                                                                                                                                                 "flex": 1
                                                                                                                                                                                               }
@@ -622,14 +622,14 @@
                                                                                                                                                                                                   "displayName": "View"
                                                                                                                                                                                                 },
                                                                                                                                                                                                 "memoizedProps": {
-                                                                                                                                                                                                  "ph-label": "PostHogProvider",
+                                                                                                                                                                                                  "ph-label": "InsightsProvider",
                                                                                                                                                                                                   "style": {
                                                                                                                                                                                                     "flex": 1
                                                                                                                                                                                                   }
                                                                                                                                                                                                 },
                                                                                                                                                                                                 "return": {
                                                                                                                                                                                                   "elementType": {
-                                                                                                                                                                                                    "name": "PostHogProvider"
+                                                                                                                                                                                                    "name": "InsightsProvider"
                                                                                                                                                                                                   },
                                                                                                                                                                                                   "memoizedProps": {
                                                                                                                                                                                                     "apiKey": "phc_FzKQvNvps9ZUTxF5KJR9jIKdGb4bq4HNBa9SRyAHi0C",

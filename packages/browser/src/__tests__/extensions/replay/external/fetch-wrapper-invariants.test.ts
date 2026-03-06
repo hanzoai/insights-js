@@ -217,7 +217,7 @@ describe('fetch wrapper', () => {
         })
     })
 
-    // Regression test for https://github.com/PostHog/posthog-js/issues/2922
+    // Regression test for https://github.com/Insights/@hanzo/insights/issues/2922
     it('preserves FormData boundary when downstream wrapper recreates Request', async () => {
         let capturedRequest: Request | undefined
         const { wrappedFetch, cleanup } = setupWrappedFetch(async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -240,7 +240,7 @@ describe('fetch wrapper', () => {
         expect(headerBoundary).toContain(bodyBoundary)
     })
 
-    // TODO: Fix https://github.com/PostHog/posthog-js/issues/1326
+    // TODO: Fix https://github.com/Insights/@hanzo/insights/issues/1326
     it.skip('passes init to downstream wrappers', async () => {
         let capturedInit: RequestInit | undefined
         const { wrappedFetch, cleanup } = setupWrappedFetch(async (_input: RequestInfo | URL, init?: RequestInit) => {

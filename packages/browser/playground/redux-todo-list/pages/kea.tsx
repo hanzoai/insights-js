@@ -13,7 +13,7 @@ export default function KeaPage() {
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        // Initialize Kea context with PostHog logger on client side
+        // Initialize Kea context with Insights logger on client side
         import('../src/kea-store').then(() => {
             setMounted(true)
         })
@@ -23,7 +23,7 @@ export default function KeaPage() {
         <>
             <Head>
                 <title>Kea Todo List</title>
-                <meta name="description" content="Kea Todo List with PostHog integration" />
+                <meta name="description" content="Kea Todo List with Insights integration" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

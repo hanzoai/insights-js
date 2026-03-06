@@ -1,5 +1,5 @@
 import { CAPTURE_RATE_LIMIT } from './constants'
-import type { PostHog } from './posthog-core'
+import type { Insights } from './insights-core'
 import { RequestResponse } from './types'
 import { createLogger } from './utils/logger'
 
@@ -15,11 +15,11 @@ interface CaptureResponse {
 }
 
 export class RateLimiter {
-    instance: PostHog
+    instance: Insights
     serverLimits: Record<string, number> = {}
     lastEventRateLimited = false
 
-    constructor(instance: PostHog) {
+    constructor(instance: Insights) {
         this.instance = instance
         this.lastEventRateLimited = this.clientRateLimitContext(true).isRateLimited
     }
@@ -66,7 +66,7 @@ export class RateLimiter {
             this.instance.capture(
                 RATE_LIMIT_EVENT,
                 {
-                    $$client_ingestion_warning_message: `posthog-js client rate limited. Config is set to ${captureEventsPerSecond} events per second and ${captureEventsBurstLimit} events burst limit.`,
+                    $$client_ingestion_warning_message: `@hanzo/insights client rate limited. Config is set to ${captureEventsPerSecond} events per second and ${captureEventsBurstLimit} events burst limit.`,
                 },
                 {
                     skip_client_rate_limiting: true,

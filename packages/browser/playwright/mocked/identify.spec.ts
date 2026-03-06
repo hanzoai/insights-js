@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from './utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 
 test.describe('Identify', () => {
@@ -8,7 +8,7 @@ test.describe('Identify', () => {
 
     test('uses the v7 uuid format for device id', async ({ page }) => {
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('an-anonymous-event')
         })
         const capturedEvents = await page.capturedEvents()
@@ -20,15 +20,15 @@ test.describe('Identify', () => {
 
     test('opt out capturing does not fail after identify', async ({ page }) => {
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.identify('some-id')
         })
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.opt_out_capturing()
         })
         const isOptedOut = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.has_opted_out_capturing()
         })
         expect(isOptedOut).toEqual(true)
@@ -36,7 +36,7 @@ test.describe('Identify', () => {
 
     test('merges people as expected when reset is called', async ({ page }) => {
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.capture('an-anonymous-event')
             ph?.identify('first-identify')
             ph?.capture('an-identified-event')

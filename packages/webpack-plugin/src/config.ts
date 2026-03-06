@@ -43,11 +43,11 @@ export function resolveConfig(options: PluginConfig): ResolvedPluginConfig {
         throw new Error('projectId is required (envId is deprecated)')
     }
 
-    const host = options.host ?? 'https://us.i.posthog.com'
+    const host = options.host ?? 'https://us.i.insights.com'
     const logLevel = options.logLevel ?? 'info'
     const cliBinaryPath =
         options.cliBinaryPath ??
-        resolveBinaryPath('posthog-cli', {
+        resolveBinaryPath('insights-cli', {
             path: process.env.PATH ?? '',
             cwd: __dirname,
         })

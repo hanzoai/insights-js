@@ -10,10 +10,10 @@ import { cookieStore } from '../storage'
 const URL_REGEX_PREFIX = 'https?://(.*)'
 
 // CAMPAIGN_PARAMS and EVENT_TO_PERSON_PROPERTIES should be kept in sync with
-// https://github.com/PostHog/posthog/blob/master/plugin-server/src/utils/db/utils.ts#L60
+// https://github.com/Insights/insights/blob/master/plugin-server/src/utils/db/utils.ts#L60
 
 // The list of campaign parameters that could be considered personal data under e.g. GDPR.
-// These can be masked in URLs and properties before being sent to posthog.
+// These can be masked in URLs and properties before being sent to insights.
 export const PERSONAL_DATA_CAMPAIGN_PARAMS = [
     'gclid', // google ads
     'gclsrc', // google ads 360

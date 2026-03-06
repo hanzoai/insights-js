@@ -1,6 +1,6 @@
 <html>
     <head>
-        <title>PostHog JS Snippet test</title>
+        <title>Insights JS Snippet test</title>
         <!-- Below can be enabled to test with a Consent Management Platform (CMP) like Osano that often causes infinite loop errors -->
         <!-- <script src="https://cmp.osano.com/16CPMUTPznTQbEG/88c966c1-72a5-40ca-90b3-274dd5cbff70/osano.js"></script> -->
     </head>
@@ -13,13 +13,13 @@
 
         <br />
 
-        <button data-cy-custom-event-button onclick="posthog.capture('custom-event', { foo: 2 })">
+        <button data-cy-custom-event-button onclick="insights.capture('custom-event', { foo: 2 })">
             Send custom event
         </button>
 
         <br />
 
-        <button data-cy-feature-flag-button onclick="console.log(posthog.isFeatureEnabled('some-feature'))">
+        <button data-cy-feature-flag-button onclick="console.log(insights.isFeatureEnabled('some-feature'))">
             Test a feature flag
         </button>
 
@@ -47,13 +47,13 @@
             <button data-cy-open-new-window onclick="window.open(window.location)">Open new window</button>
         </div>
 
-        <button onclick="posthog.startSessionRecording();">Start recording</button>
+        <button onclick="insights.startSessionRecording();">Start recording</button>
 
         <script>
             !(function (t, e) {
                 var o, n, p, r
                 e.__SV ||
-                    ((window.posthog = e),
+                    ((window.insights = e),
                     (e._i = []),
                     (e.init = function (i, s, a) {
                         function g(t, e) {
@@ -70,11 +70,11 @@
                             (r = t.getElementsByTagName('script')[0]).parentNode.insertBefore(p, r)
                         var u = e
                         for (
-                            void 0 !== a ? (u = e[a] = []) : (a = 'posthog'),
+                            void 0 !== a ? (u = e[a] = []) : (a = 'insights'),
                                 u.people = u.people || [],
                                 u.toString = function (t) {
-                                    var e = 'posthog'
-                                    return 'posthog' !== a && (e += '.' + a), t || (e += ' (stub)'), e
+                                    var e = 'insights'
+                                    return 'insights' !== a && (e += '.' + a), t || (e += ' (stub)'), e
                                 },
                                 u.people.toString = function () {
                                     return u.toString(1) + '.people (stub)'
@@ -91,18 +91,18 @@
                         e._i.push([i, s, a])
                     }),
                     (e.__SV = 1))
-            })(document, window.posthog || [])
+            })(document, window.insights || [])
         </script>
 
         <script>
-            posthog.init('phc_gV2VtAdq8G5nA3bAJSPZDYafV5FxvPxw8DcXMHgotmT', {
+            insights.init('phc_gV2VtAdq8G5nA3bAJSPZDYafV5FxvPxw8DcXMHgotmT', {
                 api_host: 'http://localhost:8000',
                 disable_session_recording: true,
                 capture_performance: true,
                 capture_pageview: 'history_change',
             })
 
-            posthog.init(
+            insights.init(
                 'phc_other',
                 {
                     api_host: 'http://localhost:8000',
@@ -113,17 +113,17 @@
                 'other'
             )
 
-            posthog.capture('event')
-            posthog.capture('event2')
-            posthog.people.set({ test: true })
-            posthog.other.capture('other_event')
-            posthog.other.people.set({ test: true })
-            console.log(posthog)
+            insights.capture('event')
+            insights.capture('event2')
+            insights.people.set({ test: true })
+            insights.other.capture('other_event')
+            insights.other.people.set({ test: true })
+            console.log(insights)
 
             setTimeout(() => {
-                posthog.debug()
-                document.getElementById('current-session-id').innerHTML = posthog.sessionRecording.sessionId
-                document.getElementById('current-window-id').innerHTML = posthog.sessionRecording.windowId
+                insights.debug()
+                document.getElementById('current-session-id').innerHTML = insights.sessionRecording.sessionId
+                document.getElementById('current-window-id').innerHTML = insights.sessionRecording.windowId
             }, 100)
         </script>
     </body>

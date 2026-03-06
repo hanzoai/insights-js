@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 20px; font-family: sans-serif">
     <h1>Feature Flags Testing Page</h1>
-    <p>Test the PostHog feature flag composables:</p>
+    <p>Test the Insights feature flag composables:</p>
 
     <div style="margin-top: 20px">
       <h2>Feature Flag Examples</h2>
@@ -25,7 +25,7 @@
       </div>
 
       <div style="margin-top: 15px; padding: 15px; background-color: #f5f5f5; border-radius: 8px">
-        <h3>4. Use PostHog directly</h3>
+        <h3>4. Use Insights directly</h3>
         <button @click="captureEvent" style="padding: 10px; cursor: pointer; margin-right: 10px">
           Capture Event
         </button>
@@ -50,7 +50,7 @@ import { computed, ref } from 'vue'
 const featureFlagEnabled = useFeatureFlagEnabled('beta-feature')
 const featureFlagVariant = useFeatureFlagVariantKey('test-variant')
 const featureFlagPayload = useFeatureFlagPayload('config-flag')
-const posthog = usePostHog()
+const insights = useInsights()
 
 const allFlags = ref<Record<string, boolean | string> | undefined>()
 
@@ -65,13 +65,13 @@ const payloadDisplay = computed(() => {
 })
 
 const captureEvent = () => {
-  posthog?.capture('feature_flags_test_event', {
+  insights?.capture('feature_flags_test_event', {
     page: 'feature-flags',
   })
   alert('Event captured!')
 }
 
 const getAllFlags = () => {
-  allFlags.value = posthog?.featureFlags.getFlagVariants()
+  allFlags.value = insights?.featureFlags.getFlagVariants()
 }
 </script>

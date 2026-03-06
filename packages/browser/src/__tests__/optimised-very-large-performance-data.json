@@ -142,7 +142,7 @@
                 731.8
             ],
             ["http://127.0.0.1:8000/api/instance_status/", 577, 329.1, "fetch", 577, 906.1],
-            ["https://update.posthog.com/", 577.9, 63.5, "fetch", 577.9, 641.4],
+            ["https://update.insights.hanzo.ai/", 577.9, 63.5, "fetch", 577.9, 641.4],
             ["http://127.0.0.1:8000/api/personal_api_keys/", 590.1, 93.2, "fetch", 590.1, 683.3],
             ["http://127.0.0.1:8000/api/license/", 595.1, 99.8, "fetch", 595.1, 694.9],
             [
@@ -162,8 +162,8 @@
                 712,
                 1195.1
             ],
-            ["https://app.posthog.com/e/?ip=0&_=1641815977640&v=0.0.3", 813.7, 180.7, "fetch", 813.7, 994.4],
-            ["https://app.posthog.com/e/?ip=0&_=1641815977642&v=0.0.3", 814.8, 179.8, "fetch", 814.8, 994.6],
+            ["https://app.insights.hanzo.ai/e/?ip=0&_=1641815977640&v=0.0.3", 813.7, 180.7, "fetch", 813.7, 994.4],
+            ["https://app.insights.hanzo.ai/e/?ip=0&_=1641815977642&v=0.0.3", 814.8, 179.8, "fetch", 814.8, 994.6],
             [
                 "http://127.0.0.1:8000/api/projects/@current/feature_flags/my_flags?groups=%7B%22project%22%3A%22017dde0e-17bf-0000-b67f-e0a7b99463b2%22%2C%22organization%22%3A%22017dde0e-1268-0000-c020-25c8dbb92363%22%2C%22instance%22%3A%22http%3A%2F%2Flocalhost%3A8000%22%7D&temporary_token=udvetBiDQnR0nIdLfoKKLrmI7gmp8JE9hbox_GmMR_E",
                 815.5,
@@ -316,7 +316,7 @@
                 49032.1,
                 50183.5
             ],
-            ["http://localhost:8234/static/assets/posthog-icon-FDVNZJ5Z.svg", 50352.2, 5.2, "css", 50352.2, 50357.4],
+            ["http://localhost:8234/static/assets/insights-icon-FDVNZJ5Z.svg", 50352.2, 5.2, "css", 50352.2, 50357.4],
             [
                 "http://127.0.0.1:8000/s/?compression=gzip-js&ip=0&_=1641816027596",
                 50770.1,

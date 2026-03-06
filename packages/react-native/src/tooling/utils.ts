@@ -38,7 +38,7 @@ export type MetroSerializer = (
  * Returns minified Chunk ID code snippet.
  */
 export function createDebugIdSnippet(debugId: string): string {
-  return `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._posthogChunkIds=e._posthogChunkIds||{},e._posthogChunkIds[n]="${debugId}")}catch(e){}}();`
+  return `!function(){try{var e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof globalThis?globalThis:"undefined"!=typeof self?self:{},n=(new e.Error).stack;n&&(e._insightsChunkIds=e._insightsChunkIds||{},e._insightsChunkIds[n]="${debugId}")}catch(e){}}();`
 }
 
 /**
@@ -62,15 +62,15 @@ export function stringToUUID(str: string): string {
 }
 
 /**
- * Looks for an injected `_posthogChunkIds[n] = "debugId"` pattern
+ * Looks for an injected `_insightsChunkIds[n] = "debugId"` pattern
  * in the bundle source and extracts the `debugId` value from it.
  *
  * Matches both string and numeric keys for `n`, e.g.:
- *   _posthogChunkIds["abc"] = "1234"
- *   _posthogChunkIds[42] = "1234"
+ *   _insightsChunkIds["abc"] = "1234"
+ *   _insightsChunkIds[42] = "1234"
  */
 export function determineDebugIdFromBundleSource(code: string): string | undefined {
-  const match = code.match(/_posthogChunkIds\[\s*(?:(?:"[^"]*")|(?:'[^']*')|\d+)\s*\]\s*=\s*"([^"]+)"/)
+  const match = code.match(/_insightsChunkIds\[\s*(?:(?:"[^"]*")|(?:'[^']*')|\d+)\s*\]\s*=\s*"([^"]+)"/)
   return match ? match[1] : undefined
 }
 
