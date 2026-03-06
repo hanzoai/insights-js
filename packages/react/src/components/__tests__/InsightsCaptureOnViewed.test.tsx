@@ -1,18 +1,18 @@
 import * as React from 'react'
 import { render, screen } from '@testing-library/react'
-import { PostHog, PostHogProvider } from '../../context'
-import { PostHogCaptureOnViewed } from '../'
+import { Insights, InsightsProvider } from '../../context'
+import { InsightsCaptureOnViewed } from '../'
 import '@testing-library/jest-dom'
 
-describe('PostHogCaptureOnViewed component', () => {
+describe('InsightsCaptureOnViewed component', () => {
     let mockObserverCallback: any = null
 
-    let fakePosthog: PostHog
+    let fakeInsights: Insights
 
     beforeEach(() => {
-        fakePosthog = {
+        fakeInsights = {
             capture: jest.fn(),
-        } as unknown as PostHog
+        } as unknown as Insights
 
         const mockIntersectionObserver = jest.fn((callback) => {
             mockObserverCallback = callback
@@ -30,11 +30,11 @@ describe('PostHogCaptureOnViewed component', () => {
 
     it('should render children', () => {
         render(
-            <PostHogProvider client={fakePosthog}>
-                <PostHogCaptureOnViewed name="test-element">
+            <InsightsProvider client={fakeInsights}>
+                <InsightsCaptureOnViewed name="test-element">
                     <div data-testid="child">Hello</div>
-                </PostHogCaptureOnViewed>
-            </PostHogProvider>
+                </InsightsCaptureOnViewed>
+            </InsightsProvider>
         )
 
         expect(screen.getByTestId('child')).toBeInTheDocument()
@@ -42,52 +42,52 @@ describe('PostHogCaptureOnViewed component', () => {
 
     it('should track when element comes into view', () => {
         render(
-            <PostHogProvider client={fakePosthog}>
-                <PostHogCaptureOnViewed name="test-element">
+            <InsightsProvider client={fakeInsights}>
+                <InsightsCaptureOnViewed name="test-element">
                     <div data-testid="child">Hello</div>
-                </PostHogCaptureOnViewed>
-            </PostHogProvider>
+                </InsightsCaptureOnViewed>
+            </InsightsProvider>
         )
 
-        expect(fakePosthog.capture).not.toHaveBeenCalled()
+        expect(fakeInsights.capture).not.toHaveBeenCalled()
 
         mockObserverCallback([{ isIntersecting: true }])
 
-        expect(fakePosthog.capture).toHaveBeenCalledWith('$element_viewed', {
+        expect(fakeInsights.capture).toHaveBeenCalledWith('$element_viewed', {
             element_name: 'test-element',
         })
-        expect(fakePosthog.capture).toHaveBeenCalledTimes(1)
+        expect(fakeInsights.capture).toHaveBeenCalledTimes(1)
     })
 
     it('should only track visibility once', () => {
         render(
-            <PostHogProvider client={fakePosthog}>
-                <PostHogCaptureOnViewed name="test-element">
+            <InsightsProvider client={fakeInsights}>
+                <InsightsCaptureOnViewed name="test-element">
                     <div data-testid="child">Hello</div>
-                </PostHogCaptureOnViewed>
-            </PostHogProvider>
+                </InsightsCaptureOnViewed>
+            </InsightsProvider>
         )
 
         mockObserverCallback([{ isIntersecting: true }])
-        expect(fakePosthog.capture).toHaveBeenCalledTimes(1)
+        expect(fakeInsights.capture).toHaveBeenCalledTimes(1)
 
         mockObserverCallback([{ isIntersecting: true }])
         mockObserverCallback([{ isIntersecting: true }])
-        expect(fakePosthog.capture).toHaveBeenCalledTimes(1)
+        expect(fakeInsights.capture).toHaveBeenCalledTimes(1)
     })
 
     it('should include custom properties', () => {
         render(
-            <PostHogProvider client={fakePosthog}>
-                <PostHogCaptureOnViewed name="test-element" properties={{ category: 'hero', priority: 'high' }}>
+            <InsightsProvider client={fakeInsights}>
+                <InsightsCaptureOnViewed name="test-element" properties={{ category: 'hero', priority: 'high' }}>
                     <div data-testid="child">Hello</div>
-                </PostHogCaptureOnViewed>
-            </PostHogProvider>
+                </InsightsCaptureOnViewed>
+            </InsightsProvider>
         )
 
         mockObserverCallback([{ isIntersecting: true }])
 
-        expect(fakePosthog.capture).toHaveBeenCalledWith('$element_viewed', {
+        expect(fakeInsights.capture).toHaveBeenCalledWith('$element_viewed', {
             element_name: 'test-element',
             category: 'hero',
             priority: 'high',
@@ -96,15 +96,15 @@ describe('PostHogCaptureOnViewed component', () => {
 
     it('should not track when element is not intersecting', () => {
         render(
-            <PostHogProvider client={fakePosthog}>
-                <PostHogCaptureOnViewed name="test-element">
+            <InsightsProvider client={fakeInsights}>
+                <InsightsCaptureOnViewed name="test-element">
                     <div data-testid="child">Hello</div>
-                </PostHogCaptureOnViewed>
-            </PostHogProvider>
+                </InsightsCaptureOnViewed>
+            </InsightsProvider>
         )
 
         mockObserverCallback([{ isIntersecting: false }])
 
-        expect(fakePosthog.capture).not.toHaveBeenCalled()
+        expect(fakeInsights.capture).not.toHaveBeenCalled()
     })
 })

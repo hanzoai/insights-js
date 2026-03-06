@@ -1,15 +1,15 @@
 import * as React from 'react'
 import { render } from '@testing-library/react'
-import { PostHogProvider, PostHog } from '..'
+import { InsightsProvider, Insights } from '..'
 
-describe('PostHogContext component', () => {
-    const posthog = {} as unknown as PostHog
+describe('InsightsContext component', () => {
+    const insights = {} as unknown as Insights
 
     it('should return a client instance from the context if available', () => {
         render(
-            <PostHogProvider client={posthog}>
+            <InsightsProvider client={insights}>
                 <div>Hello</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
     })
 
@@ -20,16 +20,16 @@ describe('PostHogContext component', () => {
         expect(() => {
             render(
                 // we have to cast `as any` so that we can test for when
-                // posthog might not exist - in SSR for example
-                <PostHogProvider client={undefined as any}>
+                // insights might not exist - in SSR for example
+                <InsightsProvider client={undefined as any}>
                     <div>Hello</div>
-                </PostHogProvider>
+                </InsightsProvider>
             )
         }).not.toThrow()
 
         // eslint-disable-next-line no-console
         expect(console.warn).toHaveBeenCalledWith(
-            '[PostHog.js] No `apiKey` or `client` were provided to `PostHogProvider`. Using default global `window.posthog` instance. You must initialize it manually. This is not recommended behavior.'
+            '[Insights] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global instance. You must initialize it manually. This is not recommended behavior.'
         )
     })
 })

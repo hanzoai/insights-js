@@ -1,43 +1,43 @@
 import React, { FunctionComponent } from 'react'
-import { PostHogContext } from '../context'
+import { InsightsContext } from '../context'
 import { isFunction } from '../utils/type-utils'
 
 export type Properties = Record<string, any>
 
-export type PostHogErrorBoundaryFallbackProps = {
+export type InsightsErrorBoundaryFallbackProps = {
     error: unknown
     exceptionEvent: unknown
     componentStack: string
 }
 
-export type PostHogErrorBoundaryProps = {
+export type InsightsErrorBoundaryProps = {
     children?: React.ReactNode | (() => React.ReactNode)
-    fallback?: React.ReactNode | FunctionComponent<PostHogErrorBoundaryFallbackProps>
+    fallback?: React.ReactNode | FunctionComponent<InsightsErrorBoundaryFallbackProps>
     additionalProperties?: Properties | ((error: unknown) => Properties)
 }
 
-type PostHogErrorBoundaryState = {
+type InsightsErrorBoundaryState = {
     componentStack: string | null
     exceptionEvent: unknown
     error: unknown
 }
 
-const INITIAL_STATE: PostHogErrorBoundaryState = {
+const INITIAL_STATE: InsightsErrorBoundaryState = {
     componentStack: null,
     exceptionEvent: null,
     error: null,
 }
 
-export const __POSTHOG_ERROR_MESSAGES = {
+export const __INSIGHTS_ERROR_MESSAGES = {
     INVALID_FALLBACK:
-        '[PostHog.js][PostHogErrorBoundary] Invalid fallback prop, provide a valid React element or a function that returns a valid React element.',
+        '[Insights][InsightsErrorBoundary] Invalid fallback prop, provide a valid React element or a function that returns a valid React element.',
 }
 
-export class PostHogErrorBoundary extends React.Component<PostHogErrorBoundaryProps, PostHogErrorBoundaryState> {
-    static contextType = PostHogContext
-    declare context: React.ContextType<typeof PostHogContext>
+export class InsightsErrorBoundary extends React.Component<InsightsErrorBoundaryProps, InsightsErrorBoundaryState> {
+    static contextType = InsightsContext
+    declare context: React.ContextType<typeof InsightsContext>
 
-    constructor(props: PostHogErrorBoundaryProps) {
+    constructor(props: InsightsErrorBoundaryProps) {
         super(props)
         this.state = INITIAL_STATE
     }
@@ -83,7 +83,7 @@ export class PostHogErrorBoundary extends React.Component<PostHogErrorBoundaryPr
             return element as React.ReactElement
         }
         //eslint-disable-next-line no-console
-        console.warn(__POSTHOG_ERROR_MESSAGES.INVALID_FALLBACK)
+        console.warn(__INSIGHTS_ERROR_MESSAGES.INVALID_FALLBACK)
         return <></>
     }
 }

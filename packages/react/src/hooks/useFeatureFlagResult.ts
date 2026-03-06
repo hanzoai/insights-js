@@ -1,10 +1,10 @@
 import { FeatureFlagResult } from '@hanzo/insights'
 import { useContext, useEffect, useState } from 'react'
-import { PostHogContext } from '../context'
+import { InsightsContext } from '../context'
 import { isUndefined } from '../utils/type-utils'
 
 export function useFeatureFlagResult(flag: string): FeatureFlagResult | undefined {
-    const { client, bootstrap } = useContext(PostHogContext)
+    const { client, bootstrap } = useContext(InsightsContext)
 
     const [result, setResult] = useState<FeatureFlagResult | undefined>(() => client.getFeatureFlagResult(flag))
 

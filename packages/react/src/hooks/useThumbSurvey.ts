@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useMemo, type RefCallback, useEffect } from 'react'
-import { usePostHog } from './usePostHog'
+import { useInsights } from './useInsights'
 import { DisplaySurveyType, SurveyEventName, SurveyEventProperties, SurveyPosition } from '@hanzo/insights'
 
 export interface UseThumbSurveyOptions {
-    /** ID of the target PostHog survey */
+    /** ID of the target Insights survey */
     surveyId: string
     /** Configure the position of the pop-up for followup questions, if applicable. Defaults to SurveyPosition.NextToTrigger */
     displayPosition?: SurveyPosition
@@ -32,11 +32,11 @@ const TRIGGER_ATTR = 'data-ph-thumb-survey-trigger'
  * Convenience hook for managing a "thumb" (1-2 rating scale) survey.
  *
  * Pre-requisites:
- * 1) Ensure surveys are not disabled in your PostHog config (`disable_surveys: false`)
- * 2) Ensure surveys are enabled in your PostHog project (Settings > Surveys > Enable surveys)
+ * 1) Ensure surveys are not disabled in your Insights config (`disable_surveys: false`)
+ * 2) Ensure surveys are enabled in your Insights project (Settings > Surveys > Enable surveys)
  *
  * How-to:
- * 1) Create an API survey in PostHog (New survey > Presentation > API)
+ * 1) Create an API survey in Insights (New survey > Presentation > API)
  * 2) Set the first question to a thumb rating scale (Question type: Rating -> Display type: Emoji -> Scale: 1-2 (thumbs up/down))
  * 3) Set the thumb question to "Automatically submit on selection"
  * 4) Optionally add follow-up questions
@@ -77,7 +77,7 @@ export function useThumbSurvey({
     onResponse,
     disableAutoShownTracking,
 }: UseThumbSurveyOptions): UseThumbSurveyResult {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [responded, setResponded] = useState<'up' | 'down' | null>(null)
     const [instanceId] = useState(() => Math.random().toString(36).slice(2, 9))
     const triggerValue = useMemo(() => `${surveyId}-${instanceId}`, [surveyId, instanceId])
@@ -100,14 +100,14 @@ export function useThumbSurvey({
     const respondedRef = useRef(false)
 
     const trackShown = useCallback(() => {
-        if (shownRef.current || !posthog) return
+        if (shownRef.current || !insights) return
         shownRef.current = true
-        posthog.capture(SurveyEventName.SHOWN, {
+        insights.capture(SurveyEventName.SHOWN, {
             [SurveyEventProperties.SURVEY_ID]: surveyId,
-            sessionRecordingUrl: posthog.get_session_replay_url?.(),
+            sessionRecordingUrl: insights.get_session_replay_url?.(),
             ...properties,
         })
-    }, [posthog, surveyId, properties])
+    }, [insights, surveyId, properties])
 
     useEffect(() => {
         if (!disableAutoShownTracking) {
@@ -117,13 +117,13 @@ export function useThumbSurvey({
 
     const respond = useCallback(
         (value: 'up' | 'down') => {
-            if (!posthog?.surveys || respondedRef.current) return
+            if (!insights?.surveys || respondedRef.current) return
             respondedRef.current = true
 
             setResponded(value)
             onResponse?.(value)
 
-            posthog.surveys.displaySurvey(surveyId, {
+            insights.surveys.displaySurvey(surveyId, {
                 displayType: DisplaySurveyType.Popover,
                 ignoreConditions: true,
                 ignoreDelay: true,
@@ -134,7 +134,7 @@ export function useThumbSurvey({
                 skipShownEvent: true,
             })
         },
-        [posthog, surveyId, displayPosition, properties, onResponse, triggerValue]
+        [insights, surveyId, displayPosition, properties, onResponse, triggerValue]
     )
 
     return {

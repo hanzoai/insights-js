@@ -1,2 +1,2 @@
-export * from './PostHogContext'
-export * from './PostHogProvider'
+export * from './InsightsContext'
+export * from './InsightsProvider'
