@@ -13,7 +13,6 @@ catalog:
   "@babel/preset-env": ^7.27.1
   "@babel/preset-react": ^7.27.1
   "@babel/preset-typescript": ^7.27.1
-  "@hanzo/cli": ~0.5.29
   "@rslib/core": 0.10.6
   "@testing-library/dom": ^10.4.1
   "@testing-library/jest-dom": ^6.9.1
@@ -39,15 +38,13 @@ minimumReleaseAgeExclude:
   - node-forge@1.3.2
   - next@15.5.7
   - "@next/env@15.5.7"
-  - "@hanzo/rrweb-plugin-console-record@0.0.45"
-  - "@hanzo/rrweb-record@0.0.45"
-  - "@hanzo/rrweb-types@0.0.45"
-  - "@hanzo/rrweb-utils@0.0.45"
-  - "@hanzo/rrweb@0.0.45"
-  - "@hanzo/rrweb-snapshot@0.0.45"
-  - "@hanzo/rrdom@0.0.45"
-  - "@hanzo/cli"
-  - "@hanzo/insights-react-native-session-replay"
+  - "@hanzo/rrweb-plugin-console-record@0.0.47"
+  - "@hanzo/rrweb-record@0.0.47"
+  - "@hanzo/rrweb-types@0.0.47"
+  - "@hanzo/rrweb-utils@0.0.47"
+  - "@hanzo/rrweb@0.0.47"
+  - "@hanzo/rrweb-snapshot@0.0.47"
+  - "@hanzo/rrdom@0.0.47"
 
 supportedArchitectures:
   cpu: [x64, arm64v8, arm64]
