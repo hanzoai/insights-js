@@ -1,6 +1,6 @@
 {
   "name": "@hanzo/insights",
-  "version": "1.357.1",
+  "version": "1.358.1",
   "description": "Hanzo Insights browser SDK for automatic event capture and behavioral analytics.",
   "repository": {
     "type": "git",
