@@ -1,5 +1,12 @@
 # @posthog/core
 
+## 1.27.6
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @posthog/types@1.372.2
+
 ## 1.27.5
 
 ### Patch Changes
