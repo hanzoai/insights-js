@@ -1,5 +1,12 @@
 # posthog-ai
 
+## 7.16.12
+
+### Patch Changes
+
+- [#3487](https://github.com/PostHog/posthog-js/pull/3487) [`09b4b3d`](https://github.com/PostHog/posthog-js/commit/09b4b3d7eced37b3297e21f6d5d145cdf121fa2d) Thanks [@richardsolomou](https://github.com/richardsolomou)! - Widen the `@opentelemetry/exporter-trace-otlp-http` peer dependency range from `^0.200.0` (which only matched `0.200.x`) to `>=0.200.0 <1.0.0`, so newer 0.x releases brought in by other OpenTelemetry-aware packages no longer trigger ERESOLVE failures or require `--legacy-peer-deps`.
+  (2026-04-27)
+
 ## 7.16.11
 
 ### Patch Changes
