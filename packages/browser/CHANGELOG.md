@@ -1,5 +1,15 @@
 # posthog-js
 
+## 1.372.2
+
+### Patch Changes
+
+- [#3484](https://github.com/PostHog/posthog-js/pull/3484) [`cba2570`](https://github.com/PostHog/posthog-js/commit/cba25700dca2e8d8e138ea6034bd42dc9d002596) Thanks [@veryayskiy](https://github.com/veryayskiy)! - Fix autofocus
+  (2026-04-27)
+- Updated dependencies []:
+    - @posthog/types@1.372.2
+    - @posthog/core@1.27.6
+
 ## 1.372.1
 
 ### Patch Changes

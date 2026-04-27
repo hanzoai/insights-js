@@ -1,5 +1,15 @@
 # posthog-react-native
 
+## 4.43.7
+
+### Patch Changes
+
+- [#3485](https://github.com/PostHog/posthog-js/pull/3485) [`e65331c`](https://github.com/PostHog/posthog-js/commit/e65331cf6eb0843d7e6edc980d1ee44a29d6adc3) Thanks [@marandaneto](https://github.com/marandaneto)! - Fix Metro resolution for optional react-native-svg survey icons.
+  (2026-04-27)
+- Updated dependencies []:
+  - @posthog/types@1.372.2
+  - @posthog/core@1.27.6
+
 ## 4.43.6
 
 ### Patch Changes
