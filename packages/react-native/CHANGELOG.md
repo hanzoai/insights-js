@@ -1,5 +1,12 @@
 # posthog-react-native
 
+## 4.43.6
+
+### Patch Changes
+
+- [#3482](https://github.com/PostHog/posthog-js/pull/3482) [`da1acaf`](https://github.com/PostHog/posthog-js/commit/da1acaf8af62ecdf19836347bd0029e9ca8af318) Thanks [@marandaneto](https://github.com/marandaneto)! - Fall back to text survey icons when react-native-svg is unavailable.
+  (2026-04-27)
+
 ## 4.43.5
 
 ### Patch Changes
