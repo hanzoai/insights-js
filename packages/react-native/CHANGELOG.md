@@ -1,5 +1,12 @@
 # posthog-react-native
 
+## 4.43.13
+
+### Patch Changes
+
+- [#3498](https://github.com/PostHog/posthog-js/pull/3498) [`135d0ef`](https://github.com/PostHog/posthog-js/commit/135d0ef8264cd421ec7cc627c9d080d7e5a4c20b) Thanks [@turnipdabeets](https://github.com/turnipdabeets)! - Fix `SurveyModal` ignoring `appearance.position`. The modal previously hard-coded a bottom-center layout regardless of the configured position. It now honors all 9 `SurveyPosition` values, mirroring the web SDK semantics: `top_*` anchors to the top edge, `middle_*` to the vertical middle, and `left` / `center` / `right` (no prefix) to the bottom edge. The default remains bottom `center`.
+  (2026-04-29)
+
 ## 4.43.12
 
 ### Patch Changes
