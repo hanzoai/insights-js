@@ -1,5 +1,15 @@
 # posthog-js
 
+## 1.372.4
+
+### Patch Changes
+
+- [#3495](https://github.com/PostHog/posthog-js/pull/3495) [`5a6b2a5`](https://github.com/PostHog/posthog-js/commit/5a6b2a55c015345909f93f744ebddd618e1fc85d) Thanks [@posthog](https://github.com/apps/posthog)! - Fix copy autocapture when copying or cutting text from Shadow DOM or document fragment contexts.
+  (2026-04-29)
+- Updated dependencies []:
+    - @posthog/types@1.372.4
+    - @posthog/core@1.27.8
+
 ## 1.372.3
 
 ### Patch Changes
