@@ -1,5 +1,12 @@
 # posthog-node
 
+## 5.31.0
+
+### Minor Changes
+
+- [#3491](https://github.com/PostHog/posthog-js/pull/3491) [`974e4b2`](https://github.com/PostHog/posthog-js/commit/974e4b273d36399e9491c88eb0a95aa23bca69b3) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - Add Express and NestJS request context support for PostHog tracing headers.
+  (2026-04-29)
+
 ## 5.30.8
 
 ### Patch Changes
