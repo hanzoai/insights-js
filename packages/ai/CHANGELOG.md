@@ -1,5 +1,12 @@
 # posthog-ai
 
+## 7.17.0
+
+### Minor Changes
+
+- [#3499](https://github.com/PostHog/posthog-js/pull/3499) [`0601162`](https://github.com/PostHog/posthog-js/commit/06011623a5d0c98d23c80a5cc2b15e0968769128) Thanks [@richardsolomou](https://github.com/richardsolomou)! - Add `captureAiGeneration`, a generic primitive for emitting `$ai_generation` events from LLM calls that don't go through one of the wrapped clients (Cloudflare Workers AI, TanStack AI, custom HTTP, etc.). All built-in wrappers (`withTracing`, `OpenAI`, `Anthropic`, `GoogleGenAI`) now funnel through the same primitive, so external events are indistinguishable from SDK-wrapped ones.
+  (2026-04-30)
+
 ## 7.16.15
 
 ### Patch Changes
