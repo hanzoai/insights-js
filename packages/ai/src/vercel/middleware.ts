@@ -14,14 +14,14 @@ import { v4 as uuidv4 } from 'uuid'
 import { PostHog } from 'posthog-node'
 import {
   CostOverride,
-  sendEventToPosthog,
   truncate,
   MAX_OUTPUT_SIZE,
   extractAvailableToolCalls,
   toContentString,
   calculateWebSearchCount,
-  sendEventWithErrorToPosthog,
+  getModelParams,
 } from '../utils'
+import { captureAiGeneration } from '../captureAiGeneration'
 import { redactBase64DataUrl } from '../sanitization'
 import { isString } from '../typeGuards'
 
@@ -448,6 +448,19 @@ export const wrapVercelLanguageModel = <T extends LanguageModel>(
     },
   }
 
+  // Shared `captureAiGeneration` options for every call site in this wrapper.
+  const baseOptions = {
+    distinctId: mergedOptions.posthogDistinctId,
+    traceId,
+    properties: mergedOptions.posthogProperties,
+    groups: mergedOptions.posthogGroups,
+    privacyMode: mergedOptions.posthogPrivacyMode,
+    modelOverride: mergedOptions.posthogModelOverride,
+    providerOverride: mergedOptions.posthogProviderOverride,
+    costOverride: mergedOptions.posthogCostOverride,
+    captureImmediate: mergedOptions.posthogCaptureImmediate,
+  }
+
   // Create wrapped model using Object.create to preserve the prototype chain
   // This automatically inherits all properties (including getters) from the model
   const wrappedModel = Object.create(model, {
@@ -515,47 +528,41 @@ export const wrapVercelLanguageModel = <T extends LanguageModel>(
                 ? String(rawFinishReason.unified)
                 : undefined
 
-          await sendEventToPosthog({
-            client: phClient,
-            distinctId: mergedOptions.posthogDistinctId,
-            traceId: mergedOptions.posthogTraceId ?? uuidv4(),
+          await captureAiGeneration(phClient, {
+            ...baseOptions,
             model: modelId,
             provider: provider,
             input: mergedOptions.posthogPrivacyMode ? '' : mapVercelPrompt(params.prompt as LanguageModelPrompt),
             output: content,
             latency,
             baseURL,
-            params: mergedParams as any,
+            modelParameters: getModelParams(mergedParams as any),
             httpStatus: 200,
             usage,
             stopReason: finishReasonStr,
             tools: availableTools,
-            captureImmediate: mergedOptions.posthogCaptureImmediate,
           })
 
           return result
         } catch (error: unknown) {
           const modelId = model.modelId
-          const enrichedError = await sendEventWithErrorToPosthog({
-            client: phClient,
-            distinctId: mergedOptions.posthogDistinctId,
-            traceId: mergedOptions.posthogTraceId ?? uuidv4(),
+          await captureAiGeneration(phClient, {
+            ...baseOptions,
             model: modelId,
             provider: model.provider,
             input: mergedOptions.posthogPrivacyMode ? '' : mapVercelPrompt(params.prompt as LanguageModelPrompt),
             output: [],
             latency: 0,
             baseURL: '',
-            params: mergedParams as any,
+            modelParameters: getModelParams(mergedParams as any),
             usage: {
               inputTokens: 0,
               outputTokens: 0,
             },
             error: error,
             tools: availableTools,
-            captureImmediate: mergedOptions.posthogCaptureImmediate,
           })
-          throw enrichedError
+          throw error
         }
       },
       writable: true,
@@ -720,10 +727,8 @@ export const wrapVercelLanguageModel = <T extends LanguageModel>(
 
               adjustAnthropicV3CacheTokens(model, modelId, provider, finalUsage)
 
-              await sendEventToPosthog({
-                client: phClient,
-                distinctId: mergedOptions.posthogDistinctId,
-                traceId: mergedOptions.posthogTraceId ?? uuidv4(),
+              await captureAiGeneration(phClient, {
+                ...baseOptions,
                 model: modelId,
                 provider: provider,
                 input: mergedOptions.posthogPrivacyMode ? '' : mapVercelPrompt(params.prompt as LanguageModelPrompt),
@@ -731,12 +736,11 @@ export const wrapVercelLanguageModel = <T extends LanguageModel>(
                 latency,
                 timeToFirstToken,
                 baseURL,
-                params: mergedParams as any,
+                modelParameters: getModelParams(mergedParams as any),
                 httpStatus: 200,
                 usage: finalUsage,
                 stopReason,
                 tools: availableTools,
-                captureImmediate: mergedOptions.posthogCaptureImmediate,
               })
             },
           })
@@ -746,26 +750,23 @@ export const wrapVercelLanguageModel = <T extends LanguageModel>(
             ...rest,
           }
         } catch (error: unknown) {
-          const enrichedError = await sendEventWithErrorToPosthog({
-            client: phClient,
-            distinctId: mergedOptions.posthogDistinctId,
-            traceId: mergedOptions.posthogTraceId ?? uuidv4(),
+          await captureAiGeneration(phClient, {
+            ...baseOptions,
             model: modelId,
             provider: provider,
             input: mergedOptions.posthogPrivacyMode ? '' : mapVercelPrompt(params.prompt as LanguageModelPrompt),
             output: [],
             latency: 0,
             baseURL: '',
-            params: mergedParams as any,
+            modelParameters: getModelParams(mergedParams as any),
             usage: {
               inputTokens: 0,
               outputTokens: 0,
             },
             error: error,
             tools: availableTools,
-            captureImmediate: mergedOptions.posthogCaptureImmediate,
           })
-          throw enrichedError
+          throw error
         }
       },
       writable: true,
