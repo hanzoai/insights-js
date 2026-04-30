@@ -1,5 +1,12 @@
 # posthog-ai
 
+## 7.17.1
+
+### Patch Changes
+
+- [#3507](https://github.com/PostHog/posthog-js/pull/3507) [`38e85c9`](https://github.com/PostHog/posthog-js/commit/38e85c9eaa4dc633c612334e842df5cb41ecbfd8) Thanks [@richardsolomou](https://github.com/richardsolomou)! - perf(vercel): drop O(N²) prompt trim and reuse TextEncoder/TextDecoder in `mapVercelPrompt`/`truncate` so long conversations no longer block the main thread for hundreds of milliseconds in `withTracing`'s stream flush
+  (2026-04-30)
+
 ## 7.17.0
 
 ### Minor Changes
