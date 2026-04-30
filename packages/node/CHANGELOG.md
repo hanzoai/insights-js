@@ -1,5 +1,12 @@
 # posthog-node
 
+## 5.32.0
+
+### Minor Changes
+
+- [#3474](https://github.com/PostHog/posthog-js/pull/3474) [`70ba8f8`](https://github.com/PostHog/posthog-js/commit/70ba8f84649680a8c5e85b0deae00741075dc21b) Thanks [@patricio-posthog](https://github.com/patricio-posthog)! - feat(flags): support mixed targeting in local evaluation
+  (2026-04-30)
+
 ## 5.31.0
 
 ### Minor Changes
