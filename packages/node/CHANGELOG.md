@@ -1,5 +1,23 @@
 # posthog-node
 
+## 5.33.0
+
+### Minor Changes
+
+- [#3476](https://github.com/PostHog/posthog-js/pull/3476) [`f8bc02f`](https://github.com/PostHog/posthog-js/commit/f8bc02f946b51f27f55f97351ca8d81a1fa54e9d) Thanks [@dmarticus](https://github.com/dmarticus)! - Add `evaluateFlags()` and a new `flags` option on `capture()` so a single `/flags` request powers both flag branching and event enrichment per incoming request:
+
+  ```ts
+  const flags = await posthog.evaluateFlags(distinctId, { personProperties: { plan: 'enterprise' } })
+  if (flags.isEnabled('new-dashboard')) {
+    renderNewDashboard()
+  }
+  posthog.capture({ distinctId, event: 'page_viewed', flags })
+  ```
+
+  The returned `FeatureFlagEvaluations` snapshot exposes `isEnabled()`, `getFlag()`, `getFlagPayload()` for branching, plus `onlyAccessed()` and `only([keys])` for filtering which flags get attached to a captured event. Pass `flagKeys: [...]` to `evaluateFlags()` to scope the underlying `/flags` request itself. `captureException()` / `captureExceptionImmediate()` accept a `flags` argument so `$exception` events carry the same flag context as the rest of your request's events.
+
+  Deprecates `isFeatureEnabled()`, `getFeatureFlag()`, `getFeatureFlagPayload()`, and `capture({ sendFeatureFlags })`. They continue to work but now log a deduped `[PostHog] ... is deprecated` warning the first time they're used. Removal is planned for the next major version. (2026-05-02)
+
 ## 5.32.1
 
 ### Patch Changes
