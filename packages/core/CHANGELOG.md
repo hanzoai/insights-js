@@ -1,5 +1,14 @@
 # @posthog/core
 
+## 1.28.1
+
+### Patch Changes
+
+- [#3512](https://github.com/PostHog/posthog-js/pull/3512) [`8aee3d5`](https://github.com/PostHog/posthog-js/commit/8aee3d55f8e2bf7a14a534c940327d8e08ba64f6) Thanks [@marandaneto](https://github.com/marandaneto)! - Do not crash when the React Native SDK is initialized without an API key; initialize as disabled and log an error instead. Disabled clients now also skip manual reload/flush/survey/log network calls.
+  (2026-05-04)
+- Updated dependencies []:
+  - @posthog/types@1.372.7
+
 ## 1.28.0
 
 ### Minor Changes
