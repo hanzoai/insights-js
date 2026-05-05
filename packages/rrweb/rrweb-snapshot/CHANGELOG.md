@@ -1,5 +1,16 @@
 # rrweb-snapshot
 
+## 0.0.61
+
+### Patch Changes
+
+- [#3510](https://github.com/PostHog/posthog-js/pull/3510) [`a5d86c9`](https://github.com/PostHog/posthog-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474) Thanks [@arnaudhillen](https://github.com/arnaudhillen)! - Move posthog-rrweb sources into the posthog-js monorepo under `packages/rrweb/`.
+  The seven packages we publish (`@posthog/rrweb`, `@posthog/rrweb-types`,
+  `@posthog/rrweb-utils`, `@posthog/rrdom`, `@posthog/rrweb-snapshot`,
+  `@posthog/rrweb-record`, `@posthog/rrweb-plugin-console-record`) now release
+  from this repo via the existing changesets pipeline. No runtime behavior
+  changes. (2026-05-05)
+
 ## 2.0.0-alpha.18
 
 ### Major Changes
@@ -65,10 +76,10 @@
 
 - [#1387](https://github.com/rrweb-io/rrweb/pull/1387) [`5e7943d`](https://github.com/rrweb-io/rrweb/commit/5e7943dbae6e2cde76c484bdd26bc0b96f1b6dce) Thanks [@H4ad](https://github.com/H4ad)! - Avoid recreating the same element every time, instead, we cache and we just update the element.
 
-  Before: 779k ops/s
-  After: 860k ops/s
+    Before: 779k ops/s
+    After: 860k ops/s
 
-  Benchmark: https://jsbench.me/ktlqztuf95/1
+    Benchmark: https://jsbench.me/ktlqztuf95/1
 
 - [#1440](https://github.com/rrweb-io/rrweb/pull/1440) [`c0f83af`](https://github.com/rrweb-io/rrweb/commit/c0f83afab8f1565633de0e986b7e96fa56f2d25c) Thanks [@daibhin](https://github.com/daibhin)! - better nested css selector splitting when commas or brackets happen to be in quoted text
 
@@ -101,7 +112,7 @@
 
 - [#1155](https://github.com/rrweb-io/rrweb/pull/1155) [`8aea5b0`](https://github.com/rrweb-io/rrweb/commit/8aea5b00a4dfe5a6f59bd2ae72bb624f45e51e81) Thanks [@YunFeng0817](https://github.com/YunFeng0817)! - Feat: Add 'isCustom' flag to serialized elements.
 
-  This flag is used to indicate whether the element is a custom element or not. This is useful for replaying the :defined pseudo-class of custom elements.
+    This flag is used to indicate whether the element is a custom element or not. This is useful for replaying the :defined pseudo-class of custom elements.
 
 - [#1374](https://github.com/rrweb-io/rrweb/pull/1374) [`314a8dd`](https://github.com/rrweb-io/rrweb/commit/314a8dde5a13095873b89d07bac7c949918bf817) Thanks [@andrewpomeroy](https://github.com/andrewpomeroy)! - Capture stylesheets designated as `rel="preload"`
 
@@ -159,7 +170,7 @@
 
 - [#1133](https://github.com/rrweb-io/rrweb/pull/1133) [`c28ef5f`](https://github.com/rrweb-io/rrweb/commit/c28ef5f658abb93086504581409cf7a376db48dc) Thanks [@eoghanmurray](https://github.com/eoghanmurray)! - Fix: CSS transitions are incorrectly being applied upon rebuild in Firefox. Presumably FF doesn't finished parsing the styles in time, and applies e.g. a default margin:0 to elements which have a non-zero margin set in CSS, along with a transition on them.
 
-  Related bug report to Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1816672​
+    Related bug report to Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1816672​
 
 - [#1130](https://github.com/rrweb-io/rrweb/pull/1130) [`f6f07e9`](https://github.com/rrweb-io/rrweb/commit/f6f07e953376634a4caf28ff8cbfed5a017c4347) Thanks [@Equlnox](https://github.com/Equlnox)! - Fix: Make relative path detection in stylesheet URLs to detect more types of URL protocols when inlining stylesheets.
 
