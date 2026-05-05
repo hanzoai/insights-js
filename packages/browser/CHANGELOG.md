@@ -1,5 +1,19 @@
 # posthog-js
 
+## 1.372.9
+
+### Patch Changes
+
+- [#3537](https://github.com/PostHog/posthog-js/pull/3537) [`026e09d`](https://github.com/PostHog/posthog-js/commit/026e09d3d540ce39c06e88cd39db6c08403e855d) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Pull in the canvas-manager fix from `@posthog/rrweb` 0.0.61: skip canvas
+  snapshots while the WebGL context is lost so transparent bitmaps don't
+  poison the worker's fingerprint dedup map and silently kill canvas
+  recording for the rest of the session. Also wraps `getCanvas()` in
+  try/catch so DOM/shadow-root traversal errors can't cancel the rAF
+  loop. See PR #3527 for context. (2026-05-05)
+- Updated dependencies []:
+    - @posthog/types@1.372.9
+    - @posthog/core@1.28.3
+
 ## 1.372.8
 
 ### Patch Changes
