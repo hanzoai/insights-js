@@ -1,5 +1,18 @@
 # @posthog/next
 
+## 0.4.42
+
+### Patch Changes
+
+- [#3533](https://github.com/PostHog/posthog-js/pull/3533) [`eb546b4`](https://github.com/PostHog/posthog-js/commit/eb546b48bcc08d6e702e2eb30c8ae1005ea00739) Thanks [@brandonhines-mialabs](https://github.com/brandonhines-mialabs)! - Fix `@posthog/next/pages` packaging so the documented Pages Router setup builds without a `server-only` import error.
+
+    The `./pages` subpath previously had no per-runtime `exports` conditions, so any module importing from `@posthog/next/pages` (e.g. `pages/_app.tsx`) transitively pulled in `'server-only'` and `posthog-node`. Next.js rejects `'server-only'` from client modules before tree-shaking can drop the unused re-exports, breaking `next build`. The barrel is now split per runtime:
+    - `browser` → `./dist/pages.client.js` — `PostHogProvider`, `PostHogPageView`
+    - `edge-light` / `edge` / `worker` → `./dist/pages.edge.js` — `postHogMiddleware`, `PostHogPageView`, `DEFAULT_INGEST_PATH`
+    - `react-server` / `default` → `./dist/pages.js` — full surface including `getServerSidePostHog` and `getPostHog`
+
+    Existing imports (`from '@posthog/next/pages'`) keep working unchanged; the resolver picks the right barrel per runtime. (2026-05-06)
+
 ## 0.4.41
 
 ### Patch Changes
