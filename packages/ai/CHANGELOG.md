@@ -1,5 +1,12 @@
 # posthog-ai
 
+## 7.18.0
+
+### Minor Changes
+
+- [#3539](https://github.com/PostHog/posthog-js/pull/3539) [`6b23fd3`](https://github.com/PostHog/posthog-js/commit/6b23fd39d0c6458be72c861fa704bc7b8ec3bc23) Thanks [@carlos-marchal-ph](https://github.com/carlos-marchal-ph)! - Added a new generic binary payload sanitizer to catch more edge cases
+  (2026-05-07)
+
 ## 7.17.5
 
 ### Patch Changes
