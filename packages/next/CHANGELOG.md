@@ -1,5 +1,12 @@
 # @posthog/next
 
+## 0.4.43
+
+### Patch Changes
+
+- [#3543](https://github.com/PostHog/posthog-js/pull/3543) [`ece3097`](https://github.com/PostHog/posthog-js/commit/ece3097bea5d2cfeeaff0c02bb61e6f58c188013) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - Publish `@posthog/next` from the release workflow so npm catches up with the versions already recorded in the changelog.
+  (2026-05-07)
+
 ## 0.4.42
 
 ### Patch Changes
