@@ -3,6 +3,7 @@ import { window } from '../utils/globals'
 import { addEventListener } from '../utils'
 import { logger } from '../utils/logger'
 import { patch } from './replay/rrweb-plugins/patch'
+import type { Extension } from './types'
 
 /**
  * This class is used to capture pageview events when the user navigates using the history API (pushState, replaceState)
@@ -19,6 +20,10 @@ export class HistoryAutocapture {
     constructor(instance: Insights) {
         this._instance = instance
         this._lastPathname = window?.location?.pathname || ''
+    }
+
+    initialize() {
+        this.startIfEnabled()
     }
 
     public get isEnabled(): boolean {
@@ -90,7 +95,7 @@ export class HistoryAutocapture {
 
             // Only capture pageview if the pathname has changed and the feature is enabled
             if (currentPathname !== this._lastPathname && this.isEnabled) {
-                this._instance.capture('$pageview', { navigation_type: navigationType })
+                this._instance.capture(EVENT_PAGEVIEW, { navigation_type: navigationType })
             }
 
             this._lastPathname = currentPathname

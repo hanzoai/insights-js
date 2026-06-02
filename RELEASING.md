@@ -10,7 +10,7 @@ pnpm changeset
 
 CLI will prompt questions about the changes you've made and will generate a changeset file for you.
 
-Add a `release` label to your PR to automatically:
+When a PR containing a changeset is merged to `main`, the release workflow will automatically:
 
 1. Bump versions based on changesets
 2. Commit version updates directly to main

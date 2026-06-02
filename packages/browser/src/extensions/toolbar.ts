@@ -17,11 +17,8 @@ const LOCALSTORAGE_KEY = '_insightsToolbarParams'
 
 const logger = createLogger('[Toolbar]')
 
-enum ToolbarState {
-    UNINITIALIZED = 0,
-    LOADING = 1,
-    LOADED = 2,
-}
+const ToolbarState = { UNINITIALIZED: 0, LOADING: 1, LOADED: 2 } as const
+type ToolbarState = (typeof ToolbarState)[keyof typeof ToolbarState]
 
 export class Toolbar {
     instance: Insights
@@ -37,6 +34,10 @@ export class Toolbar {
 
     private _getToolbarState(): ToolbarState {
         return assignableWindow['ph_toolbar_state'] ?? ToolbarState.UNINITIALIZED
+    }
+
+    initialize(): boolean {
+        return this.maybeLoadToolbar()
     }
 
     /**

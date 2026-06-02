@@ -38,7 +38,7 @@ export class ExceptionObserver {
 
     private _requiredConfig(): Required<ExceptionAutoCaptureConfig> {
         const providedConfig = this._instance.config.capture_exceptions
-        let config = {
+        let config: Required<ExceptionAutoCaptureConfig> = {
             capture_unhandled_errors: false,
             capture_unhandled_rejections: false,
             capture_console_errors: false,
@@ -161,6 +161,6 @@ export class ExceptionObserver {
             return
         }
 
-        this._instance.exceptions.sendExceptionEvent(errorProperties)
+        this._instance.exceptions?.sendExceptionEvent(errorProperties)
     }
 }

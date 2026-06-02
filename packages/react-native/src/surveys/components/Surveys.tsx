@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from 'react'
-import { ScrollView, StyleProp, ViewStyle } from 'react-native'
+import { StyleProp, ViewStyle } from 'react-native'
 
 import { getDisplayOrderQuestions, getNextSurveyStep, SurveyAppearanceTheme } from '../surveys-utils'
 import {
   Survey,
   SurveyAppearance,
   SurveyQuestion,
+  type SurveyResponses,
   maybeAdd,
   SurveyQuestionBranchingType,
   isUndefined,
@@ -29,30 +30,12 @@ export const sendSurveyShownEvent = (survey: Survey, insights: Insights): void =
     $survey_id: survey.id,
     ...maybeAdd('$survey_iteration', survey.current_iteration),
     ...maybeAdd('$survey_iteration_start_date', survey.current_iteration_start_date),
+    ...(surveyLanguage ? { [SURVEY_LANGUAGE_PROPERTY]: surveyLanguage } : {}),
   })
 }
 
-function getSurveyNewResponseKey(questionId: string) {
-  return `$survey_response_${questionId}`
-}
-
-function getSurveyOldResponseKey(originalQuestionIndex: number) {
-  return originalQuestionIndex === 0 ? '$survey_response' : `$survey_response_${originalQuestionIndex}`
-}
-
-const getSurveyResponseValue = (responses: Record<string, string | number | string[] | null>, questionId?: string) => {
-  if (!questionId) {
-    return null
-  }
-  const response = responses[getSurveyNewResponseKey(questionId)]
-  if (Array.isArray(response)) {
-    return [...response]
-  }
-  return response
-}
-
 export const sendSurveyEvent = (
-  responses: Record<string, string | number | string[] | null> = {},
+  responses: SurveyResponses = {},
   survey: Survey,
   insights: Insights
 ): void => {
@@ -75,12 +58,8 @@ export const sendSurveyEvent = (
     $survey_id: survey.id,
     ...maybeAdd('$survey_iteration', survey.current_iteration),
     ...maybeAdd('$survey_iteration_start_date', survey.current_iteration_start_date),
-    $survey_questions: survey.questions.map((question: SurveyQuestion) => ({
-      id: question.id,
-      question: question.question,
-      response: getSurveyResponseValue(responses, question.id),
-    })),
-    ...allResponses,
+    ...(surveyLanguage ? { [SURVEY_LANGUAGE_PROPERTY]: surveyLanguage } : {}),
+    ...buildSurveyResponseProperties(responses, survey),
     $set: {
       [getSurveyInteractionProperty(survey, 'responded')]: true,
     },
@@ -93,6 +72,9 @@ export const dismissedSurveyEvent = (survey: Survey, insights: Insights): void =
     $survey_id: survey.id,
     ...maybeAdd('$survey_iteration', survey.current_iteration),
     ...maybeAdd('$survey_iteration_start_date', survey.current_iteration_start_date),
+    ...(surveyLanguage ? { [SURVEY_LANGUAGE_PROPERTY]: surveyLanguage } : {}),
+    $survey_partially_completed: surveyHasResponses(responses),
+    ...buildSurveyResponseProperties(responses, survey),
     $set: {
       [getSurveyInteractionProperty(survey, 'dismissed')]: true,
     },
@@ -101,16 +83,21 @@ export const dismissedSurveyEvent = (survey: Survey, insights: Insights): void =
 
 export function Questions({
   survey,
+  surveyLanguage,
   appearance,
   styleOverrides,
+  responses = {},
+  onResponsesChange = () => {},
   onSubmit,
 }: {
   survey: Survey
+  surveyLanguage?: string | null
   appearance: SurveyAppearanceTheme
   styleOverrides?: StyleProp<ViewStyle>
+  responses?: SurveyResponses
+  onResponsesChange?: (responses: SurveyResponses) => void
   onSubmit: () => void
 }): JSX.Element {
-  const [questionsResponses, setQuestionsResponses] = useState({})
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const surveyQuestions = useMemo(() => getDisplayOrderQuestions(survey), [survey])
   const insights = useInsights()
@@ -126,13 +113,13 @@ export function Questions({
     questionId: string
     // displayQuestionIndex: number
   }): void => {
-    const responseKey = getSurveyNewResponseKey(questionId)
+    const responseKey = getSurveyResponseKey(questionId)
 
     const allResponses = {
-      ...questionsResponses,
+      ...responses,
       [responseKey]: res,
     }
-    setQuestionsResponses(allResponses)
+    onResponsesChange(allResponses)
 
     // Get the next question index based on conditional logic
     const nextStep = getNextSurveyStep(survey, originalQuestionIndex, res)
@@ -149,29 +136,23 @@ export function Questions({
 
   const question = surveyQuestions[currentQuestionIndex]
 
-  return (
-    <ScrollView
-      style={[styleOverrides, { flexGrow: 0 }]}
-      keyboardShouldPersistTaps="handled" // do not dismiss keyboard on submit button tap
-    >
-      {getQuestionComponent({
-        question,
-        appearance,
-        onSubmit: (res) =>
-          onNextButtonClick({
-            res,
-            originalQuestionIndex: question.originalQuestionIndex,
-            questionId: question.id,
-            // displayQuestionIndex: currentQuestionIndex,
-          }),
-      })}
-    </ScrollView>
-  )
+  return getQuestionComponent({
+    question,
+    appearance,
+    styleOverrides,
+    onSubmit: (res) =>
+      onNextButtonClick({
+        res,
+        originalQuestionIndex: question.originalQuestionIndex,
+        questionId: question.id,
+      }),
+  })
 }
 
 type GetQuestionComponentProps = {
   question: SurveyQuestion
   appearance: SurveyAppearance
+  styleOverrides?: StyleProp<ViewStyle>
   onSubmit: (res: string | string[] | number | null) => void
 }
 

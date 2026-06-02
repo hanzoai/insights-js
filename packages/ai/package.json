@@ -23,8 +23,13 @@
   },
   "devDependencies": {
     "@ai-sdk/provider": "^3.0.8",
+    "@openai/agents": "^0.8.0",
+    "@openai/agents-core": "^0.8.0",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/sdk-trace-base": "^2.2.0",
+    "@opentelemetry/core": "^2.0.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
+    "@opentelemetry/otlp-exporter-base": "^0.200.0",
+    "@opentelemetry/sdk-trace-base": "^2.0.0",
     "@babel/preset-env": "catalog:",
     "@babel/preset-typescript": "catalog:",
     "@hanzo/insights-tooling-rollup-utils": "workspace:*",
@@ -42,7 +47,8 @@
     "anthropic",
     "gemini",
     "llm",
-    "observability"
+    "observability",
+    "agents"
   ],
   "engines": {
     "node": "^20.20.0 || >=22.22.0"
@@ -59,7 +65,8 @@
   },
   "peerDependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/sdk-trace-base": "^2.2.0",
+    "@opentelemetry/exporter-trace-otlp-http": ">=0.200.0 <1.0.0",
+    "@opentelemetry/sdk-trace-base": "^2.0.0",
     "@ai-sdk/provider": "^2.0.0 || ^3.0.0",
     "@hanzo/insights-node": "^5.0.0"
   },
@@ -67,10 +74,16 @@
     "@opentelemetry/api": {
       "optional": true
     },
+    "@opentelemetry/exporter-trace-otlp-http": {
+      "optional": true
+    },
     "@opentelemetry/sdk-trace-base": {
       "optional": true
     },
     "@ai-sdk/provider": {
+      "optional": true
+    },
+    "@openai/agents": {
       "optional": true
     }
   },
@@ -112,6 +125,11 @@
       "require": "./dist/langchain/index.cjs",
       "import": "./dist/langchain/index.mjs",
       "types": "./dist/langchain/index.d.ts"
+    },
+    "./openai-agents": {
+      "require": "./dist/openai-agents/index.cjs",
+      "import": "./dist/openai-agents/index.mjs",
+      "types": "./dist/openai-agents/index.d.ts"
     }
   },
   "directories": {

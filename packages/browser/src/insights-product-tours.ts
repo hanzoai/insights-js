@@ -5,10 +5,9 @@ import { RemoteConfig } from './types'
 import { createLogger } from './utils/logger'
 import { isArray, isNullish } from '@hanzo/insights-core'
 import { assignableWindow } from './utils/globals'
+import { Extension } from './extensions/types'
 
 const logger = createLogger('[Product Tours]')
-
-const PRODUCT_TOURS_STORAGE_KEY = 'ph_product_tours'
 
 interface ProductTourManagerInterface {
     start: () => void
@@ -40,13 +39,17 @@ export class InsightsProductTours {
         this._instance = instance
     }
 
+    initialize() {
+        this.loadIfEnabled()
+    }
+
     onRemoteConfig(response: RemoteConfig): void {
         if (!('productTours' in response)) {
             return
         }
 
-        if (this._instance.persistence) {
-            this._instance.persistence.register({
+        if (this._persistence) {
+            this._persistence.register({
                 [PRODUCT_TOURS_ENABLED_SERVER_SIDE]: !!response.productTours,
             })
         }
@@ -87,9 +90,9 @@ export class InsightsProductTours {
             return
         }
 
-        const persistence = this._instance.persistence
+        const persistence = this._persistence
         if (persistence) {
-            const storedTours = persistence.props[PRODUCT_TOURS_STORAGE_KEY]
+            const storedTours = persistence.props[PRODUCT_TOURS]
             if (isArray(storedTours) && !forceReload) {
                 this._cachedTours = storedTours
                 callback(storedTours, { isLoaded: true })
@@ -116,7 +119,7 @@ export class InsightsProductTours {
                 this._cachedTours = tours
 
                 if (persistence) {
-                    persistence.register({ [PRODUCT_TOURS_STORAGE_KEY]: tours })
+                    persistence.register({ [PRODUCT_TOURS]: tours })
                 }
 
                 callback(tours, { isLoaded: true })
@@ -164,7 +167,7 @@ export class InsightsProductTours {
 
     clearCache(): void {
         this._cachedTours = null
-        this._instance.persistence?.unregister(PRODUCT_TOURS_STORAGE_KEY)
+        this._persistence?.unregister(PRODUCT_TOURS)
     }
 
     resetTour(tourId: string): void {

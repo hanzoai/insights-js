@@ -15,8 +15,6 @@ export interface FlagDefinitionCacheData {
 }
 
 /**
- * @experimental This API is experimental and may change in minor versions.
- *
  * Provider interface for caching feature flag definitions.
  *
  * Implementations can use this to control when flag definitions are fetched

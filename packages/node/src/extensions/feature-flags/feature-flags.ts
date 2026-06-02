@@ -9,7 +9,10 @@ const SIXTY_SECONDS = 60 * 1000
 // eslint-disable-next-line
 const LONG_SCALE = 0xfffffffffffffff
 
-const NULL_VALUES_ALLOWED_OPERATORS = ['is_not']
+// Operators that should still run their switch case when the property value is null/undefined.
+// `is_not` may legitimately compare against null; `is_set` only cares about key presence and
+// must not be short-circuited by the null guard in `matchProperty`.
+const NULL_VALUES_ALLOWED_OPERATORS = ['is_not', 'is_set']
 class ClientError extends Error {
   constructor(message: string) {
     super()
@@ -276,12 +279,15 @@ class FeatureFlagsPoller {
   ): Promise<FeatureFlagValue> {
     const { distinctId, groups, personProperties, groupProperties } = evaluationContext
 
-    if (flag.ensure_experience_continuity) {
-      throw new InconclusiveMatchError('Flag has experience continuity enabled')
-    }
-
+    // Order matters: an inactive flag is always false regardless of continuity. Checking
+    // `ensure_experience_continuity` first would cause a disabled-but-continuity flag to come
+    // back as undefined instead of the correct `false`.
     if (!flag.active) {
       return false
+    }
+
+    if (flag.ensure_experience_continuity) {
+      throw new InconclusiveMatchError('Flag has experience continuity enabled')
     }
 
     const flagFilters = flag.filters || {}
@@ -485,18 +491,55 @@ class FeatureFlagsPoller {
   ): Promise<FeatureFlagValue> {
     const flagFilters = flag.filters || {}
     const flagConditions = flagFilters.groups || []
+    const flagAggregation = flagFilters.aggregation_group_type_index
+    const { groups, groupProperties } = evaluationContext
     let isInconclusive = false
     let result = undefined
 
     for (const condition of flagConditions) {
       try {
-        if (await this.isConditionMatch(flag, bucketingValue, condition, properties, evaluationContext)) {
+        // Per-condition aggregation overrides only when the condition explicitly
+        // sets its own aggregation_group_type_index (mixed targeting).
+        // When absent, use the properties/bucketing already resolved by the caller.
+        const conditionAggregation =
+          condition.aggregation_group_type_index !== undefined
+            ? condition.aggregation_group_type_index
+            : flagAggregation
+
+        let effectiveProperties = properties
+        let effectiveBucketingValue = bucketingValue
+
+        // Mixed-override path: condition-level aggregation differs from flag-level.
+        // This assumes flag-level aggregation is null/undefined for mixed flags.
+        if (conditionAggregation !== flagAggregation) {
+          if (conditionAggregation !== null && conditionAggregation !== undefined) {
+            const groupName = this.groupTypeMapping[String(conditionAggregation)]
+            if (!groupName || !(groupName in groups)) {
+              this.logMsgIfDebug(() =>
+                console.debug(
+                  `[FEATURE FLAGS] Skipping group condition for flag '${flag.key}': group type index ${conditionAggregation} not available`
+                )
+              )
+              continue
+            }
+            if (!(groupName in groupProperties)) {
+              isInconclusive = true
+              continue
+            }
+            effectiveProperties = groupProperties[groupName]
+            effectiveBucketingValue = groups[groupName]
+          }
+        }
+
+        if (
+          await this.isConditionMatch(flag, effectiveBucketingValue, condition, effectiveProperties, evaluationContext)
+        ) {
           const variantOverride = condition.variant
           const flagVariants = flagFilters.multivariate?.variants || []
           if (variantOverride && flagVariants.some((variant) => variant.key === variantOverride)) {
             result = variantOverride
           } else {
-            result = (await this.getMatchingVariant(flag, bucketingValue)) || true
+            result = (await this.getMatchingVariant(flag, effectiveBucketingValue)) || true
           }
           break
         }
@@ -542,7 +585,9 @@ class FeatureFlagsPoller {
         let matches = false
 
         if (propertyType === 'cohort') {
-          matches = matchCohort(prop, properties, this.cohorts, this.debugMode)
+          matches = await matchCohort(prop, properties, this.cohorts, this.debugMode, (depProp) =>
+            this.evaluateFlagDependency(depProp, properties, evaluationContext)
+          )
         } else if (propertyType === 'flag') {
           matches = await this.evaluateFlagDependency(prop, properties, evaluationContext)
         } else {
@@ -982,9 +1027,14 @@ function matchProperty(
   const operator = property.operator || 'exact'
 
   if (!(key in propertyValues)) {
+    // When the property is genuinely absent we can answer `is_not_set` locally — no need to
+    // bail out as inconclusive and force the flag to return undefined.
+    if (operator === 'is_not_set') {
+      return true
+    }
     throw new InconclusiveMatchError(`Property ${key} not found in propertyValues`)
   } else if (operator === 'is_not_set') {
-    throw new InconclusiveMatchError(`Operator is_not_set is not supported`)
+    return false
   }
 
   const overrideValue = propertyValues[key]
@@ -1038,28 +1088,24 @@ function matchProperty(
     case 'gte':
     case 'lt':
     case 'lte': {
-      // :TRICKY: We adjust comparison based on the override value passed in,
-      // to make sure we handle both numeric and string comparisons appropriately.
-      let parsedValue = typeof value === 'number' ? value : null
-
-      if (typeof value === 'string') {
-        try {
-          parsedValue = parseFloat(value)
-        } catch (err) {
-          // pass
-        }
-      }
-
-      if (parsedValue != null && overrideValue != null) {
-        // check both null and undefined
-        if (typeof overrideValue === 'string') {
-          return compare(overrideValue, String(value), operator)
-        } else {
-          return compare(overrideValue, parsedValue, operator)
-        }
+      // Try a numeric comparison first; only fall back to lexicographic when one side genuinely
+      // isn't a number. `parseFloat` returns NaN for non-numeric strings, so `Number.isFinite`
+      // is the right guard — `NaN != null` would slip through and produce nonsense comparisons
+      // like `NaN > 5`. Likewise, when a person property arrives as the string `"10"` we want
+      // `"10" > "9"` to evaluate numerically (true), not lexicographically (false).
+      const parsedValue = typeof value === 'number' ? value : parseFloat(String(value))
+      let parsedOverride: number
+      if (typeof overrideValue === 'number') {
+        parsedOverride = overrideValue
+      } else if (overrideValue != null) {
+        parsedOverride = parseFloat(String(overrideValue))
       } else {
-        return compare(String(overrideValue), String(value), operator)
+        parsedOverride = NaN
       }
+      if (Number.isFinite(parsedValue) && Number.isFinite(parsedOverride)) {
+        return compare(parsedOverride, parsedValue, operator)
+      }
+      return compare(String(overrideValue), String(value), operator)
     }
     case 'is_date_after':
     case 'is_date_before': {
@@ -1082,6 +1128,45 @@ function matchProperty(
       }
       return overrideDate > parsedDate
     }
+    case 'semver_eq': {
+      const cmp = compareSemverTuples(parseSemver(String(overrideValue)), parseSemver(String(value)))
+      return cmp === 0
+    }
+    case 'semver_neq': {
+      const cmp = compareSemverTuples(parseSemver(String(overrideValue)), parseSemver(String(value)))
+      return cmp !== 0
+    }
+    case 'semver_gt': {
+      const cmp = compareSemverTuples(parseSemver(String(overrideValue)), parseSemver(String(value)))
+      return cmp > 0
+    }
+    case 'semver_gte': {
+      const cmp = compareSemverTuples(parseSemver(String(overrideValue)), parseSemver(String(value)))
+      return cmp >= 0
+    }
+    case 'semver_lt': {
+      const cmp = compareSemverTuples(parseSemver(String(overrideValue)), parseSemver(String(value)))
+      return cmp < 0
+    }
+    case 'semver_lte': {
+      const cmp = compareSemverTuples(parseSemver(String(overrideValue)), parseSemver(String(value)))
+      return cmp <= 0
+    }
+    case 'semver_tilde': {
+      const overrideParsed = parseSemver(String(overrideValue))
+      const { lower, upper } = computeTildeBounds(String(value))
+      return compareSemverTuples(overrideParsed, lower) >= 0 && compareSemverTuples(overrideParsed, upper) < 0
+    }
+    case 'semver_caret': {
+      const overrideParsed = parseSemver(String(overrideValue))
+      const { lower, upper } = computeCaretBounds(String(value))
+      return compareSemverTuples(overrideParsed, lower) >= 0 && compareSemverTuples(overrideParsed, upper) < 0
+    }
+    case 'semver_wildcard': {
+      const overrideParsed = parseSemver(String(overrideValue))
+      const { lower, upper } = computeWildcardBounds(String(value))
+      return compareSemverTuples(overrideParsed, lower) >= 0 && compareSemverTuples(overrideParsed, upper) < 0
+    }
     default:
       throw new InconclusiveMatchError(`Unknown operator: ${operator}`)
   }
@@ -1095,25 +1180,29 @@ function checkCohortExists(cohortId: string, cohortProperties: FeatureFlagsPolle
   }
 }
 
-function matchCohort(
+type FlagDependencyEvaluator = (prop: FlagProperty) => Promise<boolean>
+
+async function matchCohort(
   property: FeatureFlagCondition['properties'][number],
   propertyValues: Record<string, any>,
   cohortProperties: FeatureFlagsPoller['cohorts'],
-  debugMode: boolean = false
-): boolean {
+  debugMode: boolean = false,
+  flagDependencyEvaluator?: FlagDependencyEvaluator
+): Promise<boolean> {
   const cohortId = String(property.value)
   checkCohortExists(cohortId, cohortProperties)
 
   const propertyGroup = cohortProperties[cohortId]
-  return matchPropertyGroup(propertyGroup, propertyValues, cohortProperties, debugMode)
+  return matchPropertyGroup(propertyGroup, propertyValues, cohortProperties, debugMode, flagDependencyEvaluator)
 }
 
-function matchPropertyGroup(
+async function matchPropertyGroup(
   propertyGroup: PropertyGroup,
   propertyValues: Record<string, any>,
   cohortProperties: FeatureFlagsPoller['cohorts'],
-  debugMode: boolean = false
-): boolean {
+  debugMode: boolean = false,
+  flagDependencyEvaluator?: FlagDependencyEvaluator
+): Promise<boolean> {
   if (!propertyGroup) {
     return true
   }
@@ -1132,7 +1221,13 @@ function matchPropertyGroup(
     // a nested property group
     for (const prop of properties as PropertyGroup[]) {
       try {
-        const matches = matchPropertyGroup(prop, propertyValues, cohortProperties, debugMode)
+        const matches = await matchPropertyGroup(
+          prop,
+          propertyValues,
+          cohortProperties,
+          debugMode,
+          flagDependencyEvaluator
+        )
         if (propertyGroupType === 'AND') {
           if (!matches) {
             return false
@@ -1168,15 +1263,14 @@ function matchPropertyGroup(
       try {
         let matches: boolean
         if (prop.type === 'cohort') {
-          matches = matchCohort(prop, propertyValues, cohortProperties, debugMode)
+          matches = await matchCohort(prop, propertyValues, cohortProperties, debugMode, flagDependencyEvaluator)
         } else if (prop.type === 'flag') {
-          if (debugMode) {
-            console.warn(
-              `[FEATURE FLAGS] Flag dependency filters are not supported in local evaluation. ` +
-                `Skipping condition with dependency on flag '${prop.key || 'unknown'}'`
+          if (!flagDependencyEvaluator) {
+            throw new InconclusiveMatchError(
+              `Flag dependency '${prop.key || 'unknown'}' cannot be evaluated without a flag dependency evaluator`
             )
           }
-          continue
+          matches = await flagDependencyEvaluator(prop)
         } else {
           matches = matchProperty(prop, propertyValues)
         }
@@ -1231,6 +1325,144 @@ function isValidRegex(regex: string): boolean {
   } catch (err) {
     return false
   }
+}
+
+type SemverTuple = [number, number, number]
+
+/**
+ * Parse a single numeric identifier from a semver string.
+ * Per semver 2.0.0 §2, numeric identifiers MUST NOT include leading zeros.
+ */
+function parseSemverNumericIdentifier(part: string, raw: string): number {
+  if (!/^\d+$/.test(part)) {
+    throw new InconclusiveMatchError(`Invalid semver: ${raw}`)
+  }
+  if (part.length > 1 && part[0] === '0') {
+    throw new InconclusiveMatchError(`Invalid semver: ${raw}`)
+  }
+  return parseInt(part, 10)
+}
+
+/**
+ * Parse a version string into a [major, minor, patch] tuple.
+ * - Strips leading/trailing whitespace
+ * - Strips 'v' or 'V' prefix
+ * - Strips pre-release and build metadata (-alpha, +build)
+ * - Defaults missing components to 0
+ * - Ignores extra components beyond the third
+ * - Throws InconclusiveMatchError for invalid input
+ */
+function parseSemver(value: string): SemverTuple {
+  const text = String(value).trim().replace(/^[vV]/, '')
+
+  // Strip pre-release and build metadata
+  const baseVersion = text.split('-')[0].split('+')[0]
+
+  if (!baseVersion || baseVersion.startsWith('.')) {
+    throw new InconclusiveMatchError(`Invalid semver: ${value}`)
+  }
+
+  const parts = baseVersion.split('.')
+
+  const parsePart = (part: string | undefined): number => {
+    if (part === undefined || part === '') {
+      return 0
+    }
+    return parseSemverNumericIdentifier(part, value)
+  }
+
+  const major = parsePart(parts[0])
+  const minor = parsePart(parts[1])
+  const patch = parsePart(parts[2])
+
+  return [major, minor, patch]
+}
+
+/**
+ * Compare two semver tuples.
+ * Returns -1 if a < b, 0 if a == b, 1 if a > b
+ */
+function compareSemverTuples(a: SemverTuple, b: SemverTuple): number {
+  for (let i = 0; i < 3; i++) {
+    if (a[i] < b[i]) return -1
+    if (a[i] > b[i]) return 1
+  }
+  return 0
+}
+
+/**
+ * Compute bounds for tilde operator: ~X.Y.Z means >=X.Y.Z and <X.(Y+1).0
+ */
+function computeTildeBounds(value: string): { lower: SemverTuple; upper: SemverTuple } {
+  const parsed = parseSemver(value)
+  const lower: SemverTuple = [parsed[0], parsed[1], parsed[2]]
+  const upper: SemverTuple = [parsed[0], parsed[1] + 1, 0]
+  return { lower, upper }
+}
+
+/**
+ * Compute bounds for caret operator:
+ * - ^X.Y.Z where X > 0: >=X.Y.Z <(X+1).0.0
+ * - ^0.Y.Z where Y > 0: >=0.Y.Z <0.(Y+1).0
+ * - ^0.0.Z: >=0.0.Z <0.0.(Z+1)
+ */
+function computeCaretBounds(value: string): { lower: SemverTuple; upper: SemverTuple } {
+  const parsed = parseSemver(value)
+  const [major, minor, patch] = parsed
+  const lower: SemverTuple = [major, minor, patch]
+
+  let upper: SemverTuple
+  if (major > 0) {
+    upper = [major + 1, 0, 0]
+  } else if (minor > 0) {
+    upper = [0, minor + 1, 0]
+  } else {
+    upper = [0, 0, patch + 1]
+  }
+
+  return { lower, upper }
+}
+
+/**
+ * Compute bounds for wildcard operator:
+ * - "X.*" or "X" with wildcard: >=X.0.0 <(X+1).0.0
+ * - "X.Y.*": >=X.Y.0 <X.(Y+1).0
+ */
+function computeWildcardBounds(value: string): { lower: SemverTuple; upper: SemverTuple } {
+  const text = String(value).trim().replace(/^[vV]/, '')
+
+  // Remove trailing .* or *
+  const cleanedText = text.replace(/\.\*$/, '').replace(/\*$/, '')
+
+  if (!cleanedText) {
+    throw new InconclusiveMatchError(`Invalid wildcard semver: ${value}`)
+  }
+
+  const parts = cleanedText.split('.')
+  const parseWildcardPart = (part: string): number => {
+    try {
+      return parseSemverNumericIdentifier(part, value)
+    } catch {
+      throw new InconclusiveMatchError(`Invalid wildcard semver: ${value}`)
+    }
+  }
+  const major = parseWildcardPart(parts[0])
+
+  let lower: SemverTuple
+  let upper: SemverTuple
+
+  if (parts.length === 1) {
+    // X.* pattern
+    lower = [major, 0, 0]
+    upper = [major + 1, 0, 0]
+  } else {
+    // X.Y.* pattern
+    const minor = parseWildcardPart(parts[1])
+    lower = [major, minor, 0]
+    upper = [major, minor + 1, 0]
+  }
+
+  return { lower, upper }
 }
 
 function convertToDateTime(value: FlagPropertyValue | Date): Date {
@@ -1288,6 +1520,7 @@ export {
   FeatureFlagsPoller,
   matchProperty,
   relativeDateParseForFeatureFlagMatching,
+  parseSemver,
   InconclusiveMatchError,
   RequiresServerEvaluation,
   ClientError,

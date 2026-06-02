@@ -3,10 +3,12 @@ import { captureSpan, createInsightsSpanProcessor, InsightsSpanProcessor, Insigh
 import * as captureModule from '../src/otel/capture'
 import { flushPromises } from './test-utils'
 
-const mockSpanContext = (traceId: string) => ({
-  traceId,
-  spanId: '0000000000000001',
-  traceFlags: 1,
+jest.mock('@opentelemetry/exporter-trace-otlp-http', () => {
+  const MockExporter = jest.fn()
+  MockExporter.prototype.export = jest.fn()
+  MockExporter.prototype.shutdown = jest.fn().mockResolvedValue(undefined)
+  MockExporter.prototype.forceFlush = jest.fn().mockResolvedValue(undefined)
+  return { OTLPTraceExporter: MockExporter }
 })
 
 jest.mock('@hanzo/insights-node', () => {
@@ -24,6 +26,19 @@ jest.mock('@hanzo/insights-node', () => {
 describe('OTEL span mapping', () => {
   let mockInsightsClient: Insights
 
+function getSuperExport(): jest.Mock {
+  return OTLPTraceExporter.prototype.export as jest.Mock
+}
+
+function getSuperShutdown(): jest.Mock {
+  return OTLPTraceExporter.prototype.shutdown as jest.Mock
+}
+
+function getSuperForceFlush(): jest.Mock {
+  return OTLPTraceExporter.prototype.forceFlush as jest.Mock
+}
+
+describe('PostHogTraceExporter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockInsightsClient = new (Insights as any)()
@@ -223,12 +238,11 @@ describe('OTEL span mapping', () => {
     expect(captureCall[0].properties.$ai_trace_id).toBe('accepted-trace')
   })
 
-  it('span processor forceFlush waits for in-flight captures to settle', async () => {
-    let resolveCapture: (() => void) | undefined
-    const captureSpy = jest.spyOn(captureModule, 'captureSpan').mockImplementation(() => {
-      return new Promise<void>((resolve) => {
-        resolveCapture = resolve
-      })
+  it('accepts deprecated apiKey', () => {
+    new PostHogTraceExporter({ apiKey: DEFAULT_TOKEN })
+    expect(OTLPTraceExporter).toHaveBeenCalledWith({
+      url: 'https://us.i.posthog.com/i/v0/ai/otel',
+      headers: { Authorization: `Bearer ${DEFAULT_TOKEN}` },
     })
 
     const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
@@ -259,40 +273,25 @@ describe('OTEL span mapping', () => {
     captureSpy.mockRestore()
   })
 
-  it('span processor shutdown waits for in-flight captures to settle', async () => {
-    let resolveCapture: (() => void) | undefined
-    const captureSpy = jest.spyOn(captureModule, 'captureSpan').mockImplementation(() => {
-      return new Promise<void>((resolve) => {
-        resolveCapture = resolve
-      })
-    })
+  it.each([
+    ['missing', {}],
+    ['empty', { projectToken: '' }],
+    ['blank', { projectToken: '  \n\t ' }],
+  ])('disables and no-ops when projectToken is %s', (_case, options) => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const exporter = new PostHogTraceExporter(options as any)
+    const callback = jest.fn()
 
     const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
       insightsDistinctId: 'processor-user',
     })
 
-    spanProcessor.onEnd({
-      attributes: {
-        'ai.operationId': 'ai.generateText.doGenerate',
-        'ai.model.id': 'gpt-4o-mini',
-      },
-      duration: [0, 120000000],
-      status: { code: 1 },
-      spanContext: () => mockSpanContext('shutdown-trace'),
-    } as any)
-
-    let shutdownComplete = false
-    const shutdownPromise = spanProcessor.shutdown().then(() => {
-      shutdownComplete = true
-    })
-
-    await flushPromises()
-    expect(shutdownComplete).toBe(false)
-
-    resolveCapture?.()
-    await shutdownPromise
-    expect(shutdownComplete).toBe(true)
-    captureSpy.mockRestore()
+    expect(getSuperExport()).not.toHaveBeenCalled()
+    expect(callback).toHaveBeenCalledWith({ code: 0 })
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[PostHogTraceExporter] projectToken is missing or blank; the exporter will be disabled.'
+    )
+    warnSpy.mockRestore()
   })
 
   it('creates a Insights span processor', async () => {

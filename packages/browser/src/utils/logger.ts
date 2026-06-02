@@ -32,6 +32,10 @@ const _createLogger = (prefix: string, { debugEnabled }: CreateLoggerOptions = {
             }
         },
 
+        debug: (...args: any[]) => {
+            logger._log('debug', ...args)
+        },
+
         info: (...args: any[]) => {
             logger._log('log', ...args)
         },

@@ -157,9 +157,10 @@ describe('FlagDefinitionCacheProvider Integration', () => {
       const promise1 = poller.loadFeatureFlags()
       const promise2 = poller.loadFeatureFlags()
 
-      expect(promise1).toStrictEqual(promise2)
+      await Promise.all(promises)
 
-      await promise1
+      expect(mockCacheProvider.getFlagDefinitions).toHaveBeenCalledTimes(1)
+      expect(mockCacheProvider.shouldFetchFlagDefinitions).toHaveBeenCalledTimes(1)
     })
   })
 

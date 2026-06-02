@@ -86,25 +86,25 @@ export const testAlias = mutation({
 })
 
 export const testCaptureException = mutation({
-  args: {
-    errorMessage: v.string(),
-    errorType: v.optional(v.union(v.literal('error'), v.literal('string'), v.literal('object'))),
-    distinctId: v.optional(v.string()),
-    additionalProperties: v.optional(v.any()),
-  },
-  handler: async (ctx, args) => {
-    let error: unknown
-    switch (args.errorType ?? 'error') {
-      case 'error':
-        error = new Error(args.errorMessage)
-        break
-      case 'string':
-        error = args.errorMessage
-        break
-      case 'object':
-        error = { message: args.errorMessage }
-        break
-    }
+    args: {
+        errorMessage: v.string(),
+        errorType: v.optional(v.union(v.literal('error'), v.literal('string'), v.literal('object'))),
+        distinctId: v.optional(v.string()),
+        additionalProperties: v.optional(v.any()),
+    },
+    handler: async (ctx, args) => {
+        let error: unknown
+        switch (args.errorType ?? 'error') {
+            case 'error':
+                error = new Error(args.errorMessage)
+                break
+            case 'string':
+                error = args.errorMessage
+                break
+            case 'object':
+                error = { message: args.errorMessage }
+                break
+        }
 
     await insights.captureException(ctx, {
       error,
@@ -118,29 +118,26 @@ export const testCaptureException = mutation({
 // --- Feature flag methods (actions) ---
 
 const featureFlagArgs = {
-  distinctId: v.optional(v.string()),
-  flagKey: v.string(),
-  groups: v.optional(v.any()),
-  personProperties: v.optional(v.any()),
-  groupProperties: v.optional(v.any()),
-  sendFeatureFlagEvents: v.optional(v.boolean()),
-  disableGeoip: v.optional(v.boolean()),
+    distinctId: v.optional(v.string()),
+    flagKey: v.string(),
+    groups: v.optional(v.any()),
+    personProperties: v.optional(v.any()),
+    groupProperties: v.optional(v.any()),
+    disableGeoip: v.optional(v.boolean()),
 }
 
 function featureFlagOptions(args: {
-  groups?: unknown
-  personProperties?: unknown
-  groupProperties?: unknown
-  sendFeatureFlagEvents?: boolean
-  disableGeoip?: boolean
+    groups?: unknown
+    personProperties?: unknown
+    groupProperties?: unknown
+    disableGeoip?: boolean
 }) {
-  return {
-    groups: args.groups as Record<string, string> | undefined,
-    personProperties: args.personProperties as Record<string, string> | undefined,
-    groupProperties: args.groupProperties as Record<string, Record<string, string>> | undefined,
-    sendFeatureFlagEvents: args.sendFeatureFlagEvents,
-    disableGeoip: args.disableGeoip,
-  }
+    return {
+        groups: args.groups as Record<string, string> | undefined,
+        personProperties: args.personProperties as Record<string, string> | undefined,
+        groupProperties: args.groupProperties as Record<string, Record<string, string>> | undefined,
+        disableGeoip: args.disableGeoip,
+    }
 }
 
 export const testGetFeatureFlag = action({
@@ -195,9 +192,60 @@ export const testGetFeatureFlagResult = action({
   },
 })
 
-export const testGetAllFlags = action({
-  args: {
+export const testGetAllFlags = query({
+    args: {
+        distinctId: v.optional(v.string()),
+        groups: v.optional(v.any()),
+        personProperties: v.optional(v.any()),
+        groupProperties: v.optional(v.any()),
+        disableGeoip: v.optional(v.boolean()),
+        flagKeys: v.optional(v.array(v.string())),
+    },
+    handler: async (ctx, args) => {
+        const flags = await posthog.getAllFlags(ctx, {
+            distinctId: args.distinctId,
+            groups: args.groups as Record<string, string> | undefined,
+            personProperties: args.personProperties as Record<string, string> | undefined,
+            groupProperties: args.groupProperties as Record<string, Record<string, string>> | undefined,
+            disableGeoip: args.disableGeoip,
+            flagKeys: args.flagKeys,
+        })
+        return { flags }
+    },
+})
+
+// --- Cache inspection helpers (used by the demo UI to surface the cron's progress) ---
+
+export const flagDefinitionsStatus = query({
+    args: {},
+    handler: async (ctx) => {
+        const row = await ctx.runQuery(components.posthog.lib.getFlagDefinitions, {})
+        if (!row) return null
+        let flagKeys: string[] = []
+        try {
+            const parsed = JSON.parse(row.data) as { flags?: Array<{ key?: string }> }
+            flagKeys = parsed.flags?.map((f) => f.key ?? '<unnamed>') ?? []
+        } catch {
+            // ignore parse errors — keys list stays empty.
+        }
+        return {
+            fetchedAt: row.fetchedAt,
+            etag: row.etag ?? null,
+            flagCount: flagKeys.length,
+            flagKeys,
+        }
+    },
+})
+
+// --- Remote feature flag evaluation wrappers ---
+//
+// These are action-context actions that hit PostHog's `/flags` endpoint via the client's
+// `evaluate*` methods. Use them when local eval isn't possible (no personal API key, experience
+// continuity flags, static cohorts, properties you don't have server-side).
+
+const remoteFlagArgs = {
     distinctId: v.optional(v.string()),
+    flagKey: v.string(),
     groups: v.optional(v.any()),
     personProperties: v.optional(v.any()),
     groupProperties: v.optional(v.any()),

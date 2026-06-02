@@ -181,6 +181,7 @@ export type InsightsExtensionKind =
 export interface LazyLoadedSessionRecordingInterface {
     start: (startReason?: SessionStartReason) => void
     stop: () => void
+    discard: () => void
     sessionId: string
     status: SessionRecordingStatus
     onRRwebEmit: (rawEvent: eventWithTime) => void
@@ -206,6 +207,10 @@ export interface LazyLoadedConversationsInterface {
 
     // Lifecycle
     reset: () => void
+
+    // Identity verification
+    setIdentity: () => void
+    clearIdentity: () => void
 
     // API methods
     sendMessage: (message: string, userTraits?: UserProvidedTraits, newTicket?: boolean) => Promise<SendMessageResponse>
@@ -277,10 +282,6 @@ if (typeof File === 'undefined') {
     ;(global as any).File = function () {}
 }
 
-export const ArrayProto = Array.prototype
-export const nativeForEach = ArrayProto.forEach
-export const nativeIndexOf = ArrayProto.indexOf
-
 export const navigator = global?.navigator
 export const document = global?.document
 export const location = global?.location
@@ -288,6 +289,7 @@ export const fetch = global?.fetch
 export const XMLHttpRequest =
     global?.XMLHttpRequest && 'withCredentials' in new global.XMLHttpRequest() ? global.XMLHttpRequest : undefined
 export const AbortController = global?.AbortController
+export const CompressionStream = global?.CompressionStream
 export const userAgent = navigator?.userAgent
 export const assignableWindow: AssignableWindow = win ?? ({} as any)
 

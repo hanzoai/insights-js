@@ -236,6 +236,28 @@ describe('Insights Node.js', () => {
       ])
     })
 
+    it('should await the network request when identifyImmediate is awaited', async () => {
+      expect(mockedFetch).toHaveBeenCalledTimes(0)
+
+      await posthog.identifyImmediate({ distinctId: '123', properties: { foo: 'bar' } })
+
+      // Without awaiting the underlying request, the batch endpoint would not have been hit yet
+      // (regression guard for the missing-await bug in identifyImmediate).
+      const batchEvents = getLastBatchEvents()
+      expect(batchEvents).toMatchObject([
+        {
+          distinct_id: '123',
+          event: '$identify',
+          properties: {
+            $set: {
+              foo: 'bar',
+            },
+            $geoip_disable: true,
+          },
+        },
+      ])
+    })
+
     it('should allow overriding timestamp', async () => {
       expect(mockedFetch).toHaveBeenCalledTimes(0)
       insights.capture({ event: 'custom-time', distinctId: '123', timestamp: new Date('2021-02-03') })
@@ -645,6 +667,59 @@ describe('Insights Node.js', () => {
     })
   })
 
+  describe('request timeout', () => {
+    beforeEach(() => {
+      jest.useRealTimers()
+    })
+
+    afterEach(() => {
+      jest.useFakeTimers()
+    })
+
+    it('should abort a slow fetch after requestTimeout', async () => {
+      // A fetch that hangs forever but respects the AbortSignal — just like a real
+      // server that never responds. When our AbortController fires, the signal's
+      // abort event rejects the promise, mimicking real fetch abort behavior.
+      const hangingFetch = jest.fn((_url: string, init?: { signal?: AbortSignal }) => {
+        return new Promise<Response>((_resolve, reject) => {
+          if (init?.signal?.aborted) {
+            reject(new DOMException('The operation was aborted', 'AbortError'))
+            return
+          }
+          init?.signal?.addEventListener('abort', () => {
+            reject(new DOMException('The operation was aborted', 'AbortError'))
+          })
+        })
+      })
+
+      const ph = new PostHog('TEST_API_KEY', {
+        host: 'http://example.com',
+        fetch: hangingFetch as any,
+        fetchRetryCount: 0,
+        flushAt: 100, // high value so capture() doesn't auto-flush
+        flushInterval: 0,
+        requestTimeout: 10,
+        disableCompression: true,
+      })
+
+      const errors: any[] = []
+      ph.on('error', (err: any) => errors.push(err))
+
+      ph.capture({ event: 'test-event', distinctId: '123' })
+
+      // shutdown() joins the promise queue (waits for capture's async prepareEventMessage),
+      // then flushes. The flush calls fetchWithRetry → hangingFetch → abort fires after 10ms.
+      // _flush() catch emits 'error' (posthog-core-stateless.ts:1159) and re-throws.
+      // doShutdown() catches the PostHogFetchError and returns cleanly.
+      await ph.shutdown()
+
+      expect(hangingFetch).toHaveBeenCalled()
+      expect(errors).toHaveLength(1)
+      expect(errors[0].name).toBe('PostHogFetchNetworkError')
+      expect(errors[0].error.name).toBe('AbortError')
+    }, 10000)
+  })
+
   describe('groupIdentify', () => {
     it('should identify group with unique id', async () => {
       insights.groupIdentify({ groupType: 'insights', groupKey: 'team-1', properties: { analytics: true } })
@@ -811,7 +886,7 @@ describe('Insights Node.js', () => {
       )
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.stringContaining('"geoip_disable":true') })
       )
     })
@@ -845,7 +920,7 @@ describe('Insights Node.js', () => {
       await waitForPromises()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST' })
       )
 
@@ -870,7 +945,7 @@ describe('Insights Node.js', () => {
 
       expect(mockedFetch).not.toHaveBeenCalledWith(...anyLocalEvalCall)
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.stringContaining('"geoip_disable":true') })
       )
     })
@@ -896,6 +971,55 @@ describe('Insights Node.js', () => {
       })
 
       expect(insights.options.featureFlagsPollingInterval).toEqual(30000)
+    })
+
+    it('should trim whitespace-sensitive api keys and host during initialization', async () => {
+      posthog = new PostHog('  TEST_API_KEY\n', {
+        host: '  http://example.com\t ',
+        fetchRetryCount: 0,
+        personalApiKey: '  TEST_PERSONAL_API_KEY\t ',
+        disableCompression: true,
+      })
+
+      expect(posthog.apiKey).toEqual('TEST_API_KEY')
+      expect(posthog.host).toEqual('http://example.com')
+      expect(posthog.options.personalApiKey).toEqual('TEST_PERSONAL_API_KEY')
+    })
+
+    it('should not start local evaluation polling or fetch flags when api key is missing', async () => {
+      mockedFetch.mockClear()
+
+      posthog = new PostHog('  \n\t ', {
+        host: 'http://example.com',
+        fetchRetryCount: 0,
+        personalApiKey: 'TEST_PERSONAL_API_KEY',
+        featureFlagsPollingInterval: 100,
+        disableCompression: true,
+      })
+
+      await waitForPromises()
+      jest.runOnlyPendingTimers()
+      await waitForPromises()
+
+      expect(posthog.isDisabled).toEqual(true)
+      expect(await posthog.getFeatureFlag('feature-1', 'distinct_id')).toBeUndefined()
+      expect(await posthog.getAllFlagsAndPayloads('distinct_id')).toEqual({
+        featureFlags: {},
+        featureFlagPayloads: {},
+      })
+      expect((await posthog.evaluateFlags('distinct_id')).keys).toEqual([])
+
+      posthog.capture({ distinctId: 'distinct_id', event: 'node test event', sendFeatureFlags: true })
+      await posthog.captureImmediate({
+        distinctId: 'distinct_id',
+        event: 'node immediate event',
+        sendFeatureFlags: true,
+      })
+      await waitForPromises()
+      jest.runOnlyPendingTimers()
+      await waitForPromises()
+
+      expect(mockedFetch).not.toHaveBeenCalled()
     })
 
     it('should throw an error when creating SDK if a project key is passed in as personalApiKey', async () => {
@@ -933,7 +1057,7 @@ describe('Insights Node.js', () => {
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
       // no flags call
       expect(mockedFetch).not.toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST' })
       )
 
@@ -992,7 +1116,7 @@ describe('Insights Node.js', () => {
       expect(mockedFetch).toHaveBeenCalledWith(...anyLocalEvalCall)
       // no flags call
       expect(mockedFetch).not.toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST' })
       )
 
@@ -1041,7 +1165,7 @@ describe('Insights Node.js', () => {
       await waitForFlushTimer()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.not.stringContaining('geoip_disable') })
       )
 
@@ -1190,7 +1314,7 @@ describe('Insights Node.js', () => {
 
         // Should make remote flags call
         expect(mockedFetch).toHaveBeenCalledWith(
-          'http://example.com/flags/?v=2&config=true',
+          'http://example.com/flags/?v=2',
           expect.objectContaining({
             method: 'POST',
             body: expect.stringContaining('"plan":"premium"'),
@@ -1250,7 +1374,7 @@ describe('Insights Node.js', () => {
 
         // Should not make remote flags call
         expect(mockedFetch).not.toHaveBeenCalledWith(
-          'http://example.com/flags/?v=2&config=true',
+          'http://example.com/flags/?v=2',
           expect.objectContaining({ method: 'POST' })
         )
 
@@ -1436,7 +1560,7 @@ describe('Insights Node.js', () => {
 
         // Should not make remote flags call
         expect(mockedFetch).not.toHaveBeenCalledWith(
-          'http://example.com/flags/?v=2&config=true',
+          'http://example.com/flags/?v=2',
           expect.objectContaining({ method: 'POST' })
         )
 
@@ -1545,7 +1669,7 @@ describe('Insights Node.js', () => {
 
         // Should make remote flags call since local evaluation has no flags
         expect(mockedFetch).toHaveBeenCalledWith(
-          'http://example.com/flags/?v=2&config=true',
+          'http://example.com/flags/?v=2',
           expect.objectContaining({
             method: 'POST',
             body: expect.stringContaining('"plan":"premium"'),
@@ -1768,7 +1892,7 @@ describe('Insights Node.js', () => {
 
         // Should not make any remote calls for flags
         expect(mockedFetch).not.toHaveBeenCalledWith(
-          'http://example.com/flags/?v=2&config=true',
+          'http://example.com/flags/?v=2',
           expect.objectContaining({ method: 'POST' })
         )
 
@@ -1822,7 +1946,7 @@ describe('Insights Node.js', () => {
 
         // Should make remote calls for flags
         expect(mockedFetch).toHaveBeenCalledWith(
-          'http://example.com/flags/?v=2&config=true',
+          'http://example.com/flags/?v=2',
           expect.objectContaining({ method: 'POST' })
         )
 
@@ -2277,7 +2401,7 @@ describe('Insights Node.js', () => {
       ).resolves.toEqual(2)
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.stringContaining('"geoip_disable":true') })
       )
     })
@@ -2318,7 +2442,7 @@ describe('Insights Node.js', () => {
       ).resolves.toEqual([1])
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.stringContaining('"geoip_disable":true') })
       )
     })
@@ -2338,7 +2462,7 @@ describe('Insights Node.js', () => {
       ).resolves.toEqual(2)
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.stringContaining('"geoip_disable":true') })
       )
 
@@ -2347,7 +2471,7 @@ describe('Insights Node.js', () => {
       await expect(insights.isFeatureEnabled('feature-variant', '123', { disableGeoip: false })).resolves.toEqual(true)
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({ method: 'POST', body: expect.not.stringContaining('geoip_disable') })
       )
     })
@@ -2361,7 +2485,7 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           body: JSON.stringify({
             token: 'TEST_API_KEY',
@@ -2391,7 +2515,7 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           body: JSON.stringify({
             token: 'TEST_API_KEY',
@@ -2422,7 +2546,7 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           body: JSON.stringify({
             token: 'TEST_API_KEY',
@@ -2446,7 +2570,7 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           body: JSON.stringify({
             token: 'TEST_API_KEY',
@@ -2466,7 +2590,7 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           body: JSON.stringify({
             token: 'TEST_API_KEY',
@@ -2488,7 +2612,7 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           body: JSON.stringify({
             token: 'TEST_API_KEY',
@@ -2548,7 +2672,7 @@ describe('Insights Node.js', () => {
       await insightsWithEnvs.getAllFlags('some-distinct-id')
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           method: 'POST',
           body: expect.stringContaining('"evaluation_contexts":["production","backend"]'),
@@ -2574,7 +2698,7 @@ describe('Insights Node.js', () => {
       await insightsWithoutEnvs.getAllFlags('some-distinct-id')
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           method: 'POST',
           body: expect.not.stringContaining('evaluation_contexts'),
@@ -2601,7 +2725,7 @@ describe('Insights Node.js', () => {
       await insightsWithEmptyEnvs.getAllFlags('some-distinct-id')
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           method: 'POST',
           body: expect.not.stringContaining('evaluation_contexts'),
@@ -2628,7 +2752,7 @@ describe('Insights Node.js', () => {
       await insightsWithDeprecated.getAllFlags('some-distinct-id')
 
       expect(mockedFetch).toHaveBeenCalledWith(
-        'http://example.com/flags/?v=2&config=true',
+        'http://example.com/flags/?v=2',
         expect.objectContaining({
           method: 'POST',
           body: expect.stringContaining('"evaluation_contexts":["production","backend"]'),
@@ -2668,6 +2792,19 @@ describe('Insights Node.js', () => {
       await expect(insightsWithoutKey.getRemoteConfigPayload('test-flag')).rejects.toThrow(
         'Personal API key is required for remote config payload decryption'
       )
+    })
+
+    it('should return undefined without fetching when api key is missing', async () => {
+      const posthogWithoutProjectKey = new PostHog('  \n\t ', {
+        host: 'http://example.com',
+        fetchRetryCount: 0,
+        disableCompression: true,
+        personalApiKey: 'TEST_PERSONAL_API_KEY',
+      })
+      mockedFetch.mockClear()
+
+      await expect(posthogWithoutProjectKey.getRemoteConfigPayload('test-flag')).resolves.toBeUndefined()
+      expect(mockedFetch).not.toHaveBeenCalled()
     })
 
     it('should return empty object when no payload is available', async () => {

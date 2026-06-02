@@ -8,6 +8,11 @@
  * @module
  */
 
+import type * as aiSdk_manualCapture from "../aiSdk/manualCapture.js";
+import type * as aiSdk_openTelemetry from "../aiSdk/openTelemetry.js";
+import type * as convexAgent_manualCapture from "../convexAgent/manualCapture.js";
+import type * as convexAgent_openTelemetry from "../convexAgent/openTelemetry.js";
+import type * as crons from "../crons.js";
 import type * as example from "../example.js";
 import type * as insights from "../insights.js";
 
@@ -18,6 +23,11 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "aiSdk/manualCapture": typeof aiSdk_manualCapture;
+  "aiSdk/openTelemetry": typeof aiSdk_openTelemetry;
+  "convexAgent/manualCapture": typeof convexAgent_manualCapture;
+  "convexAgent/openTelemetry": typeof convexAgent_openTelemetry;
+  crons: typeof crons;
   example: typeof example;
   insights: typeof insights;
 }>;

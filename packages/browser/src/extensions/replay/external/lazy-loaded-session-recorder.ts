@@ -10,26 +10,21 @@ import {
 import { buildNetworkRequestOptions } from './config'
 import {
     ACTIVE,
-    allMatchSessionRecordingStatus,
-    AndTriggerMatching,
-    anyMatchSessionRecordingStatus,
     BUFFERING,
     DISABLED,
     EventTriggerMatching,
     LinkedFlagMatching,
-    nullMatchSessionRecordingStatus,
-    OrTriggerMatching,
     PAUSED,
-    PendingTriggerMatching,
-    RecordingTriggersStatus,
-    SAMPLED,
     SessionRecordingStatus,
-    TRIGGER_PENDING,
-    TriggerStatusMatching,
     TriggerType,
     URLTriggerMatching,
 } from './triggerMatching'
-import { estimateSize, INCREMENTAL_SNAPSHOT_EVENT_TYPE, truncateLargeConsoleLogs } from './sessionrecording-utils'
+import {
+    estimateCompressedEventSize,
+    estimateSize,
+    INCREMENTAL_SNAPSHOT_EVENT_TYPE,
+    truncateLargeConsoleLogs,
+} from './sessionrecording-utils'
 import { gzipSync, strFromU8, strToU8 } from 'fflate'
 import { assignableWindow, LazyLoadedSessionRecordingInterface, window, document } from '../../../utils/globals'
 import { addEventListener } from '../../../utils'
@@ -37,17 +32,20 @@ import { MutationThrottler } from './mutation-throttler'
 import { createLogger } from '../../../utils/logger'
 import {
     clampToRange,
+    gzipCompress,
+    isArray,
     isBoolean,
     isFunction,
+    isGzipSupported,
     isNull,
     isNullish,
+    isNativeAsyncGzipError,
     isNumber,
     isObject,
     isString,
     isUndefined,
 } from '@hanzo/insights-core'
 import {
-    SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION,
     SESSION_RECORDING_FIRST_FULL_SNAPSHOT_TIMESTAMP,
     SESSION_RECORDING_IS_SAMPLED,
     SESSION_RECORDING_OVERRIDE_SAMPLING,
@@ -56,11 +54,14 @@ import {
     SESSION_RECORDING_OVERRIDE_URL_TRIGGER,
     SESSION_RECORDING_PAST_MINIMUM_DURATION,
     SESSION_RECORDING_REMOTE_CONFIG,
+    SESSION_RECORDING_START_REASON,
+    SDK_DEBUG_REPLAY_RRWEB_ATTACHED,
+    SDK_DEBUG_REPLAY_RRWEB_START_ATTEMPTED,
     SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION,
+    SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION,
 } from '../../../constants'
 import { Insights } from '../../../insights-core'
 import {
-    CaptureResult,
     NetworkRecordOptions,
     PerformanceCaptureConfig,
     Properties,
@@ -71,8 +72,13 @@ import {
 } from '../../../types'
 import { isLocalhost } from '../../../utils/request-utils'
 import Config from '../../../config'
-import { sampleOnProperty } from '../../sampling'
 import { FlushedSizeTracker } from './flushed-size-tracker'
+import {
+    RecordingStrategy,
+    V1RecordingStrategy,
+    V2TriggerGroupStrategy,
+    RecordingStrategyContext,
+} from './recording-strategies'
 
 const BASE_ENDPOINT = '/s/'
 const DEFAULT_CANVAS_QUALITY = 0.4
@@ -84,6 +90,7 @@ const ONE_KB = 1024
 
 const ONE_MINUTE = 1000 * 60
 const FIVE_MINUTES = ONE_MINUTE * 5
+const ONE_HOUR = ONE_MINUTE * 60
 
 /**
  * Extracts the network_timing value from a capturePerformance config.
@@ -94,7 +101,7 @@ function networkTimingFromConfig(config: boolean | PerformanceCaptureConfig | un
 }
 
 export const RECORDING_IDLE_THRESHOLD_MS = FIVE_MINUTES
-export const RECORDING_REMOTE_CONFIG_TTL_MS = FIVE_MINUTES
+export const RECORDING_REMOTE_CONFIG_TTL_MS = ONE_HOUR
 export const RECORDING_MAX_EVENT_SIZE = ONE_KB * ONE_KB * 0.9 // ~1mb (with some wiggle room)
 export const RECORDING_BUFFER_TIMEOUT = 2000 // 2 seconds
 export const SESSION_RECORDING_BATCH_KEY = 'recordings'
@@ -109,6 +116,16 @@ interface QueuedRRWebEvent {
     enqueuedAt: number
 }
 
+interface QueuedCompressionEvent {
+    event: eventWithTime
+    compressionEnabled: boolean
+    targetSessionId: string
+    targetWindowId: string
+    generation: number
+    processed: boolean
+    counted: boolean
+}
+
 interface SessionIdlePayload {
     eventTimestamp: number
     lastActivityTimestamp: number
@@ -120,11 +137,12 @@ interface SessionIdlePayload {
 export interface SnapshotBuffer {
     size: number
     data: any[]
+    sizes: number[]
     sessionId: string
     windowId: string
 }
 
-const ACTIVE_SOURCES = [
+const ACTIVE_SOURCES: IncrementalSource[] = [
     IncrementalSource.MouseMove,
     IncrementalSource.MouseInteraction,
     IncrementalSource.Scroll,
@@ -150,12 +168,12 @@ function getRRWebRecord(): rrwebRecordType | undefined {
 }
 
 export type compressedFullSnapshotEvent = {
-    type: EventType.FullSnapshot
+    type: typeof EventType.FullSnapshot
     data: string
 }
 
 export type compressedIncrementalSnapshotEvent = {
-    type: EventType.IncrementalSnapshot
+    type: typeof EventType.IncrementalSnapshot
     data: {
         source: IncrementalSource
         texts: string
@@ -166,9 +184,9 @@ export type compressedIncrementalSnapshotEvent = {
 }
 
 export type compressedIncrementalStyleSnapshotEvent = {
-    type: EventType.IncrementalSnapshot
+    type: typeof EventType.IncrementalSnapshot
     data: {
-        source: IncrementalSource.StyleSheetRule
+        source: typeof IncrementalSource.StyleSheetRule
         id?: number
         styleId?: number
         replace?: string
@@ -189,8 +207,112 @@ export type compressedEventWithTime = compressedEvent & {
     cv: '2024-10'
 }
 
+function gzipStringToString(serializedData: string): string {
+    return strFromU8(gzipSync(strToU8(serializedData)), true)
+}
+
 function gzipToString(data: unknown): string {
-    return strFromU8(gzipSync(strToU8(JSON.stringify(data))), true)
+    return gzipStringToString(JSON.stringify(data))
+}
+
+async function gzipToStringAsync(data: unknown): Promise<string> {
+    const serializedData = JSON.stringify(data)
+    const compressed = await gzipCompress(serializedData, Config.DEBUG, { rethrow: true })
+    return strFromU8(new Uint8Array(await compressed!.arrayBuffer()), true)
+}
+
+let _gzippedEmptyArray: string | undefined
+let _gzippedEmptyArrayPromise: Promise<string> | undefined
+const _isNativeAsyncSessionRecordingGzipSupported = typeof globalThis !== 'undefined' && isGzipSupported()
+let _nativeAsyncSessionRecordingGzipDisabled = false
+
+function gzipField(data: unknown): string {
+    if (isArray(data) && data.length === 0) {
+        _gzippedEmptyArray = _gzippedEmptyArray ?? gzipToString([])
+        return _gzippedEmptyArray
+    }
+    return gzipToString(data)
+}
+
+async function gzipFieldAsync(data: unknown): Promise<string> {
+    if (isArray(data) && data.length === 0) {
+        if (_gzippedEmptyArray) {
+            return _gzippedEmptyArray
+        }
+        _gzippedEmptyArrayPromise =
+            _gzippedEmptyArrayPromise ??
+            gzipToStringAsync([])
+                .then((compressed) => {
+                    _gzippedEmptyArray = compressed
+                    return compressed
+                })
+                .catch((error) => {
+                    _gzippedEmptyArray = undefined
+                    _gzippedEmptyArrayPromise = undefined
+                    throw error
+                })
+        return _gzippedEmptyArrayPromise
+    }
+    return gzipToStringAsync(data)
+}
+
+function shouldCompressEvent(event: eventWithTime): boolean {
+    return (
+        event.type === EventType.FullSnapshot ||
+        (event.type === EventType.IncrementalSnapshot &&
+            (event.data.source === IncrementalSource.Mutation ||
+                event.data.source === IncrementalSource.StyleSheetRule))
+    )
+}
+
+function shouldUseNativeAsyncSessionRecordingGzip(event: eventWithTime): boolean {
+    return (
+        _isNativeAsyncSessionRecordingGzipSupported &&
+        !_nativeAsyncSessionRecordingGzipDisabled &&
+        shouldCompressEvent(event)
+    )
+}
+
+type CompressedEventResult = { event: eventWithTime | compressedEventWithTime; size: number }
+
+type CompressedMutationFields = Pick<
+    compressedIncrementalSnapshotEvent['data'],
+    'texts' | 'attributes' | 'removes' | 'adds'
+>
+type CompressedStyleFields = Pick<compressedIncrementalStyleSnapshotEvent['data'], 'adds' | 'removes'>
+
+function compressedResult(event: compressedEventWithTime): CompressedEventResult {
+    return { event, size: estimateCompressedEventSize(event) }
+}
+
+function buildCompressedFullSnapshotEvent(event: eventWithTime, data: string): compressedEventWithTime {
+    return {
+        ...event,
+        data,
+        cv: '2024-10' as const,
+    } as compressedEventWithTime
+}
+
+function buildCompressedMutationEvent(event: eventWithTime, fields: CompressedMutationFields): compressedEventWithTime {
+    return {
+        ...event,
+        cv: '2024-10' as const,
+        data: {
+            ...(event.data as Record<string, unknown>),
+            ...fields,
+        },
+    } as compressedEventWithTime
+}
+
+function buildCompressedStyleEvent(event: eventWithTime, fields: CompressedStyleFields): compressedEventWithTime {
+    return {
+        ...event,
+        cv: '2024-10' as const,
+        data: {
+            ...(event.data as Record<string, unknown>),
+            ...fields,
+        },
+    } as compressedEventWithTime
 }
 
 /**
@@ -198,44 +320,68 @@ function gzipToString(data: unknown): string {
  * but we want to be able to inspect metadata during ingestion.
  * and don't want to compress the entire event,
  * so we have a custom packer that only compresses part of some events
+ *
+ * returns the compressed event and its estimated JSON size,
+ * avoiding a redundant JSON.stringify for size estimation
  */
-function compressEvent(event: eventWithTime): eventWithTime | compressedEventWithTime {
+function compressEventSync(event: eventWithTime): CompressedEventResult {
     try {
         if (event.type === EventType.FullSnapshot) {
-            return {
-                ...event,
-                data: gzipToString(event.data),
-                cv: '2024-10',
-            }
+            return compressedResult(buildCompressedFullSnapshotEvent(event, gzipToString(event.data)))
         }
         if (event.type === EventType.IncrementalSnapshot && event.data.source === IncrementalSource.Mutation) {
-            return {
-                ...event,
-                cv: '2024-10',
-                data: {
-                    ...event.data,
-                    texts: gzipToString(event.data.texts),
-                    attributes: gzipToString(event.data.attributes),
-                    removes: gzipToString(event.data.removes),
-                    adds: gzipToString(event.data.adds),
-                },
-            }
+            return compressedResult(
+                buildCompressedMutationEvent(event, {
+                    texts: gzipField(event.data.texts),
+                    attributes: gzipField(event.data.attributes),
+                    removes: gzipField(event.data.removes),
+                    adds: gzipField(event.data.adds),
+                })
+            )
         }
         if (event.type === EventType.IncrementalSnapshot && event.data.source === IncrementalSource.StyleSheetRule) {
-            return {
-                ...event,
-                cv: '2024-10',
-                data: {
-                    ...event.data,
+            return compressedResult(
+                buildCompressedStyleEvent(event, {
                     adds: event.data.adds ? gzipToString(event.data.adds) : undefined,
                     removes: event.data.removes ? gzipToString(event.data.removes) : undefined,
-                },
-            }
+                })
+            )
         }
     } catch (e) {
         logger.error('could not compress event - will use uncompressed event', e)
     }
-    return event
+    return { event, size: estimateSize(event) }
+}
+
+async function compressEventAsync(event: eventWithTime): Promise<CompressedEventResult> {
+    try {
+        if (event.type === EventType.FullSnapshot) {
+            return compressedResult(buildCompressedFullSnapshotEvent(event, await gzipToStringAsync(event.data)))
+        }
+        if (event.type === EventType.IncrementalSnapshot && event.data.source === IncrementalSource.Mutation) {
+            const [texts, attributes, removes, adds] = await Promise.all([
+                gzipFieldAsync(event.data.texts),
+                gzipFieldAsync(event.data.attributes),
+                gzipFieldAsync(event.data.removes),
+                gzipFieldAsync(event.data.adds),
+            ])
+            return compressedResult(buildCompressedMutationEvent(event, { texts, attributes, removes, adds }))
+        }
+        if (event.type === EventType.IncrementalSnapshot && event.data.source === IncrementalSource.StyleSheetRule) {
+            const [adds, removes] = await Promise.all([
+                event.data.adds ? gzipToStringAsync(event.data.adds) : undefined,
+                event.data.removes ? gzipToStringAsync(event.data.removes) : undefined,
+            ])
+            return compressedResult(buildCompressedStyleEvent(event, { adds, removes }))
+        }
+    } catch (e) {
+        if (isNativeAsyncGzipError(e)) {
+            _nativeAsyncSessionRecordingGzipDisabled = true
+        }
+        logger.error('could not compress event asynchronously - trying synchronous compression', e)
+        return compressEventSync(event)
+    }
+    return { event, size: estimateSize(event) }
 }
 
 function isCustomEvent(e: eventWithTime, tag: string): e is eventWithTime & customEvent {
@@ -292,18 +438,20 @@ export const SEVEN_MEGABYTES = 1024 * 1024 * 7 * 0.9 // ~7mb (with some wiggle r
 export function splitBuffer(buffer: SnapshotBuffer, sizeLimit: number = SEVEN_MEGABYTES): SnapshotBuffer[] {
     if (buffer.size >= sizeLimit && buffer.data.length > 1) {
         const half = Math.floor(buffer.data.length / 2)
-        const firstHalf = buffer.data.slice(0, half)
-        const secondHalf = buffer.data.slice(half)
+        const firstHalfSizes = buffer.sizes.slice(0, half)
+        const secondHalfSizes = buffer.sizes.slice(half)
         return [
             splitBuffer({
-                size: estimateSize(firstHalf),
-                data: firstHalf,
+                size: firstHalfSizes.reduce((a, b) => a + b, 0),
+                data: buffer.data.slice(0, half),
+                sizes: firstHalfSizes,
                 sessionId: buffer.sessionId,
                 windowId: buffer.windowId,
             }),
             splitBuffer({
-                size: estimateSize(secondHalf),
-                data: secondHalf,
+                size: secondHalfSizes.reduce((a, b) => a + b, 0),
+                data: buffer.data.slice(half),
+                sizes: secondHalfSizes,
                 sessionId: buffer.sessionId,
                 windowId: buffer.windowId,
             }),
@@ -334,14 +482,14 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     private _queuedRRWebEvents: QueuedRRWebEvent[] = []
     private _isIdle: boolean | 'unknown' = 'unknown'
     private _rrwebError = false
+    private _rrwebStartAttempted = false
     private _maxDepthExceeded = false
 
     private _linkedFlagMatching: LinkedFlagMatching
     private _urlTriggerMatching: URLTriggerMatching
     private _eventTriggerMatching: EventTriggerMatching
-    // we need to be able to check the state of the event and url triggers separately
-    // as we make some decisions based on them without referencing LinkedFlag etc
-    private _triggerMatching: TriggerStatusMatching = new PendingTriggerMatching()
+    // Strategy pattern: V1 vs V2 trigger logic
+    private _strategy: RecordingStrategy | undefined
     private _fullSnapshotTimer?: ReturnType<typeof setInterval>
     private _fullSnapshotTimestamps: Array<[string, number]> = []
 
@@ -354,6 +502,11 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     private _flushBufferTimer?: any
     // we have a buffer - that contains Insights snapshot events ready to be sent to the server
     private _buffer: SnapshotBuffer
+    private _compressionQueue?: Promise<void>
+    private _pendingCompressionEvents: QueuedCompressionEvent[] = []
+    private _queuedCompressionEvents: number = 0
+    private _compressionQueueGeneration: number = 0
+    private _isStoppingAfterCompression: boolean = false
 
     private _removePageViewCaptureHook: (() => void) | undefined = undefined
 
@@ -391,12 +544,8 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     }
 
     private get _minimumDuration(): number | null {
-        const duration = this._remoteConfig?.minimumDurationMilliseconds
-        return isNumber(duration) ? duration : null
+        return this._strategy?.getMinimumDuration(this.sessionId) ?? null
     }
-
-    private _statusMatcher: (triggersStatus: RecordingTriggersStatus) => SessionRecordingStatus =
-        nullMatchSessionRecordingStatus
 
     private _onSessionIdListener: (() => void) | undefined = undefined
     private _onSessionIdleResetForcedListener: (() => void) | undefined = undefined
@@ -622,10 +771,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     }
 
     private get _fullSnapshotIntervalMillis(): number {
-        if (
-            this._triggerMatching.triggerStatus(this.sessionId) === TRIGGER_PENDING &&
-            !['sampled', 'active'].includes(this.status)
-        ) {
+        if (this._strategy?.hasPendingTriggers(this.sessionId) && !['sampled', 'active'].includes(this.status)) {
             return ONE_MINUTE
         }
 
@@ -686,29 +832,38 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     }
 
     private _activateTrigger(triggerType: TriggerType, matchDetail?: string) {
+        // V1 only: V2 uses per-group activation and never calls this method
         // Prevent re-entry: if we're already activating a trigger, skip to avoid infinite recursion
         // This can happen when _reportStarted emits custom events that match the trigger condition
         if (this._isActivatingTrigger) {
             return
         }
 
-        if (this._triggerMatching.triggerStatus(this.sessionId) === TRIGGER_PENDING) {
-            this._isActivatingTrigger = true
-            try {
-                // status is stored separately for URL and event triggers
-                this._instance?.persistence?.register({
-                    [triggerType === 'url'
-                        ? SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION
-                        : SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION]: this._sessionId,
-                })
+        if (!this._strategy?.hasPendingTriggers(this.sessionId)) {
+            return
+        }
 
-                this._flushBuffer()
-                this._reportStarted((triggerType + '_trigger_matched') as SessionStartReason, {
-                    [triggerType === 'url' ? 'matchedUrl' : 'matchedEvent']: matchDetail,
-                })
-            } finally {
-                this._isActivatingTrigger = false
-            }
+        this._isActivatingTrigger = true
+        try {
+            // V1: Write trigger activation to persistence
+            // (V2 handles this per-group via TriggerGroupMatching.activateTrigger)
+            const persistenceKey =
+                triggerType === 'url'
+                    ? SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION
+                    : SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION
+
+            this._instance.persistence?.register({
+                [persistenceKey]: this.sessionId,
+            })
+
+            this._strategy?.updateActiveTriggers(this.sessionId)
+
+            this._flushBuffer()
+            this._reportStarted((triggerType + '_trigger_matched') as SessionStartReason, {
+                [triggerType === 'url' ? 'matchedUrl' : 'matchedEvent']: matchDetail,
+            })
+        } finally {
+            this._isActivatingTrigger = false
         }
     }
 
@@ -721,14 +876,21 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         if (!persistedConfig) {
             return undefined
         }
-        const parsedConfig = isObject(persistedConfig) ? persistedConfig : JSON.parse(persistedConfig)
+        let parsedConfig: SessionRecordingPersistedConfig
+        try {
+            parsedConfig = isObject(persistedConfig) ? persistedConfig : JSON.parse(persistedConfig)
+        } catch (e) {
+            // Do not unregister here: the SDK only registers structured configs, and this read path should
+            // ignore corrupt legacy/external values without mutating persistence.
+            logger.warn('persisted remote config for session recording is invalid and will be ignored', e)
+            return undefined
+        }
 
         // Only check TTL if recording hasn't started yet
         // Once started, trust the config until a hard page load
         if (!this.isStarted) {
-            // default to now so that older persisted configs without a cache_timestamp
-            // are treated as fresh instead of being cleared on every read
-            // they come from versions of the code that will never set a cache_timestamp
+            // default to now so that configs persisted by older SDK versions
+            // (which never set cache_timestamp) are treated as fresh
             const cacheTimestamp = parsedConfig.cache_timestamp ?? Date.now()
             if (Date.now() - cacheTimestamp > RECORDING_REMOTE_CONFIG_TTL_MS) {
                 logger.info('persisted remote config for session recording is stale and will be ignored', {
@@ -743,13 +905,13 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         return parsedConfig as SessionRecordingPersistedConfig
     }
 
-    private _checkOverride(key: string, overrideFunction: () => void): void {
+    private _checkOverride(key: string, overrideFunction: () => void, clearOverride: () => void): void {
         const overrideFlag: boolean = this._instance.get_property(key) as boolean
         if (overrideFlag) {
             overrideFunction()
 
             // Clean up the override flag after applying it
-            this._instance.persistence?.unregister(key)
+            clearOverride()
         }
     }
 
@@ -772,46 +934,69 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             this._endpoint = config?.endpoint
         }
 
-        if (config?.triggerMatchType === 'any') {
-            this._statusMatcher = anyMatchSessionRecordingStatus
-            this._triggerMatching = new OrTriggerMatching([this._eventTriggerMatching, this._urlTriggerMatching])
+        // Initialize the appropriate strategy based on config version
+        const isV2 = config?.version === 2 && config?.triggerGroups && config.triggerGroups.length > 0
+
+        if (isV2) {
+            this._strategy = new V2TriggerGroupStrategy(
+                this._instance,
+                this._urlTriggerMatching,
+                this._reportStarted.bind(this),
+                this._tryAddCustomEvent.bind(this)
+            )
         } else {
-            // either the setting is "ALL"
-            // or we default to the most restrictive
-            this._statusMatcher = allMatchSessionRecordingStatus
-            this._triggerMatching = new AndTriggerMatching([this._eventTriggerMatching, this._urlTriggerMatching])
+            this._strategy = new V1RecordingStrategy(
+                this._instance,
+                this._urlTriggerMatching,
+                this._eventTriggerMatching,
+                this._linkedFlagMatching,
+                this._reportStarted.bind(this),
+                this._tryTakeFullSnapshot.bind(this)
+            )
         }
-        this._instance.register_for_session({
-            $sdk_debug_replay_remote_trigger_matching_config: config?.triggerMatchType,
-        })
 
-        this._urlTriggerMatching.onConfig(config)
+        // Let the strategy configure itself
+        this._strategy.onRemoteConfig(config)
 
-        this._eventTriggerMatching.onConfig(config)
+        // Setup event trigger listeners via strategy
         this._removeEventTriggerCaptureHook?.()
-        this._addEventTriggerListener()
+        this._removeEventTriggerCaptureHook = this._strategy.setupEventTriggerListeners(
+            this._instance.on.bind(this._instance, 'eventCaptured'),
+            this.sessionId,
+            (triggerType, matchDetail) => this._activateTrigger(triggerType, matchDetail)
+        )
 
-        this._linkedFlagMatching.onConfig(config, (flag, variant) => {
-            this._reportStarted('linked_flag_matched', {
-                flag,
-                variant,
-            })
-        })
+        this._checkOverride(
+            SESSION_RECORDING_OVERRIDE_SAMPLING,
+            () => {
+                this.overrideSampling()
+            },
+            () => this._instance.persistence?.unregister(SESSION_RECORDING_OVERRIDE_SAMPLING)
+        )
+        this._checkOverride(
+            SESSION_RECORDING_OVERRIDE_LINKED_FLAG,
+            () => {
+                this.overrideLinkedFlag()
+            },
+            () => this._instance.persistence?.unregister(SESSION_RECORDING_OVERRIDE_LINKED_FLAG)
+        )
+        this._checkOverride(
+            SESSION_RECORDING_OVERRIDE_EVENT_TRIGGER,
+            () => {
+                this.overrideTrigger('event')
+            },
+            () => this._instance.persistence?.unregister(SESSION_RECORDING_OVERRIDE_EVENT_TRIGGER)
+        )
+        this._checkOverride(
+            SESSION_RECORDING_OVERRIDE_URL_TRIGGER,
+            () => {
+                this.overrideTrigger('url')
+            },
+            () => this._instance.persistence?.unregister(SESSION_RECORDING_OVERRIDE_URL_TRIGGER)
+        )
 
-        this._checkOverride(SESSION_RECORDING_OVERRIDE_SAMPLING, () => {
-            this.overrideSampling()
-        })
-        this._checkOverride(SESSION_RECORDING_OVERRIDE_LINKED_FLAG, () => {
-            this.overrideLinkedFlag()
-        })
-        this._checkOverride(SESSION_RECORDING_OVERRIDE_EVENT_TRIGGER, () => {
-            this.overrideTrigger('event')
-        })
-        this._checkOverride(SESSION_RECORDING_OVERRIDE_URL_TRIGGER, () => {
-            this.overrideTrigger('url')
-        })
-
-        this._makeSamplingDecision(this.sessionId)
+        // Let strategy make sampling decisions
+        this._strategy.makeSamplingDecisions(this.sessionId)
         this._startRecorder()
 
         if (this._rrwebError) {
@@ -917,10 +1102,13 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
 
         this._clearConditionalRecordingPersistence()
 
-        // Note: We don't call stop()/start() here because _updateWindowAndSessionIds
-        // already handles the restart. This callback fires synchronously during
-        // checkAndGetSessionAndWindowId(), so _updateWindowAndSessionIds will detect
-        // the session change and handle the restart after this callback returns.
+        // When rrweb isn't running _updateWindowAndSessionIds can't drive the restart,
+        // so we restart here. Otherwise it handles the restart after this callback returns.
+        if (this._isIdle === true || !this.isStarted) {
+            this._isIdle = 'unknown'
+            this.stop()
+            this.start('session_id_changed')
+        }
 
         if (shouldLinkSessions) {
             this._tryAddCustomEvent('$session_starting', {
@@ -936,18 +1124,16 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         }
 
         if (isNumber(this._sampleRate) && isNullish(this._samplingSessionListener)) {
-            this._makeSamplingDecision(sessionId)
+            this._strategy?.makeSamplingDecisions(sessionId)
         }
     }
 
-    stop() {
+    private _teardown() {
         window?.removeEventListener('beforeunload', this._onBeforeUnload)
         window?.removeEventListener('offline', this._onOffline)
         window?.removeEventListener('online', this._onOnline)
         window?.removeEventListener('visibilitychange', this._onVisibilityChange)
 
-        this._flushBuffer()
-        this._clearBuffer()
         clearInterval(this._fullSnapshotTimer)
         this._clearFlushBufferTimer()
 
@@ -964,10 +1150,20 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         this._forceIdleSessionIdListener?.()
         this._forceIdleSessionIdListener = undefined
 
-        this._eventTriggerMatching.stop()
-        this._urlTriggerMatching.stop()
-        this._linkedFlagMatching.stop()
+        this._strategy?.stop()
 
+        this._stopRecordingProducers()
+
+        // Invalidate any in-flight async compression work so it does not capture events
+        // after stop()/discard() has cleared the buffer or after a future restart.
+        this._compressionQueueGeneration += 1
+        this._pendingCompressionEvents = []
+        this._queuedCompressionEvents = 0
+        this._compressionQueue = undefined
+        this._isStoppingAfterCompression = false
+    }
+
+    private _stopRecordingProducers() {
         this._mutationThrottler?.stop()
 
         // Clear any queued rrweb events to prevent memory leaks from closures
@@ -975,11 +1171,182 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
 
         this._stopRrweb?.()
         this._stopRrweb = undefined
+    }
 
+    private _stopAfterCompressionQueueDrains(): boolean {
+        if (!this._compressionQueue || this._queuedCompressionEvents === 0) {
+            return false
+        }
+        if (this._isStoppingAfterCompression) {
+            return true
+        }
+
+        this._isStoppingAfterCompression = true
+        const generation = this._compressionQueueGeneration
+        this._clearFlushBufferTimer()
+        // Stop rrweb synchronously so it cannot keep producing events while we wait
+        // for the compression queue to drain and flush the already queued events.
+        this._stopRecordingProducers()
+        this._compressionQueue
+            .catch(() => undefined)
+            .then(() => {
+                if (generation !== this._compressionQueueGeneration) {
+                    return
+                }
+
+                this._isStoppingAfterCompression = false
+                this._flushBuffer()
+                this._clearBuffer()
+                this._teardown()
+                logger.info('stopped')
+            })
+            .catch(() => {
+                // Keep stop() best-effort. Compression errors are handled per event,
+                // but never let an unexpected queue failure block teardown.
+                this._isStoppingAfterCompression = false
+                this._teardown()
+                logger.info('stopped')
+            })
+
+        return true
+    }
+
+    stop() {
+        if (this._stopAfterCompressionQueueDrains()) {
+            return
+        }
+
+        this._flushBuffer()
+        this._clearBuffer()
+        this._teardown()
         logger.info('stopped')
     }
 
+    discard() {
+        this._clearBuffer()
+        this._teardown()
+        logger.info('discarded')
+    }
+
+    private _captureProcessedEvent(
+        event: eventWithTime,
+        eventToSend: eventWithTime | compressedEventWithTime,
+        size: number,
+        targetSessionId: string,
+        targetWindowId: string
+    ) {
+        const properties = {
+            $snapshot_bytes: size,
+            $snapshot_data: eventToSend,
+            $session_id: targetSessionId,
+            $window_id: targetWindowId,
+        }
+
+        if (event.type === EventType.FullSnapshot && getRRWeb()?.wasMaxDepthReached?.()) {
+            this._maxDepthExceeded = true
+        }
+
+        if (this.status === DISABLED) {
+            this._clearBuffer()
+            return
+        }
+
+        this._captureSnapshotBuffered(properties)
+    }
+
+    private _finishQueuedCompressionEvent(queuedEvent: QueuedCompressionEvent) {
+        if (queuedEvent.counted && queuedEvent.generation === this._compressionQueueGeneration) {
+            this._queuedCompressionEvents = Math.max(0, this._queuedCompressionEvents - 1)
+        }
+        queuedEvent.counted = false
+        this._pendingCompressionEvents = this._pendingCompressionEvents.filter((x) => x !== queuedEvent)
+    }
+
+    private _captureQueuedCompressionEvent(
+        queuedEvent: QueuedCompressionEvent,
+        eventToSend: eventWithTime | compressedEventWithTime,
+        size: number
+    ) {
+        if (queuedEvent.processed || queuedEvent.generation !== this._compressionQueueGeneration) {
+            return
+        }
+
+        queuedEvent.processed = true
+        this._captureProcessedEvent(
+            queuedEvent.event,
+            eventToSend,
+            size,
+            queuedEvent.targetSessionId,
+            queuedEvent.targetWindowId
+        )
+    }
+
+    private _processQueuedCompressionEventSync(queuedEvent: QueuedCompressionEvent) {
+        try {
+            const { event: eventToSend, size } = queuedEvent.compressionEnabled
+                ? compressEventSync(queuedEvent.event)
+                : { event: queuedEvent.event, size: estimateSize(queuedEvent.event) }
+
+            this._captureQueuedCompressionEvent(queuedEvent, eventToSend, size)
+        } finally {
+            this._finishQueuedCompressionEvent(queuedEvent)
+        }
+    }
+
+    private _drainCompressionQueueSync() {
+        const queuedEvents = [...this._pendingCompressionEvents]
+        queuedEvents.forEach((queuedEvent) => {
+            this._processQueuedCompressionEventSync(queuedEvent)
+        })
+    }
+
+    private _enqueueCompression(
+        event: eventWithTime,
+        compressionEnabled: boolean,
+        targetSessionId: string,
+        targetWindowId: string
+    ) {
+        const queuedEvent: QueuedCompressionEvent = {
+            event,
+            compressionEnabled,
+            targetSessionId,
+            targetWindowId,
+            generation: this._compressionQueueGeneration,
+            processed: false,
+            counted: true,
+        }
+        this._pendingCompressionEvents.push(queuedEvent)
+        this._queuedCompressionEvents += 1
+
+        const processEvent = async () => {
+            try {
+                if (queuedEvent.processed) {
+                    return
+                }
+
+                const { event: eventToSend, size } = compressionEnabled
+                    ? shouldUseNativeAsyncSessionRecordingGzip(event)
+                        ? await compressEventAsync(event)
+                        : compressEventSync(event)
+                    : { event, size: estimateSize(event) }
+
+                this._captureQueuedCompressionEvent(queuedEvent, eventToSend, size)
+            } finally {
+                this._finishQueuedCompressionEvent(queuedEvent)
+            }
+        }
+
+        this._compressionQueue = this._compressionQueue
+            ? this._compressionQueue.catch(() => undefined).then(processEvent)
+            : processEvent()
+    }
+
     onRRwebEmit(rawEvent: eventWithTime) {
+        // late event after sessionManager teardown (e.g. cookieless opt-out) — _sessionManager would throw
+        if (!this._instance.sessionManager) {
+            return
+        }
+
         this._processQueuedEvents()
 
         if (!rawEvent || !isObject(rawEvent)) {
@@ -997,13 +1364,14 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             this._pageViewFallBack()
         }
 
-        // Check if the URL matches any trigger patterns
-        this._urlTriggerMatching.checkUrlTriggerConditions(
+        // Check if the URL matches any trigger patterns - delegate to strategy
+        this._strategy?.checkUrlTriggers(
+            this.sessionId,
             () => this._pauseRecording(),
             () => this._resumeRecording(),
-            (triggerType, matchDetail) => this._activateTrigger(triggerType, matchDetail),
-            this.sessionId
+            (triggerType, matchDetail) => this._activateTrigger(triggerType, matchDetail)
         )
+
         // always have to check if the URL is blocked really early,
         // or you risk getting stuck in a loop
         if (this._urlTriggerMatching.urlBlocked && !isRecordingPausedEvent(rawEvent)) {
@@ -1028,11 +1396,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         }
 
         // Clear the buffer if waiting for a trigger and only keep data from after the current full snapshot
-        // we always start trigger pending so need to wait for flags before we know if we're really pending
-        if (
-            rawEvent.type === EventType.FullSnapshot &&
-            this._triggerMatching.triggerStatus(this.sessionId) === TRIGGER_PENDING
-        ) {
+        if (rawEvent.type === EventType.FullSnapshot && this._strategy?.hasPendingTriggers(this.sessionId)) {
             this._clearBufferBeforeMostRecentMeta()
         }
 
@@ -1099,42 +1463,39 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             }
         }
 
-        const eventToSend =
-            (this._instance.config.session_recording.compress_events ?? true) ? compressEvent(event) : event
-        const size = estimateSize(eventToSend)
+        const compressionEnabled = this._instance.config.session_recording.compress_events ?? true
 
-        const properties = {
-            $snapshot_bytes: size,
-            $snapshot_data: eventToSend,
-            $session_id: targetSessionId,
-            $window_id: targetWindowId,
-        }
-
-        if (event.type === EventType.FullSnapshot && getRRWeb()?.wasMaxDepthReached?.()) {
-            this._maxDepthExceeded = true
-        }
-
-        if (this.status === DISABLED) {
-            this._clearBuffer()
+        if (
+            this._queuedCompressionEvents > 0 ||
+            (compressionEnabled && shouldUseNativeAsyncSessionRecordingGzip(event))
+        ) {
+            this._enqueueCompression(event, compressionEnabled, targetSessionId, targetWindowId)
             return
         }
 
-        this._captureSnapshotBuffered(properties)
+        const { event: eventToSend, size } = compressionEnabled
+            ? compressEventSync(event)
+            : { event, size: estimateSize(event) }
+        this._captureProcessedEvent(event, eventToSend, size, targetSessionId, targetWindowId)
     }
 
     get status(): SessionRecordingStatus {
-        return this._statusMatcher({
-            // can't get here without recording being enabled...
-            receivedFlags: true,
-            isRecordingEnabled: true,
-            // things that do still vary
+        if (!this._strategy) {
+            return DISABLED
+        }
+
+        const context: RecordingStrategyContext = {
+            instance: this._instance,
+            sessionId: this.sessionId,
             isSampled: this._isSampled,
             rrwebError: this._rrwebError,
             urlTriggerMatching: this._urlTriggerMatching,
             eventTriggerMatching: this._eventTriggerMatching,
             linkedFlagMatching: this._linkedFlagMatching,
-            sessionId: this.sessionId,
-        })
+            remoteConfig: this._remoteConfig,
+        }
+
+        return this._strategy.getStatus(context)
     }
 
     log(message: string, level: 'log' | 'warn' | 'error' = 'log') {
@@ -1212,10 +1573,13 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
                     $snapshot_data: snapshotBuffer.data,
                     $session_id: snapshotBuffer.sessionId,
                     $window_id: snapshotBuffer.windowId,
-                    $lib: 'web',
+                    $lib: Config.LIB_NAME,
                     $lib_version: Config.LIB_VERSION,
                 })
             })
+
+            // Notify strategy that initial flush is complete (performance optimization)
+            this._strategy?.onFlushComplete()
         }
 
         // buffer is empty, we clear it in case the session id has changed
@@ -1296,6 +1660,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
 
         this._buffer.size += properties.$snapshot_bytes
         this._buffer.data.push(properties.$snapshot_data)
+        this._buffer.sizes.push(properties.$snapshot_bytes)
 
         if (!this._flushBufferTimer && !this._isIdle) {
             this._flushBufferTimer = setTimeout(() => {
@@ -1335,7 +1700,8 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         }
         if (lastMetaIndex >= 0) {
             this._buffer.data = this._buffer.data.slice(lastMetaIndex)
-            this._buffer.size = this._buffer.data.reduce((acc, curr) => acc + estimateSize(curr), 0)
+            this._buffer.sizes = this._buffer.sizes.slice(lastMetaIndex)
+            this._buffer.size = this._buffer.sizes.reduce((a, b) => a + b, 0)
             return this._buffer
         } else {
             return this._clearBuffer()
@@ -1346,6 +1712,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         this._buffer = {
             size: 0,
             data: [],
+            sizes: [],
             sessionId: this._sessionId,
             windowId: this._windowId,
         }
@@ -1359,6 +1726,9 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             return
         }
 
+        // beforeunload cannot wait for async CompressionStream work. Synchronously
+        // compress any queued events so sendBeacon can include them in this flush.
+        this._drainCompressionQueueSync()
         this._flushBuffer()
     }
 
@@ -1379,7 +1749,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
 
     private _reportStarted(startReason: SessionStartReason, tagPayload?: Record<string, any>) {
         this._instance.register_for_session({
-            $session_recording_start_reason: startReason,
+            [SESSION_RECORDING_START_REASON]: startReason,
         })
         logger.info(startReason.replace('_', ' '), tagPayload)
         if (startReason !== 'session_id_changed') {
@@ -1473,75 +1843,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
     }
 
     private _clearConditionalRecordingPersistence(): void {
-        this._instance?.persistence?.unregister(SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION)
-        this._instance?.persistence?.unregister(SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION)
-        this._instance?.persistence?.unregister(SESSION_RECORDING_IS_SAMPLED)
-        this._instance?.persistence?.unregister(SESSION_RECORDING_PAST_MINIMUM_DURATION)
-    }
-
-    private _makeSamplingDecision(sessionId: string): void {
-        const sessionIdChanged = this._sessionId !== sessionId
-
-        // capture the current sample rate
-        // because it is re-used multiple times
-        // and the bundler won't minimize any of the references
-        const currentSampleRate = this._sampleRate
-
-        if (!isNumber(currentSampleRate)) {
-            this._instance.persistence?.unregister(SESSION_RECORDING_IS_SAMPLED)
-            return
-        }
-
-        const storedIsSampled = this._isSampled
-
-        /**
-         * if we get this far, then we should make a sampling decision.
-         * When the session id changes or there is no stored sampling decision for this session id
-         * then we should make a new decision.
-         *
-         * Otherwise, we should use the stored decision.
-         */
-        const makeDecision = sessionIdChanged || !isBoolean(storedIsSampled)
-        const shouldSample = makeDecision ? sampleOnProperty(sessionId, currentSampleRate) : storedIsSampled
-
-        if (makeDecision) {
-            if (shouldSample) {
-                this._reportStarted(SAMPLED)
-            } else {
-                logger.warn(
-                    `Sample rate (${currentSampleRate}) has determined that this sessionId (${sessionId}) will not be sent to the server.`
-                )
-            }
-
-            this._tryAddCustomEvent('samplingDecisionMade', {
-                sampleRate: currentSampleRate,
-                isSampled: shouldSample,
-            })
-        }
-
-        this._instance.persistence?.register({
-            [SESSION_RECORDING_IS_SAMPLED]: shouldSample ? sessionId : false,
-        })
-    }
-
-    private _addEventTriggerListener() {
-        if (this._eventTriggerMatching._eventTriggers.length === 0 || !isNullish(this._removeEventTriggerCaptureHook)) {
-            return
-        }
-
-        this._removeEventTriggerCaptureHook = this._instance.on('eventCaptured', (event: CaptureResult) => {
-            // If anything could go wrong here, it has the potential to block the main loop,
-            // so we catch all errors.
-            try {
-                this._eventTriggerMatching.checkEventTriggerConditions(
-                    event.event,
-                    (triggerType, matchDetail) => this._activateTrigger(triggerType, matchDetail),
-                    this.sessionId
-                )
-            } catch (e) {
-                logger.error('Could not activate event trigger', e)
-            }
-        })
+        this._strategy?.clearConditionalRecordingPersistence()
     }
 
     get sdkDebugProperties(): Properties {
@@ -1557,6 +1859,8 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             $sdk_debug_replay_full_snapshots: this._fullSnapshotTimestamps,
             $snapshot_max_depth_exceeded: this._maxDepthExceeded,
             $sdk_debug_replay_rrweb_error: this._rrwebError,
+            [SDK_DEBUG_REPLAY_RRWEB_ATTACHED]: !!this._stopRrweb,
+            [SDK_DEBUG_REPLAY_RRWEB_START_ATTEMPTED]: this._rrwebStartAttempted,
         }
     }
 
@@ -1564,6 +1868,7 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
         if (this._stopRrweb) {
             return
         }
+        this._rrwebStartAttempted = true
 
         // rrweb config info: https://github.com/rrweb-io/rrweb/blob/7d5d0033258d6c29599fb08412202d9a2c7b9413/src/record/index.ts#L28
         const sessionRecordingOptions: recordOptions = {

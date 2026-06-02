@@ -157,6 +157,10 @@ export function OpenTextQuestion({
                     }}
                     onKeyDown={(e) => {
                         e.stopPropagation()
+                        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !validationError) {
+                            e.preventDefault()
+                            isPreviewMode ? handlePreviewSubmit() : handleSubmit()
+                        }
                     }}
                     value={text}
                 />
