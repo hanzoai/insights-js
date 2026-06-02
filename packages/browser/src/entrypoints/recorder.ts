@@ -1,8 +1,8 @@
 // This file is kept only for backwards compatibility.
 // In almost every case, if you are manually importing a file you should use insights-recorder instead.
 
-import { record as rrwebRecord } from '@rrweb/record'
-import { getRecordConsolePlugin } from '@rrweb/rrweb-plugin-console-record'
+import { record as rrwebRecord, wasMaxDepthReached, resetMaxDepthState } from '@posthog/rrweb-record'
+import { getRecordConsolePlugin } from '@posthog/rrweb-plugin-console-record'
 import { getRecordNetworkPlugin } from '../extensions/replay/external/network-plugin'
 import { assignableWindow } from '../utils/globals'
 

@@ -19,6 +19,8 @@ export interface InsightsMaskViewProps extends ViewProps {
  * - Setting `accessibilityLabel` to `"ph-no-capture"` to hide the content from session recordings
  * - Setting `importantForAccessibility` to `"no"` to prevent the wrapper View from hiding
  *   accessible content on Android (since `accessibilityLabel` would otherwise interfere)
+ * - Setting `collapsable={false}` so React Native keeps this wrapper in the native view hierarchy
+ *   (otherwise layout-only view flattening can remove it and masking is not detected on iOS/Android)
  *
  * @example
  * ```jsx

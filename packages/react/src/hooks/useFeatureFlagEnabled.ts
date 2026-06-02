@@ -17,8 +17,9 @@ export function useFeatureFlagEnabled(flag: string): boolean | undefined {
 
     // if the client is not loaded yet, check if we have a bootstrapped value and then true/false it
     if (!client?.featureFlags?.hasLoadedFlags && bootstrap?.featureFlags) {
-        return isUndefined(bootstrapped) ? undefined : !!bootstrapped
+        return isUndefined(bootstrapped) ? defaultValue : !!bootstrapped
     }
 
-    return featureEnabled
+    // while the flag value is unknown (flags not loaded, or the flag is absent), fall back to defaultValue
+    return isUndefined(featureEnabled) ? defaultValue : featureEnabled
 }

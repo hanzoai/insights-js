@@ -64,6 +64,7 @@ export type {
     PerformanceCaptureConfig,
     DeadClickCandidate,
     ExceptionAutoCaptureConfig,
+    ExceptionStepsConfig,
     DeadClicksAutoCaptureConfig,
     HeatmapConfig,
     ConfigDefaults,
@@ -84,3 +85,21 @@ export type { SurveyRenderReason } from './survey'
 
 // Toolbar types
 export type { ToolbarParams, ToolbarUserIntent, ToolbarSource, ToolbarVersion } from './toolbar'
+
+// Tree-shakeable extension types
+export type { TreeShakeableConfig, TreeShakeable } from './tree-shakeable'
+
+// Log capture types
+export type {
+    LogSeverityLevel,
+    OtlpSeverityText,
+    OtlpSeverityEntry,
+    LogAttributeValue,
+    LogAttributes,
+    CaptureLogOptions,
+    Logger,
+    OtlpAnyValue,
+    OtlpKeyValue,
+    OtlpLogRecord,
+    OtlpLogsPayload,
+} from './capture-log'

@@ -69,7 +69,7 @@ describe('exception autocapture', () => {
             type: 'onuncaughtexception',
           },
           framesLength: 3,
-          lastFrameFileName: workerFilename,
+          lastFrameFileName: relative(process.cwd(), workerFilename),
           lastFrameHasContext: true,
         })
         res()
@@ -95,7 +95,7 @@ describe('exception autocapture', () => {
             type: 'onunhandledrejection',
           },
           framesLength: 1,
-          lastFrameFileName: workerFilename,
+          lastFrameFileName: relative(process.cwd(), workerFilename),
           lastFrameHasContext: true,
         })
         res()

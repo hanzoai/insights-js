@@ -2,6 +2,7 @@ import { Insights } from '../insights-core'
 import { InsightsConfig } from '../types'
 import { AllExtensions } from '../extensions/extension-bundles'
 import { Autocapture } from '../autocapture'
+import { PostHogFeatureFlags } from '../posthog-featureflags'
 import { SessionRecording } from '../extensions/replay/session-recording'
 import { createInsightsInstance } from './helpers/insights-instance'
 
@@ -67,6 +68,34 @@ describe('__extensionClasses enrollment', () => {
         })
 
         expect(insights.autocapture).toBeInstanceOf(MockAutocapture)
+    })
+
+    it('eagerly constructs extensions from defaults before init()', () => {
+        PostHog.__defaultExtensionClasses = AllExtensions
+
+        const posthog = new PostHog()
+
+        expect(posthog.featureFlags).toBeDefined()
+        expect(posthog.toolbar).toBeDefined()
+        expect(posthog.surveys).toBeDefined()
+        expect(posthog.conversations).toBeDefined()
+        expect(posthog.logs).toBeDefined()
+        expect(posthog.experiments).toBeDefined()
+        expect(posthog.exceptions).toBeDefined()
+    })
+
+    it('does not eagerly construct extensions when no defaults exist', () => {
+        PostHog.__defaultExtensionClasses = {}
+
+        const posthog = new PostHog()
+
+        expect(posthog.featureFlags).toBeUndefined()
+        expect(posthog.toolbar).toBeUndefined()
+        expect(posthog.surveys).toBeUndefined()
+        expect(posthog.conversations).toBeUndefined()
+        expect(posthog.logs).toBeUndefined()
+        expect(posthog.experiments).toBeUndefined()
+        expect(posthog.exceptions).toBeUndefined()
     })
 
     it('default extensions are used when __extensionClasses is not provided', async () => {

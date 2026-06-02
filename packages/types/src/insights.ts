@@ -8,6 +8,7 @@
 import type { InsightsConfig } from './insights-config'
 import type { Properties, JsonType } from './common'
 import type { CaptureResult, CaptureOptions } from './capture'
+import type { CaptureLogOptions, Logger } from './capture-log'
 import type {
     FeatureFlagsCallback,
     EarlyAccessFeatureCallback,
@@ -99,6 +100,32 @@ export interface Insights {
      */
     captureException(error: unknown, additionalProperties?: Properties): CaptureResult | undefined
 
+    /**
+     * Adds a breadcrumb-like step that will be attached to the next captured exception as `$exception_steps`.
+     *
+     * @param message - The step message
+     * @param properties - Additional context for this step
+     */
+    addExceptionStep(message: string, properties?: Properties): void
+
+    /**
+     * Capture a log entry and send it to the PostHog logs endpoint.
+     *
+     * @param options - The log entry options (body, level, attributes, etc.)
+     */
+    captureLog(options: CaptureLogOptions): void
+
+    /**
+     * Logger with convenience methods for each severity level.
+     *
+     * @example
+     * ```js
+     * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
+     * posthog.logger.error('payment failed', { error_code: 'E001' })
+     * ```
+     */
+    logger: Logger
+
     // ============================================================================
     // User Identification
     // ============================================================================
@@ -111,6 +138,19 @@ export interface Insights {
      * @param userPropertiesToSetOnce - Properties to set once on the user (using $set_once)
      */
     identify(new_distinct_id?: string, userPropertiesToSet?: Properties, userPropertiesToSetOnce?: Properties): void
+
+    /**
+     * Set HMAC-based identity verification.
+     *
+     * @param distinctId - The verified user distinct_id
+     * @param hash - HMAC-SHA256 of distinctId using the project API secret
+     */
+    setIdentity(distinctId: string, hash: string): void
+
+    /**
+     * Clear HMAC-based identity verification, reverting to anonymous mode.
+     */
+    clearIdentity(): void
 
     /**
      * Set properties on the current user.
@@ -202,7 +242,7 @@ export interface Insights {
     /**
      * The feature flags instance. Provides access to feature flag override methods.
      */
-    featureFlags: {
+    featureFlags: TreeShakeable<{
         /**
          * Override feature flags on the client-side. Useful for testing/debugging.
          *
@@ -217,6 +257,9 @@ export interface Insights {
          *     flags: {'beta-feature': 'variant'},
          *     payloads: { 'beta-feature': { someData: true } }
          * })
+         * posthog.featureFlags.overrideFeatureFlags({ // only override payloads
+         *     payloads: { 'beta-feature': { someData: true } }
+         * })
          * ```
          */
         overrideFeatureFlags(overrideOptions: OverrideFeatureFlagsOptions): void
@@ -225,7 +268,7 @@ export interface Insights {
          * @deprecated Use `overrideFeatureFlags` instead. This will be removed in a future version.
          */
         override(flags: boolean | string[] | Record<string, string | boolean>, suppressWarning?: boolean): void
-    }
+    }>
 
     /**
      * Get the value of a feature flag.

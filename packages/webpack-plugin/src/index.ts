@@ -1,5 +1,6 @@
 import { Logger, createLogger } from '@hanzo/insights-core'
 import { PluginConfig, resolveConfig, ResolvedPluginConfig } from './config'
+import { runSourcemapCli } from '@posthog/plugin-utils'
 import webpack from 'webpack'
 import { spawnLocal } from '@hanzo/insights-core/process'
 import path from 'path'
@@ -24,12 +25,14 @@ export class InsightsWebpackPlugin {
     }
 
     apply(compiler: webpack.Compiler): void {
-        new compiler.webpack.SourceMapDevToolPlugin({
-            filename: '[file].map',
-            noSources: false,
-            moduleFilenameTemplate: '[resource-path]',
-            append: this.resolvedConfig.sourcemaps.deleteAfterUpload ? false : undefined,
-        }).apply(compiler)
+        if (this.resolvedConfig.sourcemaps.enabled) {
+            new compiler.webpack.SourceMapDevToolPlugin({
+                filename: '[file].map',
+                noSources: false,
+                moduleFilenameTemplate: '[resource-path]',
+                append: this.resolvedConfig.sourcemaps.deleteAfterUpload ? false : undefined,
+            }).apply(compiler)
+        }
 
         const onDone = async (stats: webpack.Stats, callback: any): Promise<void> => {
             callback = callback || (() => {})
@@ -50,12 +53,9 @@ export class InsightsWebpackPlugin {
     }
 
     async processSourceMaps(compilation: webpack.Compilation, config: ResolvedPluginConfig): Promise<void> {
+        if (!config.sourcemaps.enabled) return
+
         const outputDirectory = compilation.outputOptions.path
-        const args = []
-
-        // chunks are output outside of the output directory for server chunks
-        args.push('sourcemap', 'process')
-
         const chunkArray = Array.from(compilation.chunks)
 
         if (chunkArray.length == 0) {
@@ -63,10 +63,11 @@ export class InsightsWebpackPlugin {
             return
         }
 
+        const filePaths: string[] = []
         chunkArray.forEach((chunk) =>
             chunk.files.forEach((file) => {
                 const chunkPath = path.resolve(outputDirectory, file)
-                args.push('--file', chunkPath)
+                filePaths.push(chunkPath)
             })
         )
 

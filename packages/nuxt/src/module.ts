@@ -8,6 +8,20 @@ import { dirname } from 'node:path'
 
 const filename = fileURLToPath(import.meta.url)
 const resolvedDirname = dirname(filename)
+const DEFAULT_NUXT_HOST = 'https://us.i.posthog.com'
+
+function normalizeApiKey(value?: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function normalizePersonalApiKey(value?: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function normalizeHost(value?: unknown): string {
+  const normalizedValue = typeof value === 'string' ? value.trim() : ''
+  return normalizedValue || DEFAULT_NUXT_HOST
+}
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
@@ -23,6 +37,7 @@ interface SourcemapsConfig {
   /** @deprecated Use releaseName instead */
   project?: string
   releaseName?: string
+  build?: string | number
   logLevel?: LogLevel
   deleteAfterUpload?: boolean
   batchSize?: number
@@ -64,6 +79,8 @@ export default defineNuxtModule<ModuleOptions>({
 
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url)
+    const normalizedPublicKey = normalizeApiKey(options.publicKey)
+    const normalizedHost = normalizeHost(options.host)
     addPlugin(resolver.resolve('./runtime/vue-plugin'))
     addServerPlugin(resolver.resolve('./runtime/nitro-plugin'))
     addImportsDir(resolver.resolve('./runtime/composables'))
@@ -180,6 +197,10 @@ function getInjectArgs(directory: string, sourcemapsConfig: SourcemapsConfig) {
   const releaseVersion = sourcemapsConfig.releaseVersion ?? sourcemapsConfig.version
   if (releaseVersion) {
     processOptions.push('--release-version', releaseVersion)
+  }
+
+  if (sourcemapsConfig.build !== undefined && sourcemapsConfig.build !== '') {
+    processOptions.push('--build', String(sourcemapsConfig.build))
   }
 
   return processOptions

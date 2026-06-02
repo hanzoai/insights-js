@@ -4,8 +4,13 @@ import AnthropicOriginal from '@anthropic-ai/sdk'
 import type { ChatCompletionTool } from 'openai/resources/chat/completions'
 import type { ResponseCreateParamsWithTools } from 'openai/lib/ResponsesParser'
 import type { Tool as GeminiTool } from '@google/genai'
-import type { FormattedMessage, FormattedContent, TokenUsage } from './types'
-import { version } from '../package.json'
+import type {
+  FormattedMessage,
+  FormattedContent,
+  FormattedAudioContent,
+  FormattedImageContent,
+  FormattedDocumentContent,
+} from './types'
 import { v4 as uuidv4 } from 'uuid'
 import { isString } from './typeGuards'
 import { uuidv7, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
@@ -37,6 +42,13 @@ export function getTokensSource(insightsProperties?: Record<string, unknown>): s
 // limit large outputs by truncating to 200kb (approx 200k bytes)
 export const MAX_OUTPUT_SIZE = 200000
 const STRING_FORMAT = 'utf8'
+
+// Reused across calls to avoid per-invocation allocation; truncate() runs
+// hundreds of times for prompts with many parts.
+const sharedTextEncoder = new TextEncoder()
+const sharedTextDecoder = new TextDecoder(STRING_FORMAT, { fatal: false })
+
+export const utf8ByteLength = (str: string): number => sharedTextEncoder.encode(str).byteLength
 
 /**
  * Safely converts content to a string, preserving structure for objects/arrays.
@@ -270,6 +282,19 @@ export const formatResponseOpenAI = (response: any): FormattedMessage[] => {
   return output
 }
 
+export const buildInlineDataBlock = (
+  mimeType: string,
+  data: string
+): FormattedAudioContent | FormattedImageContent | FormattedDocumentContent => {
+  if (mimeType.startsWith('audio/')) {
+    return { type: 'audio', mime_type: mimeType, data }
+  }
+  if (mimeType.startsWith('image/')) {
+    return { type: 'image', inline_data: { mime_type: mimeType, data } }
+  }
+  return { type: 'document', inline_data: { mime_type: mimeType, data } }
+}
+
 export const formatResponseGemini = (response: any): FormattedMessage[] => {
   const output: FormattedMessage[] = []
 
@@ -290,8 +315,8 @@ export const formatResponseGemini = (response: any): FormattedMessage[] => {
               },
             })
           } else if (part.inlineData) {
-            // Handle audio/media inline data
-            const mimeType = part.inlineData.mimeType || 'audio/pcm'
+            // Handle inline data (images, audio, documents)
+            const mimeType = part.inlineData.mimeType || part.inlineData.mime_type || 'application/octet-stream'
             let data = part.inlineData.data
 
             // Handle binary data (Uint8Array/Buffer -> base64)
@@ -310,11 +335,7 @@ export const formatResponseGemini = (response: any): FormattedMessage[] => {
             // Sanitize base64 data for images and other large inline data
             data = redactBase64DataUrl(data)
 
-            content.push({
-              type: 'audio',
-              mime_type: mimeType,
-              data: data,
-            })
+            content.push(buildInlineDataBlock(mimeType, data))
           }
         }
 
@@ -379,18 +400,16 @@ export const truncate = (input: unknown): string => {
   }
 
   // Check if we need to truncate and ensure STRING_FORMAT is respected
-  const encoder = new TextEncoder()
-  const buffer = encoder.encode(str)
+  const buffer = sharedTextEncoder.encode(str)
   if (buffer.length <= MAX_OUTPUT_SIZE) {
     // Ensure STRING_FORMAT is respected
-    return new TextDecoder(STRING_FORMAT).decode(buffer)
+    return sharedTextDecoder.decode(buffer)
   }
 
-  // Truncate the buffer and ensure a valid string is returned
+  // Truncate the buffer and ensure a valid string is returned.
+  // fatal: false means we get U+FFFD at the end if truncation broke the encoding.
   const truncatedBuffer = buffer.slice(0, MAX_OUTPUT_SIZE)
-  // fatal: false means we get U+FFFD at the end if truncation broke the encoding
-  const decoder = new TextDecoder(STRING_FORMAT, { fatal: false })
-  let truncatedStr = decoder.decode(truncatedBuffer)
+  let truncatedStr = sharedTextDecoder.decode(truncatedBuffer)
   if (truncatedStr.endsWith('\uFFFD')) {
     truncatedStr = truncatedStr.slice(0, -1)
   }

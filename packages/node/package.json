@@ -12,6 +12,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test:unit": "jest",
+    "test:edge-compat": "jest --env @edge-runtime/jest-environment --no-coverage",
     "prebuild": "node -p \"'export const version = \\'' + require('./package.json').version + '\\''\" > src/version.ts",
     "build": "rslib build",
     "dev": "rslib build -w",
@@ -45,7 +46,16 @@
     "@types/express": "^5.0.5",
     "@types/jest": "catalog:",
     "@types/node": "^20.0.0",
-    "jest": "catalog:"
+    "jest": "catalog:",
+    "rxjs": "^7.8.0"
+  },
+  "peerDependencies": {
+    "rxjs": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "rxjs": {
+      "optional": true
+    }
   },
   "keywords": [
     "hanzo",
@@ -85,8 +95,16 @@
       "require": "./dist/entrypoints/index.edge.js",
       "default": "./dist/entrypoints/index.edge.js"
     },
+    "./nestjs": {
+      "types": "./dist/entrypoints/nestjs.d.ts",
+      "import": "./dist/entrypoints/nestjs.mjs",
+      "require": "./dist/entrypoints/nestjs.js"
+    },
     "./experimental": {
-      "types": "./dist/experimental.d.ts"
+      "types": "./dist/experimental.d.ts",
+      "import": "./dist/experimental.mjs",
+      "require": "./dist/experimental.js",
+      "default": "./dist/experimental.js"
     }
   }
 }

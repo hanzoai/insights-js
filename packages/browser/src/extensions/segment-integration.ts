@@ -63,8 +63,8 @@ const createSegmentIntegration = (insights: Insights): SegmentPlugin => {
         // eslint-disable-next-line compat/compat
         load: () => Promise.resolve(),
         track: (ctx) => enrichEvent(ctx, ctx.event.event),
-        page: (ctx) => enrichEvent(ctx, '$pageview'),
-        identify: (ctx) => enrichEvent(ctx, '$identify'),
+        page: (ctx) => enrichEvent(ctx, EVENT_PAGEVIEW),
+        identify: (ctx) => enrichEvent(ctx, EVENT_IDENTIFY),
         screen: (ctx) => enrichEvent(ctx, '$screen'),
     }
 }

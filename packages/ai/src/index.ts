@@ -6,6 +6,8 @@ import InsightsAnthropic from './anthropic'
 import InsightsGoogleGenAI from './gemini'
 import { LangChainCallbackHandler } from './langchain/callbacks'
 import { Prompts } from './prompts'
+import { captureAiGeneration } from './captureAiGeneration'
+import { AIEvent } from './utils'
 
 export { InsightsOpenAI as OpenAI }
 export { InsightsAzureOpenAI as AzureOpenAI }

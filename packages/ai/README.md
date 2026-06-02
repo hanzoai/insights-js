@@ -24,7 +24,7 @@ const client = new OpenAI({
 })
 
 const completion = await client.chat.completions.create({
-  model: 'gpt-3.5-turbo',
+  model: 'gpt-5-mini',
   messages: [{ role: 'user', content: 'Tell me a fun fact about hedgehogs' }],
   insightsDistinctId: 'user_123', // optional
   insightsTraceId: 'trace_123', // optional
@@ -39,7 +39,7 @@ console.log(completion.choices[0].message.content)
 await phClient.shutdown()
 ```
 
-## OTEL + AI SDK (`experimental_telemetry`)
+## Custom and unsupported providers
 
 Use this when working with Vercel AI SDK telemetry. `@hanzo/ai` exposes an OTEL `SpanProcessor` that maps spans to Insights AI events and sends them through `@hanzo/insights-node`.
 
@@ -58,38 +58,38 @@ const sdk = new NodeSDK({
   ],
 })
 
-sdk.start()
-
-await generateText({
-  model: openai('gpt-5.1'),
-  prompt: 'Write a short haiku about debugging',
-  experimental_telemetry: {
-    isEnabled: true,
-    functionId: 'my-awesome-function',
-    metadata: {
-      conversation_id: 'abc123',
-      plan: 'pro',
-    },
-  },
+await captureAiGeneration(phClient, {
+  distinctId: 'user_123',
+  traceId: 'trace_abc',
+  provider: 'cloudflare-workers-ai',
+  model: '@cf/zai-org/glm-4.7-flash',
+  input: messages,
+  output: result.response,
+  modelParameters: { reasoning_effort: 'high' },
+  usage: { inputTokens: result.usage?.prompt_tokens, outputTokens: result.usage?.completion_tokens },
+  latency: (Date.now() - start) / 1000,
+  properties: { feature: 'transcript-toc' },
 })
 
 await phClient.shutdown()
 ```
 
-### Custom Mappers
+`captureAiGeneration` is the same primitive that every other `@posthog/ai` wrapper funnels through, so the resulting events are indistinguishable from those produced by `withTracing`, `OpenAI`, `Anthropic`, etc.
 
-The OTEL processor supports adapter mappers for different span formats:
+## OpenTelemetry
 
 - `aiSdkSpanMapper` is the default mapper.
 - You can pass custom `mappers` in `InsightsSpanProcessor` options to support additional span schemas.
 
-### Per-call Metadata (Recommended)
+```bash
+npm install @posthog/ai @opentelemetry/sdk-node @opentelemetry/sdk-trace-base @opentelemetry/exporter-trace-otlp-http
+```
 
 For dynamic properties, pass values in `experimental_telemetry.metadata` on each AI SDK call.
 These are captured from `ai.telemetry.metadata.*` and forwarded as Insights event properties.
 Use processor options (`insightsProperties`) only for global defaults.
 
-## Notes
+A self-contained `SpanProcessor` that handles batching and export internally. Use this when your setup accepts a span processor.
 
 - The OTEL route currently maps supported spans into Insights AI events (manual capture path).
 - Existing wrapper-based tracing (for example `withTracing`) still works and is unchanged.

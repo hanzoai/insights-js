@@ -20,7 +20,15 @@ const getDeviceType = (): string => {
     // Check user agent to determine if it's desktop or mobile
     const ua = typeof navigator !== 'undefined' && navigator.userAgent ? navigator.userAgent : ''
 
-    deviceType = detectDeviceType(ua)
+    const nav = typeof navigator !== 'undefined' ? (navigator as any) : undefined
+    const win = typeof (globalThis as any).window !== 'undefined' ? (globalThis as any).window : undefined
+    deviceType = detectDeviceType(ua, {
+      userAgentDataPlatform: nav?.userAgentData?.platform,
+      maxTouchPoints: nav?.maxTouchPoints,
+      screenWidth: win?.screen?.width,
+      screenHeight: win?.screen?.height,
+      devicePixelRatio: win?.devicePixelRatio,
+    })
   }
   return deviceType
 }
@@ -59,12 +67,14 @@ export const getAppProperties = (): InsightsCustomAppProperties => {
     }
 
     properties.$os_version = OptionalExpoDevice.osVersion
+    properties.$is_emulator = !OptionalExpoDevice.isDevice
   } else if (OptionalReactNativeDeviceInfo) {
     properties.$device_manufacturer = returnPropertyIfNotUnknown(OptionalReactNativeDeviceInfo.getManufacturerSync())
     // react-native-device-info already maps the device model identifier to a human readable name
     properties.$device_name = returnPropertyIfNotUnknown(OptionalReactNativeDeviceInfo.getModel())
     properties.$os_name = returnPropertyIfNotUnknown(OptionalReactNativeDeviceInfo.getSystemName())
     properties.$os_version = returnPropertyIfNotUnknown(OptionalReactNativeDeviceInfo.getSystemVersion())
+    properties.$is_emulator = OptionalReactNativeDeviceInfo.isEmulatorSync()
   }
 
   if (OptionalExpoLocalization) {

@@ -7,6 +7,7 @@ import { ConversationsRemoteConfig } from './insights-conversations-types'
 import type { SAMPLED } from './extensions/replay/external/triggerMatching'
 
 // Extension class types for __extensionClasses (type-only, no bundle impact)
+import type { ExtensionConstructor } from './extensions/types'
 import type { Autocapture } from './autocapture'
 import type { DeadClicksAutocapture } from './extensions/dead-clicks-autocapture'
 import type { ExceptionObserver } from './extensions/exception-autocapture'
@@ -17,8 +18,13 @@ import type { SessionRecording } from './extensions/replay/session-recording'
 import type { Heatmaps } from './heatmaps'
 import type { InsightsProductTours } from './insights-product-tours'
 import type { SiteApps } from './site-apps'
-
-type Extension<T> = new (...args: any[]) => T
+import type { PostHogSurveys } from './posthog-surveys'
+import type { Toolbar } from './extensions/toolbar'
+import type { PostHogExceptions } from './posthog-exceptions'
+import type { WebExperiments } from './web-experiments'
+import type { PostHogConversations } from './extensions/conversations/posthog-conversations'
+import type { PostHogFeatureFlags } from './posthog-featureflags'
+import type { PostHogLogs } from './posthog-logs'
 
 // ============================================================================
 // Re-export public types from @insights/types
@@ -73,6 +79,7 @@ export type {
     PerformanceCaptureConfig,
     DeadClickCandidate,
     ExceptionAutoCaptureConfig,
+    ExceptionStepsConfig,
     DeadClicksAutoCaptureConfig,
     HeatmapConfig,
     ConfigDefaults,
@@ -233,6 +240,16 @@ export type SessionRecordingRemoteConfig = SessionRecordingCanvasOptions & {
      * which nobody wanted, now the default is all
      */
     triggerMatchType?: 'any' | 'all'
+    /**
+     * Config version - defaults to 1 (legacy)
+     * When version is 2, triggerGroups is used instead of individual trigger fields
+     */
+    version?: 1 | 2
+    /**
+     * V2 Trigger Groups - multiple named trigger groups with their own conditions and sample rates
+     * Only used when version === 2
+     */
+    triggerGroups?: SessionRecordingTriggerGroup[]
 }
 
 /**
@@ -424,8 +441,6 @@ export interface PersistentStore {
     _remove: (name: string, cross_subdomain?: boolean) => void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export type Breaker = {}
 export type EventHandler = (event: Event) => boolean | void
 
 export type SnippetArrayItem = [method: string, ...args: any[]]
@@ -477,6 +492,39 @@ export interface SessionRecordingUrlTrigger {
     matching: 'regex'
 }
 
+/**
+ * V2 event trigger - always an object with name, optionally with property filters.
+ * The server normalizes bare event name strings to this shape before sending.
+ */
+export interface SessionRecordingEventTrigger {
+    name: string
+    properties?: SessionRecordingTriggerPropertyFilter[]
+}
+
+export interface SessionRecordingTriggerPropertyFilter {
+    key: string
+    type: 'event' | 'person'
+    operator?: 'exact' | 'is_not' | 'icontains' | 'not_icontains' | 'regex' | 'not_regex' | 'gt' | 'lt'
+    value?: string | number | boolean | string[]
+}
+
+/**
+ * V2 Trigger Group - represents a single trigger group with its own conditions and sample rate
+ */
+export interface SessionRecordingTriggerGroup {
+    id: string
+    name: string
+    sampleRate: number
+    minDurationMs?: number
+    conditions: {
+        matchType: 'any' | 'all'
+        events?: SessionRecordingEventTrigger[]
+        urls?: SessionRecordingUrlTrigger[]
+        flag?: string | FlagVariant
+        properties?: SessionRecordingTriggerPropertyFilter[]
+    }
+}
+
 export type PropertyMatchType = 'regex' | 'not_regex' | 'exact' | 'is_not' | 'icontains' | 'not_icontains'
 
 export interface ErrorTrackingSuppressionRule {
@@ -508,7 +556,8 @@ export type OverrideConfig = {
     event_trigger: boolean
 }
 
-export enum Compression {
-    GZipJS = 'gzip-js',
-    Base64 = 'base64',
-}
+export const Compression = {
+    GZipJS: 'gzip-js',
+    Base64: 'base64',
+} as const
+export type Compression = (typeof Compression)[keyof typeof Compression]

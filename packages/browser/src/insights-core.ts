@@ -4,16 +4,29 @@ import {
     ALIAS_ID_KEY,
     COOKIELESS_MODE_FLAG_PROPERTY,
     COOKIELESS_SENTINEL_VALUE,
+    COOKIELESS_ON_REJECT,
+    DEVICE_ID,
+    PERSON_PROFILES_IDENTIFIED_ONLY,
+    USER_STATE_ANONYMOUS,
+    USER_STATE_IDENTIFIED,
+    DOM_EVENT_VISIBILITYCHANGE,
     ENABLE_PERSON_PROCESSING,
+    EVENT_GROUPIDENTIFY,
+    EVENT_IDENTIFY,
+    EVENT_PAGELEAVE,
+    EVENT_PAGEVIEW,
     FLAG_CALL_REPORTED,
     PEOPLE_DISTINCT_ID_KEY,
+    SDK_DEBUG_EXTENSIONS_INIT_METHOD,
+    SDK_DEBUG_EXTENSIONS_INIT_TIME_MS,
+    SESSION_RECORDING_REMOTE_CONFIG,
     SURVEYS_REQUEST_TIMEOUT_MS,
     USER_STATE,
+    COOKIELESS_ALWAYS,
 } from './constants'
 import { isDeadClicksEnabledForAutocapture } from './extensions/dead-clicks-autocapture'
 import { setupSegmentIntegration } from './extensions/segment-integration'
 import { SentryIntegration, sentryIntegration, SentryIntegrationOptions } from './extensions/sentry-integration'
-import { Toolbar } from './extensions/toolbar'
 import { PageViewManager } from './page-view'
 import { InsightsExceptions } from './insights-exceptions'
 import { InsightsFeatureFlags } from './insights-featureflags'
@@ -21,8 +34,8 @@ import { InsightsPersistence } from './insights-persistence'
 import { InsightsSurveys } from './insights-surveys'
 import { InsightsConversations } from './extensions/conversations/insights-conversations'
 import {
-    DisplaySurveyOptions,
-    SurveyCallback,
+    type DisplaySurveyOptions,
+    type SurveyCallback,
     SurveyEventName,
     SurveyEventProperties,
     SurveyRenderReason,
@@ -39,6 +52,7 @@ import { SessionPropsManager } from './session-props'
 import { SessionIdManager } from './sessionid'
 import { localStore } from './storage'
 import {
+    CaptureLogOptions,
     CaptureOptions,
     CaptureResult,
     Compression,
@@ -47,7 +61,6 @@ import {
     EarlyAccessFeatureStage,
     EventName,
     ExceptionAutoCaptureConfig,
-    FeatureFlagDetail,
     FeatureFlagsCallback,
     FeatureFlagOptions,
     FeatureFlagResult,
@@ -64,6 +77,7 @@ import {
     ToolbarParams,
     InsightsInterface,
 } from './types'
+import type { TreeShakeable } from '@posthog/types'
 import {
     _copyAndTruncateStrings,
     addEventListener,
@@ -102,8 +116,8 @@ import {
     isBoolean,
 } from '@hanzo/insights-core'
 import { uuidv7 } from './uuidv7'
-import { WebExperiments } from './web-experiments'
 import { ExternalIntegrations } from './extensions/external-integration'
+import type { PostHogSurveys } from './posthog-surveys'
 import type { Autocapture } from './autocapture'
 import type { DeadClicksAutocapture } from './extensions/dead-clicks-autocapture'
 import type { ExceptionObserver } from './extensions/exception-autocapture'
@@ -113,6 +127,10 @@ import type { Heatmaps } from './heatmaps'
 import type { InsightsProductTours } from './insights-product-tours'
 import type { SiteApps } from './site-apps'
 import type { SessionRecording } from './extensions/replay/session-recording'
+import type { Extension } from './extensions/types'
+import type { Toolbar } from './extensions/toolbar'
+import type { PostHogFeatureFlags } from './posthog-featureflags'
+import type { WebExperiments } from './web-experiments'
 
 /*
 SIMPLE STYLE GUIDE:
@@ -143,8 +161,11 @@ const instances: Record<string, Insights> = {}
 // calls into push() calls, which would otherwise cause infinite recursion.
 let _executeArrayDepth = 0
 
-// some globals for comparisons
 const __NOOP = () => {}
+const CONSENT_COOKIELESS_WARN = 'Consent opt in/out is not valid with cookieless_mode="always" and will be ignored'
+const SURVEYS_NOT_AVAILABLE = 'Surveys module not available'
+const SANITIZE_DEPRECATED = 'sanitize_properties is deprecated. Use before_send instead'
+const DENYLIST_INVALID = 'Invalid value for property_denylist config: '
 
 const PRIMARY_INSTANCE_NAME = 'insights'
 
@@ -168,12 +189,14 @@ const defaultsThatVaryByConfig = (
     | 'session_recording'
     | 'external_scripts_inject_target'
     | 'internal_or_test_user_hostname'
+    | 'persistence_save_debounce_ms'
 > => ({
     rageclick: defaults && defaults >= '2025-11-30' ? { content_ignorelist: true } : true,
     capture_pageview: defaults && defaults >= '2025-05-24' ? 'history_change' : true,
     session_recording: defaults && defaults >= '2025-11-30' ? { strictMinimumDuration: true } : {},
     external_scripts_inject_target: defaults && defaults >= '2026-01-30' ? 'head' : 'body',
     internal_or_test_user_hostname: defaults && defaults >= '2026-01-30' ? /^(localhost|127\.0\.0\.1)$/ : undefined,
+    persistence_save_debounce_ms: defaults && defaults >= '2026-05-30' ? 250 : 0,
 })
 
 // NOTE: Remember to update `types.ts` when changing a default value
@@ -233,6 +256,7 @@ export const defaultConfig = (defaults?: ConfigDefaults): InsightsConfig => ({
     advanced_disable_feature_flags: false,
     advanced_disable_feature_flags_on_first_load: false,
     advanced_only_evaluate_survey_feature_flags: false,
+    advanced_feature_flags_dedup_per_session: false,
     advanced_enable_surveys: false,
     advanced_disable_toolbar_metrics: false,
     feature_flag_request_timeout_ms: 3000,
@@ -247,7 +271,7 @@ export const defaultConfig = (defaults?: ConfigDefaults): InsightsConfig => ({
     bootstrap: {},
     disable_compression: false,
     session_idle_timeout_seconds: 30 * 60, // 30 minutes
-    person_profiles: 'identified_only',
+    person_profiles: PERSON_PROFILES_IDENTIFIED_ONLY,
     before_send: undefined,
     request_queue_config: { flush_interval_ms: DEFAULT_FLUSH_INTERVAL_MS },
     error_tracking: {},
@@ -293,7 +317,7 @@ export const configRenames = (origConfig: Partial<InsightsConfig>): Partial<Insi
         } else if (isArray(origConfig.property_denylist)) {
             newConfig.property_denylist = [...origConfig.property_blacklist, ...origConfig.property_denylist]
         } else {
-            logger.error('Invalid value for property_denylist config: ' + origConfig.property_denylist)
+            logger.error(DENYLIST_INVALID + origConfig.property_denylist)
         }
     }
 
@@ -375,6 +399,7 @@ export class Insights implements InsightsInterface {
     compression?: Compression
     __request_queue: QueuedRequestWithOptions[]
     _pendingRemoteConfig?: RemoteConfig
+    _lastRemoteConfig?: RemoteConfig
     _remoteConfigLoader?: RemoteConfigLoader
     analyticsDefaultEndpoint: string
     version: string = Config.LIB_VERSION
@@ -385,6 +410,27 @@ export class Insights implements InsightsInterface {
     sentryIntegration: (options?: SentryIntegrationOptions) => ReturnType<typeof sentryIntegration>
 
     _internalEventEmitter = new SimpleEventEmitter()
+
+    private readonly _extensions: Extension[] = []
+
+    private _replaceExtension<T extends Extension>(oldExt: T | undefined, newExt: T): T {
+        if (oldExt) {
+            const idx = this._extensions.indexOf(oldExt)
+            if (idx !== -1) {
+                this._extensions.splice(idx, 1)
+            }
+        }
+        this._extensions.push(newExt)
+        newExt.initialize?.()
+        return newExt
+    }
+
+    private _inCookielessMode(): boolean {
+        return (
+            this.config.cookieless_mode === COOKIELESS_ALWAYS ||
+            (this.config.cookieless_mode === COOKIELESS_ON_REJECT && this.consent.isRejected())
+        )
+    }
 
     // Legacy property to support existing usage - this isn't technically correct but it's what it has always been - a proxy for flags being loaded
     /** @deprecated Use `flagsEndpointWasHit` instead.  We migrated to using a new feature flag endpoint and the new method is more semantically accurate */
@@ -427,6 +473,18 @@ export class Insights implements InsightsInterface {
         this.requestRouter = new RequestRouter(this)
         this.consent = new ConsentManager(this)
         this.externalIntegrations = new ExternalIntegrations(this)
+
+        // Eagerly construct extensions from default classes so they're available before init().
+        // For the slim bundle, these remain undefined until _initExtensions sets them from config.
+        const ext = PostHog.__defaultExtensionClasses ?? {}
+        this.featureFlags = ext.featureFlags && new ext.featureFlags(this)
+        this.toolbar = ext.toolbar && new ext.toolbar(this)
+        this.surveys = ext.surveys && new ext.surveys(this)
+        this.conversations = ext.conversations && new ext.conversations(this)
+        this.logs = ext.logs && new ext.logs(this)
+        this.experiments = ext.experiments && new ext.experiments(this)
+        this.exceptions = ext.exceptions && new ext.exceptions(this)
+
         // NOTE: See the property definition for deprecation notice
         this.people = {
             set: (prop: string | Properties, to?: string, callback?: RequestCallback) => {
@@ -542,7 +600,7 @@ export class Insights implements InsightsInterface {
         this.set_config(
             extend({}, defaultConfig(config.defaults), configRenames(config), {
                 name: name,
-                token: token,
+                token: normalizedToken,
             })
         )
 
@@ -573,9 +631,7 @@ export class Insights implements InsightsInterface {
         this._retryQueue = new RetryQueue(this)
         this.__request_queue = []
 
-        const startInCookielessMode =
-            this.config.cookieless_mode === 'always' ||
-            (this.config.cookieless_mode === 'on_reject' && this.consent.isExplicitlyOptedOut())
+        const startInCookielessMode = this._inCookielessMode()
 
         if (!startInCookielessMode) {
             this.sessionManager = new SessionIdManager(this)
@@ -610,35 +666,65 @@ export class Insights implements InsightsInterface {
             })
         }
 
+        // When identity_distinct_id is provided at init time, use it as the
+        // bootstrap distinct ID so the Person record is created from the first event.
+        if (this.config.identity_distinct_id && !config.bootstrap?.distinctID) {
+            config.bootstrap = {
+                ...config.bootstrap,
+                distinctID: this.config.identity_distinct_id,
+                isIdentifiedID: true,
+            }
+        }
+
         // isUndefined doesn't provide typehint here so wouldn't reduce bundle as we'd need to assign
         // eslint-disable-next-line @hanzo/insights/no-direct-undefined-check
         if (config.bootstrap?.distinctID !== undefined) {
-            const uuid = this.config.get_device_id(uuidv7())
-            const deviceID = config.bootstrap?.isIdentifiedID ? uuid : config.bootstrap.distinctID
-            this.persistence.set_property(USER_STATE, config.bootstrap?.isIdentifiedID ? 'identified' : 'anonymous')
-            this.register({
-                distinct_id: config.bootstrap.distinctID,
-                $device_id: deviceID,
-            })
-        }
+            const bootstrapDistinctId = config.bootstrap.distinctID
+            const existingDistinctId = this.get_distinct_id()
+            const existingUserState = this.persistence.get_property(USER_STATE)
 
-        if (this._hasBootstrappedFeatureFlags()) {
-            const activeFlags = Object.keys(config.bootstrap?.featureFlags || {})
-                .filter((flag) => !!config.bootstrap?.featureFlags?.[flag])
-                .reduce((res: Record<string, string | boolean>, key) => {
-                    res[key] = config.bootstrap?.featureFlags?.[key] || false
-                    return res
-                }, {})
-            const featureFlagPayloads = Object.keys(config.bootstrap?.featureFlagPayloads || {})
-                .filter((key) => activeFlags[key])
-                .reduce((res: Record<string, JsonType>, key) => {
-                    if (config.bootstrap?.featureFlagPayloads?.[key]) {
-                        res[key] = config.bootstrap?.featureFlagPayloads?.[key]
-                    }
-                    return res
-                }, {})
-
-            this.featureFlags.receivedFeatureFlags({ featureFlags: activeFlags, featureFlagPayloads })
+            if (
+                config.bootstrap.isIdentifiedID &&
+                existingDistinctId != null &&
+                existingDistinctId !== bootstrapDistinctId &&
+                existingUserState === USER_STATE_ANONYMOUS
+            ) {
+                // The server bootstrapped identity for an identified user, but local persistence
+                // still has an anonymous ID from a previous session. Calling identify() merges
+                // the anonymous user into the identified user, ensuring consistent identity
+                // for feature flag evaluation and preventing duplicate $feature_flag_called events.
+                //
+                // Note: this runs during _init(), before _loaded() enables the request queue.
+                // The $identify event is enqueued and flushed once the queue starts. The
+                // reloadFeatureFlags() call inside identify() sets _reloadDebouncer, so the
+                // subsequent ensureFlagsLoaded() from _onRemoteConfig is a no-op (no double request).
+                this.identify(bootstrapDistinctId)
+            } else if (
+                config.bootstrap.isIdentifiedID &&
+                existingDistinctId != null &&
+                existingDistinctId !== bootstrapDistinctId &&
+                existingUserState === USER_STATE_IDENTIFIED
+            ) {
+                // The existing user is already identified with a different ID. Silently
+                // switching identities without an $identify event would corrupt analytics.
+                // Preserve the existing identity and log a warning.
+                logger.warn(
+                    'Bootstrap distinctID differs from an already-identified user. ' +
+                        'The existing identity is preserved. Call reset() before reinitializing ' +
+                        'if you intend to switch users.'
+                )
+            } else {
+                const uuid = this.config.get_device_id(uuidv7())
+                const deviceID = config.bootstrap.isIdentifiedID ? uuid : bootstrapDistinctId
+                this.persistence.set_property(
+                    USER_STATE,
+                    config.bootstrap.isIdentifiedID ? USER_STATE_IDENTIFIED : USER_STATE_ANONYMOUS
+                )
+                this.register({
+                    distinct_id: bootstrapDistinctId,
+                    $device_id: deviceID,
+                })
+            }
         }
 
         if (startInCookielessMode) {
@@ -663,7 +749,7 @@ export class Insights implements InsightsInterface {
                 ''
             )
             // distinct id == $device_id is a proxy for anonymous user
-            this.persistence.set_property(USER_STATE, 'anonymous')
+            this.persistence.set_property(USER_STATE, USER_STATE_ANONYMOUS)
         }
         // Set up event handler for pageleave
         // Use `onpagehide` if available, see https://calendar.perfplanet.com/2020/beaconing-in-practice/#beaconing-reliability-avoiding-abandons
@@ -672,8 +758,6 @@ export class Insights implements InsightsInterface {
         addEventListener(window, 'onpagehide' in self ? 'pagehide' : 'unload', this._handle_unload.bind(this), {
             passive: false,
         })
-
-        this.toolbar.maybeLoadToolbar()
 
         // We want to avoid promises for IE11 compatibility, so we use callbacks here
         if (config.segment) {
@@ -711,87 +795,76 @@ export class Insights implements InsightsInterface {
         // Build queue of extension initialization tasks
         const initTasks: Array<() => void> = []
 
+        // Due to name mangling, we can't easily iterate and assign these extensions
+        // The assignment needs to also be mangled. Thus, the loop is unrolled.
+        if (ext.featureFlags) {
+            this._extensions.push((this.featureFlags = this.featureFlags ?? new ext.featureFlags(this)))
+        }
+        if (ext.exceptions) {
+            this._extensions.push((this.exceptions = this.exceptions ?? new ext.exceptions(this)))
+        }
+        if (ext.historyAutocapture) {
+            this._extensions.push((this.historyAutocapture = new ext.historyAutocapture(this)))
+        }
         if (ext.tracingHeaders) {
-            initTasks.push(() => {
-                new ext.tracingHeaders!(this).startIfEnabledOrStop()
-            })
+            this._extensions.push(new ext.tracingHeaders(this))
         }
-
         if (ext.siteApps) {
-            initTasks.push(() => {
-                this.siteApps = new ext.siteApps!(this) as SiteApps
-                this.siteApps?.init()
-            })
+            this._extensions.push((this.siteApps = new ext.siteApps(this)))
         }
-
-        if (!startInCookielessMode && ext.sessionRecording) {
-            initTasks.push(() => {
-                this.sessionRecording = new ext.sessionRecording!(this) as SessionRecording
-                this.sessionRecording.startIfEnabledOrStop()
-            })
+        if (ext.sessionRecording && !startInCookielessMode) {
+            this._extensions.push((this.sessionRecording = new ext.sessionRecording(this)))
         }
-
         if (!this.config.disable_scroll_properties) {
             initTasks.push(() => {
                 this.scrollManager.startMeasuringScrollPosition()
             })
         }
-
         if (ext.autocapture) {
-            initTasks.push(() => {
-                this.autocapture = new ext.autocapture!(this) as Autocapture
-                this.autocapture.startIfEnabled()
-            })
+            this._extensions.push((this.autocapture = new ext.autocapture(this)))
         }
-
-        initTasks.push(() => {
-            this.surveys.loadIfEnabled()
-        })
-
-        initTasks.push(() => {
-            this.logs.loadIfEnabled()
-        })
-
-        initTasks.push(() => {
-            this.conversations.loadIfEnabled()
-        })
-
+        if (ext.surveys) {
+            this._extensions.push((this.surveys = this.surveys ?? new ext.surveys(this)))
+        }
+        if (ext.logs) {
+            this._extensions.push((this.logs = this.logs ?? new ext.logs(this)))
+        }
+        if (ext.conversations) {
+            this._extensions.push((this.conversations = this.conversations ?? new ext.conversations(this)))
+        }
         if (ext.productTours) {
             initTasks.push(() => {
                 this.productTours = new ext.productTours!(this) as InsightsProductTours
                 this.productTours.loadIfEnabled()
             })
         }
-
         if (ext.heatmaps) {
-            initTasks.push(() => {
-                this.heatmaps = new ext.heatmaps!(this) as Heatmaps
-                this.heatmaps.startIfEnabled()
-            })
+            this._extensions.push((this.heatmaps = new ext.heatmaps(this)))
         }
-
         if (ext.webVitalsAutocapture) {
-            initTasks.push(() => {
-                this.webVitalsAutocapture = new ext.webVitalsAutocapture!(this) as WebVitalsAutocapture
-            })
+            this._extensions.push((this.webVitalsAutocapture = new ext.webVitalsAutocapture(this)))
         }
-
         if (ext.exceptionObserver) {
-            initTasks.push(() => {
-                this.exceptionObserver = new ext.exceptionObserver!(this) as ExceptionObserver
-                this.exceptionObserver.startIfEnabledOrStop()
-            })
+            this._extensions.push((this.exceptionObserver = new ext.exceptionObserver(this)))
+        }
+        if (ext.deadClicksAutocapture) {
+            this._extensions.push(
+                (this.deadClicksAutocapture = new ext.deadClicksAutocapture(this, isDeadClicksEnabledForAutocapture))
+            )
+        }
+        if (ext.toolbar) {
+            this._extensions.push((this.toolbar = this.toolbar ?? new ext.toolbar(this)))
+        }
+        if (ext.experiments) {
+            this._extensions.push((this.experiments = this.experiments ?? new ext.experiments(this)))
         }
 
-        if (ext.deadClicksAutocapture) {
+        this._extensions.forEach((extension) => {
+            if (!extension.initialize) return
             initTasks.push(() => {
-                this.deadClicksAutocapture = new ext.deadClicksAutocapture!(
-                    this,
-                    isDeadClicksEnabledForAutocapture
-                ) as DeadClicksAutocapture
-                this.deadClicksAutocapture.startIfEnabledOrStop()
+                extension.initialize?.()
             })
-        }
+        })
 
         // Replay any pending remote config that arrived before extensions were ready
         initTasks.push(() => {
@@ -842,10 +915,10 @@ export class Insights implements InsightsInterface {
         // eslint-disable-next-line compat/compat
         const taskInitTiming = Math.round(performance.now() - initStartTime)
         this.register_for_session({
-            $sdk_debug_extensions_init_method: this.config.__preview_deferred_init_extensions
+            [SDK_DEBUG_EXTENSIONS_INIT_METHOD]: this.config.__preview_deferred_init_extensions
                 ? 'deferred'
                 : 'synchronous',
-            $sdk_debug_extensions_init_time_ms: taskInitTiming,
+            [SDK_DEBUG_EXTENSIONS_INIT_TIME_MS]: taskInitTiming,
         })
         if (this.config.__preview_deferred_init_extensions) {
             logger.info(`Insights extensions initialized (${taskInitTiming}ms)`)
@@ -866,6 +939,11 @@ export class Insights implements InsightsInterface {
             this._pendingRemoteConfig = config
         }
 
+        // Cache the latest remote config so extensions that are created later
+        // (e.g. sessionRecording after opt_in_capturing from cookieless mode) can
+        // replay it and pick up server-side settings like recording enable flags.
+        this._lastRemoteConfig = config
+
         this.compression = undefined
         if (config.supportedCompression && !this.config.disable_compression) {
             this.compression = includes(config['supportedCompression'], Compression.GZipJS)
@@ -880,21 +958,12 @@ export class Insights implements InsightsInterface {
         }
 
         this.set_config({
-            person_profiles: this._initialPersonProfilesConfig ? this._initialPersonProfilesConfig : 'identified_only',
+            person_profiles: this._initialPersonProfilesConfig
+                ? this._initialPersonProfilesConfig
+                : PERSON_PROFILES_IDENTIFIED_ONLY,
         })
 
-        this.siteApps?.onRemoteConfig(config)
-        this.sessionRecording?.onRemoteConfig(config)
-        this.autocapture?.onRemoteConfig(config)
-        this.heatmaps?.onRemoteConfig(config)
-        this.surveys.onRemoteConfig(config)
-        this.logs.onRemoteConfig(config)
-        this.conversations.onRemoteConfig(config)
-        this.productTours?.onRemoteConfig(config)
-        this.webVitalsAutocapture?.onRemoteConfig(config)
-        this.exceptionObserver?.onRemoteConfig(config)
-        this.exceptions.onRemoteConfig(config)
-        this.deadClicksAutocapture?.onRemoteConfig(config)
+        this._extensions.forEach((ext) => ext.onRemoteConfig?.(config))
     }
 
     _loaded(): void {
@@ -921,7 +990,7 @@ export class Insights implements InsightsInterface {
             // NOTE: We want to fire this on the next tick as the previous implementation had this side effect
             // and some clients may rely on it
             setTimeout(() => {
-                if (this.consent.isOptedIn() || this.config.cookieless_mode === 'always') {
+                if (this.consent.isOptedIn() || this._inCookielessMode()) {
                     this._captureInitialPageview()
                 }
             }, 1)
@@ -949,19 +1018,20 @@ export class Insights implements InsightsInterface {
     }
 
     _handle_unload(): void {
-        this.surveys.handlePageUnload()
+        this.surveys?.handlePageUnload()
 
         if (!this.config.request_batching) {
             if (this._shouldCapturePageleave()) {
-                this.capture('$pageleave', null, { transport: 'sendBeacon' })
+                this.capture(EVENT_PAGELEAVE, null, { transport: 'sendBeacon' })
             }
             return
         }
 
         if (this._shouldCapturePageleave()) {
-            this.capture('$pageleave')
+            this.capture(EVENT_PAGELEAVE)
         }
 
+        this.logs?.flushLogs('sendBeacon')
         this._requestQueue?.unload()
         this._retryQueue?.unload()
     }
@@ -1046,7 +1116,11 @@ export class Insights implements InsightsInterface {
                     if (isArray(fn_name)) {
                         capturing_calls.push(item) // chained call e.g. insights.get_group().set()
                     } else if (isFunction(item)) {
-                        ;(item as any).call(this)
+                        try {
+                            ;(item as any).call(this)
+                        } catch (e) {
+                            logger.error('Error executing queued PostHog call', item, e)
+                        }
                     } else if (isArray(item) && fn_name === 'alias') {
                         alias_calls.push(item)
                     } else if (
@@ -1062,9 +1136,8 @@ export class Insights implements InsightsInterface {
             })
 
             const execute = function (calls: SnippetArrayItem[], thisArg: any) {
-                eachArray(
-                    calls,
-                    function (item) {
+                eachArray(calls, function (item) {
+                    try {
                         if (isArray(item[0])) {
                             // chained call
                             let caller = thisArg
@@ -1072,13 +1145,12 @@ export class Insights implements InsightsInterface {
                                 caller = caller[call[0]].apply(caller, call.slice(1))
                             })
                         } else {
-                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                            // @ts-ignore
-                            this[item[0]].apply(this, item.slice(1))
+                            thisArg[item[0]].apply(thisArg, item.slice(1))
                         }
-                    },
-                    thisArg
-                )
+                    } catch (e) {
+                        logger.error('Error executing queued PostHog call', item, e)
+                    }
+                })
             }
 
             execute(alias_calls, this)
@@ -1087,13 +1159,6 @@ export class Insights implements InsightsInterface {
         } finally {
             _executeArrayDepth--
         }
-    }
-
-    _hasBootstrappedFeatureFlags(): boolean {
-        return (
-            (this.config.bootstrap?.featureFlags && Object.keys(this.config.bootstrap?.featureFlags).length > 0) ||
-            false
-        )
     }
 
     /**
@@ -1225,7 +1290,7 @@ export class Insights implements InsightsInterface {
         const systemTime = new Date()
         const timestamp = options?.timestamp || systemTime
 
-        const uuid = uuidv7()
+        const uuid = options?.uuid || uuidv7()
         let data: CaptureResult = {
             uuid,
             event: event_name,
@@ -1233,7 +1298,7 @@ export class Insights implements InsightsInterface {
         }
 
         // Route pageviews to $bot_pageview when bot detected and preview flag enabled
-        if (event_name === '$pageview' && this.config.__preview_capture_bot_pageviews && isBot) {
+        if (event_name === EVENT_PAGEVIEW && this.config.__preview_capture_bot_pageviews && isBot) {
             data.event = '$bot_pageview'
             // While it's obvious that a $bot_pageview is (likely) from a bot, we explicitly set $browser_type
             // to make it easy to filter and test bot pageviews in the product
@@ -1251,13 +1316,22 @@ export class Insights implements InsightsInterface {
         // $groupidentify doesn't process person $set_once on the server, so don't mark
         // initial person props as sent. This ensures they're included with subsequent
         // $identify calls.
-        const markSetOnceAsSent = event_name !== '$groupidentify'
-        const setOnceProperties = this._calculate_set_once_properties(options?.$set_once, markSetOnceAsSent)
+        const markSetOnceAsSent = event_name !== EVENT_GROUPIDENTIFY
+        // $identify should always include initial props because it creates/merges persons
+        // and may be processed before earlier anonymous events on the server
+        const forceIncludeInitialProps = event_name === EVENT_IDENTIFY
+        const setOnceProperties = this._calculate_set_once_properties(
+            options?.$set_once,
+            markSetOnceAsSent,
+            forceIncludeInitialProps
+        )
         if (setOnceProperties) {
             data.$set_once = setOnceProperties
         }
 
-        data = _copyAndTruncateStrings(data, options?._noTruncate ? null : this.config.properties_string_max_length)
+        if (!options?._noTruncate) {
+            data = _copyAndTruncateStrings(data, this.config.properties_string_max_length)
+        }
         data.timestamp = timestamp
         if (!isUndefined(options?.timestamp)) {
             data.properties['$event_time_override_provided'] = true
@@ -1316,6 +1390,7 @@ export class Insights implements InsightsInterface {
             data,
             compression: 'best-available',
             batchKey: options?._batchKey,
+            transport: options?.transport,
         }
 
         if (this.config.request_batching && (!options || options?._batchKey) && !options?.send_instantly) {
@@ -1362,10 +1437,7 @@ export class Insights implements InsightsInterface {
         properties['token'] = this.config.token
         properties['$config_defaults'] = this.config.defaults
 
-        if (
-            this.config.cookieless_mode == 'always' ||
-            (this.config.cookieless_mode == 'on_reject' && this.consent.isExplicitlyOptedOut())
-        ) {
+        if (this._inCookielessMode()) {
             // Set a flag to tell the plugin server to use cookieless server hash mode
             properties[COOKIELESS_MODE_FLAG_PROPERTY] = true
         }
@@ -1414,16 +1486,16 @@ export class Insights implements InsightsInterface {
         }
 
         let pageviewProperties: Record<string, any>
-        if (eventName === '$pageview' && !readOnly) {
+        if (eventName === EVENT_PAGEVIEW && !readOnly) {
             pageviewProperties = this.pageViewManager.doPageView(timestamp, uuid)
-        } else if (eventName === '$pageleave' && !readOnly) {
+        } else if (eventName === EVENT_PAGELEAVE && !readOnly) {
             pageviewProperties = this.pageViewManager.doPageLeave(timestamp)
         } else {
             pageviewProperties = this.pageViewManager.doEvent()
         }
         properties = extend(properties, pageviewProperties)
 
-        if (eventName === '$pageview' && document) {
+        if (eventName === EVENT_PAGEVIEW && document) {
             properties['title'] = document.title
         }
 
@@ -1460,7 +1532,7 @@ export class Insights implements InsightsInterface {
             })
         } else {
             logger.error(
-                'Invalid value for property_denylist config: ' +
+                DENYLIST_INVALID +
                     this.config.property_denylist +
                     ' or property_blacklist config: ' +
                     this.config.property_blacklist
@@ -1469,7 +1541,7 @@ export class Insights implements InsightsInterface {
 
         const sanitize_properties = this.config.sanitize_properties
         if (sanitize_properties) {
-            logger.error('sanitize_properties is deprecated. Use before_send instead')
+            logger.error(SANITIZE_DEPRECATED)
             properties = sanitize_properties(properties, eventName)
         }
 
@@ -1494,13 +1566,19 @@ export class Insights implements InsightsInterface {
      * @param dataSetOnce
      * @param markAsSent - if true, marks the properties as sent so they won't be included in future events.
      *                     Set to false for events like $groupidentify where the server doesn't process person props.
+     * @param forceIncludeInitialProps - if true, include initial person props even if they've already been sent.
+     *                                   Used for $identify which creates/merges persons and may be processed out of order.
      */
-    _calculate_set_once_properties(dataSetOnce?: Properties, markAsSent: boolean = true): Properties | undefined {
+    _calculate_set_once_properties(
+        dataSetOnce?: Properties,
+        markAsSent: boolean = true,
+        forceIncludeInitialProps: boolean = false
+    ): Properties | undefined {
         if (!this.persistence || !this._hasPersonProcessing()) {
             return dataSetOnce
         }
 
-        if (this._personProcessingSetOncePropertiesSent) {
+        if (this._personProcessingSetOncePropertiesSent && !forceIncludeInitialProps) {
             // We only need to send these properties once. Sending them with later events would be redundant and would
             // just require extra work on the server to process them.
             return dataSetOnce
@@ -1511,7 +1589,7 @@ export class Insights implements InsightsInterface {
         let setOnceProperties = extend({}, initialProps, sessionProps || {}, dataSetOnce || {})
         const sanitize_properties = this.config.sanitize_properties
         if (sanitize_properties) {
-            logger.error('sanitize_properties is deprecated. Use before_send instead')
+            logger.error(SANITIZE_DEPRECATED)
             setOnceProperties = sanitize_properties(setOnceProperties, '$set_once')
         }
         if (markAsSent) {
@@ -1719,7 +1797,7 @@ export class Insights implements InsightsInterface {
      *                        If {fresh: true}, we won't return cached values from localStorage - only values loaded from the server.
      */
     getFeatureFlag(key: string, options?: FeatureFlagOptions): boolean | string | undefined {
-        return this.featureFlags.getFeatureFlag(key, options)
+        return this.featureFlags?.getFeatureFlag(key, options)
     }
 
     /**
@@ -1742,7 +1820,7 @@ export class Insights implements InsightsInterface {
      * @param {Object|String} prop Key of the feature flag.
      */
     getFeatureFlagPayload(key: string): JsonType {
-        return this.featureFlags.getFeatureFlagPayload(key)
+        return this.featureFlags?.getFeatureFlagPayload(key)
     }
 
     /**
@@ -1778,7 +1856,7 @@ export class Insights implements InsightsInterface {
      * @returns {FeatureFlagResult | undefined} The feature flag result including key, enabled, variant, and payload.
      */
     getFeatureFlagResult(key: string, options?: FeatureFlagOptions): FeatureFlagResult | undefined {
-        return this.featureFlags.getFeatureFlagResult(key, options)
+        return this.featureFlags?.getFeatureFlagResult(key, options)
     }
 
     /**
@@ -1813,7 +1891,7 @@ export class Insights implements InsightsInterface {
      *                        If {fresh: true}, we won't return cached values from localStorage - only values loaded from the server.
      */
     isFeatureEnabled(key: string, options?: FeatureFlagOptions): boolean | undefined {
-        return this.featureFlags.isFeatureEnabled(key, options)
+        return this.featureFlags?.isFeatureEnabled(key, options)
     }
 
     /**
@@ -1829,7 +1907,7 @@ export class Insights implements InsightsInterface {
      * @public
      */
     reloadFeatureFlags(): void {
-        this.featureFlags.reloadFeatureFlags()
+        this.featureFlags?.reloadFeatureFlags()
     }
 
     /**
@@ -1873,31 +1951,7 @@ export class Insights implements InsightsInterface {
         payloads?: Record<string, JsonType>,
         options?: { merge?: boolean }
     ): void {
-        // If merging, combine with existing flags
-        const existingFlags = options?.merge ? this.featureFlags.getFlagVariants() : {}
-        const existingPayloads = options?.merge ? this.featureFlags.getFlagPayloads() : {}
-        const finalFlags = { ...existingFlags, ...flags }
-        const finalPayloads = { ...existingPayloads, ...payloads }
-
-        // Convert simple flags to v4 format to avoid deprecation warning
-        const flagDetails: Record<string, FeatureFlagDetail> = {}
-        for (const [key, value] of Object.entries(finalFlags)) {
-            const isVariant = typeof value === 'string'
-            flagDetails[key] = {
-                key,
-                enabled: isVariant ? true : Boolean(value),
-                variant: isVariant ? value : undefined,
-                reason: undefined,
-                // id: 0 indicates manually injected flags (not from server evaluation)
-                metadata: !isUndefined(finalPayloads?.[key])
-                    ? { id: 0, version: undefined, description: undefined, payload: finalPayloads[key] }
-                    : undefined,
-            }
-        }
-
-        this.featureFlags.receivedFeatureFlags({
-            flags: flagDetails,
-        })
+        this.featureFlags?.updateFlags(flags, payloads, options)
     }
 
     /**
@@ -1950,7 +2004,7 @@ export class Insights implements InsightsInterface {
      * @param {String} [stage] The stage of the feature flag to update.
      */
     updateEarlyAccessFeatureEnrollment(key: string, isEnrolled: boolean, stage?: string): void {
-        this.featureFlags.updateEarlyAccessFeatureEnrollment(key, isEnrolled, stage)
+        this.featureFlags?.updateEarlyAccessFeatureEnrollment(key, isEnrolled, stage)
     }
 
     /**
@@ -2003,7 +2057,7 @@ export class Insights implements InsightsInterface {
         force_reload = false,
         stages?: EarlyAccessFeatureStage[]
     ): void {
-        return this.featureFlags.getEarlyAccessFeatures(callback, force_reload, stages)
+        return this.featureFlags?.getEarlyAccessFeatures(callback, force_reload, stages)
     }
 
     /**
@@ -2067,6 +2121,10 @@ export class Insights implements InsightsInterface {
      * @returns A function that can be called to unsubscribe the listener. Used by `useEffect` when the component unmounts.
      */
     onFeatureFlags(callback: FeatureFlagsCallback): () => void {
+        if (!this.featureFlags) {
+            callback([], {}, { errorsLoading: true })
+            return () => {}
+        }
         return this.featureFlags.onFeatureFlags(callback)
     }
 
@@ -2089,6 +2147,10 @@ export class Insights implements InsightsInterface {
      * @returns {Function} A function that can be called to unsubscribe the listener.
      */
     onSurveysLoaded(callback: SurveyCallback): () => void {
+        if (!this.surveys) {
+            callback([], { isLoaded: false, error: SURVEYS_NOT_AVAILABLE })
+            return () => {}
+        }
         return this.surveys.onSurveysLoaded(callback)
     }
 
@@ -2134,7 +2196,9 @@ export class Insights implements InsightsInterface {
      * @param {Boolean} [forceReload] Optional boolean to force an API call for updated surveys
      */
     getSurveys(callback: SurveyCallback, forceReload = false): void {
-        this.surveys.getSurveys(callback, forceReload)
+        this.surveys
+            ? this.surveys.getSurveys(callback, forceReload)
+            : callback([], { isLoaded: false, error: SURVEYS_NOT_AVAILABLE })
     }
 
     /**
@@ -2155,7 +2219,9 @@ export class Insights implements InsightsInterface {
      * @param {Boolean} [forceReload] Whether to force a reload of the surveys.
      */
     getActiveMatchingSurveys(callback: SurveyCallback, forceReload = false): void {
-        this.surveys.getActiveMatchingSurveys(callback, forceReload)
+        this.surveys
+            ? this.surveys.getActiveMatchingSurveys(callback, forceReload)
+            : callback([], { isLoaded: false, error: SURVEYS_NOT_AVAILABLE })
     }
 
     /**
@@ -2181,7 +2247,7 @@ export class Insights implements InsightsInterface {
      * @param {String} selector The selector of the HTML element to render the survey on.
      */
     renderSurvey(surveyId: string, selector: string): void {
-        this.surveys.renderSurvey(surveyId, selector)
+        this.surveys?.renderSurvey(surveyId, selector)
     }
 
     /**
@@ -2218,7 +2284,7 @@ export class Insights implements InsightsInterface {
      * {@label Surveys}
      */
     displaySurvey(surveyId: string, options: DisplaySurveyOptions = DEFAULT_DISPLAY_SURVEY_OPTIONS): void {
-        this.surveys.displaySurvey(surveyId, options)
+        this.surveys?.displaySurvey(surveyId, options)
     }
 
     /**
@@ -2227,7 +2293,7 @@ export class Insights implements InsightsInterface {
      * {@label Surveys}
      */
     cancelPendingSurvey(surveyId: string): void {
-        this.surveys.cancelPendingSurvey(surveyId)
+        this.surveys?.cancelPendingSurvey(surveyId)
     }
 
     /**
@@ -2244,7 +2310,12 @@ export class Insights implements InsightsInterface {
      * @returns A SurveyRenderReason object indicating if the survey can be rendered.
      */
     canRenderSurvey(surveyId: string): SurveyRenderReason | null {
-        return this.surveys.canRenderSurvey(surveyId)
+        return (
+            this.surveys?.canRenderSurvey(surveyId) ?? {
+                visible: false,
+                disabledReason: SURVEYS_NOT_AVAILABLE,
+            }
+        )
     }
 
     /**
@@ -2272,7 +2343,31 @@ export class Insights implements InsightsInterface {
      * @returns A SurveyRenderReason object indicating if the survey can be rendered.
      */
     canRenderSurveyAsync(surveyId: string, forceReload = false): Promise<SurveyRenderReason> {
-        return this.surveys.canRenderSurveyAsync(surveyId, forceReload)
+        return (
+            this.surveys?.canRenderSurveyAsync(surveyId, forceReload) ??
+            // eslint-disable-next-line compat/compat
+            Promise.resolve({ visible: false, disabledReason: SURVEYS_NOT_AVAILABLE })
+        )
+    }
+
+    private _validateIdentifyId(id: string | undefined): id is string {
+        if (!id || isEmptyString(id)) {
+            logger.critical('Unique user id has not been set in posthog.identify')
+            return false
+        }
+        if (id === COOKIELESS_SENTINEL_VALUE) {
+            logger.critical(
+                `The string "${id}" was set in posthog.identify which indicates an error. This ID is only used as a sentinel value.`
+            )
+            return false
+        }
+        if (isDistinctIdStringLike(id) || ['undefined', 'null'].includes(id.toLowerCase())) {
+            logger.critical(
+                `The string "${id}" was set in posthog.identify which indicates an error. This ID should be unique to the user and not a hardcoded string.`
+            )
+            return false
+        }
+        return true
     }
 
     /**
@@ -2353,7 +2448,7 @@ export class Insights implements InsightsInterface {
         const previous_distinct_id = this.get_distinct_id()
         this.register({ $user_id: new_distinct_id })
 
-        if (!this.get_property('$device_id')) {
+        if (!this.get_property(DEVICE_ID)) {
             // The persisted distinct id might not actually be a device id at all
             // it might be a distinct id of the user from before
             const device_id = previous_distinct_id
@@ -2372,21 +2467,22 @@ export class Insights implements InsightsInterface {
             this.register({ distinct_id: new_distinct_id })
         }
 
-        const isKnownAnonymous = (this.persistence.get_property(USER_STATE) || 'anonymous') === 'anonymous'
+        const isKnownAnonymous =
+            (this.persistence.get_property(USER_STATE) || USER_STATE_ANONYMOUS) === USER_STATE_ANONYMOUS
 
         // send an $identify event any time the distinct_id is changing and the old ID is an anonymous ID
         // - logic on the server will determine whether or not to do anything with it.
         if (new_distinct_id !== previous_distinct_id && isKnownAnonymous) {
-            this.persistence.set_property(USER_STATE, 'identified')
+            this.persistence.set_property(USER_STATE, USER_STATE_IDENTIFIED)
 
             // Update current user properties
             this.setPersonPropertiesForFlags(
-                { ...(userPropertiesToSetOnce || {}), ...(userPropertiesToSet || {}) },
+                { $set: userPropertiesToSet || {}, $set_once: userPropertiesToSetOnce || {} },
                 false
             )
 
             this.capture(
-                '$identify',
+                EVENT_IDENTIFY,
                 {
                     distinct_id: new_distinct_id,
                     $anon_distinct_id: previous_distinct_id,
@@ -2402,7 +2498,7 @@ export class Insights implements InsightsInterface {
 
             // let the reload feature flag request know to send this previous distinct id
             // for flag consistency
-            this.featureFlags.setAnonymousDistinctId(previous_distinct_id)
+            this.featureFlags?.setAnonymousDistinctId(previous_distinct_id)
         } else if (userPropertiesToSet || userPropertiesToSetOnce) {
             // If the distinct_id is not changing, but we have user properties to set, we can check if they have changed
             // and if so, send a $set event
@@ -2471,7 +2567,10 @@ export class Insights implements InsightsInterface {
         }
 
         // Update current user properties
-        this.setPersonPropertiesForFlags({ ...(userPropertiesToSetOnce || {}), ...(userPropertiesToSet || {}) })
+        this.setPersonPropertiesForFlags(
+            { $set: userPropertiesToSet || {}, $set_once: userPropertiesToSetOnce || {} },
+            true
+        )
 
         this.capture('$set', { $set: userPropertiesToSet || {}, $set_once: userPropertiesToSetOnce || {} })
 
@@ -2517,26 +2616,36 @@ export class Insights implements InsightsInterface {
         }
 
         const existingGroups = this.getGroups()
+        const isNewGroup = existingGroups[groupType] !== groupKey
 
         // if group key changes, remove stored group properties
-        if (existingGroups[groupType] !== groupKey) {
+        if (isNewGroup) {
             this.resetGroupPropertiesForFlags(groupType)
         }
 
         this.register({ $groups: { ...existingGroups, [groupType]: groupKey } })
 
-        if (groupPropertiesToSet) {
-            this.capture('$groupidentify', {
+        // Send $groupidentify when the group is new/changed OR when properties
+        // are provided. Skip only when the group already exists with the same
+        // key and no new properties are being set.
+        if (isNewGroup || groupPropertiesToSet) {
+            const groupIdentifyProperties: Properties = {
                 $group_type: groupType,
                 $group_key: groupKey,
-                $group_set: groupPropertiesToSet,
-            })
+            }
+            if (groupPropertiesToSet) {
+                groupIdentifyProperties.$group_set = groupPropertiesToSet
+            }
+            this.capture(EVENT_GROUPIDENTIFY, groupIdentifyProperties)
+        }
+
+        if (groupPropertiesToSet) {
             this.setGroupPropertiesForFlags({ [groupType]: groupPropertiesToSet })
         }
 
         // If groups change and no properties change, reload feature flags.
         // The property change reload case is handled in setGroupPropertiesForFlags.
-        if (existingGroups[groupType] !== groupKey && !groupPropertiesToSet) {
+        if (isNewGroup && !groupPropertiesToSet) {
             this.reloadFeatureFlags()
         }
     }
@@ -2586,7 +2695,7 @@ export class Insights implements InsightsInterface {
      * @param {Boolean} [reloadFeatureFlags] Whether to reload feature flags.
      */
     setPersonPropertiesForFlags(properties: Properties, reloadFeatureFlags = true): void {
-        this.featureFlags.setPersonPropertiesForFlags(properties, reloadFeatureFlags)
+        this.featureFlags?.setPersonPropertiesForFlags(properties, reloadFeatureFlags)
     }
 
     /**
@@ -2602,7 +2711,7 @@ export class Insights implements InsightsInterface {
      * ```
      */
     resetPersonPropertiesForFlags(): void {
-        this.featureFlags.resetPersonPropertiesForFlags()
+        this.featureFlags?.resetPersonPropertiesForFlags()
     }
 
     /**
@@ -2634,7 +2743,7 @@ export class Insights implements InsightsInterface {
         if (!this._requirePersonProcessing('insights.setGroupPropertiesForFlags')) {
             return
         }
-        this.featureFlags.setGroupPropertiesForFlags(properties, reloadFeatureFlags)
+        this.featureFlags?.setGroupPropertiesForFlags(properties, reloadFeatureFlags)
     }
 
     /**
@@ -2650,7 +2759,7 @@ export class Insights implements InsightsInterface {
      * ```
      */
     resetGroupPropertiesForFlags(group_type?: string): void {
-        this.featureFlags.resetGroupPropertiesForFlags(group_type)
+        this.featureFlags?.resetGroupPropertiesForFlags(group_type)
     }
 
     /**
@@ -2686,19 +2795,32 @@ export class Insights implements InsightsInterface {
         if (!this.__loaded) {
             return logger.uninitializedWarning('insights.reset')
         }
-        const device_id = this.get_property('$device_id')
+        const device_id = this.get_property(DEVICE_ID)
+        // Snapshot the session-recording remote config before clearing persistence.
+        // It's server-defined config (sample rate, masking, canvas, triggers, …),
+        // not user state, and must survive reset(). Otherwise start('session_id_changed')
+        // bails on the next session rotation: rrweb is torn down with no replacement
+        // and the new session opens with no FullSnapshot until the next periodic
+        // checkout (~5 min later).
+        const recordingRemoteConfig = this.get_property(SESSION_RECORDING_REMOTE_CONFIG)
+
         this.consent.reset()
         this.persistence?.clear()
         this.sessionPersistence?.clear()
-        this.surveys.reset()
+
+        if (!isUndefined(recordingRemoteConfig)) {
+            this.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: recordingRemoteConfig })
+        }
+        this.surveys?.reset()
         // Stop the refresh interval before resetting flags — featureFlags.reset() clears
         // the debouncer, so if the order were reversed a pending refresh could fire after reset.
         this._remoteConfigLoader?.stop()
-        this.featureFlags.reset()
-        this.persistence?.set_property(USER_STATE, 'anonymous')
+        this.featureFlags?.reset()
+        this.conversations?.reset()
+        this.persistence?.set_property(USER_STATE, USER_STATE_ANONYMOUS)
         this.sessionManager?.resetSessionId()
         this._cachedPersonProperties = null
-        if (this.config.cookieless_mode === 'always') {
+        if (this.config.cookieless_mode === COOKIELESS_ALWAYS) {
             this.register_once(
                 {
                     distinct_id: COOKIELESS_SENTINEL_VALUE,
@@ -2723,6 +2845,56 @@ export class Insights implements InsightsInterface {
             },
             1
         )
+
+        // Clear HMAC identity verification fields
+        delete this.config.identity_distinct_id
+        delete this.config.identity_hash
+
+        // Reload feature flags for the new anonymous user, just like identify()
+        // does when the distinct_id changes.
+        this.reloadFeatureFlags()
+    }
+
+    /**
+     * Set HMAC-based identity verification.
+     *
+     * @remarks
+     * When set, products like conversations use server-verified identity
+     * (distinct_id + HMAC hash) instead of anonymous session identifiers.
+     * The hash should be computed server-side as HMAC-SHA256 of the
+     * distinct_id using the project's API secret.
+     *
+     * @param distinctId - The verified user distinct_id
+     * @param hash - HMAC-SHA256 of distinctId using the project API secret
+     *
+     * @example
+     * ```js
+     * posthog.setIdentity('user_123', 'a1b2c3d4e5f6...')
+     * ```
+     *
+     * @public
+     */
+    setIdentity(distinctId: string, hash: string): void {
+        this.config.identity_distinct_id = distinctId
+        this.config.identity_hash = hash
+        this.alias(distinctId)
+        this.conversations?._onIdentityChanged()
+    }
+
+    /**
+     * Clear HMAC-based identity verification, reverting to anonymous mode.
+     *
+     * @example
+     * ```js
+     * posthog.clearIdentity()
+     * ```
+     *
+     * @public
+     */
+    clearIdentity(): void {
+        delete this.config.identity_distinct_id
+        delete this.config.identity_hash
+        this.conversations?._onIdentityCleared()
     }
 
     /**
@@ -2921,7 +3093,7 @@ export class Insights implements InsightsInterface {
             if (isBoolean(this.config.debug)) {
                 if (this.config.debug) {
                     Config.DEBUG = true
-                    localStore._is_supported() && localStore._set('ph_debug', 'true')
+                    localStore._is_supported() && localStore._set('ph_debug', true)
                     logger.info('set_config', {
                         config,
                         oldConfig,
@@ -2934,16 +3106,29 @@ export class Insights implements InsightsInterface {
             }
 
             this.exceptionObserver?.onConfigChange()
+            this.exceptions?.onConfigChange()
 
             this.sessionRecording?.startIfEnabledOrStop()
             this.autocapture?.startIfEnabled()
             this.heatmaps?.startIfEnabled()
             this.exceptionObserver?.startIfEnabledOrStop()
             this.deadClicksAutocapture?.startIfEnabledOrStop()
-            this.surveys.loadIfEnabled()
+            this.surveys?.loadIfEnabled()
             this._sync_opt_out_with_persistence()
             this.externalIntegrations?.startIfEnabledOrStop()
         }
+    }
+
+    /**
+     * @internal
+     * Allows wrapper SDKs (e.g. posthog-flutter, posthog-react-native) to override the
+     * `$lib` and `$lib_version` properties sent with every event.
+     *
+     * This is not a public API and may change without notice.
+     */
+    _overrideSDKInfo(sdkName: string, sdkVersion: string): void {
+        Config.LIB_NAME = sdkName
+        Config.LIB_VERSION = sdkVersion
     }
 
     /**
@@ -3094,6 +3279,64 @@ export class Insights implements InsightsInterface {
     }
 
     /**
+     * Add a breadcrumb-like step that will be attached to the next captured exception.
+     *
+     * {@label Error tracking}
+     *
+     * @public
+     *
+     * @example
+     * ```js
+     * posthog.addExceptionStep('Checkout button clicked', {
+     *   checkout_id: 'ch_123',
+     * })
+     * ```
+     */
+    addExceptionStep(message: string, properties?: Properties): void {
+        this.exceptions?.addExceptionStep(message, properties)
+    }
+
+    /**
+     * Capture a log entry and send it to the PostHog logs endpoint.
+     *
+     * {@label Logs}
+     *
+     * @public
+     *
+     * @example
+     * ```js
+     * posthog.captureLog({
+     *   body: 'checkout completed',
+     *   level: 'info',
+     *   attributes: { order_id: 'ord_789', amount_cents: 4999 },
+     * })
+     * ```
+     *
+     * @param {CaptureLogOptions} options The log entry options
+     */
+    captureLog(options: CaptureLogOptions): void {
+        this.logs?.captureLog(options)
+    }
+
+    private static _noopLogger = (() => {
+        const noop = () => {}
+        return { trace: noop, debug: noop, info: noop, warn: noop, error: noop, fatal: noop }
+    })()
+
+    /**
+     * Logger with convenience methods for each severity level.
+     *
+     * @example
+     * ```js
+     * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
+     * posthog.logger.error('payment failed', { error_code: 'E001' })
+     * ```
+     */
+    get logger() {
+        return this.logs?.logger ?? PostHog._noopLogger
+    }
+
+    /**
      * turns exception autocapture on, and updates the config option `capture_exceptions` to the provided config (or `true`)
      *
      * {@label Error tracking}
@@ -3152,7 +3395,7 @@ export class Insights implements InsightsInterface {
      */
 
     loadToolbar(params: ToolbarParams): boolean {
-        return this.toolbar.loadToolbar(params)
+        return this.toolbar?.loadToolbar(params) ?? false
     }
 
     /**
@@ -3227,15 +3470,15 @@ export class Insights implements InsightsInterface {
 
     _isIdentified(): boolean {
         return (
-            this.persistence?.get_property(USER_STATE) === 'identified' ||
-            this.sessionPersistence?.get_property(USER_STATE) === 'identified'
+            this.persistence?.get_property(USER_STATE) === USER_STATE_IDENTIFIED ||
+            this.sessionPersistence?.get_property(USER_STATE) === USER_STATE_IDENTIFIED
         )
     }
 
     _hasPersonProcessing(): boolean {
         return !(
             this.config.person_profiles === 'never' ||
-            (this.config.person_profiles === 'identified_only' &&
+            (this.config.person_profiles === PERSON_PROFILES_IDENTIFIED_ONLY &&
                 !this._isIdentified() &&
                 isEmptyObject(this.getGroups()) &&
                 !this.persistence?.props?.[ALIAS_ID_KEY] &&
@@ -3327,7 +3570,7 @@ export class Insights implements InsightsInterface {
         }
         const isOptedOut = this.consent.isOptedOut()
         const defaultPersistenceDisabled =
-            this.config.opt_out_persistence_by_default || this.config.cookieless_mode === 'on_reject'
+            this.config.opt_out_persistence_by_default || this.config.cookieless_mode === COOKIELESS_ON_REJECT
 
         // TRICKY: We want a deterministic state for persistence so that a new pageload has the same persistence
         return this.config.disable_persistence || (isOptedOut && !!defaultPersistenceDisabled)
@@ -3387,12 +3630,12 @@ export class Insights implements InsightsInterface {
         captureEventName?: EventName | null | false /** event name to be used for capturing the opt-in action */
         captureProperties?: Properties /** set of properties to be captured along with the opt-in action */
     }): void {
-        if (this.config.cookieless_mode === 'always') {
-            logger.warn('Consent opt in/out is not valid with cookieless_mode="always" and will be ignored')
+        if (this.config.cookieless_mode === COOKIELESS_ALWAYS) {
+            logger.warn(CONSENT_COOKIELESS_WARN)
             return
         }
-        if (this.config.cookieless_mode === 'on_reject' && this.consent.isExplicitlyOptedOut()) {
-            // If the user has explicitly opted out on_reject mode, then before we can start sending regular non-cookieless events
+        if (this._inCookielessMode()) {
+            // If the user was being treated as rejected in on_reject mode (either explicitly opted out, or opted out by default via opt_out_capturing_by_default), then before we can start sending regular non-cookieless events
             // we need to reset the instance to ensure that there is no leaking of state or data between the cookieless and regular events
             this.reset(true)
             this.sessionManager?.destroy()
@@ -3405,8 +3648,16 @@ export class Insights implements InsightsInterface {
             const SessionRecordingClass =
                 this.config.__extensionClasses?.sessionRecording ?? Insights.__defaultExtensionClasses?.sessionRecording
             if (SessionRecordingClass) {
-                this.sessionRecording = new SessionRecordingClass(this) as SessionRecording
-                this.sessionRecording.startIfEnabledOrStop()
+                this.sessionRecording = this._replaceExtension(
+                    this.sessionRecording,
+                    new SessionRecordingClass(this) as SessionRecording
+                )
+                // Replay the cached remote config so the new recorder picks up server-side
+                // settings (enable flag, endpoint, sampling) that arrived while we were
+                // still in cookieless mode and sessionRecording didn't yet exist.
+                if (this._lastRemoteConfig) {
+                    this.sessionRecording?.onRemoteConfig?.(this._lastRemoteConfig)
+                }
             }
         }
 
@@ -3421,8 +3672,8 @@ export class Insights implements InsightsInterface {
         this.sessionRecording?.startIfEnabledOrStop()
 
         // Reinitialize surveys if we're in cookieless mode and just opted in
-        if (this.config.cookieless_mode == 'on_reject') {
-            this.surveys.loadIfEnabled()
+        if (this.config.cookieless_mode == COOKIELESS_ON_REJECT) {
+            this.surveys?.loadIfEnabled()
         }
 
         // Don't capture if captureEventName is null or false
@@ -3453,12 +3704,12 @@ export class Insights implements InsightsInterface {
      * @public
      */
     opt_out_capturing(): void {
-        if (this.config.cookieless_mode === 'always') {
-            logger.warn('Consent opt in/out is not valid with cookieless_mode="always" and will be ignored')
+        if (this.config.cookieless_mode === COOKIELESS_ALWAYS) {
+            logger.warn(CONSENT_COOKIELESS_WARN)
             return
         }
 
-        if (this.config.cookieless_mode === 'on_reject' && this.consent.isOptedIn()) {
+        if (this.config.cookieless_mode === COOKIELESS_ON_REJECT && this.consent.isOptedIn()) {
             // If the user has opted in, we need to reset the instance to ensure that there is no leaking of state or data between the cookieless and regular events
             this.reset(true)
         }
@@ -3466,19 +3717,23 @@ export class Insights implements InsightsInterface {
         this.consent.optInOut(false)
         this._sync_opt_out_with_persistence()
 
-        if (this.config.cookieless_mode === 'on_reject') {
-            // If cookieless_mode is 'on_reject', we start capturing events in cookieless mode
+        if (this.config.cookieless_mode === COOKIELESS_ON_REJECT) {
+            // If cookieless_mode is COOKIELESS_ON_REJECT, we start capturing events in cookieless mode
             this.register({
                 distinct_id: COOKIELESS_SENTINEL_VALUE,
                 $device_id: null,
             })
+            // tear down rrweb observers before sessionManager goes away — late events would throw
+            this.sessionRecording?.stopRecording()
+            this.sessionRecording = undefined
             this.sessionManager?.destroy()
             this.pageViewManager?.destroy()
             this.sessionManager = undefined
             this.sessionPropsManager = undefined
-            this.sessionRecording?.stopRecording()
-            this.sessionRecording = undefined
             this._captureInitialPageview()
+            // At init time, consent was PENDING so is_capturing() was false and _start_queue_if_opted_in() was a no-op.
+            // Now that rejection has been recorded, capturing is active — enable the queue so batched events are flushed.
+            this._start_queue_if_opted_in()
         }
     }
 
@@ -3563,8 +3818,8 @@ export class Insights implements InsightsInterface {
      * Usually this means that the user has not opted out of capturing, but the exact behaviour can be controlled by
      * some config options.
      *
-     * Additionally, if the cookieless_mode is set to 'on_reject', we will capture events in cookieless mode if the
-     * user has explicitly opted out.
+     * Additionally, if the cookieless_mode is set to `'on_reject'`, we will capture events in cookieless mode if the
+     * user has opted out or been defaulted to opt-out.
      *
      * {@label Privacy}
      *
@@ -3575,11 +3830,11 @@ export class Insights implements InsightsInterface {
      * @returns {boolean} whether the insights library is capturing events
      */
     is_capturing(): boolean {
-        if (this.config.cookieless_mode === 'always') {
+        if (this.config.cookieless_mode === COOKIELESS_ALWAYS) {
             return true
         }
-        if (this.config.cookieless_mode === 'on_reject') {
-            return this.consent.isExplicitlyOptedOut() || this.consent.isOptedIn()
+        if (this.config.cookieless_mode === COOKIELESS_ON_REJECT) {
+            return this.consent.isRejected() || this.consent.isOptedIn()
         } else {
             return !this.has_opted_out_capturing()
         }
@@ -3619,7 +3874,7 @@ export class Insights implements InsightsInterface {
         if (document.visibilityState !== 'visible') {
             if (!this._visibilityStateListener) {
                 this._visibilityStateListener = this._captureInitialPageview.bind(this)
-                addEventListener(document, 'visibilitychange', this._visibilityStateListener)
+                addEventListener(document, DOM_EVENT_VISIBILITYCHANGE, this._visibilityStateListener)
             }
 
             return
@@ -3628,11 +3883,11 @@ export class Insights implements InsightsInterface {
         // Extra check here to guarantee we only ever trigger a single `$pageview` event
         if (!this._initialPageviewCaptured) {
             this._initialPageviewCaptured = true
-            this.capture('$pageview', { title: document.title }, { send_instantly: true })
+            this.capture(EVENT_PAGEVIEW, { title: document.title }, { send_instantly: true })
 
             // After we've captured the initial pageview, we can remove the listener
             if (this._visibilityStateListener) {
-                document.removeEventListener('visibilitychange', this._visibilityStateListener)
+                document.removeEventListener(DOM_EVENT_VISIBILITYCHANGE, this._visibilityStateListener)
                 this._visibilityStateListener = null
             }
         }

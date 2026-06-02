@@ -25,14 +25,16 @@ export default function Home() {
                     </button>
                     <button
                         onClick={() => {
-                            throw new Error('exception captured')
+                            addCheckoutExceptionSteps()
+                            throw new Error('Payment form crashed before submit')
                         }}
                     >
                         Capture error automatically
                     </button>
                     <button
                         onClick={() => {
-                            Promise.reject(new Error('promise rejection captured'))
+                            addCheckoutExceptionSteps()
+                            Promise.reject(new Error('Payment provider timed out'))
                         }}
                     >
                         Capture promise rejection automatically
@@ -44,7 +46,7 @@ export default function Home() {
                             insights.captureException(new Error('custom fingerprint'), {
                                 $exception_fingerprint: randomID(),
                             })
-                        }
+                        }}
                     >
                         Create custom fingerprint!
                     </button>

@@ -17,7 +17,7 @@ jest.mock('../utils/globals', () => ({
 import { fetch, XMLHttpRequest, navigator } from '../utils/globals'
 import { uuidv7 } from '../uuidv7'
 
-jest.mock('../config', () => ({ DEBUG: false, LIB_VERSION: '1.23.45' }))
+jest.mock('../config', () => ({ DEBUG: false, LIB_VERSION: '1.23.45', LIB_NAME: 'web', JS_SDK_VERSION: '1.23.45' }))
 
 const flushPromises = async () => {
     jest.useRealTimers()
@@ -25,6 +25,7 @@ const flushPromises = async () => {
     jest.useRealTimers()
 }
 
+const invalidGzipBody = () => new Uint8Array([0, 1, 2]).buffer
 const bodyData = () => ({ key: uuidv7() })
 const arrayOfBodyData = (n: number) => {
     const arr = []
@@ -204,6 +205,63 @@ describe('request', () => {
                 text: 'oh no!',
             })
         })
+
+        const invalidPreEncodedGzipRequest = (overrides?: Partial<RequestWithOptions>) =>
+            createRequest({
+                method: 'POST',
+                compression: Compression.GZipJS,
+                data: { foo: 'bar' },
+                _encodedBody: {
+                    contentType: 'text/plain',
+                    body: invalidGzipBody(),
+                    estimatedSize: 3,
+                },
+                ...overrides,
+            } as any)
+
+        it.each([
+            [
+                'fetch',
+                { transport: 'fetch' as const },
+                () => {
+                    expect(mockedFetch.mock.calls[0][0]).not.toContain('compression=gzip-js')
+                    expect(mockedFetch.mock.calls[0][1].body).toBe('{"foo":"bar"}')
+                    expect((mockedFetch.mock.calls[0][1].headers as Headers).get('Content-Type')).toBe(
+                        'application/json'
+                    )
+                },
+            ],
+            [
+                'XHR',
+                { transport: 'XHR' as const, url: 'https://any.posthog-instance.com/' },
+                () => {
+                    expect(mockedXHR.open.mock.calls[0][1]).not.toContain('compression=gzip-js')
+                    expect(mockedXHR.send.mock.calls[0][0]).toBe('{"foo":"bar"}')
+                    expect(mockedXHR.setRequestHeader).toHaveBeenCalledWith('Content-Type', 'application/json')
+                },
+            ],
+            [
+                'sendBeacon',
+                { transport: 'sendBeacon' as const, url: 'https://any.posthog-instance.com/' },
+                async () => {
+                    expect(mockedNavigator?.sendBeacon.mock.calls[0][0]).not.toContain('compression=gzip-js')
+                    const blob = mockedNavigator?.sendBeacon.mock.calls[0][1] as Blob
+                    expect(blob.type).toBe('application/json')
+                    const result = await new Promise<string>((resolve) => {
+                        const reader = new FileReader()
+                        reader.onload = () => resolve(reader.result as string)
+                        reader.readAsText(blob)
+                    })
+                    expect(result).toBe('{"foo":"bar"}')
+                },
+            ],
+        ])(
+            'falls back to JSON if a pre-encoded gzip body is not actually gzip before %s send',
+            async (_name, overrides, assertTransport) => {
+                request(invalidPreEncodedGzipRequest(overrides))
+                await assertTransport()
+            }
+        )
 
         it('supports nextOptions parameter', async () => {
             request(
@@ -455,6 +513,7 @@ describe('request', () => {
                     expect.any(Blob)
                 )
                 const blob = mockedNavigator?.sendBeacon.mock.calls[0][1] as Blob
+                expect(blob.type).toBe('application/json')
 
                 const reader = new FileReader()
                 const result = await new Promise((resolve) => {
@@ -480,6 +539,7 @@ describe('request', () => {
                     expect.any(Blob)
                 )
                 const blob = mockedNavigator?.sendBeacon.mock.calls[0][1] as Blob
+                expect(blob.type).toBe('application/x-www-form-urlencoded')
 
                 const reader = new FileReader()
                 const result = await new Promise((resolve) => {
@@ -504,15 +564,229 @@ describe('request', () => {
                     'https://any.insights-instance.com/?_=1700000000000&ver=1.23.45&compression=gzip-js&beacon=1',
                     expect.any(ArrayBuffer)
                 )
-                const arrayBuffer = mockedNavigator?.sendBeacon.mock.calls[0][1] as ArrayBuffer
-
-                const result = new TextDecoder().decode(arrayBuffer)
+                const blob = mockedNavigator?.sendBeacon.mock.calls[0][1] as Blob
+                expect(blob.type).toBe('text/plain')
+                const result = await new Promise<string>((resolve) => {
+                    const reader = new FileReader()
+                    reader.onload = () => resolve(reader.result as string)
+                    reader.readAsText(blob)
+                })
 
                 expect(result).toMatchInlineSnapshot(`
                 "�      �VJ��W�RJJ,R� ��+�
                    "
             `)
             })
+
+            it('should not call sendBeacon when body is undefined', () => {
+                request(
+                    createRequest({
+                        url: 'https://any.posthog-instance.com/',
+                        method: 'POST',
+                        data: undefined,
+                    })
+                )
+
+                expect(mockedNavigator?.sendBeacon).not.toHaveBeenCalled()
+            })
+
+            it.each([
+                ['no compression', undefined, 'application/json'],
+                ['base64 compression', Compression.Base64, 'application/x-www-form-urlencoded'],
+                ['gzip compression', Compression.GZipJS, 'text/plain'],
+            ])(
+                'always sends a Blob with correct Content-Type for %s',
+                (_name: string, compression: Compression | undefined, expectedContentType: string) => {
+                    request(
+                        createRequest({
+                            url: 'https://any.posthog-instance.com/',
+                            method: 'POST',
+                            compression,
+                            data: { event: 'test' },
+                        })
+                    )
+
+                    expect(mockedNavigator?.sendBeacon).toHaveBeenCalledTimes(1)
+                    const body = mockedNavigator?.sendBeacon.mock.calls[0][1]
+
+                    // The body must always be a Blob so the browser sets the Content-Type header.
+                    // Sending a raw ArrayBuffer (as happened before the fix in #3297) causes the
+                    // browser to omit Content-Type, which breaks proxies/WAFs/CDNs that require it.
+                    expect(body).toBeInstanceOf(Blob)
+                    expect((body as Blob).type).toBe(expectedContentType)
+                }
+            )
+        })
+    })
+
+    describe('native async gzip retry flow', () => {
+        let isolatedRequestModule: any
+        let isolatedCompression: typeof Compression
+        let mockedIsolatedFetch: jest.Mock
+        let mockedIsolatedGzipCompress: jest.Mock
+
+        beforeEach(async () => {
+            jest.resetModules()
+            jest.clearAllMocks()
+            jest.useFakeTimers()
+            jest.setSystemTime(now)
+
+            mockedIsolatedFetch = jest.fn(() =>
+                Promise.resolve({
+                    status: 200,
+                    text: () => Promise.resolve('{ "a": 1 }'),
+                })
+            )
+            mockedIsolatedGzipCompress = jest.fn()
+
+            jest.doMock('../utils/globals', () => ({
+                ...jest.requireActual('../utils/globals'),
+                fetch: mockedIsolatedFetch,
+                XMLHttpRequest: jest.fn(),
+                navigator: {
+                    sendBeacon: jest.fn(),
+                },
+                CompressionStream: jest.fn(),
+            }))
+
+            jest.doMock('@posthog/core', () => ({
+                ...jest.requireActual('@posthog/core'),
+                gzipCompress: mockedIsolatedGzipCompress,
+                isNativeAsyncGzipError: (error: unknown) =>
+                    error &&
+                    typeof error === 'object' &&
+                    'name' in error &&
+                    (error.name === 'NotReadableError' || error.name === 'NativeGzipValidationError'),
+            }))
+
+            isolatedRequestModule = await import('../request')
+            isolatedCompression = (await import('../types')).Compression
+        })
+
+        it('retries uncompressed and disables native async gzip after NotReadableError', async () => {
+            mockedIsolatedGzipCompress.mockRejectedValueOnce({ name: 'NotReadableError' })
+
+            isolatedRequestModule.request({
+                url: 'https://any.posthog-instance.com?ver=1.23.45',
+                data: { foo: 'bar' },
+                headers: {},
+                callback: jest.fn(),
+                transport: 'fetch',
+                method: 'POST',
+                compression: isolatedCompression.GZipJS,
+            })
+
+            await flushPromises()
+
+            expect(mockedIsolatedGzipCompress).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch.mock.calls[0][0]).not.toContain('&compression=gzip-js')
+            expect(mockedIsolatedFetch.mock.calls[0][1].body).toBe('{"foo":"bar"}')
+
+            mockedIsolatedFetch.mockClear()
+
+            isolatedRequestModule.request({
+                url: 'https://any.posthog-instance.com?ver=1.23.45',
+                data: { foo: 'baz' },
+                headers: {},
+                callback: jest.fn(),
+                transport: 'fetch',
+                method: 'POST',
+                compression: isolatedCompression.GZipJS,
+            })
+
+            await flushPromises()
+
+            expect(mockedIsolatedGzipCompress).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch.mock.calls[0][0]).toContain('&compression=gzip-js')
+            expect(mockedIsolatedFetch.mock.calls[0][1].body).toBeInstanceOf(ArrayBuffer)
+        })
+
+        it('falls back to fflate and disables native async gzip after invalid native gzip output', async () => {
+            mockedIsolatedGzipCompress.mockRejectedValueOnce({ name: 'NativeGzipValidationError' })
+
+            isolatedRequestModule.request({
+                url: 'https://any.posthog-instance.com?ver=1.23.45',
+                data: { foo: 'bar' },
+                headers: {},
+                callback: jest.fn(),
+                transport: 'fetch',
+                method: 'POST',
+                compression: isolatedCompression.GZipJS,
+            })
+
+            await flushPromises()
+
+            expect(mockedIsolatedGzipCompress).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch.mock.calls[0][0]).toContain('&compression=gzip-js')
+            expect(mockedIsolatedFetch.mock.calls[0][1].body).toBeInstanceOf(ArrayBuffer)
+
+            mockedIsolatedFetch.mockClear()
+
+            isolatedRequestModule.request({
+                url: 'https://any.posthog-instance.com?ver=1.23.45',
+                data: { foo: 'baz' },
+                headers: {},
+                callback: jest.fn(),
+                transport: 'fetch',
+                method: 'POST',
+                compression: isolatedCompression.GZipJS,
+            })
+
+            await flushPromises()
+
+            expect(mockedIsolatedGzipCompress).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch.mock.calls[0][0]).toContain('&compression=gzip-js')
+            expect(mockedIsolatedFetch.mock.calls[0][1].body).toBeInstanceOf(ArrayBuffer)
+        })
+
+        it('falls back to JSON if native async gzip resolves a non-gzip body before sending', async () => {
+            mockedIsolatedGzipCompress.mockResolvedValueOnce({
+                arrayBuffer: () => Promise.resolve(invalidGzipBody()),
+            })
+
+            isolatedRequestModule.request({
+                url: 'https://any.posthog-instance.com?ver=1.23.45',
+                data: { foo: 'bar' },
+                headers: {},
+                callback: jest.fn(),
+                transport: 'fetch',
+                method: 'POST',
+                compression: isolatedCompression.GZipJS,
+            })
+
+            await flushPromises()
+
+            expect(mockedIsolatedGzipCompress).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch.mock.calls[0][0]).not.toContain('&compression=gzip-js')
+            expect(mockedIsolatedFetch.mock.calls[0][1].body).toBe('{"foo":"bar"}')
+        })
+
+        it('starts with native async gzip enabled in a fresh module instance', async () => {
+            mockedIsolatedGzipCompress.mockResolvedValueOnce({
+                arrayBuffer: () => Promise.resolve(new Uint8Array([0x1f, 0x8b]).buffer),
+            })
+
+            isolatedRequestModule.request({
+                url: 'https://any.posthog-instance.com?ver=1.23.45',
+                data: { foo: 'baz' },
+                headers: {},
+                callback: jest.fn(),
+                transport: 'fetch',
+                method: 'POST',
+                compression: isolatedCompression.GZipJS,
+            })
+
+            await flushPromises()
+
+            expect(mockedIsolatedGzipCompress).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch).toHaveBeenCalledTimes(1)
+            expect(mockedIsolatedFetch.mock.calls[0][0]).toContain('&compression=gzip-js')
+            expect(mockedIsolatedFetch.mock.calls[0][1].body).toBeInstanceOf(ArrayBuffer)
         })
     })
 })
