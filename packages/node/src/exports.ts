@@ -2,6 +2,9 @@ export * from './extensions/sentry-integration'
 export * from './extensions/express'
 export * from './types'
 
+export { FeatureFlagEvaluations } from './feature-flag-evaluations'
+export type { FlagDefinitionCacheData, FlagDefinitionCacheProvider } from './extensions/feature-flags/cache'
+
 // Re-export FeatureFlagError from core for backwards compatibility.
 // These were originally defined in insights-node and moved to core for reuse across SDKs.
 export { FeatureFlagError } from '@hanzo/insights-core'

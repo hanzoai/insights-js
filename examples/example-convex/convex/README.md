@@ -1,4 +1,4 @@
-# Example App
+# Example app — Convex backend
 
 This is a minimal example showing how to use the `@hanzo/convex` component.
 

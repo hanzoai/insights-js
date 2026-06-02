@@ -21,13 +21,13 @@ The official Hanzo Insights component for [Convex](https://convex.dev). Capture 
 
 ## Quick Start
 
-Install the package:
+Install the package (requires Convex 1.39 or newer):
 
 ```sh
 pnpm add @hanzo/insights-convex
 ```
 
-Register the component in your `convex/convex.config.ts`:
+Register the component in your `convex/convex.config.ts` and forward the env vars from your app to the component:
 
 ```ts
 // convex/convex.config.ts
@@ -57,7 +57,7 @@ import { components } from "./_generated/api";
 export const insights = new Insights(components.insights);
 ```
 
-You can also pass the API key and host explicitly:
+That's the whole setup — feature flag methods will start returning live values on the next cron tick. The component refreshes flag definitions once a minute by default when `POSTHOG_PERSONAL_API_KEY` is set. To tune the cadence (e.g. raise it to `300` for a free-tier dev deployment), set `POSTHOG_FLAGS_POLLING_INTERVAL_SECONDS` and redeploy:
 
 ```ts
 export const insights = new Insights(components.insights, {

@@ -16,6 +16,7 @@ import { type fullSnapshotEvent, type metaEvent } from '../../../extensions/repl
 import Mock = jest.Mock
 import { ConsentManager } from '../../../consent'
 import { SimpleEventEmitter } from '../../../utils/simple-event-emitter'
+import { AndTriggerMatching, OrTriggerMatching } from '../../../extensions/replay/external/triggerMatching'
 import {
     allMatchSessionRecordingStatus,
     AndTriggerMatching,
@@ -27,10 +28,11 @@ import { createMockInsights, createMockConfig } from '../../helpers/insights-ins
 
 // Type and source defined here designate a non-user-generated recording event
 
-jest.mock('../../../config', () => ({ LIB_VERSION: '0.0.1' }))
+jest.mock('../../../config', () => ({ LIB_VERSION: '0.0.1', LIB_NAME: 'web' }))
 
 const EMPTY_BUFFER = {
     data: [],
+    sizes: [],
     sessionId: null,
     size: 0,
     windowId: null,
@@ -193,12 +195,9 @@ describe('SessionRecording', () => {
                     sessionRecording: { endpoint: '/s/', triggerMatchType: 'any' },
                 })
             )
-            expect(sessionRecording['_lazyLoadedSessionRecording']['_statusMatcher']).toBe(
-                anyMatchSessionRecordingStatus
-            )
-            expect(sessionRecording['_lazyLoadedSessionRecording']['_triggerMatching']).toBeInstanceOf(
-                OrTriggerMatching
-            )
+            // Trigger matching is now internal to V1 strategy
+            const strategy = sessionRecording['_lazyLoadedSessionRecording']['_strategy']
+            expect(strategy?.['_triggerStatusMatcher']).toBeInstanceOf(OrTriggerMatching)
         })
 
         it('uses allMatchSessionRecordingStatus when triggerMatching is "all"', () => {
@@ -207,12 +206,9 @@ describe('SessionRecording', () => {
                     sessionRecording: { endpoint: '/s/', triggerMatchType: 'all' },
                 })
             )
-            expect(sessionRecording['_lazyLoadedSessionRecording']['_statusMatcher']).toBe(
-                allMatchSessionRecordingStatus
-            )
-            expect(sessionRecording['_lazyLoadedSessionRecording']['_triggerMatching']).toBeInstanceOf(
-                AndTriggerMatching
-            )
+            // Trigger matching is now internal to V1 strategy
+            const strategy = sessionRecording['_lazyLoadedSessionRecording']['_strategy']
+            expect(strategy?.['_triggerStatusMatcher']).toBeInstanceOf(AndTriggerMatching)
         })
 
         it('uses most restrictive when triggerMatching is not specified', () => {
@@ -221,12 +217,9 @@ describe('SessionRecording', () => {
                     sessionRecording: { endpoint: '/s/' },
                 })
             )
-            expect(sessionRecording['_lazyLoadedSessionRecording']['_statusMatcher']).toBe(
-                allMatchSessionRecordingStatus
-            )
-            expect(sessionRecording['_lazyLoadedSessionRecording']['_triggerMatching']).toBeInstanceOf(
-                AndTriggerMatching
-            )
+            // Trigger matching is now internal to V1 strategy
+            const strategy = sessionRecording['_lazyLoadedSessionRecording']['_strategy']
+            expect(strategy?.['_triggerStatusMatcher']).toBeInstanceOf(AndTriggerMatching)
         })
 
         it('when the first event is a meta it does not take a manual full snapshot', () => {
@@ -247,6 +240,7 @@ describe('SessionRecording', () => {
             _emit(metaSnapshot)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toEqual({
                 data: [metaSnapshot],
+                sizes: [48],
                 sessionId: sessionId,
                 size: 48,
                 windowId: 'windowId',
@@ -271,14 +265,15 @@ describe('SessionRecording', () => {
             _emit(fullSnapshot)
             expect(sessionRecording['_lazyLoadedSessionRecording']['_buffer']).toEqual({
                 data: [fullSnapshot],
+                sizes: [20],
                 sessionId: sessionId,
                 size: 20,
                 windowId: 'windowId',
             })
         })
 
-        it('emit is not active until flags is called', () => {
-            expect(sessionRecording['status']).toBe('pending_config')
+        it('status is disabled until config enables recording', () => {
+            expect(sessionRecording['status']).toBe('disabled')
 
             sessionRecording.onRemoteConfig(makeFlagsResponse({ sessionRecording: { endpoint: '/s/' } }))
             expect(sessionRecording['status']).toBe('active')
@@ -346,6 +341,34 @@ describe('SessionRecording', () => {
             sessionRecording.onRemoteConfig(makeFlagsResponse({ sessionRecording: false }))
 
             expect(sessionRecording.status).toBe('disabled')
+        })
+
+        it('discards recording when server disables it after starting from cached config', () => {
+            // Fresh cached config from previous page load
+            posthog.persistence?.register({
+                [SESSION_RECORDING_REMOTE_CONFIG]: {
+                    enabled: true,
+                    endpoint: '/s/',
+                    cache_timestamp: Date.now(),
+                },
+            })
+
+            // Recording starts from cache
+            sessionRecording.startIfEnabledOrStop()
+            expect(loadScriptMock).toHaveBeenCalled()
+            expect(sessionRecording.status).toBe('active')
+
+            const lazyRecorder = sessionRecording['_lazyLoadedSessionRecording']
+            const discardSpy = jest.spyOn(lazyRecorder!, 'discard')
+            const flushSpy = jest.spyOn(lazyRecorder as any, '_flushBuffer')
+
+            // Server responds with recording disabled
+            sessionRecording.onRemoteConfig(makeFlagsResponse({ sessionRecording: false }))
+
+            expect(discardSpy).toHaveBeenCalled()
+            expect(flushSpy).not.toHaveBeenCalled()
+            expect(sessionRecording['_persistFlagsOnSessionListener']).toBeUndefined()
+            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(false)
         })
 
         it('stores sample rate', () => {
@@ -446,27 +469,66 @@ describe('SessionRecording', () => {
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
-                    urlTriggers: [],
+                    cache_timestamp: Date.now(),
                 },
             })
 
-            // Try to start without receiving remote config
-            sessionRecording.startIfEnabledOrStop()
+            // Remote config fetch fails — empty object, no sessionRecording key
+            sessionRecording.onRemoteConfig(makeFlagsResponse({}))
 
-            // Should not have started recording yet
-            expect(loadScriptMock).not.toHaveBeenCalled()
-            expect(sessionRecording.status).toBe('pending_config')
-
-            // Now receive remote config
-            sessionRecording.onRemoteConfig(
-                makeFlagsResponse({
-                    sessionRecording: { endpoint: '/s/' },
-                })
-            )
-
-            // Should now start
+            // Should fall back to persisted config and start recording
             expect(loadScriptMock).toHaveBeenCalled()
             expect(sessionRecording.status).toBe('active')
+        })
+
+        it('does not start recording when config fetch fails and no persisted config exists', () => {
+            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+
+            // Remote config fetch fails
+            sessionRecording.onRemoteConfig(makeFlagsResponse({}))
+
+            // No persisted config to fall back to
+            expect(loadScriptMock).not.toHaveBeenCalled()
+            expect(sessionRecording.status).toBe('disabled')
+        })
+
+        it('awaits config when config fetch fails and persisted config is stale', () => {
+            posthog.persistence?.register({
+                [SESSION_RECORDING_REMOTE_CONFIG]: {
+                    enabled: true,
+                    endpoint: '/s/',
+                    cache_timestamp: Date.now() - RECORDING_REMOTE_CONFIG_TTL_MS - 1000,
+                },
+            })
+
+            // Remote config fetch fails
+            sessionRecording.onRemoteConfig(makeFlagsResponse({}))
+
+            // Script loads, refresh requested — waiting for fresh config
+            expect(loadScriptMock).toHaveBeenCalled()
+            expect(sessionRecording.status).toBe('awaiting_config')
+        })
+
+        it('transitions to missing_config when config refresh fails', () => {
+            posthog.persistence?.register({
+                [SESSION_RECORDING_REMOTE_CONFIG]: {
+                    enabled: true,
+                    endpoint: '/s/',
+                    cache_timestamp: Date.now() - RECORDING_REMOTE_CONFIG_TTL_MS - 1000,
+                },
+            })
+
+            // First failure: triggers refresh
+            sessionRecording.onRemoteConfig(makeFlagsResponse({}))
+            expect(sessionRecording.status).toBe('awaiting_config')
+
+            // Second failure: refresh came back empty, now missing
+            sessionRecording.onRemoteConfig(makeFlagsResponse({}))
+            expect(sessionRecording.status).toBe('missing_config')
+
+            // Third failure: stays missing
+            sessionRecording.onRemoteConfig(makeFlagsResponse({}))
+            expect(sessionRecording.status).toBe('missing_config')
         })
 
         it('discards buffer on beforeunload if status is buffering', () => {

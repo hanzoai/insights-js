@@ -13,7 +13,7 @@ We use pnpm.
 It's best to install using `npm install -g pnpm@latest-9`
 and then `pnpm` commands as usual
 
-### Optional Dependencies
+## Contributing
 
 This package has the following optional peer dependencies:
 

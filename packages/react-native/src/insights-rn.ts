@@ -1,6 +1,8 @@
-import { AppState, Dimensions, Linking, Platform } from 'react-native'
+import { AppState, type AppStateStatus, Dimensions, Linking, Platform } from 'react-native'
 
 import {
+  CaptureLogOptions,
+  CaptureLogger,
   JsonType,
   InsightsCaptureOptions,
   InsightsCore,
@@ -12,8 +14,11 @@ import {
   InsightsRemoteConfig,
   Survey,
   SurveyResponse,
+  allSettled,
   logFlushError,
   maybeAdd,
+  patchFetchForTracingHeaders,
+  safeSetTimeout,
   FeatureFlagValue,
 } from '@hanzo/insights-core'
 import { InsightsRNStorage, InsightsRNSyncMemoryStorage } from './storage'
@@ -25,7 +30,7 @@ import {
   InsightsCustomStorage,
   InsightsSessionReplayConfig,
 } from './types'
-import { getRemoteConfigBool, getRemoteConfigNumber, isValidSampleRate } from './utils'
+import { getRemoteConfigBool, getRemoteConfigNumber, isHermes, isValidSampleRate } from './utils'
 import { withReactNativeNavigation } from './frameworks/wix-navigation'
 import { OptionalReactNativeSessionReplay } from './optional/OptionalSessionReplay'
 import { ErrorTracking, ErrorTrackingOptions } from './error-tracking'
@@ -35,6 +40,8 @@ export { InsightsPersistedProperty }
 export interface InsightsOptions extends InsightsCoreOptions {
   /** Allows you to provide the storage type. By default 'file'.
    * 'file' will try to load the best available storage, the provided 'customStorage', 'customAsyncStorage' or in-memory storage.
+   *
+   * @default 'file'
    */
   persistence?: 'memory' | 'file'
   /** Allows you to provide your own implementation of the common information about your App or a function to modify the default App properties generated */
@@ -47,9 +54,11 @@ export interface InsightsOptions extends InsightsCoreOptions {
    */
   customStorage?: InsightsCustomStorage
 
-  /** Captures app lifecycle events such as Application Installed, Application Updated, Application Opened, Application Became Active and Application Backgrounded.
-   * By default is false.
+  /**
+   * Captures app lifecycle events such as Application Installed, Application Updated, Application Opened, Application Became Active and Application Backgrounded.
    * Application Installed and Application Updated events are not supported with persistence set to 'memory'.
+   *
+   * @default true
    */
   captureAppLifecycleEvents?: boolean
 
@@ -69,7 +78,8 @@ export interface InsightsOptions extends InsightsCoreOptions {
    * If enabled, the session id ($session_id) will be persisted across app restarts.
    * This is an option for back compatibility, so your current data isn't skewed with the new version of the SDK.
    * If this is false, the session id will be always reset on app restart.
-   * Defaults to false
+   *
+   * @default false
    */
   enablePersistSessionIdAcrossRestart?: boolean
 
@@ -97,6 +107,47 @@ export interface InsightsOptions extends InsightsCoreOptions {
    * @default true
    */
   setDefaultPersonProperties?: boolean
+
+  /**
+   * Logs feature configuration. Enables structured log capture via
+   * `posthog.captureLog(...)` or `posthog.logger.info(...)`. Records ship to
+   * PostHog's logs product (`/i/v1/logs`) in OTLP format, batched on a timer,
+   * AppState change, buffer fill, or manual `flushLogs()`.
+   *
+   * Capture is **unconditional** — calling the API ships records as long as
+   * the SDK is initialized and the user hasn't opted out. The only blockers
+   * are `optedOut`, missing/empty `body`, and missing API key.
+   *
+   * All fields below are optional; per-SDK defaults apply (mobile defaults
+   * are tuned for cellular bandwidth and battery, ~50 logs/sec ceiling).
+   *
+   * @example Minimal — just service tagging, defaults for everything else
+   * ```ts
+   * new PostHog(key, {
+   *   logs: { serviceName: 'my-app', environment: 'production' }
+   * })
+   * ```
+   *
+   * @example Tune for higher-volume logging
+   * ```ts
+   * new PostHog(key, {
+   *   logs: {
+   *     serviceName: 'my-app',
+   *     rateCap: { maxLogs: 5000, windowMs: 60000 },
+   *     maxBufferSize: 500,
+   *     beforeSend: (r) => r.body.includes('secret') ? null : r,
+   *   }
+   * })
+   * ```
+   */
+  logs?: PostHogLogsConfig
+
+  /**
+   * Overrides the language used when rendering translated survey copy.
+   * When unset, the SDK falls back to the persisted person property `language`
+   * and then the device locale.
+   */
+  overrideDisplayLanguage?: string | null
 }
 
 export class Insights extends InsightsCore {
@@ -110,9 +161,20 @@ export class Insights extends InsightsCore {
   private _disableSurveys: boolean
   private _disableRemoteConfig: boolean
   private _errorTracking: ErrorTracking
+  private _logs: PostHogLogs
+  // Resolved logs config — kept around so lifecycle handlers (AppState
+  // background, _shutdown) can read the configured flush-time budgets without
+  // reaching back into the user's options object.
+  private _resolvedLogsConfig: ReturnType<typeof resolveLogsConfig>
+  // Cached, foreground/background view of the app's lifecycle. Read on the
+  // log-capture hot path (per record) so we tag every log with whether it
+  // happened in foreground or background. Updated by the AppState listener
+  // and seeded from `AppState.currentState` at construction.
+  private _currentAppState?: 'foreground' | 'background'
   private _surveysReadyPromise: Promise<void> | null = null
   private _surveysReady: boolean = false
   private _setDefaultPersonProperties: boolean
+  private _overrideDisplayLanguage: string | null
 
   /**
    * Creates a new Insights instance for React Native. You can find all configuration options in the [React Native SDK docs](https://insights.com/docs/libraries/react-native#configuration-options).
@@ -156,6 +218,7 @@ export class Insights extends InsightsCore {
     this._disableRemoteConfig = options?.disableRemoteConfig ?? false
     this._errorTracking = new ErrorTracking(this, options?.errorTracking, this._logger)
     this._setDefaultPersonProperties = options?.setDefaultPersonProperties ?? true
+    this._overrideDisplayLanguage = options?.overrideDisplayLanguage?.trim() || null
 
     // Either build the app properties from the existing ones
     this._appProperties =
@@ -163,22 +226,11 @@ export class Insights extends InsightsCore {
         ? options.customAppProperties(getAppProperties())
         : options?.customAppProperties || getAppProperties()
 
-    AppState.addEventListener('change', (state) => {
-      // ignore unknown state (usually initial state, the app might not be ready yet)
-      if (state === 'unknown') {
-        return
-      }
-
-      void this.flush().catch(async (err) => {
-        await logFlushError(err)
-      })
-
-      if (state === 'active') {
-        // rotate session id if needed (expired either 30 minutes inactive or max duration 24 hours)
-        this.getSessionId()
-      }
-    })
-
+    // Resolve storage and construct the logs module BEFORE registering the
+    // AppState listener — the listener body references `this._logs` and
+    // `this._eventsStorage`, and while AppState.addEventListener('change')
+    // only fires on changes (not at registration), the dependency direction
+    // should be explicit: dependencies first, callbacks that use them second.
     let storagePromise: Promise<void> | undefined
 
     let theStorage: InsightsCustomStorage | undefined
@@ -197,7 +249,27 @@ export class Insights extends InsightsCore {
       storagePromise.catch((error) => {
         console.error('Insights storage initialization failed:', error)
       })
-    }
+      // Flush buffered logs alongside events — OS may suspend or terminate the
+      // process next, and anything left in the queue won't get a second chance
+      // until the app is next foregrounded. On background, race the flush
+      // against `backgroundFlushBudgetMs` so a slow network can't run past
+      // the OS-imposed background window (~30s on iOS). Foreground/active
+      // transitions don't need a budget — the app is staying alive.
+      const isBackgrounding = mapped === 'background'
+      const logsFlushPromise = isBackgrounding
+        ? this._logs.flushWithTimeout(this._resolvedLogsConfig.backgroundFlushBudgetMs)
+        : this._logs.flush()
+      void logsFlushPromise.catch(async (err) => {
+        await logFlushError(err)
+      })
+      // Persist pending writes before the OS may suspend the process.
+      void this._eventsStorage.waitForPersist()
+      void this._logsStorage.waitForPersist()
+
+      if (state === 'active') {
+        this.getSessionId()
+      }
+    })
 
     const initAfterStorage = (): void => {
       // reset session id on app restart
@@ -210,12 +282,26 @@ export class Insights extends InsightsCore {
 
       this.setupBootstrap(options)
 
+      // Seed device_id from the anonymous id at init time so existing installs
+      // get a stable device-level identifier; once set, it survives identify()
+      // and reset() independently of anonymous_id.
+      if (!this.getPersistedProperty(PostHogPersistedProperty.DeviceId)) {
+        const anonId = this.getAnonymousId()
+        if (anonId) {
+          this.setPersistedProperty(PostHogPersistedProperty.DeviceId, anonId)
+        }
+      }
+
       // Set default person properties for flags if enabled
       if (this._setDefaultPersonProperties) {
         this._setDefaultPersonPropertiesForFlags(false)
       }
 
       this._isInitialized = true
+
+      if (this.isDisabled) {
+        return
+      }
 
       // Preload error tracking state from cached remote config.
       // This gates error tracking autocapture before the fresh remote config is fetched.
@@ -266,13 +352,18 @@ export class Insights extends InsightsCore {
         }
       }
 
-      if (options?.captureAppLifecycleEvents) {
+      // captureAppLifecycleEvents defaults to true; only skip if explicitly set to false
+      if (options?.captureAppLifecycleEvents !== false) {
         void this.captureAppLifecycleEvents()
       }
 
       void this.persistAppVersion()
 
       void this.startSessionReplay(options, cachedRemoteConfig ?? undefined)
+
+      if (options?.addTracingHeaders && options.addTracingHeaders.length > 0) {
+        patchFetchForTracingHeaders(this, options.addTracingHeaders)
+      }
     }
 
     // For async storage, we wait for the storage to be ready before we start the SDK
@@ -321,7 +412,39 @@ export class Insights extends InsightsCore {
    * considering events as sent, preventing duplicate events on app crash/restart.
    */
   protected async flushStorage(): Promise<void> {
-    await this._storage.waitForPersist()
+    await this._eventsStorage.waitForPersist()
+  }
+
+  /**
+   * Drain both pipelines on shutdown. Run in parallel so the logs final
+   * flush + timer teardown doesn't serialize behind events (and vice-versa).
+   * `_logs.shutdown()` swallows its own errors — a transient logs failure
+   * must not break events shutdown.
+   *
+   * Logs use the smaller of `terminationFlushBudgetMs` and the caller's
+   * `shutdownTimeoutMs` so a final flush can never run past the caller's
+   * shutdown SLA, while still respecting the configured logs-specific
+   * termination budget when it's tighter.
+   *
+   * After the flushes, drain any debounced storage writes that weren't already
+   * persisted via the queue-advance path — `setPersistedProperty` calls for
+   * distinctId, sessionId, deviceId, feature flag overrides, etc. only arm a
+   * debounced write. The drain runs in `finally` so a timed-out flush still
+   * persists them, and its await is bounded by the time left in the shutdown
+   * SLA so a hung storage backend can't run past it.
+   */
+  async _shutdown(shutdownTimeoutMs: number = 30000): Promise<void> {
+    const start = Date.now()
+    const logsBudgetMs = Math.min(shutdownTimeoutMs, this._resolvedLogsConfig.terminationFlushBudgetMs)
+    try {
+      await Promise.all([this._logs.shutdown(logsBudgetMs), super._shutdown(shutdownTimeoutMs)])
+    } finally {
+      // Sync drain runs inside waitForPersist before the race below; the race
+      // only bounds the await for in-flight async writes.
+      const remainingMs = Math.max(0, shutdownTimeoutMs - (Date.now() - start))
+      const drain = Promise.all([this._eventsStorage.waitForPersist(), this._logsStorage.waitForPersist()])
+      await Promise.race([drain, new Promise<void>((resolve) => safeSetTimeout(resolve, remainingMs))])
+    }
   }
 
   fetch(url: string, options: InsightsFetchOptions): Promise<InsightsFetchResponse> {
@@ -350,6 +473,10 @@ export class Insights extends InsightsCore {
       $screen_height: Dimensions.get('screen').height,
       $screen_width: Dimensions.get('screen').width,
     }
+  }
+
+  getSurveyDisplayLanguageOverride(): string | null {
+    return this._overrideDisplayLanguage
   }
 
   /**
@@ -404,6 +531,18 @@ export class Insights extends InsightsCore {
    * To reset the user's ID and anonymous ID, call reset. Usually you would do this right after the user logs out.
    * This also clears all stored super properties and more.
    *
+   * By default (when `propertiesToKeep` is not provided), the app lifecycle properties
+   * (`InstalledAppBuild` and `InstalledAppVersion`) are automatically preserved to prevent
+   * duplicate "Application Installed" events on the next app launch.
+   *
+   * If you pass `propertiesToKeep` explicitly, only the properties you specify will be preserved.
+   * To keep the default app lifecycle behavior, include `PostHogPersistedProperty.InstalledAppBuild`
+   * and `PostHogPersistedProperty.InstalledAppVersion` in your array.
+   *
+   * Note: The event queue (`PostHogPersistedProperty.Queue`) and logs queue
+   * (`PostHogPersistedProperty.LogsQueue`) are always preserved regardless of
+   * what is passed in `propertiesToKeep`, to ensure in-flight data is not lost.
+   *
    * {@label Identification}
    *
    * @example
@@ -418,7 +557,10 @@ export class Insights extends InsightsCore {
    * insights.reset([InsightsPersistedProperty.OverrideFeatureFlags])
    * ```
    *
-   * @param propertiesToKeep - Optional array of persisted properties to preserve during reset
+   * @param propertiesToKeep - Optional array of persisted properties to preserve during reset.
+   *   When not provided, app lifecycle and device bucketing properties are automatically preserved.
+   *   When provided, only the specified properties are preserved.
+   *   The event queue and logs queue are always preserved regardless.
    *
    * @public
    */
@@ -431,6 +573,9 @@ export class Insights extends InsightsCore {
       // reloading, and allow the super.reset() call to reload the flags.
       this._setDefaultPersonPropertiesForFlags(false)
     }
+
+    // Logout must be durable so a crash in the debounce window can't resurface the previous user.
+    void this._eventsStorage.waitForPersist()
   }
 
   /**
@@ -441,7 +586,7 @@ export class Insights extends InsightsCore {
    * @param reloadFeatureFlags Whether to reload feature flags after setting the properties. Defaults to true.
    */
   private _setDefaultPersonPropertiesForFlags(reloadFeatureFlags = true): void {
-    const defaultProps: Record<string, string> = {}
+    const defaultProps: Record<string, JsonType> = {}
     const relevantKeys = [
       '$app_version',
       '$app_build',
@@ -454,16 +599,16 @@ export class Insights extends InsightsCore {
     relevantKeys.forEach((key) => {
       const value = this._appProperties[key]
       if (value !== null && value !== undefined) {
-        defaultProps[key] = String(value)
+        defaultProps[key] = value
       }
     })
 
     const commonProps = this.getCommonEventProperties()
     if (commonProps.$lib) {
-      defaultProps.$lib = String(commonProps.$lib)
+      defaultProps.$lib = commonProps.$lib
     }
     if (commonProps.$lib_version) {
-      defaultProps.$lib_version = String(commonProps.$lib_version)
+      defaultProps.$lib_version = commonProps.$lib_version
     }
 
     if (Object.keys(defaultProps).length > 0) {
@@ -478,6 +623,9 @@ export class Insights extends InsightsCore {
    * Setting this to 1 will send events immediately and will use more battery. This is set to 20 by default.
    * You can also manually flush the queue. If a flush is already in progress it returns a promise for the existing flush.
    *
+   * Note: this drains the **events** pipeline only. Logs are flushed via
+   * {@link flushLogs}, and {@link shutdown} drains both before terminating.
+   *
    * {@label Capture}
    *
    * @example
@@ -486,12 +634,114 @@ export class Insights extends InsightsCore {
    * await insights.flush()
    * ```
    *
+   * @see flushLogs
    * @public
    *
    * @returns Promise that resolves when the flush is complete
    */
   flush(): Promise<void> {
     return super.flush()
+  }
+
+  /**
+   * Captures a structured log record and sends it to PostHog's logs product
+   * (`/i/v1/logs`). Low-level primitive — most callers will prefer
+   * `posthog.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which
+   * wrap this with a level pre-set.
+   *
+   * Records are buffered per-session, rate-limited, batched into OTLP
+   * payloads, and flushed on a timer, on AppState change, or when the
+   * buffer reaches capacity. Configure flush cadence, rate cap, and a
+   * `beforeSend` filter via the `logs` option on `new PostHog(...)`.
+   *
+   * Note — naming collision: `posthog.captureLog()` (this method) is the
+   * **logs product** API. There is also a separate, pre-existing
+   * `sessionReplayConfig.captureLog` boolean that controls whether
+   * **session replay** records the device's `console.*` output. The two
+   * are unrelated: this method emits structured records to the logs
+   * pipeline regardless of whether session replay is on.
+   *
+   * {@label Capture}
+   *
+   * @example
+   * ```ts
+   * posthog.captureLog({
+   *   body: 'checkout completed',
+   *   level: 'info',
+   *   attributes: { order_id: 'ord_789', amount_cents: 4999 },
+   * })
+   * ```
+   *
+   * @public
+   *
+   * @param options Log record. `body` is required; `level` defaults to
+   *   `'info'`. `attributes` are attached as OTLP key-value attributes
+   *   and will override auto-populated ones (distinctId, sessionId) on
+   *   key conflict.
+   */
+  captureLog(options: CaptureLogOptions): void {
+    this._logs.captureLog(options)
+  }
+
+  /**
+   * Manually flushes the logs queue.
+   *
+   * Logs flush automatically on a timer, when the buffer fills, or on
+   * AppState change — most apps never need to call this. Use it when you
+   * want a synchronous-style hand-off (e.g. before navigating away from a
+   * critical screen, in a custom crash handler, or while testing locally).
+   *
+   * If a flush is already in progress, both callers join the same in-flight
+   * promise — no double-send.
+   *
+   * Note: this drains the **logs** pipeline only. Events are flushed via
+   * {@link flush}, and {@link shutdown} drains both before terminating.
+   *
+   * {@label Capture}
+   *
+   * @example
+   * ```ts
+   * await posthog.flushLogs()
+   * ```
+   *
+   * @see flush
+   * @public
+   *
+   * @returns Promise that resolves when the flush is complete.
+   */
+  flushLogs(): Promise<void> {
+    return this._logs.flush()
+  }
+
+  private _captureLogger?: CaptureLogger
+
+  /**
+   * Convenience per-level logger. Each method is shorthand for
+   * `posthog.captureLog({ body, level, attributes })`. Lazily constructed
+   * on first access, then reused.
+   *
+   * {@label Capture}
+   *
+   * @example
+   * ```ts
+   * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
+   * posthog.logger.error('payment failed', { code: 'E001' })
+   * ```
+   *
+   * @public
+   */
+  get logger(): CaptureLogger {
+    if (!this._captureLogger) {
+      this._captureLogger = {
+        trace: (body, attributes) => this.captureLog({ body, level: 'trace', attributes }),
+        debug: (body, attributes) => this.captureLog({ body, level: 'debug', attributes }),
+        info: (body, attributes) => this.captureLog({ body, level: 'info', attributes }),
+        warn: (body, attributes) => this.captureLog({ body, level: 'warn', attributes }),
+        error: (body, attributes) => this.captureLog({ body, level: 'error', attributes }),
+        fatal: (body, attributes) => this.captureLog({ body, level: 'fatal', attributes }),
+      }
+    }
+    return this._captureLogger
   }
 
   /**
@@ -511,7 +761,10 @@ export class Insights extends InsightsCore {
    * @public
    */
   optIn(): Promise<void> {
-    return super.optIn()
+    // Consent must be durable. See reset()/identify().
+    const result = super.optIn()
+    void this._eventsStorage.waitForPersist()
+    return result
   }
 
   /**
@@ -530,7 +783,10 @@ export class Insights extends InsightsCore {
    * @public
    */
   optOut(): Promise<void> {
-    return super.optOut()
+    // Consent must be durable. See reset()/identify().
+    const result = super.optOut()
+    void this._eventsStorage.waitForPersist()
+    return result
   }
 
   /**
@@ -676,11 +932,11 @@ export class Insights extends InsightsCore {
 
     // Automatically cache group properties for feature flag evaluation
     if (properties && Object.keys(properties).length > 0) {
-      const propsToCache: Record<string, string> = {}
+      const propsToCache: Record<string, JsonType> = {}
       Object.keys(properties).forEach((key) => {
         const value = properties[key]
         if (value !== null && value !== undefined) {
-          propsToCache[key] = String(value)
+          propsToCache[key] = value
         }
       })
       if (Object.keys(propsToCache).length > 0) {
@@ -733,6 +989,27 @@ export class Insights extends InsightsCore {
    */
   getDistinctId(): string {
     return super.getDistinctId()
+  }
+
+  /**
+   * Returns the stable device identifier used for device-level feature flag bucketing.
+   * This ID persists across identify() and reset() calls, only changing on a fresh
+   * app install, manual cache clearing, or OS-initiated storage cleanup.
+   *
+   * @returns The device ID, or an empty string if not yet initialized
+   */
+  getDeviceId(): string {
+    const deviceId = this.getPersistedProperty<string>(PostHogPersistedProperty.DeviceId)
+    if (!deviceId) {
+      // Lazy init for upgrades: existing installs won't have a device_id yet
+      const anonId = this.getAnonymousId()
+      if (anonId) {
+        this.setPersistedProperty(PostHogPersistedProperty.DeviceId, anonId)
+        return anonId
+      }
+      return ''
+    }
+    return deviceId
   }
 
   /**
@@ -802,7 +1079,7 @@ export class Insights extends InsightsCore {
    * @param properties The group properties to set for flag evaluation
    * @param reloadFeatureFlags Whether to reload feature flags after setting the properties. Defaults to true.
    */
-  setGroupPropertiesForFlags(properties: Record<string, Record<string, string>>, reloadFeatureFlags = true): void {
+  setGroupPropertiesForFlags(properties: Record<string, Record<string, JsonType>>, reloadFeatureFlags = true): void {
     super.setGroupPropertiesForFlags(properties)
 
     if (reloadFeatureFlags) {
@@ -1118,25 +1395,45 @@ export class Insights extends InsightsCore {
    */
   identify(distinctId?: string, properties?: InsightsEventProperties, options?: InsightsCaptureOptions): void {
     const previousDistinctId = this.getDistinctId()
+
+    // Extract $set_once before super.identify() because core deletes it from the properties object
+    const userProps = properties?.$set || properties
+    const userPropsOnce = properties?.$set_once
+
     super.identify(distinctId, properties, options)
 
     // Automatically cache person properties for feature flag evaluation
-    // Use $set if provided, otherwise use top-level properties
-    const userProps = properties?.$set || properties
-    if (userProps && Object.keys(userProps).length > 0) {
-      const propsToCache: Record<string, string> = {}
+
+    const propsToCache: Record<string, JsonType> = {}
+    if (userProps && typeof userProps === 'object' && !Array.isArray(userProps)) {
       Object.entries(userProps).forEach(([key, value]) => {
         if (value !== null && value !== undefined) {
-          propsToCache[key] = String(value)
+          propsToCache[key] = value
         }
       })
-      if (Object.keys(propsToCache).length > 0) {
-        // super.identify() already handles reloading flags in all cases:
-        // - When distinctId changes: it calls reloadFeatureFlags() directly
-        // - When distinctId is the same but properties change: it calls setPersonProperties() which reloads flags
-        // So we only need to set the properties here without triggering another reload.
-        this.setPersonPropertiesForFlags(propsToCache, false)
-      }
+    }
+
+    const propsOnceToCache: Record<string, JsonType> = {}
+    if (userPropsOnce && typeof userPropsOnce === 'object' && !Array.isArray(userPropsOnce)) {
+      Object.entries(userPropsOnce).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          propsOnceToCache[key] = value
+        }
+      })
+    }
+
+    if (Object.keys(propsToCache).length > 0 || Object.keys(propsOnceToCache).length > 0) {
+      // super.identify() already handles reloading flags in all cases:
+      // - When distinctId changes: it calls reloadFeatureFlags() directly
+      // - When distinctId is the same but properties change: it calls setPersonProperties() which reloads flags
+      // So we only need to set the properties here without triggering another reload.
+      this.setPersonPropertiesForFlags(
+        {
+          $set: propsToCache,
+          ...(Object.keys(propsOnceToCache).length > 0 ? { $set_once: propsOnceToCache } : {}),
+        },
+        false
+      )
     }
 
     if (this._isEnableSessionReplay() && OptionalReactNativeSessionReplay) {
@@ -1149,6 +1446,9 @@ export class Insights extends InsightsCore {
         this._logger.error(`Session replay failed to identify: ${e}.`)
       }
     }
+
+    // Account-switch safety — same as reset().
+    void this._eventsStorage.waitForPersist()
   }
 
   /**
@@ -1449,6 +1749,7 @@ export class Insights extends InsightsCore {
       maskAllSandboxedViews = true,
       captureLog: localCaptureLog = true,
       captureNetworkTelemetry: localCaptureNetworkTelemetry = true,
+      screenshotModeBackgroundCapture = false,
       sampleRate: localSampleRate,
       iOSdebouncerDelayMs = defaultThrottleDelayMs,
       androidDebouncerDelayMs = defaultThrottleDelayMs,
@@ -1520,6 +1821,7 @@ export class Insights extends InsightsCore {
       maskAllSandboxedViews,
       captureLog,
       captureNetworkTelemetry,
+      screenshotModeBackgroundCapture,
       sampleRate,
       iOSdebouncerDelayMs,
       androidDebouncerDelayMs,

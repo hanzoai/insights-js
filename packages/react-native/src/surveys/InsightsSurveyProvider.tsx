@@ -12,7 +12,14 @@ import { useInsights } from '../hooks/useInsights'
 import { useFeatureFlags } from '../hooks/useFeatureFlags'
 import { Insights } from '../insights-rn'
 
-type ActiveSurveyContextType = { survey: Survey; onShow: () => void; onClose: (submitted: boolean) => void } | undefined
+type ActiveSurveyContextType =
+  | {
+      survey: Survey
+      surveyLanguage: string | null
+      onShow: () => void
+      onClose: (submitted: boolean, responses: SurveyResponses) => void
+    }
+  | undefined
 const ActiveSurveyContext = React.createContext<ActiveSurveyContextType>(undefined)
 // export const useActiveSurvey = (): ActiveSurveyContextType => React.useContext(ActiveSurveyContext)
 
@@ -122,9 +129,13 @@ export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.
     }
   }, [activeSurvey, flags, surveys, seenSurveys, activatedSurveys])
 
+  const translatedActiveSurvey = useMemo(() => {
+    return activeSurvey ? applySurveyTranslationForUser(activeSurvey, posthog) : undefined
+  }, [activeSurvey, posthog])
+
   // Merge survey appearance so that components and hooks can use a consistent model
   const surveyAppearance = useMemo<SurveyAppearanceTheme>(() => {
-    if (props.overrideAppearanceWithDefault || !activeSurvey) {
+    if (props.overrideAppearanceWithDefault || !translatedActiveSurvey) {
       return {
         ...defaultSurveyAppearance,
         ...(props.defaultSurveyAppearance ?? {}),
@@ -138,24 +149,25 @@ export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.
       ...(activeSurvey.appearance?.submitButtonColor
         ? {
             submitButtonTextColor:
-              activeSurvey.appearance.submitButtonTextColor ??
-              getContrastingTextColor(activeSurvey.appearance.submitButtonColor),
+              translatedActiveSurvey.survey.appearance.submitButtonTextColor ??
+              getContrastingTextColor(translatedActiveSurvey.survey.appearance.submitButtonColor),
           }
         : {}),
     }
-  }, [activeSurvey, props.defaultSurveyAppearance, props.overrideAppearanceWithDefault])
+  }, [translatedActiveSurvey, props.defaultSurveyAppearance, props.overrideAppearanceWithDefault])
 
   const activeContext = useMemo(() => {
-    if (!activeSurvey) {
+    if (!activeSurvey || !translatedActiveSurvey) {
       return undefined
     }
     return {
-      survey: activeSurvey,
+      survey: translatedActiveSurvey.survey,
+      surveyLanguage: translatedActiveSurvey.language,
       onShow: () => {
         sendSurveyShownEvent(activeSurvey, insights)
         setLastSeenSurveyDate(new Date())
       },
-      onClose: (submitted: boolean) => {
+      onClose: (submitted: boolean, responses: SurveyResponses) => {
         setSeenSurvey(activeSurvey.id)
         setActiveSurvey(undefined)
         if (!submitted) {

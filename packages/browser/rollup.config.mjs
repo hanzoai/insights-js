@@ -17,7 +17,18 @@ const WRITE_MANGLED_PROPERTIES = process.env.WRITE_MANGLED_PROPERTIES
 const nameCachePath = './terser-mangled-names.json'
 let nameCache = {}
 
+// Shared across all entries so mangled property names are consistent between
+// module.slim.js and extension-bundles.js — see #3313.
+// Only property names (props) are shared; top-level variable names (vars) are
+// reset per-entry by the plugin below since each module has its own scope.
+
 const plugins = (es5, noExternal) => [
+    {
+        name: 'reset-vars-name-cache',
+        buildStart() {
+            nameCache.vars = { props: {} }
+        },
+    },
     json(),
     resolve({ browser: true }),
     typescript({ sourceMap: true, outDir: './dist', module: 'es2015' }),
@@ -68,7 +79,7 @@ const plugins = (es5, noExternal) => [
         babelHelpers: 'bundled',
         plugins: [
             '@babel/plugin-transform-nullish-coalescing-operator',
-            // Explicitly included so we transform 1 ** 2 to Math.pow(1, 2) for ES6 compatability
+            // Explicitly included so we transform 1 ** 2 to Math.pow(1, 2) for ES6 compatibility
             '@babel/plugin-transform-exponentiation-operator',
         ],
         presets: [
@@ -99,10 +110,17 @@ const plugins = (es5, noExternal) => [
         ],
     }),
     terser({
-        nameCache: WRITE_MANGLED_PROPERTIES ? nameCache : undefined, // using a shared nameCache leads to race conditions and broken builds, so don't use in general, only when writing the mangled names
+        nameCache,
         toplevel: true,
         compress: {
             ecma: es5 ? 5 : 6,
+            passes: 2,
+            pure_getters: true,
+            unsafe_methods: true,
+            unsafe_comps: true,
+            unsafe_math: true,
+            unsafe_proto: true,
+            unsafe_regexp: true,
         },
         format: {
             comments: false,
@@ -208,6 +226,9 @@ const plugins = (es5, noExternal) => [
                               'version',
                               'surveys',
                               'calculateEventProperties',
+
+                              // used by wrapper SDKs (e.g. posthog-flutter, posthog-react-native) to override $lib and $lib_version
+                              '_overrideSDKInfo',
 
                               // possibly used by naughty users - we should decide if we want make these part of the public API, but be cautious for now
                               '_isIdentified',
@@ -315,7 +336,11 @@ const plugins = (es5, noExternal) => [
     },
 ]
 
-const entrypoints = fs.readdirSync('./src/entrypoints')
+const entryFilter = process.env.ENTRY
+const allEntrypoints = fs.readdirSync('./src/entrypoints')
+const entrypoints = entryFilter
+    ? allEntrypoints.filter((file) => file.startsWith(entryFilter))
+    : allEntrypoints
 
 const entrypointTargets = entrypoints.map((file) => {
     const fileParts = file.split('.')
@@ -361,13 +386,33 @@ const entrypointTargets = entrypoints.map((file) => {
     }
 })
 
+// Entries whose .d.ts must inline upstream types (respectExternal: true) so
+// consumers don't need a runtime dep on the re-exported package to resolve them.
+const inlineExternalTypesEntries = new Set([
+    'extension-bundles.es.ts',
+    'rrweb.es.ts',
+    'rrweb-types.es.ts',
+    'rrweb-plugin-console-record.es.ts',
+])
+
+// rrdom's dts drops the local `RRNodeType` alias declaration; the renderChunk
+// below rewrites value references back to `NodeType.`. Only rrweb pulls in rrdom.
+const rewriteRrdomNodeTypeAlias = (file) => file === 'rrweb.es.ts'
+
 const typeTargets = entrypoints
     .filter((file) => file.endsWith('.es.ts'))
     .map((file) => {
         const source = `./lib/src/entrypoints/${file.replace('.ts', '.d.ts')}`
+        const isExtensionBundles = file === 'extension-bundles.es.ts'
+        const inlineExternalTypes = inlineExternalTypesEntries.has(file)
+        const rewriteRrdomAlias = rewriteRrdomNodeTypeAlias(file)
         /** @type {import('rollup').RollupOptions} */
         return {
             input: source,
+            // extension-bundles types must reference module.slim rather than inlining
+            // their own copies — classes with private fields are nominally typed, so
+            // duplicate declarations across .d.ts files are incompatible.
+            ...(isExtensionBundles ? { external: [/module\.slim/] } : {}),
             output: [
                 {
                     dir: path.resolve('./dist'),
@@ -378,7 +423,31 @@ const typeTargets = entrypoints
                 json(),
                 dts({
                     exclude: [],
+                    ...(inlineExternalTypes ? { respectExternal: true } : {}),
                 }),
+                // dts preserves the tsc-era path (e.g. './module.slim.es') but the
+                // output has been renamed to module.slim.d.ts — fix the reference.
+                ...(isExtensionBundles
+                    ? [
+                          {
+                              name: 'fix-dts-external-paths',
+                              renderChunk(code) {
+                                  return code.replace(/\.\/module\.slim\.es(?=['"])/g, './module.slim')
+                              },
+                          },
+                      ]
+                    : []),
+                ...(rewriteRrdomAlias
+                    ? [
+                          {
+                              name: 'resolve-rrdom-rrnodetype-alias',
+                              renderChunk(code) {
+                                  // Value uses only; the property name `RRNodeType` (rrdom public API) must stay.
+                                  return code.replace(/\bRRNodeType\./g, 'NodeType.')
+                              },
+                          },
+                      ]
+                    : []),
             ],
         }
     })

@@ -39,6 +39,7 @@ export default class ErrorTracking {
   }
 
   static async buildEventMessage(
+    builder: CoreErrorTracking.ErrorPropertiesBuilder,
     error: unknown,
     hint: CoreErrorTracking.EventHint,
     distinctId?: string,
@@ -46,20 +47,14 @@ export default class ErrorTracking {
   ): Promise<EventMessage> {
     const properties: EventMessage['properties'] = { ...additionalProperties }
 
-    // Given stateless nature of Node SDK we capture exceptions using personless processing when no
-    // user can be determined because a distinct_id is not provided e.g. exception autocapture
-    if (!distinctId) {
-      properties.$process_person_profile = false
-    }
-
-    const exceptionProperties = this.errorPropertiesBuilder.buildFromUnknown(error, hint)
-    exceptionProperties.$exception_list = await this.errorPropertiesBuilder.modifyFrames(
-      exceptionProperties.$exception_list
-    )
+    const exceptionProperties = builder.buildFromUnknown(error, hint)
+    exceptionProperties.$exception_list = await builder.modifyFrames(exceptionProperties.$exception_list)
 
     return {
       event: '$exception',
-      distinctId: distinctId || uuidv7(),
+      // Leave distinctId resolution to prepareEventMessage which checks request context
+      // and falls back to a random UUID with $process_person_profile = false
+      distinctId: distinctId,
       properties: {
         ...exceptionProperties,
         ...properties,
@@ -79,7 +74,11 @@ export default class ErrorTracking {
     this.client.addPendingPromise(
       (async () => {
         if (!ErrorTracking.isPreviouslyCapturedError(exception)) {
-          const eventMessage = await ErrorTracking.buildEventMessage(exception, hint)
+          const eventMessage = await ErrorTracking.buildEventMessage(
+            this.client.getErrorPropertiesBuilder(),
+            exception,
+            hint
+          )
           const exceptionProperties = eventMessage.properties
           const exceptionType = exceptionProperties?.$exception_list[0]?.type ?? 'Exception'
           const isRateLimited = this._rateLimiter.consumeRateLimit(exceptionType)

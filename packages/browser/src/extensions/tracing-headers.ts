@@ -5,16 +5,21 @@ import { isUndefined } from '@hanzo/insights-core'
 
 const logger = createLogger('[TracingHeaders]')
 
-export class TracingHeaders {
+export class TracingHeaders implements Extension {
     private _restoreXHRPatch: (() => void) | undefined = undefined
     private _restoreFetchPatch: (() => void) | undefined = undefined
 
     constructor(private readonly _instance: Insights) {}
 
+    initialize() {
+        this.startIfEnabledOrStop()
+    }
+
     private _loadScript(cb: () => void): void {
         if (assignableWindow.__InsightsExtensions__?.tracingHeadersPatchFns) {
             // already loaded
             cb()
+            return
         }
 
         assignableWindow.__InsightsExtensions__?.loadExternalDependency?.(this._instance, 'tracing-headers', (err) => {
@@ -24,8 +29,13 @@ export class TracingHeaders {
             cb()
         })
     }
+    private _getConfiguredHostnames(): string[] | undefined {
+        // Prefer the new `addTracingHeaders` name; fall back to the deprecated `__add_tracing_headers`.
+        return this._instance.config.addTracingHeaders ?? this._instance.config.__add_tracing_headers
+    }
+
     public startIfEnabledOrStop() {
-        if (this._instance.config.__add_tracing_headers) {
+        if (this._getConfiguredHostnames()) {
             this._loadScript(this._startCapturing)
         } else {
             this._restoreXHRPatch?.()
@@ -37,6 +47,7 @@ export class TracingHeaders {
     }
 
     private _startCapturing = () => {
+        const hostnames = this._getConfiguredHostnames() || []
         if (isUndefined(this._restoreXHRPatch)) {
             assignableWindow.__InsightsExtensions__?.tracingHeadersPatchFns?._patchXHR(
                 this._instance.config.__add_tracing_headers || [],

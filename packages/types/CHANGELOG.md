@@ -1,5 +1,265 @@
 # @hanzo/types
 
+## 1.378.1
+
+## 1.378.0
+
+### Minor Changes
+
+- [#3688](https://github.com/PostHog/posthog-js/pull/3688) [`8181354`](https://github.com/PostHog/posthog-js/commit/8181354cae602f3f2b5e8c5b5bcd2e090e25edcc) Thanks [@pauldambra](https://github.com/pauldambra)! - feat(persistence): add `persistence_save_debounce_ms` config option to coalesce rapid storage saves into a single write. Setting a positive value debounces writes to localStorage/cookie by that window; the in-memory `props` object still updates synchronously so within-tab reads see the latest values immediately, and pending writes flush on `beforeunload` and `pagehide` so no state is lost on tab close. Cross-tab `storage` events are reduced proportionally to the debounce window. Defaults to `0` (no debouncing) for backwards compatibility. On pages that capture many events per second, `250` is a reasonable starting point. The new `2026-05-30` config default opts into `persistence_save_debounce_ms: 250` automatically.
+  (2026-06-01)
+
+## 1.377.0
+
+## 1.376.6
+
+## 1.376.5
+
+## 1.376.4
+
+## 1.376.3
+
+## 1.376.2
+
+## 1.376.1
+
+## 1.376.0
+
+## 1.375.0
+
+### Minor Changes
+
+- [#3641](https://github.com/PostHog/posthog-js/pull/3641) [`2e1d5f4`](https://github.com/PostHog/posthog-js/commit/2e1d5f4081c98a04e6a16f57e42491911453994d) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - Add `flag_keys` config to restrict browser feature flag remote evaluation to specific flag keys.
+  (2026-05-21)
+
+## 1.374.4
+
+## 1.374.3
+
+### Patch Changes
+
+- [#3607](https://github.com/PostHog/posthog-js/pull/3607) [`557b893`](https://github.com/PostHog/posthog-js/commit/557b8934aa0b990184e0376fb1fc28433ad336c6) Thanks [@eli-r-ph](https://github.com/eli-r-ph)! - Enable $web_vitals reporting when cookieless mode is enabled
+  (2026-05-20)
+
+## 1.374.2
+
+## 1.374.1
+
+## 1.374.0
+
+### Minor Changes
+
+- [#3620](https://github.com/PostHog/posthog-js/pull/3620) [`594ea11`](https://github.com/PostHog/posthog-js/commit/594ea1146045d49080f6dfd951b037c13278e975) Thanks [@pauldambra](https://github.com/pauldambra)! - Dead clicks: add a `.ph-no-deadclick` CSS class (and `capture_dead_clicks.css_selector_ignorelist` config option) to exclude specific elements from dead-click detection without affecting autocapture, session replay, or heatmaps. Mirrors the existing `.ph-no-rageclick` pattern.
+  (2026-05-18)
+
+## 1.373.5
+
+## 1.373.4
+
+## 1.373.3
+
+## 1.373.2
+
+## 1.373.1
+
+## 1.373.0
+
+### Minor Changes
+
+- [#3547](https://github.com/PostHog/posthog-js/pull/3547) [`4c0c7d9`](https://github.com/PostHog/posthog-js/commit/4c0c7d9f48e6f4f5301f8208285191f62dc8407a) Thanks [@williamchong](https://github.com/williamchong)! - `capture()` now accepts an optional `uuid` on `CaptureOptions`.
+  (2026-05-11)
+
+### Patch Changes
+
+- [#3559](https://github.com/PostHog/posthog-js/pull/3559) [`0a835fa`](https://github.com/PostHog/posthog-js/commit/0a835fa1d5db988d508aa023240ab5b4b50f0969) Thanks [@marandaneto](https://github.com/marandaneto)! - Skip remote config background refreshes when no document is available.
+  (2026-05-11)
+
+## 1.372.10
+
+## 1.372.9
+
+## 1.372.8
+
+## 1.372.7
+
+## 1.372.6
+
+## 1.372.5
+
+## 1.372.4
+
+## 1.372.3
+
+## 1.372.2
+
+## 1.372.1
+
+## 1.372.0
+
+## 1.371.4
+
+## 1.371.3
+
+## 1.371.2
+
+### Patch Changes
+
+- [#3453](https://github.com/PostHog/posthog-js/pull/3453) [`96f19b7`](https://github.com/PostHog/posthog-js/commit/96f19b79d563937ed8f98e12796eee541a2dae7f) Thanks [@turnipdabeets](https://github.com/turnipdabeets)! - Lift OTLP log serialization helpers from posthog-js into @posthog/core so the
+  upcoming React Native logs feature consumes the same builders. Browser gains
+  two fixes as a side effect: NaN and ±Infinity attribute values no longer get
+  silently dropped during JSON encoding, and the scope.version OTLP field is
+  now populated with the SDK version (changes the server's instrumentation_scope
+  column from "posthog-js@" to "posthog-js@<semver>"). (2026-04-23)
+
+## 1.371.1
+
+## 1.371.0
+
+### Minor Changes
+
+- [#3432](https://github.com/PostHog/posthog-js/pull/3432) [`1a8b727`](https://github.com/PostHog/posthog-js/commit/1a8b7277c50a42bbb3f736afd530ff1c3389a7de) Thanks [@richardsolomou](https://github.com/richardsolomou)! - refactor: rename `__add_tracing_headers` to `addTracingHeaders`. The `__` prefix signalled an internal/experimental option, but the config is a public API (documented for linking LLM traces to session replays). `__add_tracing_headers` continues to work as a deprecated alias on the browser SDK.
+
+    Also exposes `patchFetchForTracingHeaders` from `@posthog/core` so non-browser SDKs can reuse the implementation. (2026-04-23)
+
+## 1.370.1
+
+## 1.370.0
+
+### Minor Changes
+
+- [#3389](https://github.com/PostHog/posthog-js/pull/3389) [`922a1c1`](https://github.com/PostHog/posthog-js/commit/922a1c1838a5ed2ad37f59dade5fc3cc81bb4246) Thanks [@hpouillot](https://github.com/hpouillot)! - Add exception steps to error tracking (aka breadcrumbs)
+  (2026-04-22)
+
+## 1.369.5
+
+## 1.369.4
+
+## 1.369.3
+
+## 1.369.2
+
+### Patch Changes
+
+- [#3386](https://github.com/PostHog/posthog-js/pull/3386) [`4a65604`](https://github.com/PostHog/posthog-js/commit/4a65604775fe87c47e5fbdb5f03673f2481c26ea) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - Add a preview flag for versioned browser lazy bundle asset paths.
+  (2026-04-16)
+
+## 1.369.1
+
+## 1.369.0
+
+## 1.368.2
+
+## 1.368.1
+
+## 1.368.0
+
+### Minor Changes
+
+- [#3345](https://github.com/PostHog/posthog-js/pull/3345) [`3fcf5c4`](https://github.com/PostHog/posthog-js/commit/3fcf5c449b3fe10ce187d40ea03425de9f94e85f) Thanks [@jonmcwest](https://github.com/jonmcwest)! - Add posthog.captureLog() API for sending structured log entries to PostHog logs
+  (2026-04-13)
+
+## 1.367.0
+
+## 1.366.2
+
+## 1.366.1
+
+## 1.366.0
+
+## 1.365.5
+
+## 1.365.4
+
+## 1.365.3
+
+## 1.365.2
+
+### Patch Changes
+
+- [#3323](https://github.com/PostHog/posthog-js/pull/3323) [`c387f6d`](https://github.com/PostHog/posthog-js/commit/c387f6dc146c9c09640e471e66043ad832b0476e) Thanks [@pauldambra](https://github.com/pauldambra)! - perf(replay): reduce memory and CPU cost of event compression by caching gzipped empty arrays and eliminating redundant JSON.stringify for size estimation
+  (2026-04-08)
+
+## 1.365.1
+
+## 1.365.0
+
+## 1.364.7
+
+## 1.364.6
+
+## 1.364.5
+
+## 1.364.4
+
+## 1.364.3
+
+## 1.364.2
+
+## 1.364.1
+
+## 1.364.0
+
+## 1.363.6
+
+## 1.363.5
+
+### Patch Changes
+
+- [#3274](https://github.com/PostHog/posthog-js/pull/3274) [`ba08262`](https://github.com/PostHog/posthog-js/commit/ba08262a0bcf4ae1db3ef3bb841e0ad07002fbea) Thanks [@pauldambra](https://github.com/pauldambra)! - fix: document visibility change shoudln't capture dead click
+  (2026-03-25)
+
+## 1.363.4
+
+## 1.363.3
+
+## 1.363.2
+
+## 1.363.1
+
+## 1.363.0
+
+### Patch Changes
+
+- [#3245](https://github.com/PostHog/posthog-js/pull/3245) [`1acd6fd`](https://github.com/PostHog/posthog-js/commit/1acd6fdfaaa46da71ca15bba2916c3bb81c3e7ef) Thanks [@dmarticus](https://github.com/dmarticus)! - handle plain array and object forms in overrideFeatureFlags
+  (2026-03-20)
+
+## 1.362.0
+
+## 1.361.1
+
+## 1.361.0
+
+### Minor Changes
+
+- [#3241](https://github.com/PostHog/posthog-js/pull/3241) [`fe1fd7b`](https://github.com/PostHog/posthog-js/commit/fe1fd7b222b2ca51164e01fceca892628efac89c) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: add `advanced_feature_flags_dedup_per_session` config option to scope `$feature_flag_called` deduplication to the current session
+  (2026-03-18)
+
+### Patch Changes
+
+- [#3201](https://github.com/PostHog/posthog-js/pull/3201) [`552c018`](https://github.com/PostHog/posthog-js/commit/552c01843b9ae1fbf8fdf1a2e98e0b7fdc37c851) Thanks [@frankh](https://github.com/frankh)! - Add a serviceName config option to logs config
+  (2026-03-18)
+
+## 1.360.2
+
+## 1.360.1
+
+## 1.360.0
+
+### Minor Changes
+
+- [#3207](https://github.com/PostHog/posthog-js/pull/3207) [`c5a37cb`](https://github.com/PostHog/posthog-js/commit/c5a37cbc248515ff5333f425ffa270136169d47f) Thanks [@dustinbyrne](https://github.com/dustinbyrne)! - feat: Add TreeShakeable<T>
+  (2026-03-09)
+
+## 1.359.1
+
+## 1.359.0
+
+## 1.358.1
+
+## 1.358.0
+
+## 1.357.2
+
 ## 1.357.1
 
 ## 1.357.0

@@ -1,6 +1,7 @@
 /**
  * Pre-grouped extension bundles for tree-shaking support.
  *
+ * Each bundle is self-contained: a feature plus its runtime dependencies.
  * Use these with `__extensionClasses` to control which extensions are included in your bundle.
  * The default `@hanzo/insights` entrypoint includes all extensions. When using `@hanzo/insights/slim`,
  * you can import only the bundles you need:
@@ -12,7 +13,7 @@
  *
  * insights.init('ph_key', {
  *   __extensionClasses: {
- *     ...ReplayExtensions,
+ *     ...SessionReplayExtensions,
  *     ...AnalyticsExtensions,
  *   }
  * })
@@ -35,7 +36,12 @@ import { InsightsConfig } from '../types'
 
 type ExtensionClasses = NonNullable<InsightsConfig['__extensionClasses']>
 
-/** Session replay and related extensions. */
+/** Feature flags. */
+export const FeatureFlagsExtensions = {
+    featureFlags: PostHogFeatureFlags,
+} as const satisfies ExtensionClasses
+
+/** Session replay. */
 export const SessionReplayExtensions = {
     sessionRecording: SessionRecording,
 } as const satisfies ExtensionClasses
@@ -49,12 +55,13 @@ export const AnalyticsExtensions = {
     webVitalsAutocapture: WebVitalsAutocapture,
 } as const satisfies ExtensionClasses
 
-/** Automatic exception and error capture. */
+/** Exception and error capture. Requires both the observer (capture hook) and exceptions (forwarding). */
 export const ErrorTrackingExtensions = {
     exceptionObserver: ExceptionObserver,
+    exceptions: PostHogExceptions,
 } as const satisfies ExtensionClasses
 
-/** In-app product tours. */
+/** In-app product tours. Includes feature flags for targeting. */
 export const ProductToursExtensions = {
     productTours: InsightsProductTours,
 } as const satisfies ExtensionClasses
@@ -71,10 +78,16 @@ export const TracingExtensions = {
 
 /** All extensions — equivalent to the default `@hanzo/insights` bundle. */
 export const AllExtensions = {
+    ...FeatureFlagsExtensions,
     ...SessionReplayExtensions,
     ...AnalyticsExtensions,
     ...ErrorTrackingExtensions,
     ...ProductToursExtensions,
     ...SiteAppsExtensions,
+    ...SurveysExtensions,
     ...TracingExtensions,
+    ...ToolbarExtensions,
+    ...ExperimentsExtensions,
+    ...ConversationsExtensions,
+    ...LogsExtensions,
 } as const satisfies ExtensionClasses

@@ -1,7 +1,7 @@
 import type { Insights } from '../insights-rn'
 import { JsonType, Logger, InsightsEventProperties, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { trackConsole, trackUncaughtExceptions, trackUnhandledRejections } from './utils'
-import { getRemoteConfigBool, isHermes } from '../utils'
+import { getRemoteConfigBool } from '../utils'
 
 type LogLevel = 'debug' | 'log' | 'info' | 'warn' | 'error'
 
@@ -30,7 +30,6 @@ interface ResolvedErrorTrackingOptions {
 }
 
 export class ErrorTracking {
-  private errorPropertiesBuilder: CoreErrorTracking.ErrorPropertiesBuilder
   private logger: Logger
   private options: ResolvedErrorTrackingOptions
 
@@ -47,21 +46,6 @@ export class ErrorTracking {
     options: ErrorTrackingOptions = {},
     logger: Logger
   ) {
-    this.errorPropertiesBuilder = new CoreErrorTracking.ErrorPropertiesBuilder(
-      [
-        new CoreErrorTracking.PromiseRejectionEventCoercer(),
-        new CoreErrorTracking.ErrorCoercer(),
-        new CoreErrorTracking.ErrorEventCoercer(),
-        new CoreErrorTracking.ObjectCoercer(),
-        new CoreErrorTracking.StringCoercer(),
-        new CoreErrorTracking.PrimitiveCoercer(),
-      ],
-      CoreErrorTracking.createStackParser(
-        isHermes() ? 'hermes' : 'web:javascript',
-        CoreErrorTracking.chromeStackLineParser,
-        CoreErrorTracking.geckoStackLineParser
-      )
-    )
     this.logger = logger.createLogger('[ErrorTracking]')
     this.options = this.resolveOptions(options)
     this.autocapture(this.options.autocapture)
@@ -134,6 +118,11 @@ export class ErrorTracking {
         return
       }
 
+      // Offline/timeout failures are expected, not application errors.
+      if (isPostHogFetchNetworkError(error)) {
+        return
+      }
+
       const hint: CoreErrorTracking.EventHint = {
         mechanism: {
           type: 'onuncaughtexception',
@@ -146,7 +135,7 @@ export class ErrorTracking {
         additionalProperties['$exception_level'] = 'fatal' as CoreErrorTracking.SeverityLevel
       }
 
-      this.captureException(error, additionalProperties, hint)
+      this.instance.captureException(error, additionalProperties, hint)
 
       if (isFatal) {
         void this.instance.flush().catch(() => {
@@ -168,13 +157,18 @@ export class ErrorTracking {
         return
       }
 
+      // Offline/timeout failures are expected, not application errors.
+      if (isPostHogFetchNetworkError(error)) {
+        return
+      }
+
       const hint: CoreErrorTracking.EventHint = {
         mechanism: {
           type: 'onunhandledrejection',
           handled: false,
         },
       }
-      this.captureException(error, {}, hint)
+      this.instance.captureException(error, {}, hint)
     }
 
     try {
@@ -201,7 +195,7 @@ export class ErrorTracking {
       const additionalProperties = {
         $exception_level: level as CoreErrorTracking.SeverityLevel,
       }
-      this.captureException(error, additionalProperties, hint)
+      this.instance.captureException(error, additionalProperties, hint)
     }
 
     try {

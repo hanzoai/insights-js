@@ -4,14 +4,24 @@ import type { Insights } from '@hanzo/insights-node'
 import type { CachedPrompt, GetPromptOptions, PromptApiResponse, PromptVariables, PromptsDirectOptions } from './types'
 
 const DEFAULT_CACHE_TTL_SECONDS = 300 // 5 minutes
+const DEFAULT_PROMPTS_HOST = 'https://us.posthog.com'
+type PromptVersionCache = Map<number | undefined, CachedPrompt>
+
+function normalizeApiKey(value?: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function normalizeHost(value?: unknown): string {
+  const normalizedHost = typeof value === 'string' ? value.trim() : ''
+  return (normalizedHost || DEFAULT_PROMPTS_HOST).replace(/\/+$/, '')
+}
 
 function isPromptApiResponse(data: unknown): data is PromptApiResponse {
-  return (
-    typeof data === 'object' &&
-    data !== null &&
-    'prompt' in data &&
-    typeof (data as PromptApiResponse).prompt === 'string'
-  )
+  if (typeof data !== 'object' || data === null) {
+    return false
+  }
+  const record = data as Record<string, unknown>
+  return typeof record.prompt === 'string' && typeof record.name === 'string' && typeof record.version === 'number'
 }
 
 export interface PromptsWithInsightsOptions {
@@ -46,6 +56,11 @@ function isPromptsWithInsights(options: PromptsOptions): options is PromptsWithI
  *   fallback: 'You are a helpful assistant.',
  * })
  *
+ * // Or fetch an exact published version
+ * const v3Template = await prompts.get('support-system-prompt', {
+ *   version: 3,
+ * })
+ *
  * // Compile with variables
  * const systemPrompt = prompts.compile(template, {
  *   company: 'Acme Corp',
@@ -58,7 +73,8 @@ export class Prompts {
   private projectApiKey: string
   private host: string
   private defaultCacheTtlSeconds: number
-  private cache: Map<string, CachedPrompt> = new Map()
+  private cache: Map<string, PromptVersionCache> = new Map()
+  private hasWarnedDeprecation = false
 
   constructor(options: PromptsOptions) {
     this.defaultCacheTtlSeconds = options.defaultCacheTtlSeconds ?? DEFAULT_CACHE_TTL_SECONDS
@@ -83,37 +99,34 @@ export class Prompts {
    * @returns The prompt string
    * @throws Error if the prompt cannot be fetched and no fallback is provided
    */
-  async get(name: string, options?: GetPromptOptions): Promise<string> {
+  private async getInternal(name: string, options?: GetPromptOptions): Promise<PromptRemoteResult> {
     const cacheTtlSeconds = options?.cacheTtlSeconds ?? this.defaultCacheTtlSeconds
-    const fallback = options?.fallback
+    const version = options?.version
+    const promptLabel = this.getPromptLabel(name, version)
 
     // Check cache first
-    const cached = this.cache.get(name)
+    const cached = this.getPromptCache(name)?.get(version)
     const now = Date.now()
 
     if (cached) {
       const isFresh = now - cached.fetchedAt < cacheTtlSeconds * 1000
 
       if (isFresh) {
-        return cached.prompt
+        const { fetchedAt: _, ...cachedResult } = cached
+        return { source: 'cache', ...cachedResult }
       }
     }
 
     // Try to fetch from API
     try {
-      const prompt = await this.fetchPromptFromApi(name)
-      const fetchedAt = Date.now()
+      const fetched = await this.fetchPromptFromApi(name, version)
 
       // Update cache
-      this.cache.set(name, {
-        prompt,
-        fetchedAt,
-      })
+      this.getOrCreatePromptCache(name).set(version, { ...fetched, fetchedAt: Date.now() })
 
-      return prompt
+      return { source: 'api', ...fetched }
     } catch (error) {
-      // Fallback order:
-      // 1. Return stale cache (with warning)
+      // Return stale cache (with warning)
       if (cached) {
         console.warn(`[Insights Prompts] Failed to fetch prompt "${name}", using stale cache:`, error)
         return cached.prompt
@@ -153,17 +166,33 @@ export class Prompts {
   /**
    * Clear the cache for a specific prompt or all prompts
    *
-   * @param name - Optional prompt name to clear. If not provided, clears all cached prompts.
+   * @param name - Optional prompt name to clear. If provided, clears all cached versions for that prompt unless a version is also provided.
+   * @param version - Optional prompt version to clear. Requires a prompt name.
    */
-  clearCache(name?: string): void {
-    if (name !== undefined) {
-      this.cache.delete(name)
-    } else {
+  clearCache(name?: string, version?: number): void {
+    if (version !== undefined && name === undefined) {
+      throw new Error("'version' requires 'name' to be provided")
+    }
+
+    if (name === undefined) {
       this.cache.clear()
+      return
+    }
+
+    if (version === undefined) {
+      this.cache.delete(name)
+      return
+    }
+
+    const promptVersions = this.getPromptCache(name)
+    promptVersions?.delete(version)
+
+    if (promptVersions?.size === 0) {
+      this.cache.delete(name)
     }
   }
 
-  private async fetchPromptFromApi(name: string): Promise<string> {
+  private async fetchPromptFromApi(name: string, version?: number): Promise<Omit<PromptRemoteResult, 'source'>> {
     if (!this.personalApiKey) {
       throw new Error(
         '[Insights Prompts] personalApiKey is required to fetch prompts. ' +
@@ -179,7 +208,9 @@ export class Prompts {
 
     const encodedPromptName = encodeURIComponent(name)
     const encodedProjectApiKey = encodeURIComponent(this.projectApiKey)
-    const url = `${this.host}/api/environments/@current/llm_prompts/name/${encodedPromptName}/?token=${encodedProjectApiKey}`
+    const versionQuery = version === undefined ? '' : `&version=${encodeURIComponent(String(version))}`
+    const promptLabel = this.getPromptLabel(name, version)
+    const url = `${this.host}/api/environments/@current/llm_prompts/name/${encodedPromptName}/?token=${encodedProjectApiKey}${versionQuery}`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -209,6 +240,6 @@ export class Prompts {
       throw new Error(`[Insights Prompts] Invalid response format for prompt "${name}"`)
     }
 
-    return data.prompt
+    return { prompt: data.prompt, name: data.name, version: data.version }
   }
 }

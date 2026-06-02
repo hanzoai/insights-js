@@ -30,7 +30,6 @@ describe('RemoteConfigLoader', () => {
                 insights.config.advanced_disable_flags || insights.config.advanced_disable_decide || false,
             featureFlags: {
                 ensureFlagsLoaded: jest.fn(),
-                reloadFeatureFlags: jest.fn(),
             },
             requestRouter: new RequestRouter(createMockInsights({ config: defaultConfig })),
         })
@@ -246,6 +245,30 @@ describe('RemoteConfigLoader', () => {
             expect(insights.featureFlags.reloadFeatureFlags).toHaveBeenCalledTimes(1)
 
             loader.stop()
+        })
+
+        it('skips refresh when no document is available', async () => {
+            try {
+                await jest.isolateModulesAsync(async () => {
+                    jest.doMock('../utils/globals', () => ({
+                        ...jest.requireActual('../utils/globals'),
+                        document: undefined,
+                    }))
+
+                    // Re-import with no globals document to simulate browser extension background contexts.
+                    const { RemoteConfigLoader: NoDocumentRemoteConfigLoader } = await import('../remote-config')
+                    const reloadFeatureFlags = jest.fn()
+
+                    new NoDocumentRemoteConfigLoader({
+                        _shouldDisableFlags: () => false,
+                        reloadFeatureFlags,
+                    } as any).refresh()
+
+                    expect(reloadFeatureFlags).not.toHaveBeenCalled()
+                })
+            } finally {
+                jest.dontMock('../utils/globals')
+            }
         })
     })
 

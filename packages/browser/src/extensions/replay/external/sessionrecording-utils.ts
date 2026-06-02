@@ -28,6 +28,53 @@ export function estimateSize(sizeable: unknown): number {
     return JSON.stringify(sizeable, circularReferenceReplacer())?.length || 0
 }
 
+// Lightweight size estimate for compressed events without allocating a JSON string.
+// Intentionally loose: does not account for JSON escaping of strings or keys.
+// This is fine because compressed event strings are base64 gzip output (safe alphabet)
+// and keys are known-safe identifiers. Used only for buffer threshold checks (~1MB)
+// and split-buffer decisions (~7MB) where a few bytes of drift don't matter.
+export function estimateCompressedEventSize(value: unknown): number {
+    if (isNull(value)) {
+        return 4
+    }
+    if (isUndefined(value)) {
+        return 0
+    }
+    switch (typeof value) {
+        case 'string':
+            return value.length + 2
+        case 'number':
+            return String(value).length
+        case 'boolean':
+            return value ? 4 : 5
+        case 'object': {
+            if (isArray(value)) {
+                let size = 2
+                for (let i = 0; i < value.length; i++) {
+                    if (i > 0) size += 1
+                    const el = value[i]
+                    size += isUndefined(el) || isNull(el) ? 4 : estimateCompressedEventSize(el)
+                }
+                return size
+            }
+            const obj = value as Record<string, unknown>
+            let size = 2
+            let first = true
+            for (const key in obj) {
+                if (!Object.prototype.hasOwnProperty.call(obj, key)) continue
+                const val = obj[key]
+                if (isUndefined(val)) continue
+                if (!first) size += 1
+                first = false
+                size += key.length + 3 + estimateCompressedEventSize(val)
+            }
+            return size
+        }
+        default:
+            return 0
+    }
+}
+
 export const replacementImageURI =
     'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNOCAwSDE2TDAgMTZWOEw4IDBaIiBmaWxsPSIjMkQyRDJEIi8+CjxwYXRoIGQ9Ik0xNiA4VjE2SDhMMTYgOFoiIGZpbGw9IiMyRDJEMkQiLz4KPC9zdmc+Cg=='
 
@@ -119,18 +166,20 @@ export const SEVEN_MEGABYTES = 1024 * 1024 * 7 * 0.9 // ~7mb (with some wiggle r
 export function splitBuffer(buffer: SnapshotBuffer, sizeLimit: number = SEVEN_MEGABYTES): SnapshotBuffer[] {
     if (buffer.size >= sizeLimit && buffer.data.length > 1) {
         const half = Math.floor(buffer.data.length / 2)
-        const firstHalf = buffer.data.slice(0, half)
-        const secondHalf = buffer.data.slice(half)
+        const firstHalfSizes = buffer.sizes.slice(0, half)
+        const secondHalfSizes = buffer.sizes.slice(half)
         return [
             splitBuffer({
-                size: estimateSize(firstHalf),
-                data: firstHalf,
+                size: firstHalfSizes.reduce((a, b) => a + b, 0),
+                data: buffer.data.slice(0, half),
+                sizes: firstHalfSizes,
                 sessionId: buffer.sessionId,
                 windowId: buffer.windowId,
             }),
             splitBuffer({
-                size: estimateSize(secondHalf),
-                data: secondHalf,
+                size: secondHalfSizes.reduce((a, b) => a + b, 0),
+                data: buffer.data.slice(half),
+                sizes: secondHalfSizes,
                 sessionId: buffer.sessionId,
                 windowId: buffer.windowId,
             }),

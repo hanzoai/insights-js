@@ -291,6 +291,104 @@ describe('featureflags', () => {
         })
     })
 
+    describe('advanced_feature_flags_dedup_per_session', () => {
+        let currentSessionId: string
+
+        beforeEach(() => {
+            currentSessionId = 'session-1'
+            instance.config.advanced_feature_flags_dedup_per_session = true
+            instance.get_session_id = () => currentSessionId
+        })
+
+        it('should re-emit $feature_flag_called when session changes', () => {
+            featureFlags._hasLoadedFlags = true
+
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1)
+            expect(instance.get_property('$flag_call_reported')).toEqual({ 'beta-feature': ['true'] })
+            expect(instance.get_property('$flag_call_reported_session_id')).toEqual('session-1')
+
+            // Same session: should NOT re-emit
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1)
+
+            // New session: should re-emit
+            currentSessionId = 'session-2'
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(2)
+            expect(instance.get_property('$flag_call_reported')).toEqual({ 'beta-feature': ['true'] })
+            expect(instance.get_property('$flag_call_reported_session_id')).toEqual('session-2')
+        })
+
+        it('should not re-emit when option is off (default behavior)', () => {
+            instance.config.advanced_feature_flags_dedup_per_session = false
+            featureFlags._hasLoadedFlags = true
+
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1)
+
+            // Simulate session change
+            currentSessionId = 'session-2'
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1) // still deduped
+        })
+
+        it('should track different flag values within a session', () => {
+            featureFlags._hasLoadedFlags = true
+
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1)
+
+            // Change flag value within same session
+            instance.persistence.register({
+                $enabled_feature_flags: { 'beta-feature': 'variant-1' },
+            })
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(2)
+            expect(instance.get_property('$flag_call_reported')).toEqual({
+                'beta-feature': ['true', 'variant-1'],
+            })
+        })
+
+        it('should reset flag reports for all flags on session change', () => {
+            featureFlags._hasLoadedFlags = true
+
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(featureFlags.isFeatureEnabled('multivariate-flag')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(2)
+            expect(instance.get_property('$flag_call_reported')).toEqual({
+                'beta-feature': ['true'],
+                'multivariate-flag': ['variant-1'],
+            })
+
+            // New session: all flags should re-emit
+            currentSessionId = 'session-2'
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(3)
+            // Previous session's multivariate-flag entry is gone
+            expect(instance.get_property('$flag_call_reported')).toEqual({ 'beta-feature': ['true'] })
+
+            expect(featureFlags.isFeatureEnabled('multivariate-flag')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(4)
+            expect(instance.get_property('$flag_call_reported')).toEqual({
+                'beta-feature': ['true'],
+                'multivariate-flag': ['variant-1'],
+            })
+        })
+
+        it('should not clear flag reports when session id is empty', () => {
+            featureFlags._hasLoadedFlags = true
+            currentSessionId = ''
+
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1)
+
+            // With empty session id, dedup should work normally (not reset)
+            expect(featureFlags.isFeatureEnabled('beta-feature')).toEqual(true)
+            expect(instance.capture).toHaveBeenCalledTimes(1)
+        })
+    })
+
     it('should return the right feature flag and not call capture', () => {
         featureFlags._hasLoadedFlags = true
 
@@ -860,6 +958,33 @@ describe('featureflags', () => {
             })
         })
 
+        describe('plain array and object shorthand forms', () => {
+            it.each([
+                ['plain array', ['beta-feature', 'alpha-feature-2'], { 'beta-feature': true, 'alpha-feature-2': true }],
+                [
+                    'plain object',
+                    { 'beta-feature': 'variant-1', 'alpha-feature-2': false },
+                    { 'beta-feature': 'variant-1', 'alpha-feature-2': false },
+                ],
+            ])('supports %s shorthand form for flag overrides', (_, input, expected) => {
+                featureFlags.overrideFeatureFlags(input as any)
+                expect(featureFlags.getFlagVariants()).toEqual(expected)
+            })
+
+            it('plain object does not affect payloads', () => {
+                featureFlags.overrideFeatureFlags({ 'beta-feature': 'variant-1' })
+
+                expect(featureFlags.getFlagVariants()).toEqual({
+                    'beta-feature': 'variant-1',
+                    'alpha-feature-2': true,
+                })
+                expect(featureFlags.getFlagPayloads()).toEqual({
+                    'beta-feature': { original: 'payload' },
+                    'alpha-feature-2': 123,
+                })
+            })
+        })
+
         describe('callback behavior', () => {
             let callbackSpy: jest.Mock
 
@@ -949,6 +1074,87 @@ describe('featureflags', () => {
 
             expect(instance._send_request).toHaveBeenCalledTimes(1)
             expect(instance._send_request.mock.calls[0][0].data.evaluation_contexts).toEqual(['production', 'web'])
+        })
+
+        it.each([
+            [
+                'configured with flag keys',
+                ['beta-feature', 'checkout-redesign'],
+                ['beta-feature', 'checkout-redesign'],
+                0,
+            ],
+            ['configured as an empty array', [], [], 0],
+            [
+                'configured with invalid entries',
+                ['beta-feature', '', null as any, 'checkout-redesign', '   '],
+                ['beta-feature', 'checkout-redesign'],
+                3,
+            ],
+            ['configured with an invalid non-array value', 'beta-feature' as any, undefined, 1],
+            ['not configured', undefined, undefined, 0],
+        ])('should handle flag_keys when %s', (_description, configuredFlagKeys, expectedFlagKeys, expectedErrors) => {
+            const errorSpy = jest.spyOn(window.console, 'error').mockImplementation()
+            if (!isUndefined(configuredFlagKeys)) {
+                instance.config.flag_keys = configuredFlagKeys as any
+            }
+
+            featureFlags.reloadFeatureFlags()
+            jest.runOnlyPendingTimers()
+
+            expect(instance._send_request).toHaveBeenCalledTimes(1)
+            if (isUndefined(expectedFlagKeys)) {
+                expect(instance._send_request.mock.calls[0][0].data).not.toHaveProperty('flag_keys')
+            } else {
+                expect(instance._send_request.mock.calls[0][0].data.flag_keys).toEqual(expectedFlagKeys)
+            }
+            expect(errorSpy).toHaveBeenCalledTimes(expectedErrors as number)
+
+            errorSpy.mockRestore()
+        })
+
+        it('should replace existing flags with the flag_keys response', () => {
+            const requestedFlagDetail = {
+                key: 'checkout-redesign',
+                enabled: true,
+                variant: undefined,
+                reason: { code: 'condition_match', condition_index: 0, description: undefined },
+                metadata: { id: 42, version: 1, payload: undefined, description: undefined },
+            }
+            const unrequestedFlagDetail = {
+                ...requestedFlagDetail,
+                key: 'other-flag',
+                metadata: { id: 43, version: 1, payload: undefined, description: undefined },
+            }
+
+            featureFlags.receivedFeatureFlags({
+                flags: {
+                    'checkout-redesign': requestedFlagDetail,
+                    'other-flag': unrequestedFlagDetail,
+                },
+            })
+            expect(instance.persistence.props.$enabled_feature_flags).toEqual({
+                'checkout-redesign': true,
+                'other-flag': true,
+            })
+
+            instance.config.flag_keys = ['checkout-redesign']
+            instance._send_request = jest.fn().mockImplementation(({ callback }) =>
+                callback({
+                    statusCode: 200,
+                    json: {
+                        flags: {
+                            'checkout-redesign': requestedFlagDetail,
+                        },
+                    },
+                })
+            )
+
+            featureFlags.reloadFeatureFlags()
+            jest.runOnlyPendingTimers()
+
+            expect(instance.persistence.props.$enabled_feature_flags).toEqual({
+                'checkout-redesign': true,
+            })
         })
 
         it('should not include evaluation_contexts when not configured', () => {
@@ -1844,6 +2050,76 @@ describe('featureflags', () => {
                 person_properties: {},
                 timezone: expect.any(String),
             })
+        })
+
+        it('set_once properties skip keys that already exist in the cache', () => {
+            featureFlags.resetPersonPropertiesForFlags()
+            featureFlags.setPersonPropertiesForFlags({ $set_once: { first_date: '2025-01-01', plan: 'free' } }, false)
+
+            expect(instance.persistence.props.$stored_person_properties).toEqual({
+                first_date: '2025-01-01',
+                plan: 'free',
+            })
+
+            // Calling again with set_once should NOT overwrite existing keys
+            featureFlags.setPersonPropertiesForFlags(
+                { $set_once: { first_date: '2026-03-30', new_key: 'hello' } },
+                false
+            )
+
+            expect(instance.persistence.props.$stored_person_properties).toEqual({
+                first_date: '2025-01-01',
+                plan: 'free',
+                new_key: 'hello',
+            })
+        })
+
+        it('set properties overwrite existing keys even when set_once does not', () => {
+            featureFlags.resetPersonPropertiesForFlags()
+            featureFlags.setPersonPropertiesForFlags({ $set_once: { first_date: '2025-01-01' } }, false)
+
+            expect(instance.persistence.props.$stored_person_properties).toEqual({
+                first_date: '2025-01-01',
+            })
+
+            // $set should overwrite, $set_once should not
+            featureFlags.setPersonPropertiesForFlags(
+                { $set: { first_date: 'overwritten' }, $set_once: { first_date: 'ignored-by-set-once' } },
+                false
+            )
+
+            expect(instance.persistence.props.$stored_person_properties).toEqual({
+                first_date: 'overwritten',
+            })
+        })
+
+        it('set_once properties are included in /flags request', () => {
+            featureFlags.resetPersonPropertiesForFlags()
+            featureFlags.setPersonPropertiesForFlags(
+                { $set: { plan: 'pro' }, $set_once: { first_date: '2025-01-01' } },
+                false
+            )
+
+            expect(instance.persistence.props.$stored_person_properties).toEqual({
+                plan: 'pro',
+                first_date: '2025-01-01',
+            })
+
+            featureFlags.reloadFeatureFlags()
+            jest.runAllTimers()
+
+            expect(instance._send_request.mock.calls[0][0].data).toEqual({
+                token: 'random fake token',
+                distinct_id: 'blah id',
+                $anon_distinct_id: undefined,
+                groups: undefined,
+                group_properties: undefined,
+                person_properties: { plan: 'pro', first_date: '2025-01-01' },
+                timezone: expect.any(String),
+            })
+
+            // Clean up to avoid leaking into subsequent tests
+            featureFlags.resetPersonPropertiesForFlags()
         })
 
         it('on providing groupProperties updates properties successively', () => {
@@ -2761,6 +3037,87 @@ describe('parseFlagsResponse', () => {
             $feature_flag_request_id: 'test-request-id-123',
         })
     })
+
+    describe('partialResponse option', () => {
+        const surveyFlagDetail = {
+            key: 'survey-flag',
+            enabled: true,
+            variant: undefined,
+            reason: { code: 'condition_match', condition_index: 0, description: undefined },
+            metadata: { id: 1, version: 1, payload: undefined, description: undefined },
+        }
+
+        const bootstrapDetail = {
+            key: 'bootstrapped-flag',
+            enabled: true,
+            variant: undefined,
+            reason: { code: 'condition_match', condition_index: 0, description: undefined },
+            metadata: { id: 10, version: 1, payload: 'bootstrap-payload', description: undefined },
+        }
+
+        it.each([
+            {
+                name: 'merges partial response with existing flags',
+                existingFlags: { 'bootstrapped-flag': true, 'session-recording': true },
+                existingPayloads: { 'bootstrapped-flag': 'bootstrap-payload' },
+                existingDetails: { 'bootstrapped-flag': bootstrapDetail },
+                options: { partialResponse: true },
+                expectedFlags: { 'bootstrapped-flag': true, 'session-recording': true, 'survey-flag': true },
+                expectedPayloads: { 'bootstrapped-flag': 'bootstrap-payload' },
+                expectedDetails: { 'bootstrapped-flag': bootstrapDetail, 'survey-flag': surveyFlagDetail },
+            },
+            {
+                name: 'partial response overwrites values for overlapping flag keys',
+                existingFlags: { 'survey-flag': false, 'other-flag': true },
+                existingPayloads: {},
+                existingDetails: {},
+                options: { partialResponse: true },
+                expectedFlags: { 'survey-flag': true, 'other-flag': true },
+                expectedPayloads: {},
+                expectedDetails: { 'survey-flag': surveyFlagDetail },
+            },
+            {
+                name: 'without partialResponse, response overwrites existing flags entirely',
+                existingFlags: { 'bootstrapped-flag': true, 'session-recording': true },
+                existingPayloads: {},
+                existingDetails: {},
+                options: undefined,
+                expectedFlags: { 'survey-flag': true },
+                expectedPayloads: {},
+                expectedDetails: { 'survey-flag': surveyFlagDetail },
+            },
+        ])(
+            '$name',
+            ({
+                existingFlags,
+                existingPayloads,
+                existingDetails,
+                options,
+                expectedFlags,
+                expectedPayloads,
+                expectedDetails,
+            }) => {
+                const flagsResponse = { flags: { 'survey-flag': surveyFlagDetail } }
+
+                parseFlagsResponse(
+                    flagsResponse,
+                    persistence,
+                    existingFlags,
+                    existingPayloads,
+                    existingDetails,
+                    options
+                )
+
+                expect(persistence.register).toHaveBeenCalledWith(
+                    expect.objectContaining({
+                        $enabled_feature_flags: expectedFlags,
+                        $feature_flag_payloads: expectedPayloads,
+                        $feature_flag_details: expectedDetails,
+                    })
+                )
+            }
+        )
+    })
 })
 
 describe('filterActiveFeatureFlags', () => {
@@ -2823,6 +3180,36 @@ describe('getRemoteConfigPayload', () => {
                 }),
             })
         )
+    })
+
+    it.each([
+        ['configured with flag keys', ['remote-config-flag'], ['remote-config-flag']],
+        ['configured as an empty array', [], []],
+        ['not configured', undefined, undefined],
+    ])('should handle flag_keys when %s', (_description, configuredFlagKeys, expectedFlagKeys) => {
+        if (!isUndefined(configuredFlagKeys)) {
+            instance.config.flag_keys = configuredFlagKeys as any
+        }
+
+        const callback = jest.fn()
+        featureFlags.getRemoteConfigPayload('test-flag', callback)
+
+        expect(instance._send_request).toHaveBeenCalledWith(
+            expect.objectContaining({
+                method: 'POST',
+                url: 'flags/flags/?v=2',
+                data: expect.objectContaining({
+                    distinct_id: 'test-distinct-id',
+                    token: 'test-token',
+                }),
+            })
+        )
+
+        if (isUndefined(expectedFlagKeys)) {
+            expect(instance._send_request.mock.calls[0][0].data).not.toHaveProperty('flag_keys')
+        } else {
+            expect(instance._send_request.mock.calls[0][0].data.flag_keys).toEqual(expectedFlagKeys)
+        }
     })
 
     it('should not include evaluation_contexts when not configured', () => {
