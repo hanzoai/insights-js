@@ -3,6 +3,7 @@
  */
 
 import type { JsonType, Properties } from './common'
+import type { LogAttributes } from './capture-log'
 import type { BeforeSendFn, CaptureResult } from './capture'
 import type { RequestResponse } from './request'
 import type { CapturedNetworkRequest, NetworkRequest, SessionRecordingCanvasOptions } from './session-recording'
@@ -150,6 +151,10 @@ export interface PerformanceCaptureConfig {
 
     /**
      * Use chrome's web vitals library to wrap fetch and capture web vitals
+     *
+     * When `cookieless_mode` is active, there is no client-side SessionIdManager; vitals are still
+     * captured. Nested `$web_vitals_*_event` payloads omit `$session_id` / `$window_id`; PostHog ingestion assigns
+     * `$session_id` server-side for cookieless traffic when project cookieless settings are enabled (same as other events).
      */
     web_vitals?: boolean
 
@@ -204,8 +209,32 @@ export interface DeadClickCandidate {
     mutationDelayMs?: number
     // time between click and the most recent selection changed event
     selectionChangedDelayMs?: number
+    // time between click and the most recent visibility change event
+    visibilityChangedDelayMs?: number
     // if neither scroll nor mutation seen before threshold passed
     absoluteDelayMs?: number
+}
+
+/**
+ * Controls buffering and payload limits for exception steps added via `addExceptionStep`.
+ *
+ * NOTE: This type is also defined in `@posthog/core` (exception-steps.ts). Keep both in sync.
+ */
+export type ExceptionStepsConfig = {
+    /**
+     * Determines whether PostHog should collect exception steps and attach them to the next captured exception.
+     *
+     * @default true
+     */
+    enabled?: boolean
+
+    /**
+     * The maximum UTF-8 byte budget for exception steps buffered in memory.
+     * Oldest steps are evicted when the budget is exceeded.
+     *
+     * @default 32768 (~32KB)
+     */
+    max_bytes?: number
 }
 
 export type ExceptionAutoCaptureConfig = {
@@ -214,21 +243,21 @@ export type ExceptionAutoCaptureConfig = {
      *
      * @default true
      */
-    capture_unhandled_errors: boolean
+    capture_unhandled_errors?: boolean
 
     /**
      * Determines whether Insights should capture unhandled promise rejections.
      *
      * @default true
      */
-    capture_unhandled_rejections: boolean
+    capture_unhandled_rejections?: boolean
 
     /**
      * Determines whether Insights should capture console errors.
      *
      * @default false
      */
-    capture_console_errors: boolean
+    capture_console_errors?: boolean
 }
 
 export type DeadClicksAutoCaptureConfig = {
@@ -264,6 +293,20 @@ export type DeadClicksAutoCaptureConfig = {
     capture_clicks_with_modifier_keys?: boolean
 
     /**
+     * List of CSS selectors to ignore dead clicks on
+     * e.g. ['.my-download-link']
+     * we consider the tree of elements from the root to the target element of the click event
+     * so for the tree div > div > a > svg
+     * and ignore list config `['[download]']`
+     * we will ignore the dead click if the click-target or its parents has any download attribute
+     *
+     * Nothing is ignored when there's an empty ignorelist, e.g. []
+     * If no ignorelist is set, we default to ignoring .ph-no-deadclick and .ph-no-capture
+     * A custom ignorelist fully replaces the default — include .ph-no-capture if you want it to suppress dead-click capture as well
+     */
+    css_selector_ignorelist?: string[]
+
+    /**
      * Allows setting behavior for when a dead click is captured.
      * For e.g. to support capture to heatmaps
      *
@@ -284,7 +327,7 @@ export interface HeatmapConfig {
     flush_interval_milliseconds: number
 }
 
-export type ConfigDefaults = '2026-01-30' | '2025-11-30' | '2025-05-24' | 'unset'
+export type ConfigDefaults = '2026-05-30' | '2026-01-30' | '2025-11-30' | '2025-05-24' | 'unset'
 
 export type ExternalIntegrationKind = 'intercom' | 'crispChat'
 
@@ -320,6 +363,11 @@ export interface ErrorTrackingOptions {
      * @default 10
      */
     __exceptionRateLimiterBucketSize?: number
+
+    /**
+     * Controls buffering and payload limits for exception steps added via `addExceptionStep`.
+     */
+    exception_steps?: ExceptionStepsConfig
 }
 
 /**
@@ -494,8 +542,15 @@ export interface SessionRecordingOptions {
     compress_events?: boolean
 
     /**
-     * ADVANCED: alters the threshold before a recording considers a user has become idle.
-     * Normally only altered alongside changes to session_idle_timeout_ms.
+     * ADVANCED: Controls when session recording considers the user idle.
+     *
+     * If no replay user interaction occurs for this many milliseconds, the recorder marks the recording idle,
+     * emits a `sessionIdle` replay marker, flushes buffered replay events, and drops most subsequent replay
+     * events until user activity resumes. If activity resumes before `session_idle_timeout_seconds`, recording
+     * continues under the same `$session_id`.
+     *
+     * This does not control `$session_id` rotation. Session rotation is controlled by `session_idle_timeout_seconds`,
+     * so this value should be lower than `session_idle_timeout_seconds * 1000`.
      *
      * @default 1000 * 60 * 5 (5 minutes)
      */
@@ -563,9 +618,61 @@ export interface SurveyConfig {
 }
 
 /**
+ * Options for the captureLog API and posthog.logger convenience methods.
+ */
+export interface LogCaptureOptions {
+    /**
+     * The service name for log records.
+     * Maps to the OTel resource attribute 'service.name'.
+     *
+     * @default 'unknown_service'
+     */
+    serviceName?: string
+    /**
+     * The deployment environment for log records (e.g. 'production', 'staging').
+     * Maps to the OTel resource attribute 'deployment.environment'.
+     */
+    environment?: string
+    /**
+     * The service version for log records (e.g. '1.2.3').
+     * Maps to the OTel resource attribute 'service.version'.
+     */
+    serviceVersion?: string
+    /**
+     * Additional resource attributes applied to all log records.
+     * These describe the service/deployment, not individual log entries.
+     * Named fields (serviceName, environment, serviceVersion) are set first;
+     * resourceAttributes can override them.
+     *
+     * @example { 'host.name': 'web-01', 'cloud.region': 'us-east-1' }
+     */
+    resourceAttributes?: LogAttributes
+    /**
+     * Flush interval in milliseconds for batched log records.
+     *
+     * @default 3000
+     */
+    flushIntervalMs?: number
+    /**
+     * Maximum number of log records to buffer before forcing a flush.
+     *
+     * @default 100
+     */
+    maxBufferSize?: number
+    /**
+     * Maximum number of log records accepted per flush interval. Subsequent calls
+     * within the same window are dropped with a single warning, protecting
+     * against runaway loggers flooding the network.
+     *
+     * @default 1000
+     */
+    maxLogsPerInterval?: number
+}
+
+/**
  * Logs configuration options
  */
-export interface LogsConfig {
+export interface LogsConfig extends LogCaptureOptions {
     captureConsoleLogs?: boolean
 }
 
@@ -1048,7 +1155,15 @@ export interface InsightsConfig {
 
     /**
      * Determines the session idle timeout in seconds.
-     * Any new event that's happened after this timeout will create a new session.
+     *
+     * If no events are captured for this many seconds, the next event starts a
+     * new session with a new `$session_id` (and `$window_id`). The SDK may also proactively reset the stored session
+     * after the timeout while the page is idle, so the next event creates a new session.
+     *
+     * Session recording has a separate idle threshold: `session_recording.session_idle_threshold_ms`. That setting
+     * only controls when the user is considered idle, it does not rotate `$session_id`.
+     *
+     * Must be between 60 seconds and 10 hours. Values outside this range are clamped.
      *
      * @default 30 * 60 -- 30 minutes
      */
@@ -1158,6 +1273,19 @@ export interface InsightsConfig {
      * @default undefined
      */
     evaluation_contexts?: readonly string[]
+
+    /**
+     * List of feature flag keys to remotely evaluate for this SDK instance.
+     * When set, only these flags are evaluated by `/flags`; omitted flags are not remotely evaluated.
+     * Dependencies of the requested flags may still be evaluated internally by PostHog.
+     * If unset, all eligible flags are evaluated.
+     *
+     * Examples: ['checkout-redesign', 'new-onboarding']
+     *
+     * @default undefined
+     */
+    flag_keys?: readonly string[]
+
     /**
      * Evaluation environments for feature flags.
      * @deprecated Use evaluation_contexts instead. This property will be removed in a future version.
@@ -1211,6 +1339,21 @@ export interface InsightsConfig {
     feature_flag_cache_ttl_ms?: number
 
     /**
+     * When enabled, `$feature_flag_called` event deduplication is scoped to the current session.
+     *
+     * By default, the SDK deduplicates `$feature_flag_called` events globally and only re-emits
+     * them when `identify` (with a new distinct ID) or `reset` is called. This can be problematic
+     * for experiments: if a flag is checked before an experiment starts, the event is cached and
+     * won't fire again for that user until identify/reset, meaning the experiment never sees the event.
+     *
+     * When this option is `true`, the deduplication cache is keyed on the session ID, so each new
+     * session will re-emit `$feature_flag_called` for every flag that is checked.
+     *
+     * @default false
+     */
+    advanced_feature_flags_dedup_per_session: boolean
+
+    /**
      * Sets timeout for fetching surveys
      *
      * @default 10000
@@ -1229,7 +1372,7 @@ export interface InsightsConfig {
      * - **Disabled (0)**: No background refreshes. Flags only update on page load or manual `reloadFeatureFlags()` calls.
      *   Use this if you control flag updates manually or have infrequent flag changes.
      *
-     * Note: Refreshes are automatically skipped when the browser tab is hidden.
+     * Note: Refreshes are automatically skipped when the browser tab is hidden or no document is available.
      *
      * @default 300000 (5 minutes)
      */
@@ -1322,6 +1465,8 @@ export interface InsightsConfig {
 
     /**
      * Determines whether to capture dead clicks.
+     *
+     * by default dead clicks are ignored on elements that match a `ph-no-capture` or `ph-no-deadclick` css class on the element or a parent
      *
      * @see {DeadClicksAutoCaptureConfig}
      * @default undefined
@@ -1451,6 +1596,13 @@ export interface InsightsConfig {
      */
     override_display_language?: string | null
 
+    /**
+     * A list of hostnames for which to inject PostHog tracing headers to all requests
+     * (X-POSTHOG-DISTINCT-ID, X-POSTHOG-SESSION-ID, X-POSTHOG-WINDOW-ID). Used to link
+     * frontend sessions to backend traces (see https://posthog.com/docs/llm-analytics/link-session-replay).
+     */
+    addTracingHeaders?: string[]
+
     // ------- PREVIEW CONFIGS -------
 
     /**
@@ -1484,6 +1636,17 @@ export interface InsightsConfig {
      * Disables sending credentials when using XHR requests.
      */
     __preview_disable_xhr_credentials?: boolean
+
+    /**
+     * PREVIEW - MAY CHANGE WITHOUT WARNING - DO NOT USE IN PRODUCTION
+     * Loads external dependency bundles (for example recorder.js and toolbar.js) from
+     * semver-qualified asset paths such as /static/1.370.0/recorder.js instead of the
+     * legacy /static/recorder.js?v=1.370.0 form.
+     *
+     * When set to a string, that string is treated as an asset host override for any
+     * /static/* asset path while leaving non-static asset paths unchanged.
+     */
+    __preview_external_dependency_versioned_paths?: boolean | string
 
     /**
      * PREVIEW - MAY CHANGE WITHOUT WARNING - DO NOT USE IN PRODUCTION

@@ -26,6 +26,18 @@ describe('config', () => {
             expect(insights.config.rageclick).toStrictEqual({ content_ignorelist: true })
         })
 
+        it.each([
+            ['unset', undefined, 0],
+            ['2025-05-24', '2025-05-24' as const, 0],
+            ['2025-11-30', '2025-11-30' as const, 0],
+            ['2026-01-30', '2026-01-30' as const, 0],
+            ['2026-05-30', '2026-05-30' as const, 250],
+        ])('persistence_save_debounce_ms with defaults %s', (_label, defaults, expected) => {
+            const posthog = new PostHog()
+            posthog._init('test-token', defaults ? { defaults } : undefined)
+            expect(posthog.config.persistence_save_debounce_ms).toBe(expected)
+        })
+
         it('should preserve other default config values when setting defaults', () => {
             const insights1 = new Insights()
             insights1._init('test-token')
@@ -35,7 +47,6 @@ describe('config', () => {
             insights2._init('test-token', { defaults: '2025-05-24' })
             const config2 = insights2.config
 
-            // Check that all other config values remain the same
             const allKeys = new Set([...Object.keys(config1), ...Object.keys(config2)])
             allKeys.forEach((key) => {
                 if (!['capture_pageview', 'defaults'].includes(key)) {

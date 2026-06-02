@@ -11,6 +11,7 @@ import {
   calculateWebSearchCount,
   sendEventWithErrorToInsights,
 } from '../utils'
+import { captureAiGeneration } from '../captureAiGeneration'
 import type { APIPromise } from 'openai'
 import type { Stream } from 'openai/streaming'
 import type { ParsedResponse } from 'openai/resources/responses/responses'
@@ -116,11 +117,16 @@ export class WrappedCompletions extends Completions {
         if ('tee' in value) {
           const [stream1, stream2] = value.tee()
           ;(async () => {
+            // Hoisted so the catch block can surface whatever was accumulated
+            // from the streamed chunks before the failure.
+            let completionIdFromResponse: string | undefined
+            let systemFingerprintFromResponse: string | undefined
             try {
               const contentBlocks: FormattedContent = []
               let accumulatedContent = ''
               let modelFromResponse: string | undefined
               let firstTokenTime: number | undefined
+              let stopReason: string | undefined
               let usage: {
                 inputTokens?: number
                 outputTokens?: number
@@ -145,12 +151,22 @@ export class WrappedCompletions extends Completions {
               let rawUsageData: unknown
 
               for await (const chunk of stream1) {
-                // Extract model from chunk (Chat Completions chunks have model field)
+                // Extract model and completion metadata from chunk (Chat Completions chunks carry these fields)
                 if (!modelFromResponse && chunk.model) {
                   modelFromResponse = chunk.model
                 }
+                if (!completionIdFromResponse && chunk.id) {
+                  completionIdFromResponse = chunk.id
+                }
+                if (!systemFingerprintFromResponse && chunk.system_fingerprint) {
+                  systemFingerprintFromResponse = chunk.system_fingerprint
+                }
 
                 const choice = chunk?.choices?.[0]
+
+                if (choice?.finish_reason) {
+                  stopReason = choice.finish_reason
+                }
 
                 const chunkWebSearchCount = calculateWebSearchCount(chunk)
                 if (chunkWebSearchCount > 0 && chunkWebSearchCount > (usage.webSearchCount ?? 0)) {
@@ -263,7 +279,7 @@ export class WrappedCompletions extends Completions {
                 latency,
                 timeToFirstToken,
                 baseURL: this.baseURL,
-                params: body,
+                modelParameters: getModelParams(body),
                 httpStatus: 200,
                 usage: {
                   inputTokens: usage.inputTokens,
@@ -273,7 +289,10 @@ export class WrappedCompletions extends Completions {
                   webSearchCount: usage.webSearchCount,
                   rawUsage: rawUsageData,
                 },
+                stopReason,
                 tools: availableTools,
+                completionId: completionIdFromResponse,
+                providerMetadata: buildProviderMetadata({ systemFingerprint: systemFingerprintFromResponse }),
               })
             } catch (error: unknown) {
               const enrichedError = await sendEventWithErrorToInsights({
@@ -285,11 +304,16 @@ export class WrappedCompletions extends Completions {
                 output: [],
                 latency: 0,
                 baseURL: this.baseURL,
-                params: body,
+                modelParameters: getModelParams(body),
                 usage: { inputTokens: 0, outputTokens: 0 },
+                // If the stream fails mid-flight, surface whatever completion
+                // metadata the consumed chunks already provided so the error
+                // event can still be correlated to OpenAI's Logs dashboard.
+                completionId: completionIdFromResponse,
+                providerMetadata: buildProviderMetadata({ systemFingerprint: systemFingerprintFromResponse }),
                 error,
               })
-              throw enrichedError
+              throw error
             }
           })()
 
@@ -314,7 +338,7 @@ export class WrappedCompletions extends Completions {
               output: formattedOutput,
               latency,
               baseURL: this.baseURL,
-              params: body,
+              modelParameters: getModelParams(body),
               httpStatus: 200,
               usage: {
                 inputTokens: result.usage?.prompt_tokens ?? 0,
@@ -324,7 +348,13 @@ export class WrappedCompletions extends Completions {
                 webSearchCount: calculateWebSearchCount(result),
                 rawUsage: result.usage,
               },
+              stopReason: result.choices[0]?.finish_reason ?? undefined,
               tools: availableTools,
+              completionId: result.id,
+              providerMetadata: buildProviderMetadata({
+                systemFingerprint: result.system_fingerprint,
+                requestId: extractRequestId(result),
+              }),
             })
           }
           return result
@@ -344,13 +374,13 @@ export class WrappedCompletions extends Completions {
             output: [],
             latency: 0,
             baseURL: this.baseURL,
-            params: body,
+            modelParameters: getModelParams(body),
             httpStatus,
             usage: {
               inputTokens: 0,
               outputTokens: 0,
             },
-            error: JSON.stringify(error),
+            error,
           })
           throw error
         }
@@ -404,10 +434,14 @@ export class WrappedResponses extends Responses {
         if ('tee' in value && typeof value.tee === 'function') {
           const [stream1, stream2] = value.tee()
           ;(async () => {
+            // Hoisted so the catch block can surface the completion ID that
+            // was accumulated from the streamed chunks before the failure.
+            let completionIdFromResponse: string | undefined
             try {
               let finalContent: unknown[] = []
               let modelFromResponse: string | undefined
               let firstTokenTime: number | undefined
+              let stopReason: string | undefined
               let usage: {
                 inputTokens?: number
                 outputTokens?: number
@@ -428,9 +462,12 @@ export class WrappedResponses extends Responses {
                 }
 
                 if ('response' in chunk && chunk.response) {
-                  // Extract model from response object in chunk (for stored prompts)
+                  // Extract model and completion ID from the response object in the chunk (for stored prompts)
                   if (!modelFromResponse && chunk.response.model) {
                     modelFromResponse = chunk.response.model
+                  }
+                  if (!completionIdFromResponse && chunk.response.id) {
+                    completionIdFromResponse = chunk.response.id
                   }
 
                   const chunkWebSearchCount = calculateWebSearchCount(chunk.response)
@@ -446,6 +483,9 @@ export class WrappedResponses extends Responses {
                   chunk.response.output.length > 0
                 ) {
                   finalContent = chunk.response.output
+                  if (chunk.response.status) {
+                    stopReason = chunk.response.status
+                  }
                 }
                 if ('response' in chunk && chunk.response?.usage) {
                   rawUsageData = chunk.response.usage
@@ -475,7 +515,7 @@ export class WrappedResponses extends Responses {
                 latency,
                 timeToFirstToken,
                 baseURL: this.baseURL,
-                params: body,
+                modelParameters: getModelParams(body),
                 httpStatus: 200,
                 usage: {
                   inputTokens: usage.inputTokens,
@@ -485,7 +525,9 @@ export class WrappedResponses extends Responses {
                   webSearchCount: usage.webSearchCount,
                   rawUsage: rawUsageData,
                 },
+                stopReason,
                 tools: availableTools,
+                completionId: completionIdFromResponse,
               })
             } catch (error: unknown) {
               const enrichedError = await sendEventWithErrorToInsights({
@@ -500,11 +542,14 @@ export class WrappedResponses extends Responses {
                 output: [],
                 latency: 0,
                 baseURL: this.baseURL,
-                params: body,
+                modelParameters: getModelParams(body),
                 usage: { inputTokens: 0, outputTokens: 0 },
-                error: error,
+                // Surface the completion ID from any chunks consumed before
+                // the stream failed so the error event remains correlatable.
+                completionId: completionIdFromResponse,
+                error,
               })
-              throw enrichedError
+              throw error
             }
           })()
 
@@ -528,7 +573,7 @@ export class WrappedResponses extends Responses {
               output: formattedOutput,
               latency,
               baseURL: this.baseURL,
-              params: body,
+              modelParameters: getModelParams(body),
               httpStatus: 200,
               usage: {
                 inputTokens: result.usage?.input_tokens ?? 0,
@@ -538,7 +583,10 @@ export class WrappedResponses extends Responses {
                 webSearchCount: calculateWebSearchCount(result),
                 rawUsage: result.usage,
               },
+              stopReason: result.status ?? undefined,
               tools: availableTools,
+              completionId: result.id,
+              providerMetadata: buildProviderMetadata({ requestId: extractRequestId(result) }),
             })
           }
           return result
@@ -558,13 +606,13 @@ export class WrappedResponses extends Responses {
             output: [],
             latency: 0,
             baseURL: this.baseURL,
-            params: body,
+            modelParameters: getModelParams(body),
             httpStatus,
             usage: {
               inputTokens: 0,
               outputTokens: 0,
             },
-            error: JSON.stringify(error),
+            error,
           })
           throw error
         }
@@ -601,7 +649,7 @@ export class WrappedResponses extends Responses {
             output: result.output,
             latency,
             baseURL: this.baseURL,
-            params: body,
+            modelParameters: getModelParams(body),
             httpStatus: 200,
             usage: {
               inputTokens: result.usage?.input_tokens ?? 0,
@@ -610,6 +658,9 @@ export class WrappedResponses extends Responses {
               cacheReadInputTokens: result.usage?.input_tokens_details?.cached_tokens ?? 0,
               rawUsage: result.usage,
             },
+            stopReason: result.status ?? undefined,
+            completionId: result.id,
+            providerMetadata: buildProviderMetadata({ requestId: extractRequestId(result) }),
           })
           return result
         },
@@ -623,14 +674,14 @@ export class WrappedResponses extends Responses {
             output: [],
             latency: 0,
             baseURL: this.baseURL,
-            params: body,
+            modelParameters: getModelParams(body),
             usage: {
               inputTokens: 0,
               outputTokens: 0,
             },
-            error: JSON.stringify(error),
+            error,
           })
-          throw enrichedError
+          throw error
         }
       )
 
@@ -674,7 +725,7 @@ export class WrappedEmbeddings extends Embeddings {
           output: null, // Embeddings don't have output content
           latency,
           baseURL: this.baseURL,
-          params: body,
+          modelParameters: getModelParams(body),
           httpStatus: 200,
           usage: {
             inputTokens: result.usage?.prompt_tokens ?? 0,
@@ -697,12 +748,12 @@ export class WrappedEmbeddings extends Embeddings {
           output: null, // Embeddings don't have output content
           latency: 0,
           baseURL: this.baseURL,
-          params: body,
+          modelParameters: getModelParams(body),
           httpStatus,
           usage: {
             inputTokens: 0,
           },
-          error: JSON.stringify(error),
+          error,
         })
         throw error
       }
@@ -850,7 +901,7 @@ export class WrappedTranscriptions extends Transcriptions {
                 latency,
                 timeToFirstToken,
                 baseURL: this.baseURL,
-                params: body,
+                modelParameters: getModelParams(body),
                 httpStatus: 200,
                 usage,
                 tools: availableTools,
@@ -865,11 +916,11 @@ export class WrappedTranscriptions extends Transcriptions {
                 output: [],
                 latency: 0,
                 baseURL: this.baseURL,
-                params: body,
+                modelParameters: getModelParams(body),
                 usage: { inputTokens: 0, outputTokens: 0 },
-                error: error,
+                error,
               })
-              throw enrichedError
+              throw error
             }
           })()
 
@@ -891,7 +942,7 @@ export class WrappedTranscriptions extends Transcriptions {
               output: result.text,
               latency,
               baseURL: this.baseURL,
-              params: body,
+              modelParameters: getModelParams(body),
               httpStatus: 200,
               usage: {
                 inputTokens: result.usage?.type === 'tokens' ? (result.usage.input_tokens ?? 0) : 0,
@@ -912,14 +963,14 @@ export class WrappedTranscriptions extends Transcriptions {
             output: [],
             latency: 0,
             baseURL: this.baseURL,
-            params: body,
+            modelParameters: getModelParams(body),
             usage: {
               inputTokens: 0,
               outputTokens: 0,
             },
-            error: error,
+            error,
           })
-          throw enrichedError
+          throw error
         }
       ) as APIPromise<OpenAIOrignal.Audio.Transcriptions.TranscriptionCreateResponse>
 

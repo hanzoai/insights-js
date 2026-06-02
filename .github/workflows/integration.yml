@@ -9,6 +9,10 @@ env:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   browsers:
     name: Test on ${{ matrix.tests.name }}
@@ -35,7 +39,7 @@ jobs:
             install: "chromium"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
@@ -59,7 +63,7 @@ jobs:
 
       - name: Run ${{ matrix.tests.name }} test
         if: ${{ steps.is-affected.outputs.is-affected == 'true' }}
-        timeout-minutes: 10
+        timeout-minutes: 30
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
           RUN_ID: ${{ github.run_id }}

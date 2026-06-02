@@ -1,16 +1,25 @@
-# adapted from https://github.com/getsentry/sentry-react-native/blob/e76d0d388228437e82f235546de00f4e748fcbda/packages/core/scripts/sentry-xcode.sh
-
 #!/bin/bash
+# adapted from https://github.com/getsentry/sentry-react-native/blob/e76d0d388228437e82f235546de00f4e748fcbda/packages/core/scripts/sentry-xcode.sh
 # Bundle React Native code and images
 # PWD=ios
 
 # print commands before executing them and stop on first error
 set -x -e
 
+# Ensure common tool paths are available so posthog-cli can auto-detect git
+# (Xcode runs build phases with a minimal PATH)
+export PATH="/usr/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin:$HOME/.posthog:$PATH"
+
 # WITH_ENVIRONMENT is executed by React Native
 
 REACT_NATIVE_XCODE_DEFAULT="../node_modules/react-native/scripts/react-native-xcode.sh"
-REACT_NATIVE_XCODE="${1:-$REACT_NATIVE_XCODE_DEFAULT}"
+# Accept $1 only when it actually points at a shell script; guard against the
+# Expo plugin previously passing "/bin/sh" as $1 (issue #3682).
+if [[ "${1:-}" == *.sh ]]; then
+  REACT_NATIVE_XCODE="$1"
+else
+  REACT_NATIVE_XCODE="$REACT_NATIVE_XCODE_DEFAULT"
+fi
 
 # Check if DERIVED_FILE_DIR exists, defined by Xcode
 if [ ! -d "$DERIVED_FILE_DIR" ]; then
@@ -57,8 +66,30 @@ if [ -z "$PH_CLI_PATH" ] || [ ! -x "$PH_CLI_PATH" ]; then
   exit 1
 fi
 
+MIN_POSTHOG_CLI_VERSION="0.7.8"
+PH_CLI_VERSION=$("$PH_CLI_PATH" --version 2>/dev/null | awk '{print $NF}' | tr -d 'v')
+if [ -n "$PH_CLI_VERSION" ]; then
+  LOWEST=$(printf '%s\n%s\n' "$MIN_POSTHOG_CLI_VERSION" "$PH_CLI_VERSION" | sort -t. -k1,1n -k2,2n -k3,3n | head -n1)
+  if [ "$LOWEST" != "$MIN_POSTHOG_CLI_VERSION" ]; then
+    echo "error: posthog-cli >= ${MIN_POSTHOG_CLI_VERSION} required (found ${PH_CLI_VERSION}). Upgrade: npm install -g @posthog/cli@latest"
+    exit 1
+  fi
+fi
+
 # mimics how the file is defined in node_modules/react-native/scripts/react-native-xcode.sh (PACKAGER_SOURCEMAP_FILE)
 SOURCEMAP_PACKAGER_FILE="$CONFIGURATION_BUILD_DIR/$SOURCEMAP_NAME"
+
+# Pass release info from Xcode build settings when available
+CLI_RELEASE_ARGS=""
+if [ -n "${PRODUCT_BUNDLE_IDENTIFIER}" ]; then
+  CLI_RELEASE_ARGS="$CLI_RELEASE_ARGS --release-name $PRODUCT_BUNDLE_IDENTIFIER"
+fi
+if [ -n "${MARKETING_VERSION}" ]; then
+  CLI_RELEASE_ARGS="$CLI_RELEASE_ARGS --release-version $MARKETING_VERSION"
+fi
+if [ -n "${CURRENT_PROJECT_VERSION}" ]; then
+  CLI_RELEASE_ARGS="$CLI_RELEASE_ARGS --build $CURRENT_PROJECT_VERSION"
+fi
 
 # RN deletes the PACKAGER_SOURCEMAP_FILE file after execution but we need it
 # lets patch the script to comment out this part if not yet
@@ -90,7 +121,7 @@ set -x -e
 
 # Execute insights cli clone
 set +x +e
-CLI_CLONE_OUTPUT=$(/bin/sh -c "$PH_CLI_PATH exp hermes clone --minified-map-path $SOURCEMAP_PACKAGER_FILE --composed-map-path $SOURCEMAP_FILE" 2>&1)
+CLI_CLONE_OUTPUT=$(/bin/sh -c "$PH_CLI_PATH hermes clone --minified-map-path $SOURCEMAP_PACKAGER_FILE --composed-map-path $SOURCEMAP_FILE $CLI_RELEASE_ARGS" 2>&1)
 CLONE_EXIT_CODE=$?
 if [ $CLONE_EXIT_CODE -eq 0 ]; then
   echo "$CLI_CLONE_OUTPUT" | awk '{print "output: insights-cli - " $0}'
@@ -102,7 +133,7 @@ set -x -e
 
 # Execute insights cli upload
 set +x +e
-CLI_UPLOAD_OUTPUT=$(/bin/sh -c "$PH_CLI_PATH exp hermes upload --directory $DERIVED_FILE_DIR" 2>&1)
+CLI_UPLOAD_OUTPUT=$(/bin/sh -c "$PH_CLI_PATH hermes upload --directory $DERIVED_FILE_DIR $CLI_RELEASE_ARGS" 2>&1)
 UPLOAD_EXIT_CODE=$?
 if [ $UPLOAD_EXIT_CODE -eq 0 ]; then
   echo "$CLI_UPLOAD_OUTPUT" | awk '{print "output: insights-cli - " $0}'

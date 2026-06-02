@@ -35,7 +35,8 @@ import {
 import { Compression, FeatureFlagError, InsightsPersistedProperty } from './types'
 import { maybeAdd, InsightsCoreStateless, QuotaLimitedFeature } from './insights-core-stateless'
 import { uuidv7 } from './vendor/uuidv7'
-import { isEmptyObject, isNullish, isPlainError, getPersonPropertiesHash, isObject } from './utils'
+import { isEmptyObject, isNullish, getPersonPropertiesHash, isObject } from './utils'
+import { EventHint } from './error-tracking'
 
 // Stores the parameters for a pending feature flags reload request
 interface FlagsAsyncOptions {
@@ -443,11 +444,17 @@ export abstract class InsightsCore extends InsightsCoreStateless {
     options?: InsightsCaptureOptions
   ): void {
     this.wrap(() => {
+      const existingGroups = (this.props.$groups as PostHogGroupProperties) || {}
+      const isNewGroup = existingGroups[groupType] !== groupKey
+
       this.groups({
         [groupType]: groupKey,
       })
 
-      if (groupProperties) {
+      // Send $groupidentify when the group is new/changed OR when properties
+      // are provided. Skip only when the group already exists with the same
+      // key and no new properties are being set.
+      if (isNewGroup || groupProperties) {
         this.groupIdentify(groupType, groupKey, groupProperties, options)
       }
     })
@@ -475,13 +482,13 @@ export abstract class InsightsCore extends InsightsCoreStateless {
    ***/
   setPersonPropertiesForFlags(properties: { [type: string]: JsonType }, reloadFeatureFlags = true): void {
     this.wrap(() => {
-      // Get persisted person properties
       const existingProperties =
         this.getPersistedProperty<Record<string, JsonType>>(InsightsPersistedProperty.PersonProperties) || {}
 
       this.setPersistedProperty<InsightsEventProperties>(InsightsPersistedProperty.PersonProperties, {
         ...existingProperties,
-        ...properties,
+        ...setOnceProps,
+        ...propsToSet,
       })
 
       if (reloadFeatureFlags) {
@@ -496,7 +503,7 @@ export abstract class InsightsCore extends InsightsCoreStateless {
     })
   }
 
-  setGroupPropertiesForFlags(properties: { [type: string]: Record<string, string> }): void {
+  setGroupPropertiesForFlags(properties: { [type: string]: Record<string, JsonType> }): void {
     this.wrap(() => {
       // Get persisted group properties
       const existingProperties =
@@ -528,6 +535,9 @@ export abstract class InsightsCore extends InsightsCoreStateless {
 
   private async remoteConfigAsync(): Promise<InsightsRemoteConfig | undefined> {
     await this._initPromise
+    if (this.disabled) {
+      return undefined
+    }
     if (this._remoteConfigResponsePromise) {
       return this._remoteConfigResponsePromise
     }
@@ -540,6 +550,9 @@ export abstract class InsightsCore extends InsightsCoreStateless {
   protected async flagsAsync(options?: FlagsAsyncOptions): Promise<InsightsFeatureFlagsResponse | undefined> {
     const { sendAnonDistinctId = true, fetchConfig = false, triggerOnRemoteConfig = false } = options ?? {}
     await this._initPromise
+    if (this.disabled) {
+      return undefined
+    }
     if (this._flagsResponsePromise) {
       // Queue the reload request instead of dropping it
       // This ensures that requests with $anon_distinct_id (from identify()) are not lost
@@ -695,8 +708,12 @@ export abstract class InsightsCore extends InsightsCoreStateless {
           this.getPersistedProperty<Record<string, Record<string, string>>>(InsightsPersistedProperty.GroupProperties) ||
           {}
 
+        const deviceId = this.getPersistedProperty<string>(PostHogPersistedProperty.DeviceId)
+
         const extraProperties = {
           $anon_distinct_id: sendAnonDistinctId ? this.getAnonymousId() : undefined,
+          // Only set by the React Native SDK; omitted from JSON when DeviceId is not persisted
+          $device_id: deviceId ?? undefined,
         }
 
         const result = await super.getFlags(
@@ -1136,8 +1153,6 @@ export abstract class InsightsCore extends InsightsCoreStateless {
       ],
       ...additionalProperties,
     }
-
-    this.capture('$exception', properties, { _originatedFromCaptureException: true })
   }
 
   /**
@@ -1359,9 +1374,10 @@ export abstract class InsightsCore extends InsightsCoreStateless {
       }
 
       // Update person properties for feature flags evaluation
-      // Merge setOnce first, then set to allow overwriting
-      const mergedProperties = { ...(userPropertiesToSetOnce || {}), ...(userPropertiesToSet || {}) }
-      this.setPersonPropertiesForFlags(mergedProperties, reloadFeatureFlags)
+      this.setPersonPropertiesForFlags(
+        { $set: userPropertiesToSet || {}, $set_once: userPropertiesToSetOnce || {} },
+        reloadFeatureFlags
+      )
 
       this.capture('$set', { $set: userPropertiesToSet || {}, $set_once: userPropertiesToSetOnce || {} })
 

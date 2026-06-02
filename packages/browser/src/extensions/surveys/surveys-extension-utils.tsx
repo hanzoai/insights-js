@@ -24,6 +24,7 @@ import {
 import { isArray, isNullish } from '@hanzo/insights-core'
 
 import { propertyComparisons } from '../../utils/property-utils'
+import { localStore } from '../../storage'
 import { Properties, PropertyMatchType } from '../../types'
 import { Z_INDEX_SURVEYS } from '../../constants'
 import { prepareStylesheet } from '../utils/stylesheet-loader'
@@ -44,9 +45,7 @@ export function getFontFamily(fontFamily?: string): string {
     return fontFamily ? `${fontFamily}, ${defaultFontStack}` : `-apple-system, ${defaultFontStack}`
 }
 
-export function getSurveyResponseKey(questionId: string) {
-    return `$survey_response_${questionId}`
-}
+export { getSurveyResponseKey }
 
 const BLACK_TEXT_COLOR = '#020617' // Maps out to text-slate-950 from tailwind colors. Intended for text use outside interactive elements like buttons
 
@@ -84,6 +83,12 @@ export const defaultSurveyAppearance = {
     scrollbarTrackColor: 'var(--ph-survey-background-color)',
 } as const
 
+const BOTTOM_BORDER_SURVEY_POSITIONS: SurveyPosition[] = [
+    SurveyPosition.Center,
+    SurveyPosition.Left,
+    SurveyPosition.Right,
+]
+
 export const addSurveyCSSVariablesToElement = (
     element: HTMLElement,
     type: SurveyType,
@@ -93,7 +98,7 @@ export const addSurveyCSSVariablesToElement = (
     const hostStyle = element.style
 
     const surveyHasBottomBorder =
-        ![SurveyPosition.Center, SurveyPosition.Left, SurveyPosition.Right].includes(effectiveAppearance.position) ||
+        !BOTTOM_BORDER_SURVEY_POSITIONS.includes(effectiveAppearance.position) ||
         (type === SurveyType.Widget && appearance?.widgetType === SurveyWidgetType.Tab)
 
     hostStyle.setProperty('--ph-survey-font-family', getFontFamily(effectiveAppearance.fontFamily))
@@ -395,24 +400,15 @@ export const retrieveSurveyShadow = (
 }
 
 interface SendSurveyEventArgs {
-    responses: Record<string, string | number | string[] | null>
+    responses: SurveyResponses
     survey: Survey
     surveySubmissionId: string
     isSurveyCompleted: boolean
     insights?: Insights
     /** Additional properties to include in the survey event */
     properties?: Properties
-}
-
-const getSurveyResponseValue = (responses: Record<string, string | number | string[] | null>, questionId?: string) => {
-    if (!questionId) {
-        return null
-    }
-    const response = responses[getSurveyResponseKey(questionId)]
-    if (isArray(response)) {
-        return [...response]
-    }
-    return response
+    /** The language that was applied to the survey. */
+    surveyLanguage?: string | null
 }
 
 export const sendSurveyEvent = ({
@@ -422,6 +418,7 @@ export const sendSurveyEvent = ({
     insights,
     isSurveyCompleted,
     properties,
+    surveyLanguage,
 }: SendSurveyEventArgs) => {
     if (!insights) {
         logger.error('[survey sent] event not captured, Insights instance not found.')
@@ -433,11 +430,6 @@ export const sendSurveyEvent = ({
         [SurveyEventProperties.SURVEY_ID]: survey.id,
         [SurveyEventProperties.SURVEY_ITERATION]: survey.current_iteration,
         [SurveyEventProperties.SURVEY_ITERATION_START_DATE]: survey.current_iteration_start_date,
-        [SurveyEventProperties.SURVEY_QUESTIONS]: survey.questions.map((question) => ({
-            id: question.id,
-            question: question.question,
-            response: getSurveyResponseValue(responses, question.id),
-        })),
         [SurveyEventProperties.SURVEY_SUBMISSION_ID]: surveySubmissionId,
         [SurveyEventProperties.SURVEY_COMPLETED]: isSurveyCompleted,
         sessionRecordingUrl: insights.get_session_replay_url?.(),
@@ -454,10 +446,6 @@ export const sendSurveyEvent = ({
     }
 }
 
-const _surveyHasResponses = (inProgressSurvey: InProgressSurveyState | null) => {
-    return Object.values(inProgressSurvey?.responses || {}).filter((resp) => !isNullish(resp)).length > 0
-}
-
 const _buildSurveyEventProperties = (
     survey: Survey,
     inProgressSurvey: InProgressSurveyState | null,
@@ -471,11 +459,7 @@ const _buildSurveyEventProperties = (
     sessionRecordingUrl: insights.get_session_replay_url?.(),
     ...inProgressSurvey?.responses,
     [SurveyEventProperties.SURVEY_SUBMISSION_ID]: inProgressSurvey?.surveySubmissionId,
-    [SurveyEventProperties.SURVEY_QUESTIONS]: survey.questions.map((question) => ({
-        id: question.id,
-        question: question.question,
-        response: getSurveyResponseValue(inProgressSurvey?.responses || {}, question.id),
-    })),
+    ...buildSurveyResponseProperties(inProgressSurvey?.responses, survey),
 })
 
 export const dismissedSurveyEvent = (survey: Survey, insights?: Insights, readOnly?: boolean) => {
@@ -598,7 +582,7 @@ export const canActivateRepeatedly = (
  * @param survey
  */
 export const getSurveySeen = (survey: Survey): boolean => {
-    const surveySeen = localStorage.getItem(getSurveySeenKey(survey))
+    const surveySeen = localStore._get(getSurveySeenKey(survey))
     if (surveySeen) {
         // if a survey has already been seen,
         // we will override it with the event repeated activation value.
@@ -611,7 +595,7 @@ export const getSurveySeen = (survey: Survey): boolean => {
 const LAST_SEEN_SURVEY_DATE_KEY = 'lastSeenSurveyDate'
 
 export const hasWaitPeriodPassed = (waitPeriodInDays: number | undefined): boolean => {
-    const lastSeenSurveyDate = localStorage.getItem(LAST_SEEN_SURVEY_DATE_KEY)
+    const lastSeenSurveyDate = localStore._get(LAST_SEEN_SURVEY_DATE_KEY)
     return hasPeriodPassed(waitPeriodInDays, lastSeenSurveyDate)
 }
 
@@ -624,6 +608,8 @@ interface SurveyContextProps {
     surveySubmissionId: string
     /** Additional properties to include in all survey events */
     properties?: Properties
+    /** The language that was applied to the survey. */
+    surveyLanguage?: string | null
 }
 
 export const SurveyContext = createContext<SurveyContextProps>({
@@ -634,6 +620,7 @@ export const SurveyContext = createContext<SurveyContextProps>({
     onPreviewSubmit: () => {},
     surveySubmissionId: '',
     properties: undefined,
+    surveyLanguage: null,
 })
 
 export const useSurveyContext = () => {
@@ -692,7 +679,8 @@ export function doesSurveyMatchSelector(survey: Survey): boolean {
 interface InProgressSurveyState {
     surveySubmissionId: string
     lastQuestionIndex: number
-    responses: Record<string, string | number | string[] | null>
+    responses: SurveyResponses
+    surveyLanguage?: string | null
 }
 
 const getInProgressSurveyStateKey = (survey: Pick<Survey, 'id' | 'current_iteration'>): string => {

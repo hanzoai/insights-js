@@ -5,6 +5,25 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "error-tracking": [
+        "dist/error-tracking/index.d.ts"
+      ],
+      "surveys": [
+        "dist/surveys/index.d.ts"
+      ],
+      "testing": [
+        "dist/testing/index.d.ts"
+      ],
+      "utils": [
+        "dist/utils/index.d.ts"
+      ],
+      "vendor/*": [
+        "dist/vendor/*.d.ts"
+      ]
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hanzoai/insights-js.git",
@@ -45,25 +64,24 @@
       "require": "./dist/testing/index.js",
       "import": "./dist/testing/index.mjs"
     },
+    "./surveys": {
+      "types": "./dist/surveys/index.d.ts",
+      "require": "./dist/surveys/index.js",
+      "import": "./dist/surveys/index.mjs"
+    },
     "./utils": {
       "types": "./dist/utils/index.d.ts",
       "require": "./dist/utils/index.js",
       "import": "./dist/utils/index.mjs"
-    },
-    "./process": {
-      "types": "./dist/process/index.d.ts",
-      "require": "./dist/process/index.js",
-      "import": "./dist/process/index.mjs"
     }
+  },
+  "dependencies": {
+    "@posthog/types": "workspace:*"
   },
   "devDependencies": {
     "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
-    "@types/cross-spawn": "^6.0.6",
     "@types/jest": "catalog:",
     "jest": "catalog:"
-  },
-  "dependencies": {
-    "cross-spawn": "^7.0.6"
   }
 }

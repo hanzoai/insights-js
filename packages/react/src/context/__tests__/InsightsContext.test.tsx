@@ -5,12 +5,21 @@ import { InsightsProvider, Insights } from '..'
 describe('InsightsContext component', () => {
     const insights = {} as unknown as Insights
 
+    beforeEach(() => {
+        setDefaultPostHogInstance(posthogJs)
+    })
+
+    afterEach(() => {
+        setDefaultPostHogInstance(undefined)
+    })
+
     it('should return a client instance from the context if available', () => {
         render(
             <InsightsProvider client={insights}>
                 <div>Hello</div>
             </InsightsProvider>
         )
+        expect(getByTestId('client').textContent).toBe('match')
     })
 
     it("should not throw error if a client instance can't be found in the context", () => {

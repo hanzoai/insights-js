@@ -10,6 +10,7 @@ import type { DocumentInterface } from '@langchain/core/documents'
 import { ToolCall } from '@langchain/core/messages/tool'
 import { BaseMessage } from '@langchain/core/messages'
 import { sanitizeLangChain } from '../sanitization'
+import { stringifyError } from '../serializeError'
 
 interface SpanMetadata {
   /** Name of the trace/span (e.g. chain name) */
@@ -376,7 +377,7 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
       eventProperties['$process_person_profile'] = false
     }
     if (outputs instanceof Error) {
-      eventProperties['$ai_error'] = outputs.toString()
+      eventProperties['$ai_error'] = stringifyError(outputs)
       eventProperties['$ai_is_error'] = true
     } else if (outputs !== undefined) {
       eventProperties['$ai_output_state'] = withPrivacyMode(this.client, this.privacyMode, outputs)
@@ -436,7 +437,7 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
 
     if (output instanceof Error) {
       eventProperties['$ai_http_status'] = (output as any).status || 500
-      eventProperties['$ai_error'] = output.toString()
+      eventProperties['$ai_error'] = stringifyError(output)
       eventProperties['$ai_is_error'] = true
     } else {
       // Handle token usage
@@ -456,6 +457,12 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
       }
       if (additionalTokenData.webSearchCount !== undefined) {
         eventProperties['$ai_web_search_count'] = additionalTokenData.webSearchCount
+      }
+
+      // Extract stop reason from generation info
+      const stopReason = this._extractStopReason(output)
+      if (stopReason) {
+        eventProperties['$ai_stop_reason'] = stopReason
       }
 
       // Handle generations/completions
@@ -586,6 +593,39 @@ export class LangChainCallbackHandler extends BaseCallbackHandler {
 
     // Sanitize the message content to redact base64 images
     return sanitizeLangChain(messageDict) as Record<string, any>
+  }
+
+  private _extractStopReason(output: LLMResult): string | undefined {
+    if (!output.generations || !Array.isArray(output.generations)) {
+      return undefined
+    }
+    const lastGeneration = output.generations[output.generations.length - 1]
+    if (!Array.isArray(lastGeneration) || lastGeneration.length === 0) {
+      return undefined
+    }
+    const gen = lastGeneration[0]
+
+    // Check generationInfo for finish_reason (OpenAI format)
+    if (gen.generationInfo?.finish_reason) {
+      return String(gen.generationInfo.finish_reason)
+    }
+
+    // Check generationInfo for response_metadata.stop_reason (Anthropic format)
+    if (gen.generationInfo?.response_metadata?.stop_reason) {
+      return String(gen.generationInfo.response_metadata.stop_reason)
+    }
+
+    // Check message response_metadata for finish_reason (common LangChain format)
+    if (gen.generationInfo?.response_metadata?.finish_reason) {
+      return String(gen.generationInfo.response_metadata.finish_reason)
+    }
+
+    // Check for stop_reason directly in generationInfo
+    if (gen.generationInfo?.stop_reason) {
+      return String(gen.generationInfo.stop_reason)
+    }
+
+    return undefined
   }
 
   private _parseUsageModel(usage: any, provider?: string, model?: string): [number, number, Record<string, any>] {

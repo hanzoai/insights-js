@@ -44,9 +44,21 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
     return {
         name: 'insights-rollup-plugin',
 
+        config() {
+            if (!posthogOptions.sourcemaps.enabled) return
+
+            return {
+                build: {
+                    sourcemap: posthogOptions.sourcemaps.deleteAfterUpload ? 'hidden' : true,
+                },
+            }
+        },
+
         outputOptions: {
             order: 'post',
             handler(options: OutputOptions) {
+                if (!posthogOptions.sourcemaps.enabled) return options
+
                 return {
                     ...options,
                     sourcemap: insightsOptions.sourcemaps.deleteAfterUpload ? 'hidden' : true,
@@ -62,7 +74,8 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
                 const args = ['sourcemap', 'process']
                 const cliPath = insightsOptions.cliBinaryPath
                 const chunks: { [fileName: string]: OutputChunk } = {}
-                const basePaths = []
+                const filePaths: string[] = []
+                const basePaths: string[] = []
 
                 if (options.dir) {
                     basePaths.push(options.dir)
@@ -78,11 +91,11 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
                     if (chunk.type === 'chunk' && isJsFile) {
                         const chunkPath = path.resolve(...basePaths, fileName)
                         chunks[chunkPath] = chunk
-                        args.push('--file', chunkPath)
+                        filePaths.push(chunkPath)
                     }
                 }
 
-                if (Object.keys(chunks).length === 0) {
+                if (filePaths.length === 0) {
                     console.log(
                         'No chunks found, skipping sourcemap processing for this stage. Your build may be multi-stage and this stage may not be relevant'
                     )

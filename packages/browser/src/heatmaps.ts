@@ -13,6 +13,7 @@ import { includes } from '@hanzo/insights-core'
 import { addEventListener, extendArray } from './utils'
 import { maskQueryParams } from './utils/request-utils'
 import { PERSONAL_DATA_CAMPAIGN_PARAMS, MASKED } from './utils/event-utils'
+import type { Extension } from './extensions/types'
 
 const DEFAULT_FLUSH_INTERVAL = 5000
 
@@ -54,6 +55,11 @@ export class Heatmaps {
     instance: Insights
     rageclicks: RageClick
     _enabledServerSide: boolean = false
+
+    private get _config() {
+        return this.instance.config
+    }
+
     _initialized = false
     _mouseMoveTimeout: ReturnType<typeof setTimeout> | undefined
 
@@ -71,23 +77,24 @@ export class Heatmaps {
         this.rageclicks = new RageClick(instance.config.rageclick)
     }
 
+    initialize() {
+        this.startIfEnabled()
+    }
+
     public get flushIntervalMilliseconds(): number {
         let flushInterval = DEFAULT_FLUSH_INTERVAL
-        if (
-            isObject(this.instance.config.capture_heatmaps) &&
-            this.instance.config.capture_heatmaps.flush_interval_milliseconds
-        ) {
-            flushInterval = this.instance.config.capture_heatmaps.flush_interval_milliseconds
+        if (isObject(this._config.capture_heatmaps) && this._config.capture_heatmaps.flush_interval_milliseconds) {
+            flushInterval = this._config.capture_heatmaps.flush_interval_milliseconds
         }
         return flushInterval
     }
 
     public get isEnabled(): boolean {
-        if (!isNullish(this.instance.config.capture_heatmaps)) {
-            return this.instance.config.capture_heatmaps !== false
+        if (!isNullish(this._config.capture_heatmaps)) {
+            return this._config.capture_heatmaps !== false
         }
-        if (!isNullish(this.instance.config.enable_heatmaps)) {
-            return this.instance.config.enable_heatmaps
+        if (!isNullish(this._config.enable_heatmaps)) {
+            return this._config.enable_heatmaps
         }
         return this._enabledServerSide
     }
@@ -154,7 +161,7 @@ export class Heatmaps {
         }
 
         this._flushHandler = this._flush.bind(this)
-        addEventListener(window, 'beforeunload', this._flushHandler)
+        addEventListener(window, DOM_EVENT_BEFOREUNLOAD, this._flushHandler)
 
         this._onClickHandler = (e) => this._onClick((e || window?.event) as MouseEvent)
         addEventListener(document, 'click', this._onClickHandler, { capture: true })
@@ -170,7 +177,7 @@ export class Heatmaps {
         this._deadClicksCapture.startIfEnabledOrStop()
 
         this._onVisibilityChange_handler = this._onVisibilityChange.bind(this)
-        addEventListener(document, 'visibilitychange', this._onVisibilityChange_handler)
+        addEventListener(document, DOM_EVENT_VISIBILITYCHANGE, this._onVisibilityChange_handler)
 
         this._initialized = true
     }
@@ -181,7 +188,7 @@ export class Heatmaps {
         }
 
         if (this._flushHandler) {
-            window.removeEventListener('beforeunload', this._flushHandler)
+            window.removeEventListener(DOM_EVENT_BEFOREUNLOAD, this._flushHandler)
         }
 
         if (this._onClickHandler) {
@@ -193,7 +200,7 @@ export class Heatmaps {
         }
 
         if (this._onVisibilityChange_handler) {
-            document.removeEventListener('visibilitychange', this._onVisibilityChange_handler)
+            document.removeEventListener(DOM_EVENT_VISIBILITYCHANGE, this._onVisibilityChange_handler)
         }
 
         clearTimeout(this._mouseMoveTimeout)
@@ -259,11 +266,11 @@ export class Heatmaps {
         const href = window.location.href
 
         // mask url query params
-        const maskPersonalDataProperties = this.instance.config.mask_personal_data_properties
-        const customPersonalDataProperties = this.instance.config.custom_personal_data_properties
+        const maskPersonalDataProperties = this._config.mask_personal_data_properties
+        const customPersonalDataProperties = this._config.custom_personal_data_properties
 
         const paramsToMask = maskPersonalDataProperties
-            ? extendArray([], PERSONAL_DATA_CAMPAIGN_PARAMS, customPersonalDataProperties || [])
+            ? [...PERSONAL_DATA_CAMPAIGN_PARAMS, ...(customPersonalDataProperties || [])]
             : []
 
         const url = maskQueryParams(href, paramsToMask, MASKED)

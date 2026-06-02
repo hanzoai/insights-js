@@ -1,6 +1,7 @@
 import { describe, expect, test, jest } from '@jest/globals'
 import { Insights, normalizeError } from './index.js'
 import type { BeforeSendFn, IdentifyFn } from './index.js'
+import { LocalFeatureFlagEvaluator } from './feature-flags/index.js'
 
 function mockSchedulerCtx() {
   return {
@@ -30,6 +31,25 @@ describe('Insights client', () => {
     expect(insights).toBeInstanceOf(Insights)
   })
 
+  test('does not forward credentials to component calls (env-driven config)', async () => {
+    // Credentials live on the component as env vars (POSTHOG_PROJECT_TOKEN, POSTHOG_HOST,
+    // POSTHOG_PERSONAL_API_KEY) declared in convex.config.ts and read inside each action.
+    // The client must not plumb them through every call site.
+    const component = { lib: { capture: 'capture_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.capture(ctx as never, {
+      distinctId: 'user-1',
+      event: 'test-event',
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(args).not.toHaveProperty('apiKey')
+    expect(args).not.toHaveProperty('host')
+    expect(args).not.toHaveProperty('personalApiKey')
+  })
+
   test('exposes capture, identify, groupIdentify, alias, captureException methods', () => {
     const insights = new Insights({} as never, { apiKey: 'test' })
 
@@ -49,6 +69,93 @@ describe('Insights client', () => {
     expect(typeof insights.getFeatureFlagResult).toBe('function')
     expect(typeof insights.getAllFlags).toBe('function')
     expect(typeof insights.getAllFlagsAndPayloads).toBe('function')
+  })
+
+  test('exposes reloadFeatureFlags method (parity with posthog-node)', () => {
+    const posthog = new PostHog({} as never)
+    expect(typeof posthog.reloadFeatureFlags).toBe('function')
+  })
+
+  test('reloadFeatureFlags forwards to the component refresh action with no args', async () => {
+    const component = { lib: { refreshFlagDefinitions: 'refresh_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = { runAction: jest.fn(async () => ({ status: 'updated' })) }
+
+    await posthog.reloadFeatureFlags(ctx as never)
+
+    expect(ctx.runAction).toHaveBeenCalledWith('refresh_ref', {})
+  })
+
+  test('getFeatureFlagPayload with matchValue does not require a distinctId', async () => {
+    // The matchValue path is a pure key+value payload lookup; resolving a distinctId would
+    // force callers to configure an identify callback or pass an ID they don't have.
+    const definitions = JSON.stringify({
+      flags: [
+        {
+          id: 1,
+          name: 'flag',
+          key: 'flag',
+          deleted: false,
+          active: true,
+          rollout_percentage: null,
+          ensure_experience_continuity: false,
+          experiment_set: [],
+          filters: {
+            groups: [{ properties: [], rollout_percentage: 0 }],
+            multivariate: { variants: [{ key: 'red', rollout_percentage: 100 }] },
+            payloads: { red: 'red-payload' },
+          },
+        },
+      ],
+      groupTypeMapping: {},
+      cohorts: {},
+    })
+    const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = {
+      runQuery: jest.fn(async () => ({ localEvalConfigured: true, data: definitions, fetchedAt: Date.now() })),
+    }
+
+    const payload = await posthog.getFeatureFlagPayload(ctx as never, { key: 'flag', matchValue: 'red' })
+    expect(payload).toBe('red-payload')
+  })
+})
+
+describe('local-eval configuration', () => {
+  // When `POSTHOG_PERSONAL_API_KEY` isn't set on the component the cron never runs and local eval
+  // can never produce a verdict. The client throws so callers don't silently get `undefined` and
+  // wonder why their flag rollouts aren't taking effect.
+  test('throws when local eval is not configured (no PAK)', async () => {
+    const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = {
+      runQuery: jest.fn(async () => ({
+        localEvalConfigured: false,
+        data: null,
+        fetchedAt: null,
+      })),
+    }
+
+    await expect(posthog.getFeatureFlag(ctx as never, { key: 'my-flag', distinctId: 'u1' })).rejects.toThrow(
+      'local feature flag evaluation is not configured'
+    )
+  })
+
+  // PAK *is* set but the first cron tick hasn't landed yet — graceful degradation rather than
+  // throwing, so callers' fallback paths still work during the brief warm-up window.
+  test('returns undefined when PAK is configured but definitions have not been cached yet', async () => {
+    const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = {
+      runQuery: jest.fn(async () => ({
+        localEvalConfigured: true,
+        data: null,
+        fetchedAt: null,
+      })),
+    }
+
+    const value = await posthog.getFeatureFlag(ctx as never, { key: 'my-flag', distinctId: 'u1' })
+    expect(value).toBeUndefined()
   })
 })
 
@@ -124,7 +231,7 @@ describe('captureException', () => {
     expect(args.errorName).toBe('TypeError')
     expect(args.errorStack).toBeDefined()
     expect(args.distinctId).toBe('user-1')
-    expect(args.additionalProperties).toEqual({ context: 'signup' })
+    expect(args.additionalProperties).toBe(JSON.stringify({ context: 'signup' }))
   })
 
   test('handles string errors', async () => {
@@ -142,6 +249,145 @@ describe('captureException', () => {
     expect(args.errorMessage).toBe('string error')
     expect(args.errorStack).toBeUndefined()
     expect(args.errorName).toBeUndefined()
+  })
+})
+
+describe('$-prefixed property serialization', () => {
+  test('serializes properties with $-prefixed keys as JSON strings', async () => {
+    const component = { lib: { capture: 'capture_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.capture(ctx as never, {
+      distinctId: 'user-1',
+      event: '$ai_generation',
+      properties: {
+        $ai_model: 'gpt-5-mini',
+        $ai_provider: 'openai',
+        $ai_input_tokens: 10,
+        $ai_output_tokens: 20,
+      },
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(typeof args.properties).toBe('string')
+    expect(JSON.parse(args.properties)).toEqual({
+      $ai_model: 'gpt-5-mini',
+      $ai_provider: 'openai',
+      $ai_input_tokens: 10,
+      $ai_output_tokens: 20,
+    })
+  })
+
+  test('serializes identify properties with $set and $set_once', async () => {
+    const component = { lib: { identify: 'identify_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.identify(ctx as never, {
+      distinctId: 'user-1',
+      properties: {
+        $set: { name: 'Alice' },
+        $set_once: { created_at: '2026-01-01' },
+      },
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(typeof args.properties).toBe('string')
+    expect(JSON.parse(args.properties)).toEqual({
+      $set: { name: 'Alice' },
+      $set_once: { created_at: '2026-01-01' },
+    })
+  })
+
+  test('passes undefined when properties are not provided', async () => {
+    const component = { lib: { capture: 'capture_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.capture(ctx as never, {
+      distinctId: 'user-1',
+      event: 'simple_event',
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(args.properties).toBeUndefined()
+  })
+
+  test('preserves nested objects and arrays through serialization', async () => {
+    const component = { lib: { capture: 'capture_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    const properties = {
+      $ai_input: [{ role: 'user', content: 'Hello' }],
+      $ai_output_choices: [{ role: 'assistant', content: 'Hi!' }],
+      nested: { deep: { value: true } },
+      numbers: [1, 2.5, -3],
+      nullValue: null,
+      boolValue: false,
+    }
+
+    await posthog.capture(ctx as never, {
+      distinctId: 'user-1',
+      event: '$ai_generation',
+      properties,
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(JSON.parse(args.properties)).toEqual(properties)
+  })
+
+  test('serializes groups with string and number values', async () => {
+    const component = { lib: { capture: 'capture_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.capture(ctx as never, {
+      distinctId: 'user-1',
+      event: 'test',
+      groups: { company: 'acme', project_id: 42 },
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(typeof args.groups).toBe('string')
+    expect(JSON.parse(args.groups)).toEqual({ company: 'acme', project_id: 42 })
+  })
+
+  test('serializes captureException additionalProperties', async () => {
+    const component = { lib: { captureException: 'captureException_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.captureException(ctx as never, {
+      error: new Error('test'),
+      distinctId: 'user-1',
+      additionalProperties: { $ai_trace_id: 'trace-123', page: '/checkout' },
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(typeof args.additionalProperties).toBe('string')
+    expect(JSON.parse(args.additionalProperties)).toEqual({
+      $ai_trace_id: 'trace-123',
+      page: '/checkout',
+    })
+  })
+
+  test('handles empty objects', async () => {
+    const component = { lib: { capture: 'capture_ref' } }
+    const posthog = new PostHog(component as never)
+    const ctx = mockSchedulerCtx()
+
+    await posthog.capture(ctx as never, {
+      distinctId: 'user-1',
+      event: 'test',
+      properties: {},
+      groups: {},
+    })
+
+    const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
+    expect(JSON.parse(args.properties)).toEqual({})
+    expect(JSON.parse(args.groups)).toEqual({})
   })
 })
 
@@ -195,7 +441,7 @@ describe('beforeSend', () => {
     })
 
     const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
-    expect(args.properties).toEqual({ page: '/home', injected: true })
+    expect(args.properties).toBe(JSON.stringify({ page: '/home', injected: true }))
   })
 
   test('chains multiple beforeSend functions', async () => {
@@ -220,7 +466,7 @@ describe('beforeSend', () => {
     })
 
     const [, , args] = ctx.scheduler.runAfter.mock.calls[0]
-    expect(args.properties).toEqual({ first: true, second: true })
+    expect(args.properties).toBe(JSON.stringify({ first: true, second: true }))
   })
 
   test('short-circuits chain when a function returns null', async () => {

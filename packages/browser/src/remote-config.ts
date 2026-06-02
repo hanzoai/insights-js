@@ -90,11 +90,11 @@ export class RemoteConfigLoader {
      * is a no-op when flags are disabled. This avoids an unnecessary network round-trip.
      */
     refresh(): void {
-        if (this._instance._shouldDisableFlags() || document?.visibilityState === 'hidden') {
+        if (this._instance._shouldDisableFlags() || !document || document.visibilityState === 'hidden') {
             return
         }
 
-        this._instance.featureFlags.reloadFeatureFlags()
+        this._instance.reloadFeatureFlags()
     }
 
     private _startRefreshInterval(): void {
@@ -132,7 +132,7 @@ export class RemoteConfigLoader {
 
         if (config?.hasFeatureFlags !== false) {
             if (!this._instance.config.advanced_disable_feature_flags_on_first_load) {
-                this._instance.featureFlags.ensureFlagsLoaded()
+                this._instance.featureFlags?.ensureFlagsLoaded()
             }
         }
     }

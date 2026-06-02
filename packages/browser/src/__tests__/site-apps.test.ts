@@ -110,7 +110,7 @@ describe('SiteApps', () => {
     describe('init', () => {
         it('adds eventCollector as a capture hook', () => {
             expect(siteAppsInstance['_stopBuffering']).toBeUndefined()
-            siteAppsInstance.init()
+            siteAppsInstance.initialize()
 
             expect(insights._addCaptureHook).toHaveBeenCalledWith(expect.any(Function))
             expect(siteAppsInstance['_stopBuffering']).toEqual(expect.any(Function))
@@ -127,7 +127,7 @@ describe('SiteApps', () => {
 
     describe('eventCollector', () => {
         beforeEach(() => {
-            siteAppsInstance.init()
+            siteAppsInstance.initialize()
         })
 
         it('collects events if enabled after init', () => {
@@ -335,7 +335,7 @@ describe('SiteApps', () => {
                 },
             } as any
 
-            siteAppsInstance.init()
+            siteAppsInstance.initialize()
         }
 
         beforeEach(() => {

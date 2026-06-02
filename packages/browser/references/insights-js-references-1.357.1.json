@@ -38,6 +38,41 @@
           "path": "lib/src/insights-core.d.ts"
         },
         {
+          "category": "Error tracking",
+          "description": "Add a breadcrumb-like step that will be attached to the next captured exception.",
+          "details": null,
+          "id": "addExceptionStep",
+          "showDocs": true,
+          "title": "addExceptionStep",
+          "examples": [
+            {
+              "id": "",
+              "name": "",
+              "code": "\n\nposthog.addExceptionStep('Checkout button clicked', {\n  checkout_id: 'ch_123',\n})\n\n\n\n"
+            }
+          ],
+          "releaseTag": "public",
+          "params": [
+            {
+              "description": "",
+              "isOptional": false,
+              "type": "string",
+              "name": "message"
+            },
+            {
+              "description": "",
+              "isOptional": true,
+              "type": "Properties",
+              "name": "properties"
+            }
+          ],
+          "returnType": {
+            "id": "void",
+            "name": "void"
+          },
+          "path": "lib/src/posthog-core.d.ts"
+        },
+        {
           "category": "Identification",
           "description": "Creates an alias linking two distinct user identifiers. Learn more about [identifying users](/docs/product-analytics/identify)",
           "details": "Insights will use this to link two distinct_ids going forward (not retroactively). Call this when a user signs up to connect their anonymous session with their account.",
@@ -252,6 +287,35 @@
           "path": "lib/src/insights-core.d.ts"
         },
         {
+          "category": "Logs",
+          "description": "Capture a log entry and send it to the PostHog logs endpoint.",
+          "details": null,
+          "id": "captureLog",
+          "showDocs": true,
+          "title": "captureLog",
+          "examples": [
+            {
+              "id": "",
+              "name": "",
+              "code": "\n\nposthog.captureLog({\n  body: 'checkout completed',\n  level: 'info',\n  attributes: { order_id: 'ord_789', amount_cents: 4999 },\n})\n\n\n\n"
+            }
+          ],
+          "releaseTag": "public",
+          "params": [
+            {
+              "description": "The log entry options",
+              "isOptional": false,
+              "type": "CaptureLogOptions",
+              "name": "options"
+            }
+          ],
+          "returnType": {
+            "id": "void",
+            "name": "void"
+          },
+          "path": "lib/src/posthog-core.d.ts"
+        },
+        {
           "category": "LLM analytics",
           "description": "Capture written user feedback for a LLM trace. Numeric values are converted to strings.",
           "details": null,
@@ -348,6 +412,28 @@
             "name": "void"
           },
           "path": "lib/src/insights-core.d.ts"
+        },
+        {
+          "category": "",
+          "description": "Clear HMAC-based identity verification, reverting to anonymous mode.",
+          "details": null,
+          "id": "clearIdentity",
+          "showDocs": true,
+          "title": "clearIdentity",
+          "examples": [
+            {
+              "id": "",
+              "name": "",
+              "code": "\n\nposthog.clearIdentity()\n\n\n\n"
+            }
+          ],
+          "releaseTag": "public",
+          "params": [],
+          "returnType": {
+            "id": "void",
+            "name": "void"
+          },
+          "path": "lib/src/posthog-core.d.ts"
         },
         {
           "category": "Identification",
@@ -1748,6 +1834,41 @@
           "path": "lib/src/insights-core.d.ts"
         },
         {
+          "category": "",
+          "description": "Set HMAC-based identity verification.",
+          "details": "When set, products like conversations use server-verified identity (distinct_id + HMAC hash) instead of anonymous session identifiers. The hash should be computed server-side as HMAC-SHA256 of the distinct_id using the project's API secret.",
+          "id": "setIdentity",
+          "showDocs": true,
+          "title": "setIdentity",
+          "examples": [
+            {
+              "id": "",
+              "name": "",
+              "code": "\n\nposthog.setIdentity('user_123', 'a1b2c3d4e5f6...')\n\n\n\n"
+            }
+          ],
+          "releaseTag": "public",
+          "params": [
+            {
+              "description": "The verified user distinct_id",
+              "isOptional": false,
+              "type": "string",
+              "name": "distinctId"
+            },
+            {
+              "description": "HMAC-SHA256 of distinctId using the project API secret",
+              "isOptional": false,
+              "type": "string",
+              "name": "hash"
+            }
+          ],
+          "returnType": {
+            "id": "void",
+            "name": "void"
+          },
+          "path": "lib/src/posthog-core.d.ts"
+        },
+        {
           "category": "Identification",
           "description": "Marks the current user as a test user by setting the `$internal_or_test_user` person property to `true`. This also enables person processing for the current user.\nThis is useful for using in a cohort your internal/test filters for your insights org.",
           "details": null,
@@ -2174,33 +2295,18 @@
       "name": "BasicSurveyQuestion",
       "properties": [
         {
-          "type": "SurveyQuestionType.Open",
+          "type": "typeof SurveyQuestionType.Open",
           "name": "type"
         }
       ],
       "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
-      "id": "Breaker",
-      "name": "Breaker",
-      "properties": [],
-      "path": "lib/src/types.d.ts",
-      "example": "{}"
-    },
-    {
       "id": "Compression",
       "name": "Compression",
-      "properties": [
-        {
-          "type": "\"base64\"",
-          "name": "Base64"
-        },
-        {
-          "type": "\"gzip-js\"",
-          "name": "GZipJS"
-        }
-      ],
-      "path": "lib/src/types.d.ts"
+      "properties": [],
+      "path": "lib/src/types.d.ts",
+      "example": "(typeof Compression)[keyof typeof Compression]"
     },
     {
       "id": "ConversationsRemoteConfig",
@@ -2303,7 +2409,7 @@
       "name": "DisplaySurveyPopoverOptions",
       "properties": [
         {
-          "type": "DisplaySurveyType.Popover",
+          "type": "typeof DisplaySurveyType.Popover",
           "name": "displayType"
         },
         {
@@ -2536,7 +2642,7 @@
           "name": "link"
         },
         {
-          "type": "SurveyQuestionType.Link",
+          "type": "typeof SurveyQuestionType.Link",
           "name": "type"
         }
       ],
@@ -2629,7 +2735,7 @@
           "name": "skipSubmitButton"
         },
         {
-          "type": "SurveyQuestionType.SingleChoice | SurveyQuestionType.MultipleChoice",
+          "type": "typeof SurveyQuestionType.SingleChoice | typeof SurveyQuestionType.MultipleChoice",
           "name": "type"
         }
       ],
@@ -3377,7 +3483,7 @@
           "name": "skipSubmitButton"
         },
         {
-          "type": "SurveyQuestionType.Rating",
+          "type": "typeof SurveyQuestionType.Rating",
           "name": "type"
         },
         {
@@ -3666,6 +3772,16 @@
           "name": "distinct_id"
         },
         {
+          "description": "Verified distinct_id for HMAC identity mode (requires identity_hash)",
+          "type": "string",
+          "name": "identity_distinct_id"
+        },
+        {
+          "description": "HMAC-SHA256 of identity_distinct_id using team secret_api_token",
+          "type": "string",
+          "name": "identity_hash"
+        },
+        {
           "description": "The message content to send",
           "type": "string",
           "name": "message"
@@ -3748,6 +3864,21 @@
       "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
+      "id": "SessionRecordingEventTrigger",
+      "name": "SessionRecordingEventTrigger",
+      "properties": [
+        {
+          "type": "string",
+          "name": "name"
+        },
+        {
+          "type": "SessionRecordingTriggerPropertyFilter[]",
+          "name": "properties"
+        }
+      ],
+      "path": "lib/src/types.d.ts"
+    },
+    {
       "id": "SessionRecordingPersistedConfig",
       "name": "SessionRecordingPersistedConfig",
       "properties": [],
@@ -3759,7 +3890,57 @@
       "name": "SessionRecordingRemoteConfig",
       "properties": [],
       "path": "lib/src/types.d.ts",
-      "example": "SessionRecordingCanvasOptions & {\n    endpoint?: string;\n    consoleLogRecordingEnabled?: boolean;\n    sampleRate?: string | null;\n    minimumDurationMilliseconds?: number;\n    linkedFlag?: string | FlagVariant | null;\n    networkPayloadCapture?: Pick<NetworkRecordOptions, 'recordBody' | 'recordHeaders'>;\n    masking?: Pick<SessionRecordingOptions, 'maskAllInputs' | 'maskTextSelector' | 'blockSelector'>;\n    urlTriggers?: SessionRecordingUrlTrigger[];\n    scriptConfig?: {\n        script?: string | undefined;\n    };\n    urlBlocklist?: SessionRecordingUrlTrigger[];\n    eventTriggers?: string[];\n    triggerMatchType?: 'any' | 'all';\n}"
+      "example": "SessionRecordingCanvasOptions & {\n    endpoint?: string;\n    consoleLogRecordingEnabled?: boolean;\n    sampleRate?: string | null;\n    minimumDurationMilliseconds?: number;\n    linkedFlag?: string | FlagVariant | null;\n    networkPayloadCapture?: Pick<NetworkRecordOptions, 'recordBody' | 'recordHeaders'>;\n    masking?: Pick<SessionRecordingOptions, 'maskAllInputs' | 'maskTextSelector' | 'blockSelector'>;\n    urlTriggers?: SessionRecordingUrlTrigger[];\n    scriptConfig?: {\n        script?: string | undefined;\n    };\n    urlBlocklist?: SessionRecordingUrlTrigger[];\n    eventTriggers?: string[];\n    triggerMatchType?: 'any' | 'all';\n    version?: 1 | 2;\n    triggerGroups?: SessionRecordingTriggerGroup[];\n}"
+    },
+    {
+      "id": "SessionRecordingTriggerGroup",
+      "name": "SessionRecordingTriggerGroup",
+      "properties": [
+        {
+          "type": "{\n        matchType: 'any' | 'all';\n        events?: SessionRecordingEventTrigger[];\n        urls?: SessionRecordingUrlTrigger[];\n        flag?: string | FlagVariant;\n        properties?: SessionRecordingTriggerPropertyFilter[];\n    }",
+          "name": "conditions"
+        },
+        {
+          "type": "string",
+          "name": "id"
+        },
+        {
+          "type": "number",
+          "name": "minDurationMs"
+        },
+        {
+          "type": "string",
+          "name": "name"
+        },
+        {
+          "type": "number",
+          "name": "sampleRate"
+        }
+      ],
+      "path": "lib/src/types.d.ts"
+    },
+    {
+      "id": "SessionRecordingTriggerPropertyFilter",
+      "name": "SessionRecordingTriggerPropertyFilter",
+      "properties": [
+        {
+          "type": "string",
+          "name": "key"
+        },
+        {
+          "type": "'exact' | 'is_not' | 'icontains' | 'not_icontains' | 'regex' | 'not_regex' | 'gt' | 'lt'",
+          "name": "operator"
+        },
+        {
+          "type": "'event' | 'person'",
+          "name": "type"
+        },
+        {
+          "type": "string | number | boolean | string[]",
+          "name": "value"
+        }
+      ],
+      "path": "lib/src/types.d.ts"
     },
     {
       "id": "SessionRecordingUrlTrigger",
@@ -3895,6 +4076,10 @@
           "name": "targeting_flag_key"
         },
         {
+          "type": "Record<string, SurveyTranslation>",
+          "name": "translations"
+        },
+        {
           "type": "SurveyType",
           "name": "type"
         }
@@ -3969,6 +4154,10 @@
         {
           "type": "boolean",
           "name": "whiteLabel"
+        },
+        {
+          "type": "SurveyWidgetType",
+          "name": "widgetType"
         },
         {
           "type": "string",
@@ -4511,8 +4700,9 @@
     "Initialization",
     "Identification",
     "Capture",
-    "Surveys",
     "Error tracking",
+    "Surveys",
+    "Logs",
     "LLM analytics",
     "Privacy",
     "Session replay",
