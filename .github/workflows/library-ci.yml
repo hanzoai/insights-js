@@ -13,7 +13,7 @@ concurrency:
 jobs:
   unit:
     name: Unit tests
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -216,7 +216,7 @@ jobs:
 
   functional:
     name: Functional tests
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup environment
@@ -225,7 +225,7 @@ jobs:
 
   rrweb:
     name: rrweb tests
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     permissions:
       contents: read
     steps:
@@ -266,7 +266,7 @@ jobs:
 
   lint:
     name: Lint
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup environment
@@ -280,7 +280,7 @@ jobs:
 
   write-mangled-property-names:
     name: Write mangled property names
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -302,7 +302,7 @@ jobs:
     # `@posthog/core` types when extracted from a non-DOM tsconfig) surface
     # on the PR instead of blocking the release.
     name: Generate references
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     permissions:
       contents: read
     steps:
