@@ -19,7 +19,7 @@ concurrency:
 jobs:
     check-changesets:
         name: Check for changesets
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         outputs:
             has-changesets: ${{ steps.check.outputs.has-changesets }}
         steps:
@@ -56,7 +56,7 @@ jobs:
     version-bump:
         name: Bump versions and commit to main
         needs: [check-changesets, notify-approval-needed]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         # Use `always()` to ensure the job runs even if the notify-approval-needed job fails
         # but still depend on it to be able to use `needs.notify-approval-needed.outputs.slack_ts`
         if: always() && needs.check-changesets.outputs.has-changesets == 'true'
@@ -160,7 +160,7 @@ jobs:
     notify-rejected:
         name: Notify Slack - Rejected
         needs: [version-bump, notify-approval-needed]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always() && needs.version-bump.result == 'failure' && needs.notify-approval-needed.outputs.slack_ts != ''
         steps:
             - name: Check for rejection
@@ -200,7 +200,7 @@ jobs:
     publish:
         name: Publish packages
         needs: [version-bump, notify-approval-needed]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         # Use `always()` to ensure the job runs even if the check-release-label job fails
         # but still depend on it to be able to use `needs.notify-approval-needed.outputs.slack_ts`
         if: always() && needs.version-bump.outputs.commit-hash != ''
@@ -368,7 +368,7 @@ jobs:
     build-s3-artifacts:
         name: Build posthog-js dist for S3
         needs: [version-bump, notify-approval-needed]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         # Run in parallel with publish — must NOT wait for publish because
         # check-package-version compares against npm. If publish finishes first,
         # the version is already on the registry and is-new-version returns false.
@@ -421,7 +421,7 @@ jobs:
         # add minutes to the critical path if it blocked the toolbar build.
         name: Build toolbar (${{ matrix.region.name }})
         needs: [version-bump, notify-approval-needed]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always() && needs.version-bump.outputs.commit-hash != ''
         permissions:
             contents: read
@@ -556,7 +556,7 @@ jobs:
         # own dist is region-agnostic and downloaded identically in both cells.
         name: Upload posthog-js dist to S3 (${{ matrix.region.name }})
         needs: [build-s3-artifacts, build-toolbar, version-bump, notify-approval-needed]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: always() && needs.build-s3-artifacts.outputs.is-new-version == 'true'
         environment: 'S3 Upload' # For OIDC credential scoping only — no required reviewers (single approval at NPM Release)
         permissions:
@@ -663,7 +663,7 @@ jobs:
     notify-released:
         name: Notify Slack - Released
         needs: [notify-approval-needed, publish, upload-s3]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: >-
             always() &&
             needs.publish.result == 'success' &&
@@ -692,7 +692,7 @@ jobs:
     notify-partial-release:
         name: Notify Slack - Partial Release (npm only)
         needs: [notify-approval-needed, build-s3-artifacts, publish, upload-s3]
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
         if: >-
             always() &&
             needs.publish.result == 'success' &&
