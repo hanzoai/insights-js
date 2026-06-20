@@ -13,9 +13,9 @@ if (!GEMINI_API_KEY) {
   // Dynamic imports to avoid ESM parse failures when @google/genai
   // transitive deps are not configured in transformIgnorePatterns.
   // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-  const { PostHog } = require('posthog-node')
+  const { PostHog } = require('@hanzo/insights-node')
 
-  jest.mock('posthog-node', () => ({
+  jest.mock('@hanzo/insights-node', () => ({
     PostHog: jest.fn().mockImplementation(() => ({
       capture: jest.fn(),
       captureImmediate: jest.fn(),

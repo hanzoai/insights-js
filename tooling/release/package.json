@@ -1,5 +1,5 @@
 {
-    "name": "@posthog-tooling/release",
+    "name": "@hanzo/insights-tooling-release",
     "private": true,
     "type": "module",
     "scripts": {

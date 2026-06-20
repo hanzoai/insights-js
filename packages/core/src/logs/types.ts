@@ -1,4 +1,4 @@
-// Re-export OTLP/log types from @posthog/types so the rest of the logs module can
+// Re-export OTLP/log types from @hanzo/insights-types so the rest of the logs module can
 // pull everything from one place.
 export type {
   LogSeverityLevel,
@@ -11,7 +11,7 @@ export type {
   OtlpKeyValue,
   OtlpLogRecord,
   OtlpLogsPayload,
-} from '@posthog/types'
+} from '@hanzo/insights-types'
 
 /**
  * SDK-internal context the host SDK passes to `buildOtlpLogRecord` at capture
@@ -19,7 +19,7 @@ export type {
  * `currentUrl`, mobile fills `screenName` / `appState`. Missing fields are
  * omitted from the OTLP record (no stray attributes).
  *
- * Internal to `@posthog/core` — customers don't see this in autocomplete.
+ * Internal to `@hanzo/insights-core` — customers don't see this in autocomplete.
  */
 export interface LogSdkContext {
   distinctId?: string
@@ -33,13 +33,13 @@ export interface LogSdkContext {
   activeFeatureFlags?: string[]
 }
 
-// The public capture-logger interface lives in @posthog/types as `Logger`. Core
+// The public capture-logger interface lives in @hanzo/insights-types as `Logger`. Core
 // also exports a `Logger` (the SDK's internal warn/info/error logger). Alias the
 // public one to avoid the name collision inside this package.
-import type { Logger as CaptureLoggerType } from '@posthog/types'
+import type { Logger as CaptureLoggerType } from '@hanzo/insights-types'
 export type CaptureLogger = CaptureLoggerType
 
-import type { LogAttributeValue, CaptureLogOptions, OtlpLogRecord } from '@posthog/types'
+import type { LogAttributeValue, CaptureLogOptions, OtlpLogRecord } from '@hanzo/insights-types'
 
 export interface BufferedLogEntry {
   record: OtlpLogRecord

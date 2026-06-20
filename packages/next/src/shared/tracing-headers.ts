@@ -1,4 +1,4 @@
-import { isFunction, isArray } from '@posthog/core'
+import { isFunction, isArray } from '@hanzo/insights-core'
 import type { PostHogCookieState } from './cookie.js'
 import { cookieStateToProperties } from './cookie.js'
 

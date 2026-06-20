@@ -14,7 +14,7 @@ import {
     isGzipRequest,
     isNativeAsyncGzipError,
     isNativeAsyncGzipReadError,
-} from '@posthog/core'
+} from '@hanzo/insights-core'
 
 interface RequestWithEncodedBody extends RequestWithOptions {
     _encodedBody?: EncodedBody

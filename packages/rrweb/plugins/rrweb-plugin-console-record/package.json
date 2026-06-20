@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/rrweb-plugin-console-record",
+    "name": "@hanzo/rrweb-plugin-console-record",
     "version": "0.0.67",
     "description": "",
     "type": "module",
@@ -33,14 +33,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/PostHog/posthog-js.git"
+        "url": "git+https://github.com/hanzoinsights/insights-js.git"
     },
     "author": "yanzhen@smartx.com",
     "license": "MIT",
     "devDependencies": {
-        "@posthog/rrweb": "workspace:*",
-        "@posthog/rrweb-types": "workspace:*",
-        "@posthog/rrweb-utils": "workspace:*",
+        "@hanzo/rrweb": "workspace:*",
+        "@hanzo/rrweb-types": "workspace:*",
+        "@hanzo/rrweb-utils": "workspace:*",
         "typescript": "catalog:",
         "vite": "catalog:",
         "vite-plugin-dts": "catalog:",
@@ -48,7 +48,7 @@
         "puppeteer": "^23.11.1"
     },
     "peerDependencies": {
-        "@posthog/rrweb": "workspace:*",
-        "@posthog/rrweb-utils": "workspace:*"
+        "@hanzo/rrweb": "workspace:*",
+        "@hanzo/rrweb-utils": "workspace:*"
     }
 }

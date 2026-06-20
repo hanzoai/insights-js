@@ -1,9 +1,9 @@
-import { EventMessage, PostHog } from 'posthog-node'
+import { EventMessage, PostHog } from '@hanzo/insights-node'
 import type { ChatCompletionTool } from 'openai/resources/chat/completions'
 import type { Tool as GeminiTool } from '@google/genai'
 import AnthropicOriginal from '@anthropic-ai/sdk'
 import { v4 as uuidv4 } from 'uuid'
-import { uuidv7, ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { uuidv7, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { version } from '../package.json'
 import type { TokenUsage } from './types'
 import { stringifyError } from './serializeError'
@@ -86,7 +86,7 @@ export interface CaptureAiGenerationOptions {
 /**
  * Capture an `$ai_generation` (or `$ai_embedding`) event to PostHog.
  *
- * This is the canonical primitive that every `@posthog/ai` wrapper
+ * This is the canonical primitive that every `@hanzo/insights-ai` wrapper
  * (`withTracing`, `OpenAI`, `Anthropic`, `GoogleGenAI`, …) funnels through, so
  * external code can use it directly to instrument LLM calls made through
  * arbitrary clients (Cloudflare Workers AI, custom HTTP, etc.) and get the

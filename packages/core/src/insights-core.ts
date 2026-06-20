@@ -35,7 +35,7 @@ import {
 import { Compression, FeatureFlagError, InsightsPersistedProperty } from './types'
 import { maybeAdd, InsightsCoreStateless, QuotaLimitedFeature } from './insights-core-stateless'
 import { uuidv7 } from './vendor/uuidv7'
-import { isEmptyObject, isNullish, getPersonPropertiesHash, isObject } from './utils'
+import { isEmptyObject, isNullish, getPersonPropertiesHash, isObject, isPlainError } from './utils'
 import { EventHint } from './error-tracking'
 
 // Stores the parameters for a pending feature flags reload request
@@ -444,7 +444,7 @@ export abstract class InsightsCore extends InsightsCoreStateless {
     options?: InsightsCaptureOptions
   ): void {
     this.wrap(() => {
-      const existingGroups = (this.props.$groups as PostHogGroupProperties) || {}
+      const existingGroups = (this.props.$groups as InsightsGroupProperties) || {}
       const isNewGroup = existingGroups[groupType] !== groupKey
 
       this.groups({
@@ -485,6 +485,24 @@ export abstract class InsightsCore extends InsightsCoreStateless {
       const existingProperties =
         this.getPersistedProperty<Record<string, JsonType>>(InsightsPersistedProperty.PersonProperties) || {}
 
+      // If the caller passes { $set, $set_once }, split them apart so we can apply $set_once
+      // semantics (skip keys that already exist). Otherwise treat all properties as $set for
+      // backward compatibility with the public API.
+      const propsToSet =
+        (properties?.['$set'] as Record<string, JsonType>) || (!properties?.['$set_once'] ? properties : {})
+      const propsToSetOnce = properties?.['$set_once'] as Record<string, JsonType> | undefined
+
+      const setOnceProps: Record<string, JsonType> = {}
+      if (propsToSetOnce) {
+        for (const key in propsToSetOnce) {
+          if (Object.prototype.hasOwnProperty.call(propsToSetOnce, key)) {
+            if (!(key in existingProperties)) {
+              setOnceProps[key] = propsToSetOnce[key]
+            }
+          }
+        }
+      }
+
       this.setPersistedProperty<InsightsEventProperties>(InsightsPersistedProperty.PersonProperties, {
         ...existingProperties,
         ...setOnceProps,
@@ -507,8 +525,9 @@ export abstract class InsightsCore extends InsightsCoreStateless {
     this.wrap(() => {
       // Get persisted group properties
       const existingProperties =
-        this.getPersistedProperty<Record<string, Record<string, string>>>(InsightsPersistedProperty.GroupProperties) ||
-        {}
+        this.getPersistedProperty<Record<string, Record<string, JsonType>>>(
+          InsightsPersistedProperty.GroupProperties
+        ) || {}
 
       if (Object.keys(existingProperties).length !== 0) {
         Object.keys(existingProperties).forEach((groupType) => {
@@ -708,7 +727,7 @@ export abstract class InsightsCore extends InsightsCoreStateless {
           this.getPersistedProperty<Record<string, Record<string, string>>>(InsightsPersistedProperty.GroupProperties) ||
           {}
 
-        const deviceId = this.getPersistedProperty<string>(PostHogPersistedProperty.DeviceId)
+        const deviceId = this.getPersistedProperty<string>(InsightsPersistedProperty.DeviceId)
 
         const extraProperties = {
           $anon_distinct_id: sendAnonDistinctId ? this.getAnonymousId() : undefined,

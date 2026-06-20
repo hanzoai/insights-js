@@ -77,7 +77,7 @@ import {
     ToolbarParams,
     InsightsInterface,
 } from './types'
-import type { TreeShakeable } from '@posthog/types'
+import type { TreeShakeable } from '@hanzo/insights-types'
 import {
     _copyAndTruncateStrings,
     addEventListener,

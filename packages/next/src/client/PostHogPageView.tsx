@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation.js'
-import { usePostHog } from '@posthog/react'
+import { usePostHog } from '@hanzo/insights-react'
 import { getCurrentUrl } from '../shared/browser.js'
 
 /**
@@ -17,7 +17,7 @@ import { getCurrentUrl } from '../shared/browser.js'
  * @example
  * ```tsx
  * // app/layout.tsx
- * import { PostHogProvider, PostHogPageView } from '@posthog/next'
+ * import { PostHogProvider, PostHogPageView } from '@hanzo/insights-next'
  *
  * export default function RootLayout({ children }: { children: React.ReactNode }) {
  *   return (

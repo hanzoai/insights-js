@@ -8,7 +8,7 @@ jest.mock('@vercel/functions', () => ({
 
 const mockPostHogConstructor = jest.fn()
 
-jest.mock('posthog-node', () => ({
+jest.mock('@hanzo/insights-node', () => ({
     PostHog: mockPostHogConstructor,
 }))
 

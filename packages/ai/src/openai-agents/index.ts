@@ -17,8 +17,8 @@ export type InstrumentOptions = PostHogTracingProcessorOptions
  *
  * @example
  * ```typescript
- * import { instrument } from '@posthog/ai/openai-agents'
- * import PostHog from 'posthog-node'
+ * import { instrument } from '@hanzo/insights-ai/openai-agents'
+ * import PostHog from '@hanzo/insights-node'
  *
  * const phClient = new PostHog('<API_KEY>')
  *

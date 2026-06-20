@@ -1,4 +1,4 @@
-import { uuidv7 } from '@posthog/core'
+import { uuidv7 } from '@hanzo/insights-core'
 
 /**
  * Generates a random anonymous distinct_id using UUIDv7.

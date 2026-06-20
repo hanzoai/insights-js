@@ -1,11 +1,11 @@
 {
-  "name": "@posthog/plugin-utils",
+  "name": "@hanzo/insights-plugin-utils",
   "version": "1.1.1",
-  "description": "Shared CLI and sourcemap utilities for PostHog build plugins",
+  "description": "Shared CLI and sourcemap utilities for Hanzo Insights build plugins",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PostHog/posthog-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/plugin-utils"
   },
   "main": "./dist/index.js",
@@ -37,7 +37,7 @@
     "cross-spawn": "^7.0.6"
   },
   "devDependencies": {
-    "@posthog-tooling/tsconfig-base": "workspace:*",
+    "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "@types/cross-spawn": "^6.0.6",
     "@types/jest": "catalog:",
