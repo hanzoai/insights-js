@@ -1,4 +1,4 @@
-# insights-js — AI Assistant Context
+# insights-js
 
 # Hanzo Insights JS
 
