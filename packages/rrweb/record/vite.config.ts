@@ -2,12 +2,12 @@ import path from 'path';
 import config from '../vite.config.default';
 
 const workspacePackages: Record<string, string> = {
-  '@posthog/rrweb': path.resolve(__dirname, '../rrweb/src/entries/record.ts'),
-  '@posthog/rrweb-snapshot': path.resolve(
+  '@hanzo/rrweb': path.resolve(__dirname, '../rrweb/src/entries/record.ts'),
+  '@hanzo/rrweb-snapshot': path.resolve(
     __dirname,
     '../rrweb-snapshot/src/record.ts',
   ),
-  '@posthog/rrdom': path.resolve(__dirname, '../rrdom/src/index.ts'),
+  '@hanzo/rrdom': path.resolve(__dirname, '../rrdom/src/index.ts'),
 };
 
 export default config(path.resolve(__dirname, 'src/index.ts'), 'rrweb', {

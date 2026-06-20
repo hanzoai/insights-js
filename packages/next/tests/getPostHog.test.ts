@@ -12,7 +12,7 @@ const mockShutdown = jest.fn()
 const mockEnterContext = jest.fn()
 const mockWithContext = jest.fn((_, fn) => fn())
 
-jest.mock('posthog-node', () => ({
+jest.mock('@hanzo/insights-node', () => ({
     PostHog: jest.fn().mockImplementation(() => ({
         capture: mockCapture,
         identify: mockIdentify,

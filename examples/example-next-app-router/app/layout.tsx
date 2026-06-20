@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
-import { PostHogProvider, PostHogPageView } from '@posthog/next'
+import { PostHogProvider, PostHogPageView } from '@hanzo/insights-next'
 import { Nav } from './components/Nav'
 import { ConsentBanner } from './components/ConsentBanner'
 import './globals.css'
 
 export const metadata: Metadata = {
-    title: '@posthog/next App Router Example',
-    description: 'Example Next.js App Router project demonstrating @posthog/next features',
+    title: '@hanzo/insights-next App Router Example',
+    description: 'Example Next.js App Router project demonstrating @hanzo/insights-next features',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

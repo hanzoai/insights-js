@@ -1,7 +1,7 @@
 import { DisplaySurveyOptions, DisplaySurveyType, Survey, SurveyType } from '../insights-surveys-types'
 import { createLogger } from '../utils/logger'
 
-export { getSurveyInteractionProperty } from '@posthog/core/surveys'
+export { getSurveyInteractionProperty } from '@hanzo/insights-core/surveys'
 
 export const SURVEY_LOGGER = createLogger('[Surveys]')
 

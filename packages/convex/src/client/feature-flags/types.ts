@@ -1,4 +1,4 @@
-import type { FeatureFlagValue, JsonType } from '@posthog/core'
+import type { FeatureFlagValue, JsonType } from '@hanzo/insights-core'
 
 export type { FeatureFlagValue, JsonType }
 
