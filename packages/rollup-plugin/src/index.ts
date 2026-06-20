@@ -45,11 +45,11 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
         name: 'insights-rollup-plugin',
 
         config() {
-            if (!posthogOptions.sourcemaps.enabled) return
+            if (!insightsOptions.sourcemaps.enabled) return
 
             return {
                 build: {
-                    sourcemap: posthogOptions.sourcemaps.deleteAfterUpload ? 'hidden' : true,
+                    sourcemap: insightsOptions.sourcemaps.deleteAfterUpload ? 'hidden' : true,
                 },
             }
         },
@@ -57,7 +57,7 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
         outputOptions: {
             order: 'post',
             handler(options: OutputOptions) {
-                if (!posthogOptions.sourcemaps.enabled) return options
+                if (!insightsOptions.sourcemaps.enabled) return options
 
                 return {
                     ...options,

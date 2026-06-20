@@ -15,12 +15,12 @@ jest.mock('../src/utils', () => ({
 // Mock core's guard so handler tests can simulate "this is a network error" without
 // spinning up a real PostHog to produce a genuine instance. The guard itself is
 // verified against a real core instance in error-tracking-internal-errors.integration.spec.ts.
-jest.mock('@posthog/core', () => ({
-  ...jest.requireActual('@posthog/core'),
+jest.mock('@hanzo/insights-core', () => ({
+  ...jest.requireActual('@hanzo/insights-core'),
   isPostHogFetchNetworkError: jest.fn(),
 }))
 
-import { isPostHogFetchNetworkError } from '@posthog/core'
+import { isPostHogFetchNetworkError } from '@hanzo/insights-core'
 import { trackUncaughtExceptions, trackUnhandledRejections, trackConsole } from '../src/error-tracking/utils'
 import { createMockLogger, createMockPostHog } from './test-utils'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { usePostHog } from '@posthog/next'
+import { usePostHog } from '@hanzo/insights-next'
 import { useEffect, useState } from 'react'
 
 type ConsentState = 'pending' | 'granted' | 'denied'

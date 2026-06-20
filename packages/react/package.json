@@ -4,7 +4,7 @@
   "description": "React components and hooks for Hanzo Insights.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/react"
   },
   "author": {

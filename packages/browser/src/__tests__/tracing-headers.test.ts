@@ -1,4 +1,4 @@
-import { isNull, isUndefined } from '@posthog/core'
+import { isNull, isUndefined } from '@hanzo/insights-core'
 import { COOKIELESS_SENTINEL_VALUE } from '../constants'
 import patchFns from '../entrypoints/tracing-headers'
 

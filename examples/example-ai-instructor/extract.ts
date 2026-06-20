@@ -2,7 +2,7 @@
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@posthog/ai/otel'
+import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
 import { OpenAIInstrumentation } from '@opentelemetry/instrumentation-openai'
 import OpenAI from 'openai'
 import Instructor from '@instructor-ai/instructor'

@@ -1,5 +1,5 @@
 import { PostHog } from '../src'
-import { isPostHogFetchNetworkError } from '@posthog/core'
+import { isPostHogFetchNetworkError } from '@hanzo/insights-core'
 
 // Proves the exported instanceof guard recognizes a genuine PostHogFetchNetworkError
 // produced by core's real fetch path.

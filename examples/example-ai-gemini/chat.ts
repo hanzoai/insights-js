@@ -2,7 +2,7 @@
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@posthog/ai/otel'
+import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
 import { GenAIInstrumentation } from '@traceloop/instrumentation-google-generativeai'
 import { GoogleGenAI, Type } from '@google/genai'
 import type { FunctionDeclaration } from '@google/genai'

@@ -97,30 +97,14 @@ assignableWindow.__InsightsExtensions__.loadExternalDependency = (
     }
 
     if (kind === 'toolbar') {
-        // toolbar.js is served from the Insights CDN, this has a TTL of 24 hours.
-        // the toolbar asset includes a rotating "token" that is valid for 5 minutes.
+        // toolbar.js has a 24-hour CDN TTL but contains a rotating token valid for
+        // only 5 minutes. Bust the cache on a 5-minute boundary so the browser always
+        // fetches a fresh copy with a valid token.
         const fiveMinutesInMillis = 5 * 60 * 1000
-        // this ensures that we bust the cache periodically
         const timestampToNearestFiveMinutes = Math.floor(Date.now() / fiveMinutesInMillis) * fiveMinutesInMillis
-
-    if (posthog.config.__preview_external_dependency_versioned_paths) {
-        // posthog.version is baked into the executing array.js bundle, so this points at
-        // the exact semver-qualified sibling asset without relying on alias redirects.
-        url = posthog.requestRouter.endpointFor('assets', `/static/${posthog.version}/${kind}.js`)
-    } else {
-        let scriptUrlToLoad = `/static/${kind}.js?v=${posthog.version}`
-
-        if (kind === 'toolbar') {
-            // toolbar.js has a 24-hour CDN TTL but contains a rotating token valid for
-            // only 5 minutes. Bust the cache on a 5-minute boundary so the browser always
-            // fetches a fresh copy with a valid token.
-            const fiveMinutesInMillis = 5 * 60 * 1000
-            const timestampToNearestFiveMinutes = Math.floor(Date.now() / fiveMinutesInMillis) * fiveMinutesInMillis
-            scriptUrlToLoad = `${scriptUrlToLoad}&t=${timestampToNearestFiveMinutes}`
-        }
-
-        url = posthog.requestRouter.endpointFor('assets', scriptUrlToLoad)
+        scriptUrlToLoad = `${scriptUrlToLoad}&t=${timestampToNearestFiveMinutes}`
     }
+
     const url = insights.requestRouter.endpointFor('assets', scriptUrlToLoad)
 
     loadScript(insights, url, callback)

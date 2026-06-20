@@ -2,6 +2,6 @@ import record from '../record';
 export {
   wasMaxDepthReached,
   resetMaxDepthState,
-} from '@posthog/rrweb-snapshot';
+} from '@hanzo/rrweb-snapshot';
 
 export { record };

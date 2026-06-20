@@ -1,4 +1,4 @@
-import posthogJs from 'posthog-js'
+import posthogJs from '@hanzo/insights'
 import { setDefaultPostHogInstance } from './context/posthog-default'
 
 setDefaultPostHogInstance(posthogJs)

@@ -32,7 +32,7 @@ export function Nav() {
         <nav className="border-b border-gray-200 bg-white">
             <div className="max-w-4xl mx-auto px-4 flex items-center justify-between h-14">
                 <div className="flex items-center gap-6">
-                    <span className="font-semibold text-gray-900">@posthog/next</span>
+                    <span className="font-semibold text-gray-900">@hanzo/insights-next</span>
                     <div className="flex gap-4">
                         {links.map((link) => (
                             <Link

@@ -4,7 +4,7 @@
   "description": "Hanzo Insights browser SDK for automatic event capture and behavioral analytics.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/browser"
   },
   "author": {
@@ -140,9 +140,10 @@
     "tslib": "catalog:",
     "typescript": "catalog:",
     "yargs": "^17.7.2",
-    "@hanzo/rrweb-plugin-console-record": "^0.0.47",
-    "@hanzo/rrweb-record": "^0.0.47",
-    "@hanzo/rrweb-types": "^0.0.47"
+    "@hanzo/rrweb": "workspace:*",
+    "@hanzo/rrweb-plugin-console-record": "workspace:*",
+    "@hanzo/rrweb-record": "workspace:*",
+    "@hanzo/rrweb-types": "workspace:*"
   },
   "browserslist": [
     "> 0.5%, last 2 versions, Firefox ESR, not dead, IE 11"
