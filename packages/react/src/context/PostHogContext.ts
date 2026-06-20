@@ -1,5 +1,5 @@
-import type { PostHog } from 'posthog-js'
-import type { BootstrapConfig } from 'posthog-js'
+import type { PostHog } from '@hanzo/insights'
+import type { BootstrapConfig } from '@hanzo/insights'
 import { createContext } from 'react'
 import { getDefaultPostHogInstance } from './posthog-default'
 

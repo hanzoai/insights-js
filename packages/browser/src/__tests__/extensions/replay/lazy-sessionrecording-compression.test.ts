@@ -30,8 +30,8 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
             return new Blob([gzipSync(strToU8(input))])
         })
 
-    jest.doMock('@posthog/core', () => {
-        const actual = jest.requireActual('@posthog/core')
+    jest.doMock('@hanzo/insights-core', () => {
+        const actual = jest.requireActual('@hanzo/insights-core')
         return {
             ...actual,
             gzipCompress: gzipCompressMock,
@@ -133,7 +133,7 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
 
 describe('LazyLoadedSessionRecording compression paths', () => {
     afterEach(() => {
-        jest.dontMock('@posthog/core')
+        jest.dontMock('@hanzo/insights-core')
         jest.resetModules()
     })
 

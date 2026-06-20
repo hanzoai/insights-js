@@ -8,7 +8,7 @@ import {
   EventType,
   IncrementalSource,
   CanvasContext,
-} from '@posthog/rrweb-types';
+} from '@hanzo/rrweb-types';
 import { launchPuppeteer, waitForCondition } from '../utils';
 
 interface ISuite {

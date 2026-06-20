@@ -14,7 +14,7 @@ export * from './types'
 export * from './surveys'
 
 // Re-export logs public types so consumers can type their own wrappers
-// (e.g. hooks, HOCs, custom loggers) without pulling in @posthog/core.
+// (e.g. hooks, HOCs, custom loggers) without pulling in @hanzo/insights-core.
 export type {
   BeforeSendLogFn,
   CaptureLogOptions,
@@ -23,4 +23,4 @@ export type {
   LogAttributeValue,
   LogSeverityLevel,
   PostHogLogsConfig,
-} from '@posthog/core'
+} from '@hanzo/insights-core'

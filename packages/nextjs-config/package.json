@@ -4,7 +4,7 @@
   "description": "Next.js configuration helper for Hanzo Insights.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/nextjs-config"
   },
   "author": {

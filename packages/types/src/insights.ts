@@ -22,6 +22,7 @@ import type { RequestCallback } from './request'
 import type { SurveyRenderReason } from './survey'
 import type { ToolbarParams } from './toolbar'
 import type { ExceptionAutoCaptureConfig } from './insights-config'
+import type { TreeShakeable } from './tree-shakeable'
 
 /**
  * The Insights instance interface.

@@ -1,8 +1,8 @@
 /**
  * @jest-environment node
  *
- * Validates the packaging that routes `@posthog/next` and
- * `@posthog/next/pages` to the correct per-runtime barrel:
+ * Validates the packaging that routes `@hanzo/insights-next` and
+ * `@hanzo/insights-next/pages` to the correct per-runtime barrel:
  *
  *   1. `package.json#exports` declares the right file for each runtime
  *      condition (`browser`, `edge-light`/`edge`/`worker`, `react-server`,
@@ -128,7 +128,7 @@ describeIfBuilt('Transitive import closure of each built barrel', () => {
     ])('client barrel %s (%s) never reaches server-only or posthog-node', (file) => {
         const imports = bareImportsReachableFrom(path.join(DIST_DIR, file))
         expect(imports.has('server-only')).toBe(false)
-        expect(imports.has('posthog-node')).toBe(false)
+        expect(imports.has('@hanzo/insights-node')).toBe(false)
     })
 
     it('index.react-server.js never reaches server-only (posthog-node is allowed)', () => {
@@ -140,9 +140,9 @@ describeIfBuilt('Transitive import closure of each built barrel', () => {
     // in. If they stop doing so, the server-side API has likely lost the
     // intended functionality (e.g. a re-export was accidentally dropped).
     it.each([
-        ['pages.js', { 'server-only': true, 'posthog-node': true }],
-        ['index.js', { 'server-only': true, 'posthog-node': true }],
-        ['pages.edge.js', { 'server-only': true, 'posthog-node': false }],
+        ['pages.js', { 'server-only': true, '@hanzo/insights-node': true }],
+        ['index.js', { 'server-only': true, '@hanzo/insights-node': true }],
+        ['pages.edge.js', { 'server-only': true, '@hanzo/insights-node': false }],
     ])('server/edge barrel %s keeps the expected bare imports', (file, expected) => {
         const imports = bareImportsReachableFrom(path.join(DIST_DIR, file))
         for (const [specifier, shouldBeReachable] of Object.entries(expected)) {

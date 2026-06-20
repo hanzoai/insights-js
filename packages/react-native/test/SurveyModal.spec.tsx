@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 import React from 'react'
 import { act, fireEvent, render, cleanup } from '@testing-library/react'
-import { Survey, SurveyQuestionType, SurveyType } from '@posthog/core'
+import { Survey, SurveyQuestionType, SurveyType } from '@hanzo/insights-core'
 
 // Minimal react-native shim — jest-expo's full preset chain pulls in
 // TurboModule code that explodes under jsdom. We only need a handful of
