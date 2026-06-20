@@ -1,6 +1,6 @@
 jest.mock('server-only', () => ({}))
 
-// Mock posthog-node
+// Mock insights-node
 const mockCapture = jest.fn()
 const mockIdentify = jest.fn()
 const mockIsFeatureEnabled = jest.fn()
@@ -13,7 +13,7 @@ const mockEnterContext = jest.fn()
 const mockWithContext = jest.fn((_, fn) => fn())
 
 jest.mock('@hanzo/insights-node', () => ({
-    PostHog: jest.fn().mockImplementation(() => ({
+    Insights: jest.fn().mockImplementation(() => ({
         capture: mockCapture,
         identify: mockIdentify,
         isFeatureEnabled: mockIsFeatureEnabled,
@@ -72,16 +72,16 @@ jest.mock('../src/server/nodeClientCache', () => ({
     getOrCreateNodeClient: (...args: unknown[]) => mockGetOrCreateNodeClient(...args),
 }))
 
-import { getPostHog } from '../src/server/getPostHog'
+import { getInsights } from '../src/server/getInsights'
 import { cookies, headers } from 'next/headers.js'
 
-describe('getPostHog', () => {
+describe('getInsights', () => {
     const originalEnv = process.env
 
     beforeEach(() => {
         jest.clearAllMocks()
         process.env = { ...originalEnv }
-        process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_env_key'
+        process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_env_key'
 
         // Reset to empty cookies and headers by default
         const emptyCookies = createMockCookies({})
@@ -94,8 +94,8 @@ describe('getPostHog', () => {
         process.env = originalEnv
     })
 
-    it('returns an IPostHog instance', async () => {
-        const client = await getPostHog('phc_test123')
+    it('returns an IInsights instance', async () => {
+        const client = await getInsights('phc_test123')
 
         expect(client).toBeDefined()
         expect(typeof client.capture).toBe('function')
@@ -104,7 +104,7 @@ describe('getPostHog', () => {
 
     it('wraps method calls with withContext using cookie identity', async () => {
         const cookieStore = createMockCookies({
-            ph_phc_test123_posthog: JSON.stringify({
+            hi_phc_test123_insights: JSON.stringify({
                 distinct_id: 'user_abc',
                 $device_id: 'device_xyz',
                 $sesid: [1708700000000, 'session-123', 1708700000000],
@@ -112,7 +112,7 @@ describe('getPostHog', () => {
         })
         ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
 
-        const client = await getPostHog('phc_test123')
+        const client = await getInsights('phc_test123')
         client.capture({ distinctId: 'user_abc', event: 'test_event' })
 
         expect(mockWithContext).toHaveBeenCalledWith(
@@ -130,7 +130,7 @@ describe('getPostHog', () => {
         const cookieStore = createMockCookies({})
         ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
 
-        const client = await getPostHog('phc_test123')
+        const client = await getInsights('phc_test123')
         client.capture({ distinctId: 'anon', event: 'test_event' })
 
         expect(mockWithContext).toHaveBeenCalledWith(
@@ -144,86 +144,86 @@ describe('getPostHog', () => {
     })
 
     it('uses explicit apiKey over env var', async () => {
-        process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_env_key'
+        process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_env_key'
 
-        await getPostHog('phc_explicit_key')
+        await getInsights('phc_explicit_key')
 
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('phc_explicit_key', {
-            host: 'https://us.i.posthog.com',
+            host: 'https://us.i.insights.hanzo.ai',
         })
     })
 
-    it('falls back to NEXT_PUBLIC_POSTHOG_KEY env var when no apiKey provided', async () => {
-        process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_env_key'
+    it('falls back to NEXT_PUBLIC_INSIGHTS_KEY env var when no apiKey provided', async () => {
+        process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_env_key'
 
-        await getPostHog()
+        await getInsights()
 
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('phc_env_key', {
-            host: 'https://us.i.posthog.com',
+            host: 'https://us.i.insights.hanzo.ai',
         })
     })
 
     it('warns and returns a disabled client when no apiKey provided and env var missing', async () => {
-        delete process.env.NEXT_PUBLIC_POSTHOG_KEY
+        delete process.env.NEXT_PUBLIC_INSIGHTS_KEY
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-        const client = await getPostHog()
+        const client = await getInsights()
 
         expect(client).toBeDefined()
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('', {
-            host: 'https://us.i.posthog.com',
+            host: 'https://us.i.insights.hanzo.ai',
         })
         expect(cookies).not.toHaveBeenCalled()
         expect(headers).not.toHaveBeenCalled()
-        expect(warnSpy).toHaveBeenCalledWith('[PostHog Next.js] apiKey is required — PostHog will not be initialized')
+        expect(warnSpy).toHaveBeenCalledWith('[Insights Next.js] apiKey is required — Insights will not be initialized')
         warnSpy.mockRestore()
     })
 
     it('passes host from options to getOrCreateNodeClient', async () => {
-        await getPostHog('phc_test123', { host: 'https://custom.posthog.com' })
+        await getInsights('phc_test123', { host: 'https://custom.insights.hanzo.ai' })
 
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('phc_test123', {
-            host: 'https://custom.posthog.com',
+            host: 'https://custom.insights.hanzo.ai',
         })
     })
 
     it('defaults host when it is omitted', async () => {
-        await getPostHog('phc_test123')
+        await getInsights('phc_test123')
 
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('phc_test123', {
-            host: 'https://us.i.posthog.com',
+            host: 'https://us.i.insights.hanzo.ai',
         })
     })
 
     it('trims apiKey and host before creating the node client', async () => {
-        await getPostHog('  phc_test123\n', { host: '  https://custom.posthog.com/\t ' })
+        await getInsights('  phc_test123\n', { host: '  https://custom.insights.hanzo.ai/\t ' })
 
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('phc_test123', {
-            host: 'https://custom.posthog.com/',
+            host: 'https://custom.insights.hanzo.ai/',
         })
     })
 
-    it('reads host from NEXT_PUBLIC_POSTHOG_HOST env var when not in options', async () => {
-        process.env.NEXT_PUBLIC_POSTHOG_HOST = 'https://env-host.posthog.com'
+    it('reads host from NEXT_PUBLIC_INSIGHTS_HOST env var when not in options', async () => {
+        process.env.NEXT_PUBLIC_INSIGHTS_HOST = 'https://env-host.insights.hanzo.ai'
 
-        await getPostHog('phc_test123')
+        await getInsights('phc_test123')
 
         expect(mockGetOrCreateNodeClient).toHaveBeenCalledWith('phc_test123', {
-            host: 'https://env-host.posthog.com',
+            host: 'https://env-host.insights.hanzo.ai',
         })
 
-        delete process.env.NEXT_PUBLIC_POSTHOG_HOST
+        delete process.env.NEXT_PUBLIC_INSIGHTS_HOST
     })
 
     it('wraps method calls with withContext with just distinctId when cookie has no session or device', async () => {
         const cookieStore = createMockCookies({
-            ph_phc_test123_posthog: JSON.stringify({
+            hi_phc_test123_insights: JSON.stringify({
                 distinct_id: 'user_abc',
             }),
         })
         ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
 
-        const client = await getPostHog('phc_test123')
+        const client = await getInsights('phc_test123')
         client.capture({ distinctId: 'user_abc', event: 'test_event' })
 
         expect(mockWithContext).toHaveBeenCalledWith(
@@ -241,13 +241,13 @@ describe('getPostHog', () => {
             const cookieStore = createMockCookies({})
             ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
             const headerStore = createMockHeaders({
-                'x-posthog-session-id': 'header-session-456',
-                'x-posthog-distinct-id': 'header-user-789',
-                'x-posthog-window-id': 'window-abc',
+                'x-insights-session-id': 'header-session-456',
+                'x-insights-distinct-id': 'header-user-789',
+                'x-insights-window-id': 'window-abc',
             })
             ;(headers as jest.Mock).mockResolvedValue(headerStore)
 
-            const client = await getPostHog('phc_test123')
+            const client = await getInsights('phc_test123')
             client.capture({ distinctId: 'header-user-789', event: 'test_event' })
 
             expect(mockWithContext).toHaveBeenCalledWith(
@@ -265,7 +265,7 @@ describe('getPostHog', () => {
 
         it('tracing headers override cookie values for distinctId and sessionId', async () => {
             const cookieStore = createMockCookies({
-                ph_phc_test123_posthog: JSON.stringify({
+                hi_phc_test123_insights: JSON.stringify({
                     distinct_id: 'cookie-user',
                     $device_id: 'device_xyz',
                     $sesid: [1708700000000, 'cookie-session', 1708700000000],
@@ -273,12 +273,12 @@ describe('getPostHog', () => {
             })
             ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
             const headerStore = createMockHeaders({
-                'x-posthog-session-id': 'header-session',
-                'x-posthog-distinct-id': 'header-user',
+                'x-insights-session-id': 'header-session',
+                'x-insights-distinct-id': 'header-user',
             })
             ;(headers as jest.Mock).mockResolvedValue(headerStore)
 
-            const client = await getPostHog('phc_test123')
+            const client = await getInsights('phc_test123')
             client.capture({ distinctId: 'header-user', event: 'test_event' })
 
             expect(mockWithContext).toHaveBeenCalledWith(
@@ -296,7 +296,7 @@ describe('getPostHog', () => {
 
         it('falls back to cookie values when tracing headers are absent', async () => {
             const cookieStore = createMockCookies({
-                ph_phc_test123_posthog: JSON.stringify({
+                hi_phc_test123_insights: JSON.stringify({
                     distinct_id: 'cookie-user',
                     $device_id: 'device_xyz',
                     $sesid: [1708700000000, 'cookie-session', 1708700000000],
@@ -306,7 +306,7 @@ describe('getPostHog', () => {
             const headerStore = createMockHeaders({})
             ;(headers as jest.Mock).mockResolvedValue(headerStore)
 
-            const client = await getPostHog('phc_test123')
+            const client = await getInsights('phc_test123')
             client.capture({ distinctId: 'cookie-user', event: 'test_event' })
 
             expect(mockWithContext).toHaveBeenCalledWith(
@@ -324,7 +324,7 @@ describe('getPostHog', () => {
 
         it('adds $window_id from tracing headers alongside cookie properties', async () => {
             const cookieStore = createMockCookies({
-                ph_phc_test123_posthog: JSON.stringify({
+                hi_phc_test123_insights: JSON.stringify({
                     distinct_id: 'cookie-user',
                     $device_id: 'device_xyz',
                     $sesid: [1708700000000, 'cookie-session', 1708700000000],
@@ -332,11 +332,11 @@ describe('getPostHog', () => {
             })
             ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
             const headerStore = createMockHeaders({
-                'x-posthog-window-id': 'window-123',
+                'x-insights-window-id': 'window-123',
             })
             ;(headers as jest.Mock).mockResolvedValue(headerStore)
 
-            const client = await getPostHog('phc_test123')
+            const client = await getInsights('phc_test123')
             client.capture({ distinctId: 'cookie-user', event: 'test_event' })
 
             expect(mockWithContext).toHaveBeenCalledWith(
@@ -357,7 +357,7 @@ describe('getPostHog', () => {
     describe('consent awareness', () => {
         it('returns the client directly without proxy when consent cookie is 0', async () => {
             const cookieStore = createMockCookies({
-                ph_phc_test123_posthog: JSON.stringify({
+                hi_phc_test123_insights: JSON.stringify({
                     distinct_id: 'user_abc',
                     $device_id: 'device_xyz',
                 }),
@@ -365,7 +365,7 @@ describe('getPostHog', () => {
             })
             ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
 
-            const client = await getPostHog('phc_test123')
+            const client = await getInsights('phc_test123')
             expect(client).toBeDefined()
             // When opted out, methods should not go through withContext
             client.capture({ distinctId: 'user_abc', event: 'test_event' })
@@ -374,7 +374,7 @@ describe('getPostHog', () => {
 
         it('wraps method calls with withContext when consent cookie is 1', async () => {
             const cookieStore = createMockCookies({
-                ph_phc_test123_posthog: JSON.stringify({
+                hi_phc_test123_insights: JSON.stringify({
                     distinct_id: 'user_abc',
                     $device_id: 'device_xyz',
                 }),
@@ -382,7 +382,7 @@ describe('getPostHog', () => {
             })
             ;(cookies as jest.Mock).mockResolvedValue(cookieStore)
 
-            const client = await getPostHog('phc_test123')
+            const client = await getInsights('phc_test123')
             client.capture({ distinctId: 'user_abc', event: 'test_event' })
 
             expect(mockWithContext).toHaveBeenCalledWith(

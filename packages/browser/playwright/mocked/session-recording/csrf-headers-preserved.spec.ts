@@ -1,17 +1,17 @@
-import { test, expect } from '../utils/posthog-playwright-test-base'
+import { test, expect } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 import { Page, BrowserContext } from '@playwright/test'
 import { csrfHeaderCases } from '../../../src/__tests__/extensions/replay/external/test_data/header-cases'
 import { readFileSync } from 'fs'
 import { resolve as resolvePath } from 'path'
 
-// axios is NOT a dep of posthog-js — the bundle is vendored as a test
+// axios is NOT a dep of insights-js — the bundle is vendored as a test
 // fixture so we can exercise the reporter's exact runtime (axios ^0.18,
 // which uses the XMLHttpRequest adapter in the browser). Vendoring keeps
 // axios out of package.json and the production lockfile.
 const axiosBundleSrc = readFileSync(resolvePath(__dirname, 'test_fixtures/axios-0.18.1.min.js'), 'utf8')
 
-// Reproduces the user report that PostHog network recording strips CSRF
+// Reproduces the user report that Insights network recording strips CSRF
 // headers from the actual outgoing request. The fix invariant: enabling
 // session recording network capture (and/or tracing-headers, both of which
 // wrap fetch/XHR) must NEVER cause user-supplied request headers to go
@@ -106,14 +106,14 @@ async function captureRequestHeaders(
         context
     )
 
-    await page.waitForFunction(() => (window as any).posthog?.__loaded === true)
+    await page.waitForFunction(() => (window as any).insights?.__loaded === true)
 
     // Wait for whichever wrappers this scenario enables to actually be
     // installed before triggering the request. Without this the test
     // could fire its fetch/XHR before the patch lands and pass trivially
     // (false negative — no wrapper ever ran).
     if (scenario.options?.__add_tracing_headers) {
-        await page.waitForFunction(() => !!(window as any).__PosthogExtensions__?.tracingHeadersPatchFns)
+        await page.waitForFunction(() => !!(window as any).__InsightsExtensions__?.tracingHeadersPatchFns)
     }
     if (scenario.flagsResponseOverrides?.sessionRecording) {
         await waitForSessionRecordingToStart(page)
@@ -161,7 +161,7 @@ async function captureRequestHeaders(
     } else {
         // axios 0.18: UMD bundle exposes window.axios. Internally it
         // uses the XMLHttpRequest adapter — the prototype.open patch
-        // installed by PostHog should still see all setRequestHeader
+        // installed by Insights should still see all setRequestHeader
         // calls axios makes on the request instance.
         await page.addScriptTag({ content: axiosBundleSrc })
         await page.waitForFunction(() => typeof (window as any).axios !== 'undefined')
@@ -170,7 +170,7 @@ async function captureRequestHeaders(
         // falling through to a fetch polyfill.
         const axiosIsBeingUsed = await page.evaluate(() => {
             const a = (window as any).axios
-            // eslint-disable-next-line posthog-js/no-direct-function-check
+            // eslint-disable-next-line insights-js/no-direct-function-check
             return typeof a === 'function' && typeof a.post === 'function' && !!a.defaults?.adapter
         })
         expect(axiosIsBeingUsed).toBe(true)
@@ -192,7 +192,7 @@ async function captureRequestHeaders(
     return request.headers()
 }
 
-test.describe('CSRF headers survive PostHog network wrappers', () => {
+test.describe('CSRF headers survive Insights network wrappers', () => {
     for (const scenario of scenarios) {
         for (const method of ['fetch', 'xhr', 'axios'] as const) {
             test(`${scenario.name} | ${method} | all CSRF headers reach the server unchanged`, async ({

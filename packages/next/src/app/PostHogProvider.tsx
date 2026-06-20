@@ -1,12 +1,12 @@
 import React from 'react'
-import type { PostHogConfig } from '@hanzo/insights'
-import { ClientPostHogProvider } from '../client/ClientPostHogProvider.js'
-import type { BootstrapConfig } from '../client/ClientPostHogProvider.js'
+import type { InsightsConfig } from '@hanzo/insights'
+import { ClientInsightsProvider } from '../client/ClientInsightsProvider.js'
+import type { BootstrapConfig } from '../client/ClientInsightsProvider.js'
 import { cookies } from 'next/headers.js'
-import type { PostHogOptions } from '@hanzo/insights-node'
+import type { InsightsOptions } from '@hanzo/insights-node'
 import { getOrCreateNodeClient } from '../server/nodeClientCache.js'
 import { NEXTJS_CLIENT_DEFAULTS, resolveApiKey, resolveHostOrDefault } from '../shared/config.js'
-import { readPostHogCookie, isOptedOut } from '../shared/cookie.js'
+import { readInsightsCookie, isOptedOut } from '../shared/cookie.js'
 
 type AllFlagsOptions = {
     groups?: Record<string, string>
@@ -20,7 +20,7 @@ type AllFlagsOptions = {
 export interface BootstrapFlagsConfig {
     /** Specific flag keys to evaluate. If omitted, evaluates all flags. */
     flags?: string[]
-    /** Groups to evaluate flags for (e.g., `{ company: 'posthog' }`). */
+    /** Groups to evaluate flags for (e.g., `{ company: 'insights' }`). */
     groups?: AllFlagsOptions['groups']
     /** Known person properties to use for flag evaluation. */
     personProperties?: AllFlagsOptions['personProperties']
@@ -28,21 +28,21 @@ export interface BootstrapFlagsConfig {
     groupProperties?: AllFlagsOptions['groupProperties']
 }
 
-export interface PostHogProviderProps {
+export interface InsightsProviderProps {
     /**
-     * PostHog project API key (starts with phc_).
-     * If omitted, reads from `NEXT_PUBLIC_POSTHOG_KEY` env var.
+     * Insights project API key (starts with phc_).
+     * If omitted, reads from `NEXT_PUBLIC_INSIGHTS_KEY` env var.
      */
     apiKey?: string
-    /** Optional posthog-js configuration overrides. */
-    clientOptions?: Partial<PostHogConfig>
-    /** Options passed to the posthog-node client used for server-side flag evaluation. */
-    serverOptions?: Partial<PostHogOptions>
+    /** Optional insights-js configuration overrides. */
+    clientOptions?: Partial<InsightsConfig>
+    /** Options passed to the insights-node client used for server-side flag evaluation. */
+    serverOptions?: Partial<InsightsOptions>
     /**
      * Enable server-side feature flag evaluation for bootstrap.
      *
      * When enabled, the provider calls `cookies()` to read the user's
-     * identity and evaluates flags via `posthog-node`. This opts the
+     * identity and evaluates flags via `insights-node`. This opts the
      * route into **dynamic rendering** (incompatible with static
      * generation / ISR).
      *
@@ -54,7 +54,7 @@ export interface PostHogProviderProps {
 }
 
 /**
- * PostHog provider for Next.js App Router.
+ * Insights provider for Next.js App Router.
  *
  * By default this component is **static-safe** — it does not call any
  * dynamic APIs (`cookies()`, `headers()`) and is compatible with static
@@ -64,16 +64,16 @@ export interface PostHogProviderProps {
  * on the server and bootstraps the client SDK, which opts the route into
  * dynamic rendering.
  *
- * All PostHog hooks (`usePostHog`, `useFeatureFlagEnabled`, etc.)
+ * All Insights hooks (`useInsights`, `useFeatureFlagEnabled`, etc.)
  * require this provider as an ancestor.
  */
-export async function PostHogProvider({
+export async function InsightsProvider({
     apiKey: apiKeyProp,
     clientOptions,
     serverOptions,
     bootstrapFlags,
     children,
-}: PostHogProviderProps) {
+}: InsightsProviderProps) {
     const apiKey = resolveApiKey(apiKeyProp)
     if (!apiKey) {
         return <>{children}</>
@@ -82,12 +82,12 @@ export async function PostHogProvider({
     if (!apiKey.startsWith('phc_')) {
         // eslint-disable-next-line no-console
         console.warn(
-            `[PostHog Next.js] apiKey "${apiKey}" does not start with "phc_". This may not be a valid PostHog project API key.`
+            `[Insights Next.js] apiKey "${apiKey}" does not start with "phc_". This may not be a valid Insights project API key.`
         )
     }
 
     const host = resolveHostOrDefault(clientOptions?.api_host)
-    const resolvedOptions: Partial<PostHogConfig> = {
+    const resolvedOptions: Partial<InsightsConfig> = {
         ...NEXTJS_CLIENT_DEFAULTS,
         ...clientOptions,
         ...(host ? { api_host: host } : {}),
@@ -107,22 +107,22 @@ export async function PostHogProvider({
             }
         } catch (error) {
             // eslint-disable-next-line no-console
-            console.warn('[PostHog Next.js] Failed to evaluate bootstrap flags:', error)
+            console.warn('[Insights Next.js] Failed to evaluate bootstrap flags:', error)
         }
     }
 
     return (
-        <ClientPostHogProvider apiKey={apiKey} options={resolvedOptions} bootstrap={bootstrap}>
+        <ClientInsightsProvider apiKey={apiKey} options={resolvedOptions} bootstrap={bootstrap}>
             {children}
-        </ClientPostHogProvider>
+        </ClientInsightsProvider>
     )
 }
 
 async function evaluateFlags(
     apiKey: string,
-    options: Partial<PostHogConfig> | undefined,
+    options: Partial<InsightsConfig> | undefined,
     bootstrapFlags: boolean | BootstrapFlagsConfig,
-    serverOptions?: Partial<PostHogOptions>
+    serverOptions?: Partial<InsightsOptions>
 ): Promise<BootstrapConfig | undefined> {
     const cookieStore = await cookies()
 
@@ -130,13 +130,13 @@ async function evaluateFlags(
         return undefined
     }
 
-    const cookieState = readPostHogCookie(cookieStore, apiKey)
+    const cookieState = readInsightsCookie(cookieStore, apiKey)
     if (!cookieState) {
         return undefined
     }
 
     const host = resolveHostOrDefault(serverOptions?.host)
-    const nodeOptions: Partial<PostHogOptions> = { ...serverOptions, ...(host ? { host } : {}) }
+    const nodeOptions: Partial<InsightsOptions> = { ...serverOptions, ...(host ? { host } : {}) }
     const client = await getOrCreateNodeClient(apiKey, nodeOptions)
 
     const { flags: flagKeys, ...flagOptions } = typeof bootstrapFlags === 'object' ? bootstrapFlags : {}

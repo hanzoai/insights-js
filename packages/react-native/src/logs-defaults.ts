@@ -1,5 +1,5 @@
 import { Platform } from 'react-native'
-import type { PostHogLogsConfig, ResolvedPostHogLogsConfig } from '@hanzo/insights-core'
+import type { InsightsLogsConfig, ResolvedInsightsLogsConfig } from '@hanzo/insights-core'
 
 // Mobile defaults. Tuned for cellular radio tail (longer flush interval keeps
 // the radio asleep) and cellular data cost (tighter per-interval rate cap).
@@ -15,7 +15,7 @@ export const DEFAULT_TERMINATION_FLUSH_BUDGET_MS = 2000
 /**
  * RN-specific resource attribute defaults. Identifies the device's OS so
  * logs can be filtered by platform (e.g. "all errors on Android 13" or
- * "iOS 17 only" in the PostHog UI). User-supplied `resourceAttributes`
+ * "iOS 17 only" in the Insights UI). User-supplied `resourceAttributes`
  * spreads last in `_buildResourceAttributes` so these are overridable.
  *
  * `Platform.Version` is `string` on iOS and `number` on Android — coerce
@@ -28,7 +28,7 @@ function defaultResourceAttributes(): Record<string, string> {
   }
 }
 
-export function resolveLogsConfig(config: PostHogLogsConfig | undefined): ResolvedPostHogLogsConfig {
+export function resolveLogsConfig(config: InsightsLogsConfig | undefined): ResolvedInsightsLogsConfig {
   // `rateCap` is dropped from the spread so the resolved (flat) names below
   // are the only authoritative form on the resolved config.
   const { rateCap: _rateCap, ...rest } = config ?? {}

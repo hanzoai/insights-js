@@ -2,7 +2,7 @@ import { Insights } from '../insights-core'
 import { InsightsConfig } from '../types'
 import { AllExtensions } from '../extensions/extension-bundles'
 import { Autocapture } from '../autocapture'
-import { PostHogFeatureFlags } from '../posthog-featureflags'
+import { InsightsFeatureFlags } from '../insights-featureflags'
 import { SessionRecording } from '../extensions/replay/session-recording'
 import { createInsightsInstance } from './helpers/insights-instance'
 
@@ -71,31 +71,31 @@ describe('__extensionClasses enrollment', () => {
     })
 
     it('eagerly constructs extensions from defaults before init()', () => {
-        PostHog.__defaultExtensionClasses = AllExtensions
+        Insights.__defaultExtensionClasses = AllExtensions
 
-        const posthog = new PostHog()
+        const insights = new Insights()
 
-        expect(posthog.featureFlags).toBeDefined()
-        expect(posthog.toolbar).toBeDefined()
-        expect(posthog.surveys).toBeDefined()
-        expect(posthog.conversations).toBeDefined()
-        expect(posthog.logs).toBeDefined()
-        expect(posthog.experiments).toBeDefined()
-        expect(posthog.exceptions).toBeDefined()
+        expect(insights.featureFlags).toBeDefined()
+        expect(insights.toolbar).toBeDefined()
+        expect(insights.surveys).toBeDefined()
+        expect(insights.conversations).toBeDefined()
+        expect(insights.logs).toBeDefined()
+        expect(insights.experiments).toBeDefined()
+        expect(insights.exceptions).toBeDefined()
     })
 
     it('does not eagerly construct extensions when no defaults exist', () => {
-        PostHog.__defaultExtensionClasses = {}
+        Insights.__defaultExtensionClasses = {}
 
-        const posthog = new PostHog()
+        const insights = new Insights()
 
-        expect(posthog.featureFlags).toBeUndefined()
-        expect(posthog.toolbar).toBeUndefined()
-        expect(posthog.surveys).toBeUndefined()
-        expect(posthog.conversations).toBeUndefined()
-        expect(posthog.logs).toBeUndefined()
-        expect(posthog.experiments).toBeUndefined()
-        expect(posthog.exceptions).toBeUndefined()
+        expect(insights.featureFlags).toBeUndefined()
+        expect(insights.toolbar).toBeUndefined()
+        expect(insights.surveys).toBeUndefined()
+        expect(insights.conversations).toBeUndefined()
+        expect(insights.logs).toBeUndefined()
+        expect(insights.experiments).toBeUndefined()
+        expect(insights.exceptions).toBeUndefined()
     })
 
     it('default extensions are used when __extensionClasses is not provided', async () => {

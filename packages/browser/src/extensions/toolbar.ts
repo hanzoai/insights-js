@@ -29,11 +29,11 @@ export class Toolbar {
 
     // NOTE: We store the state of the toolbar in the global scope to avoid multiple instances of the SDK loading the toolbar
     private _setToolbarState(state: ToolbarState) {
-        assignableWindow['ph_toolbar_state'] = state
+        assignableWindow['hi_toolbar_state'] = state
     }
 
     private _getToolbarState(): ToolbarState {
-        return assignableWindow['ph_toolbar_state'] ?? ToolbarState.UNINITIALIZED
+        return assignableWindow['hi_toolbar_state'] ?? ToolbarState.UNINITIALIZED
     }
 
     initialize(): boolean {
@@ -91,7 +91,7 @@ export class Toolbar {
                   trySafe(() => JSON.parse(decodeURIComponent(stateHash)))
                 : null
 
-            const parseFromUrl = state && state['action'] === 'ph_authorize'
+            const parseFromUrl = state && state['action'] === 'hi_authorize'
 
             if (parseFromUrl) {
                 // happens if they are initializing the toolbar using an old snippet
@@ -132,7 +132,7 @@ export class Toolbar {
     }
 
     private _callLoadToolbar(params: ToolbarParams) {
-        const loadFn = assignableWindow['ph_load_toolbar'] || assignableWindow['ph_load_editor']
+        const loadFn = assignableWindow['hi_load_toolbar'] || assignableWindow['hi_load_editor']
         if (isNullish(loadFn) || !isFunction(loadFn)) {
             logger.warn('No toolbar load function found')
             return

@@ -78,14 +78,14 @@ describe('Prompts', () => {
       const prompts = new Prompts({
         personalApiKey: '  phx_test_key\n',
         projectApiKey: '  phc_test_key\t ',
-        host: '  https://us.posthog.com/\t ',
+        host: '  https://insights.hanzo.ai/\t ',
       })
 
       const result = await prompts.get('test-prompt')
 
       expect(result).toBe(mockPromptResponse.prompt)
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key',
+        'https://insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key',
         {
           method: 'GET',
           headers: {
@@ -102,14 +102,14 @@ describe('Prompts', () => {
         json: () => Promise.resolve({ ...mockPromptResponse, version: 2, prompt: 'Version 2 prompt' }),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = await prompts.get('test-prompt', { version: 2 })
 
       expect(result).toBe('Version 2 prompt')
       expect(mockFetch).toHaveBeenCalledWith(
-        'https://us.posthog.com/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key&version=2',
+        'https://insights.hanzo.ai/api/environments/@current/llm_prompts/name/test-prompt/?token=phc_test_key&version=2',
         {
           method: 'GET',
           headers: {
@@ -156,8 +156,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, version: 1, prompt: 'Version 1 prompt' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const latestResult = await prompts.get('test-prompt', { cacheTtlSeconds: 300 })
       const versionedResult = await prompts.get('test-prompt', { cacheTtlSeconds: 300, version: 1 })
@@ -265,11 +265,11 @@ describe('Prompts', () => {
         status: 404,
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('nonexistent-prompt', { version: 7 })).rejects.toThrow(
-        '[PostHog Prompts] Prompt "nonexistent-prompt" version 7 not found'
+        '[Insights Prompts] Prompt "nonexistent-prompt" version 7 not found'
       )
     })
 
@@ -520,8 +520,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = await prompts.get('test-prompt', { withMetadata: true })
 
@@ -540,8 +540,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call populates cache
       await prompts.get('test-prompt', { withMetadata: true })
@@ -567,8 +567,8 @@ describe('Prompts', () => {
         })
         .mockRejectedValueOnce(new Error('Network error'))
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call populates cache
       await prompts.get('test-prompt', { withMetadata: true, cacheTtlSeconds: 60 })
@@ -591,8 +591,8 @@ describe('Prompts', () => {
     it('should return source "code_fallback" with undefined name/version when fallback is used', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = await prompts.get('test-prompt', {
         withMetadata: true,
@@ -610,8 +610,8 @@ describe('Prompts', () => {
     it('should throw when no cache and no fallback', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await expect(prompts.get('test-prompt', { withMetadata: true })).rejects.toThrow('Network error')
     })
@@ -623,8 +623,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve({ ...mockPromptResponse, version: 3, prompt: 'Version 3 prompt' }),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       const result = await prompts.get('test-prompt', { withMetadata: true, version: 3 })
 
@@ -643,8 +643,8 @@ describe('Prompts', () => {
         json: () => Promise.resolve(mockPromptResponse),
       })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       // First call without metadata populates cache
       const stringResult = await prompts.get('test-prompt', { withMetadata: false })
@@ -680,8 +680,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, name: 'other-prompt' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await prompts.get('test-prompt', withMetadata !== undefined ? { withMetadata } : undefined)
       await prompts.get('other-prompt', withMetadata !== undefined ? { withMetadata } : undefined)
@@ -797,8 +797,8 @@ describe('Prompts', () => {
 
   describe('clearCache()', () => {
     it('should throw when clearing a specific version without a prompt name', () => {
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       expect(() => prompts.clearCache(undefined, 1)).toThrow("'version' requires 'name' to be provided")
     })
@@ -904,8 +904,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, version: 1, prompt: 'Version 1 prompt refreshed' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await prompts.get('test-prompt')
       await prompts.get('test-prompt', { version: 1 })
@@ -936,8 +936,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, version: 1, prompt: 'Version 1 prompt refreshed' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await prompts.get('test-prompt')
       await prompts.get('test-prompt', { version: 1 })
@@ -963,8 +963,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, version: 1, prompt: 'Version 1 prompt refreshed' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await prompts.get('test-prompt', { version: 1 })
       expect(mockFetch).toHaveBeenCalledTimes(1)
@@ -993,8 +993,8 @@ describe('Prompts', () => {
           json: () => Promise.resolve({ ...mockPromptResponse, name: 'foo', prompt: 'Foo latest refreshed' }),
         })
 
-      const posthog = createMockPostHog()
-      const prompts = new Prompts({ posthog })
+      const insights = createMockInsights()
+      const prompts = new Prompts({ insights })
 
       await prompts.get('foo')
       await prompts.get('foo::bar')

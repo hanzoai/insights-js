@@ -37,14 +37,14 @@ describe('InsightsProvider component', () => {
             const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
             render(
-                <PostHogProvider apiKey={undefined as any} options={initialOptions}>
+                <InsightsProvider apiKey={undefined as any} options={initialOptions}>
                     <div>Test</div>
-                </PostHogProvider>
+                </InsightsProvider>
             )
 
-            expect(posthogJs.init).not.toHaveBeenCalled()
+            expect(insightsJs.init).not.toHaveBeenCalled()
             expect(consoleSpy).toHaveBeenCalledWith(
-                '[PostHog.js] No `apiKey` or `client` were provided to `PostHogProvider`. Using default global `window.posthog` instance. You must initialize it manually. This is not recommended behavior.'
+                '[Insights.js] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global `window.insights` instance. You must initialize it manually. This is not recommended behavior.'
             )
 
             consoleSpy.mockRestore()

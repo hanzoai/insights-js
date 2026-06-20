@@ -1,13 +1,13 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { PostHogProvider } from '../src/app/PostHogProvider'
+import { InsightsProvider } from '../src/app/InsightsProvider'
 
-// Mock ClientPostHogProvider
+// Mock ClientInsightsProvider
 const mockClientProvider = jest.fn(({ children }: { children: React.ReactNode }) => (
     <div data-testid="client-provider">{children}</div>
 ))
-jest.mock('../src/client/ClientPostHogProvider', () => ({
-    ClientPostHogProvider: (props: any) => mockClientProvider(props),
+jest.mock('../src/client/ClientInsightsProvider', () => ({
+    ClientInsightsProvider: (props: any) => mockClientProvider(props),
 }))
 
 // Mock next/headers
@@ -29,7 +29,7 @@ jest.mock('../src/server/nodeClientCache', () => ({
 // in test, just call the function directly (no caching)
 ;(React as any).cache = (fn: Function) => fn
 
-describe('PostHogProvider', () => {
+describe('InsightsProvider', () => {
     const originalEnv = process.env
 
     beforeEach(() => {
@@ -41,8 +41,8 @@ describe('PostHogProvider', () => {
         process.env = originalEnv
     })
 
-    it('renders children via ClientPostHogProvider', async () => {
-        const element = await PostHogProvider({
+    it('renders children via ClientInsightsProvider', async () => {
+        const element = await InsightsProvider({
             apiKey: 'phc_test123',
             children: <div data-testid="child">Hello</div>,
         })
@@ -50,9 +50,9 @@ describe('PostHogProvider', () => {
         expect(screen.getByTestId('child')).toBeInTheDocument()
     })
 
-    it('passes apiKey and clientOptions to ClientPostHogProvider', async () => {
-        const clientOptions = { api_host: 'https://custom.posthog.com' }
-        const element = await PostHogProvider({
+    it('passes apiKey and clientOptions to ClientInsightsProvider', async () => {
+        const clientOptions = { api_host: 'https://custom.insights.hanzo.ai' }
+        const element = await InsightsProvider({
             apiKey: 'phc_test123',
             clientOptions,
             children: <div>Child</div>,
@@ -61,28 +61,28 @@ describe('PostHogProvider', () => {
         expect(mockClientProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 apiKey: 'phc_test123',
-                options: expect.objectContaining({ api_host: 'https://custom.posthog.com' }),
+                options: expect.objectContaining({ api_host: 'https://custom.insights.hanzo.ai' }),
             })
         )
     })
 
-    it('trims apiKey and api_host before passing them to ClientPostHogProvider', async () => {
-        const element = await PostHogProvider({
+    it('trims apiKey and api_host before passing them to ClientInsightsProvider', async () => {
+        const element = await InsightsProvider({
             apiKey: '  phc_test123\n',
-            clientOptions: { api_host: '  https://custom.posthog.com/\t ' },
+            clientOptions: { api_host: '  https://custom.insights.hanzo.ai/\t ' },
             children: <div>Child</div>,
         })
         render(element)
         expect(mockClientProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 apiKey: 'phc_test123',
-                options: expect.objectContaining({ api_host: 'https://custom.posthog.com/' }),
+                options: expect.objectContaining({ api_host: 'https://custom.insights.hanzo.ai/' }),
             })
         )
     })
 
     it('does not pass bootstrap when bootstrapFlags is not set', async () => {
-        const element = await PostHogProvider({
+        const element = await InsightsProvider({
             apiKey: 'phc_test123',
             children: <div>Child</div>,
         })
@@ -96,7 +96,7 @@ describe('PostHogProvider', () => {
 
     describe('Next.js client defaults', () => {
         it('applies Next.js-specific defaults when no options provided', async () => {
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 children: <div>Child</div>,
             })
@@ -104,7 +104,7 @@ describe('PostHogProvider', () => {
             expect(mockClientProvider).toHaveBeenCalledWith(
                 expect.objectContaining({
                     options: expect.objectContaining({
-                        api_host: 'https://us.i.posthog.com',
+                        api_host: 'https://us.i.insights.hanzo.ai',
                         persistence: 'localStorage+cookie',
                         opt_out_capturing_persistence_type: 'cookie',
                         opt_out_persistence_by_default: true,
@@ -114,7 +114,7 @@ describe('PostHogProvider', () => {
         })
 
         it('allows user clientOptions to override defaults', async () => {
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 clientOptions: {
                     persistence: 'memory',
@@ -138,7 +138,7 @@ describe('PostHogProvider', () => {
     it('does not call cookies() when bootstrapFlags is off (static-safe)', async () => {
         const { cookies } = require('next/headers.js')
 
-        const element = await PostHogProvider({
+        const element = await InsightsProvider({
             apiKey: 'phc_test123',
             children: <div>Child</div>,
         })
@@ -147,11 +147,11 @@ describe('PostHogProvider', () => {
         expect(cookies).not.toHaveBeenCalled()
     })
 
-    it('warns and renders children without ClientPostHogProvider when apiKey is empty and env var is not set', async () => {
-        delete process.env.NEXT_PUBLIC_POSTHOG_KEY
+    it('warns and renders children without ClientInsightsProvider when apiKey is empty and env var is not set', async () => {
+        delete process.env.NEXT_PUBLIC_INSIGHTS_KEY
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-        const element = await PostHogProvider({
+        const element = await InsightsProvider({
             apiKey: '',
             children: <div data-testid="child">Child</div>,
         })
@@ -159,13 +159,13 @@ describe('PostHogProvider', () => {
 
         expect(screen.getByTestId('child')).toBeInTheDocument()
         expect(mockClientProvider).not.toHaveBeenCalled()
-        expect(warnSpy).toHaveBeenCalledWith('[PostHog Next.js] apiKey is required — PostHog will not be initialized')
+        expect(warnSpy).toHaveBeenCalledWith('[Insights Next.js] apiKey is required — Insights will not be initialized')
         warnSpy.mockRestore()
     })
 
     it('warns when apiKey does not start with phc_', async () => {
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
-        const element = await PostHogProvider({
+        const element = await InsightsProvider({
             apiKey: 'not_a_valid_key',
             children: <div>Child</div>,
         })
@@ -176,7 +176,7 @@ describe('PostHogProvider', () => {
 
     it('does not warn when apiKey starts with phc_', async () => {
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
-        const element = await PostHogProvider({
+        const element = await InsightsProvider({
             apiKey: 'phc_test123',
             children: <div>Child</div>,
         })
@@ -186,9 +186,9 @@ describe('PostHogProvider', () => {
     })
 
     describe('environment variable defaults', () => {
-        it('reads apiKey from NEXT_PUBLIC_POSTHOG_KEY when prop is omitted', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_from_env'
-            const element = await PostHogProvider({
+        it('reads apiKey from NEXT_PUBLIC_INSIGHTS_KEY when prop is omitted', async () => {
+            process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_from_env'
+            const element = await InsightsProvider({
                 children: <div>Child</div>,
             })
             render(element)
@@ -196,8 +196,8 @@ describe('PostHogProvider', () => {
         })
 
         it('prefers apiKey prop over env var', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_from_env'
-            const element = await PostHogProvider({
+            process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_from_env'
+            const element = await InsightsProvider({
                 apiKey: 'phc_from_prop',
                 children: <div>Child</div>,
             })
@@ -205,46 +205,46 @@ describe('PostHogProvider', () => {
             expect(mockClientProvider).toHaveBeenCalledWith(expect.objectContaining({ apiKey: 'phc_from_prop' }))
         })
 
-        it('reads api_host from NEXT_PUBLIC_POSTHOG_HOST when not in clientOptions', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_HOST = 'https://eu.posthog.com'
-            const element = await PostHogProvider({
+        it('reads api_host from NEXT_PUBLIC_INSIGHTS_HOST when not in clientOptions', async () => {
+            process.env.NEXT_PUBLIC_INSIGHTS_HOST = 'https://insights.hanzo.ai'
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 children: <div>Child</div>,
             })
             render(element)
             expect(mockClientProvider).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    options: expect.objectContaining({ api_host: 'https://eu.posthog.com' }),
+                    options: expect.objectContaining({ api_host: 'https://insights.hanzo.ai' }),
                 })
             )
         })
 
         it('trims apiKey and api_host from env vars', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_KEY = '  phc_from_env\n'
-            process.env.NEXT_PUBLIC_POSTHOG_HOST = '  https://eu.posthog.com/\t '
-            const element = await PostHogProvider({
+            process.env.NEXT_PUBLIC_INSIGHTS_KEY = '  phc_from_env\n'
+            process.env.NEXT_PUBLIC_INSIGHTS_HOST = '  https://insights.hanzo.ai/\t '
+            const element = await InsightsProvider({
                 children: <div>Child</div>,
             })
             render(element)
             expect(mockClientProvider).toHaveBeenCalledWith(
                 expect.objectContaining({
                     apiKey: 'phc_from_env',
-                    options: expect.objectContaining({ api_host: 'https://eu.posthog.com/' }),
+                    options: expect.objectContaining({ api_host: 'https://insights.hanzo.ai/' }),
                 })
             )
         })
 
         it('prefers clientOptions.api_host over env var', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_HOST = 'https://eu.posthog.com'
-            const element = await PostHogProvider({
+            process.env.NEXT_PUBLIC_INSIGHTS_HOST = 'https://insights.hanzo.ai'
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
-                clientOptions: { api_host: 'https://custom.posthog.com' },
+                clientOptions: { api_host: 'https://custom.insights.hanzo.ai' },
                 children: <div>Child</div>,
             })
             render(element)
             expect(mockClientProvider).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    options: expect.objectContaining({ api_host: 'https://custom.posthog.com' }),
+                    options: expect.objectContaining({ api_host: 'https://custom.insights.hanzo.ai' }),
                 })
             )
         })
@@ -262,7 +262,7 @@ describe('PostHogProvider', () => {
             const { cookies } = require('next/headers.js')
             cookies.mockResolvedValue({
                 get: jest.fn((name: string) => {
-                    if (name === 'ph_phc_test123_posthog') {
+                    if (name === 'hi_phc_test123_insights') {
                         return { name, value: cookieValue }
                     }
                     // Consent cookie — opted in so flag evaluation proceeds
@@ -286,7 +286,7 @@ describe('PostHogProvider', () => {
         })
 
         it('evaluates all flags when bootstrapFlags is true', async () => {
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -305,7 +305,7 @@ describe('PostHogProvider', () => {
         })
 
         it('evaluates specific flags when flagKeys provided', async () => {
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: { flags: ['flag-1'] },
                 children: <div>Child</div>,
@@ -316,7 +316,7 @@ describe('PostHogProvider', () => {
         })
 
         it('always includes payloads in bootstrap', async () => {
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -334,7 +334,7 @@ describe('PostHogProvider', () => {
         })
 
         it('disables first flag load on client when bootstrap succeeds', async () => {
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -354,7 +354,7 @@ describe('PostHogProvider', () => {
             mockGetAllFlagsAndPayloads.mockRejectedValue(new Error('network timeout'))
             const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -367,7 +367,7 @@ describe('PostHogProvider', () => {
                 })
             )
             expect(warnSpy).toHaveBeenCalledWith(
-                '[PostHog Next.js] Failed to evaluate bootstrap flags:',
+                '[Insights Next.js] Failed to evaluate bootstrap flags:',
                 expect.any(Error)
             )
             warnSpy.mockRestore()
@@ -377,7 +377,7 @@ describe('PostHogProvider', () => {
             mockGetAllFlagsAndPayloads.mockRejectedValue(new Error('network timeout'))
             jest.spyOn(console, 'warn').mockImplementation()
 
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -421,11 +421,11 @@ describe('PostHogProvider', () => {
 
         it('skips flag evaluation when consent cookie is 0', async () => {
             setupCookiesWithConsent({
-                ph_phc_test123_posthog: identifiedCookieValue,
+                hi_phc_test123_insights: identifiedCookieValue,
                 __ph_opt_in_out_phc_test123: '0',
             })
 
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -438,11 +438,11 @@ describe('PostHogProvider', () => {
 
         it('evaluates flags when consent cookie is 1', async () => {
             setupCookiesWithConsent({
-                ph_phc_test123_posthog: identifiedCookieValue,
+                hi_phc_test123_insights: identifiedCookieValue,
                 __ph_opt_in_out_phc_test123: '1',
             })
 
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,
@@ -454,10 +454,10 @@ describe('PostHogProvider', () => {
 
         it('skips flag evaluation when no consent cookie and opt_out_capturing_by_default is true', async () => {
             setupCookiesWithConsent({
-                ph_phc_test123_posthog: identifiedCookieValue,
+                hi_phc_test123_insights: identifiedCookieValue,
             })
 
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 clientOptions: { opt_out_capturing_by_default: true },
                 bootstrapFlags: true,
@@ -471,10 +471,10 @@ describe('PostHogProvider', () => {
 
         it('evaluates flags when no consent cookie and opt_out_capturing_by_default is false (default)', async () => {
             setupCookiesWithConsent({
-                ph_phc_test123_posthog: identifiedCookieValue,
+                hi_phc_test123_insights: identifiedCookieValue,
             })
 
-            const element = await PostHogProvider({
+            const element = await InsightsProvider({
                 apiKey: 'phc_test123',
                 bootstrapFlags: true,
                 children: <div>Child</div>,

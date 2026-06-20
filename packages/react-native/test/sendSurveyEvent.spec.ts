@@ -69,21 +69,21 @@ describe('sendSurveyEvent', () => {
     it('should include survey language when provided', () => {
       const survey = createMockSurvey()
 
-      sendSurveyShownEvent(survey, mockPostHog, 'pt')
-      dismissedSurveyEvent(survey, {}, mockPostHog, 'pt')
-      sendSurveyEvent({}, survey, mockPostHog, 'pt')
+      sendSurveyShownEvent(survey, mockInsights, 'pt')
+      dismissedSurveyEvent(survey, {}, mockInsights, 'pt')
+      sendSurveyEvent({}, survey, mockInsights, 'pt')
 
-      expect(mockPostHog.capture).toHaveBeenNthCalledWith(
+      expect(mockInsights.capture).toHaveBeenNthCalledWith(
         1,
         'survey shown',
         expect.objectContaining({ $survey_language: 'pt' })
       )
-      expect(mockPostHog.capture).toHaveBeenNthCalledWith(
+      expect(mockInsights.capture).toHaveBeenNthCalledWith(
         2,
         'survey dismissed',
         expect.objectContaining({ $survey_language: 'pt' })
       )
-      expect(mockPostHog.capture).toHaveBeenNthCalledWith(
+      expect(mockInsights.capture).toHaveBeenNthCalledWith(
         3,
         'survey sent',
         expect.objectContaining({ $survey_language: 'pt' })
@@ -308,10 +308,10 @@ describe('sendSurveyEvent', () => {
 })
 
 describe('dismissedSurveyEvent', () => {
-  let mockPostHog: any
+  let mockInsights: any
 
   beforeEach(() => {
-    mockPostHog = {
+    mockInsights = {
       capture: jest.fn(),
     }
   })
@@ -375,8 +375,8 @@ describe('dismissedSurveyEvent', () => {
   ])('$label', ({ responses, expectedPayload }) => {
     const survey = createMockSurvey()
 
-    dismissedSurveyEvent(survey, responses, mockPostHog)
+    dismissedSurveyEvent(survey, responses, mockInsights)
 
-    expect(mockPostHog.capture).toHaveBeenCalledWith('survey dismissed', expectedPayload)
+    expect(mockInsights.capture).toHaveBeenCalledWith('survey dismissed', expectedPayload)
   })
 })

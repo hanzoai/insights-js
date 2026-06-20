@@ -225,13 +225,13 @@ describe('Insights React Native', () => {
             throw new Error('sync throw from storage backend')
           },
         }
-        const syncStorage = new PostHogRNStorage(syncThrowingStorage, '.test-sync.json')
+        const syncStorage = new InsightsRNStorage(syncThrowingStorage, '.test-sync.json')
         const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
         syncStorage.setItem('a', '1')
         jest.runOnlyPendingTimers()
 
-        expect(consoleSpy).toHaveBeenCalledWith('PostHog storage scheduled persist threw:', expect.any(Error))
+        expect(consoleSpy).toHaveBeenCalledWith('Insights storage scheduled persist threw:', expect.any(Error))
         consoleSpy.mockRestore()
       } finally {
         jest.useRealTimers()
@@ -300,13 +300,13 @@ describe('Insights React Native', () => {
           throw new Error('sync throw from storage backend')
         },
       }
-      const syncStorage = new PostHogRNStorage(syncThrowingStorage, '.test-sync.json')
+      const syncStorage = new InsightsRNStorage(syncThrowingStorage, '.test-sync.json')
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
       syncStorage.setItem('a', '1')
       await expect(syncStorage.waitForPersist()).resolves.toBeUndefined()
 
-      expect(consoleSpy).toHaveBeenCalledWith('PostHog storage drain persist threw:', expect.any(Error))
+      expect(consoleSpy).toHaveBeenCalledWith('Insights storage drain persist threw:', expect.any(Error))
       consoleSpy.mockRestore()
     })
 
@@ -317,7 +317,7 @@ describe('Insights React Native', () => {
       jest.useFakeTimers()
       try {
         const cache: Record<string, string> = {}
-        const sync = new PostHogRNStorage(
+        const sync = new InsightsRNStorage(
           {
             getItem: (k: string) => cache[k] ?? null,
             setItem: (k: string, v: string) => {
@@ -343,7 +343,7 @@ describe('Insights React Native', () => {
       jest.useFakeTimers()
       try {
         const cache: Record<string, string> = {}
-        const sync = new PostHogRNStorage(
+        const sync = new InsightsRNStorage(
           {
             getItem: (k: string) => cache[k] ?? null,
             setItem: (k: string, v: string) => {

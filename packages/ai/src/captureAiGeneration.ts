@@ -1,4 +1,4 @@
-import { EventMessage, PostHog } from '@hanzo/insights-node'
+import { EventMessage, Insights } from '@hanzo/insights-node'
 import type { ChatCompletionTool } from 'openai/resources/chat/completions'
 import type { Tool as GeminiTool } from '@google/genai'
 import AnthropicOriginal from '@anthropic-ai/sdk'
@@ -84,7 +84,7 @@ export interface CaptureAiGenerationOptions {
 }
 
 /**
- * Capture an `$ai_generation` (or `$ai_embedding`) event to PostHog.
+ * Capture an `$ai_generation` (or `$ai_embedding`) event to Insights.
  *
  * This is the canonical primitive that every `@hanzo/insights-ai` wrapper
  * (`withTracing`, `OpenAI`, `Anthropic`, `GoogleGenAI`, …) funnels through, so
@@ -93,10 +93,10 @@ export interface CaptureAiGenerationOptions {
  * same events the SDK wrappers produce.
  *
  * When `error` is set, the event is captured as an error. If the error is an
- * object, it is mutated in place to set `__posthog_previously_captured_error`
+ * object, it is mutated in place to set `__insights_previously_captured_error`
  * so callers can re-throw the original error reference safely.
  */
-export const captureAiGeneration = async (client: PostHog, options: CaptureAiGenerationOptions): Promise<void> => {
+export const captureAiGeneration = async (client: Insights, options: CaptureAiGenerationOptions): Promise<void> => {
   if (!client.capture) {
     return
   }
@@ -125,7 +125,7 @@ export const captureAiGeneration = async (client: PostHog, options: CaptureAiGen
       exceptionId = uuidv7()
       client.captureException(options.error, undefined, { $ai_trace_id: traceId }, exceptionId)
       if (typeof options.error === 'object') {
-        ;(options.error as CoreErrorTracking.PreviouslyCapturedError).__posthog_previously_captured_error = true
+        ;(options.error as CoreErrorTracking.PreviouslyCapturedError).__insights_previously_captured_error = true
       }
     }
 
@@ -157,7 +157,7 @@ export const captureAiGeneration = async (client: PostHog, options: CaptureAiGen
   }
 
   const properties: Record<string, unknown> = {
-    $ai_lib: 'posthog-ai',
+    $ai_lib: 'insights-ai',
     $ai_lib_version: version,
     $ai_provider: options.providerOverride ?? options.provider,
     $ai_model: options.modelOverride ?? options.model,

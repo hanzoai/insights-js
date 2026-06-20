@@ -154,7 +154,7 @@ function _getSearchInfoFromReferrer(referrer: string): Record<string, any> {
 
         const keyword = document ? getQueryParam(document.referrer, param) : ''
         if (keyword.length) {
-            ret['ph_keyword'] = keyword
+            ret['hi_keyword'] = keyword
         }
     }
 

@@ -23,7 +23,7 @@ export class Insights extends InsightsCore {
     super(apiKey, options)
 
     // @hanzo/insights stores options in one object on
-    this._storageKey = options?.persistence_name ? `ph_${options.persistence_name}` : `ph_${apiKey}_insights`
+    this._storageKey = options?.persistence_name ? `hi_${options.persistence_name}` : `hi_${apiKey}_insights`
 
     this._storage = getStorage(options?.persistence || 'localStorage', this.getWindow())
     this.setupBootstrap(options)

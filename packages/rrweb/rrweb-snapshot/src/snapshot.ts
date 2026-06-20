@@ -766,7 +766,7 @@ function serializeElementNode(
       // we can't detect whether the dialog is modal or non-modal open, so have to guess
       // hopefully this is only safari 15.4 and 15.5
       attributes.rr_open_mode = 'modal';
-      attributes.ph_rr_could_not_detect_modal = true;
+      attributes.hi_rr_could_not_detect_modal = true;
     }
   }
 

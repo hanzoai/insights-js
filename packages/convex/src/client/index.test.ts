@@ -32,14 +32,14 @@ describe('Insights client', () => {
   })
 
   test('does not forward credentials to component calls (env-driven config)', async () => {
-    // Credentials live on the component as env vars (POSTHOG_PROJECT_TOKEN, POSTHOG_HOST,
-    // POSTHOG_PERSONAL_API_KEY) declared in convex.config.ts and read inside each action.
+    // Credentials live on the component as env vars (INSIGHTS_PROJECT_TOKEN, INSIGHTS_HOST,
+    // INSIGHTS_PERSONAL_API_KEY) declared in convex.config.ts and read inside each action.
     // The client must not plumb them through every call site.
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'test-event',
     })
@@ -71,17 +71,17 @@ describe('Insights client', () => {
     expect(typeof insights.getAllFlagsAndPayloads).toBe('function')
   })
 
-  test('exposes reloadFeatureFlags method (parity with posthog-node)', () => {
-    const posthog = new PostHog({} as never)
-    expect(typeof posthog.reloadFeatureFlags).toBe('function')
+  test('exposes reloadFeatureFlags method (parity with insights-node)', () => {
+    const insights = new Insights({} as never)
+    expect(typeof insights.reloadFeatureFlags).toBe('function')
   })
 
   test('reloadFeatureFlags forwards to the component refresh action with no args', async () => {
     const component = { lib: { refreshFlagDefinitions: 'refresh_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = { runAction: jest.fn(async () => ({ status: 'updated' })) }
 
-    await posthog.reloadFeatureFlags(ctx as never)
+    await insights.reloadFeatureFlags(ctx as never)
 
     expect(ctx.runAction).toHaveBeenCalledWith('refresh_ref', {})
   })
@@ -111,23 +111,23 @@ describe('Insights client', () => {
       cohorts: {},
     })
     const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = {
       runQuery: jest.fn(async () => ({ localEvalConfigured: true, data: definitions, fetchedAt: Date.now() })),
     }
 
-    const payload = await posthog.getFeatureFlagPayload(ctx as never, { key: 'flag', matchValue: 'red' })
+    const payload = await insights.getFeatureFlagPayload(ctx as never, { key: 'flag', matchValue: 'red' })
     expect(payload).toBe('red-payload')
   })
 })
 
 describe('local-eval configuration', () => {
-  // When `POSTHOG_PERSONAL_API_KEY` isn't set on the component the cron never runs and local eval
+  // When `INSIGHTS_PERSONAL_API_KEY` isn't set on the component the cron never runs and local eval
   // can never produce a verdict. The client throws so callers don't silently get `undefined` and
   // wonder why their flag rollouts aren't taking effect.
   test('throws when local eval is not configured (no PAK)', async () => {
     const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = {
       runQuery: jest.fn(async () => ({
         localEvalConfigured: false,
@@ -136,7 +136,7 @@ describe('local-eval configuration', () => {
       })),
     }
 
-    await expect(posthog.getFeatureFlag(ctx as never, { key: 'my-flag', distinctId: 'u1' })).rejects.toThrow(
+    await expect(insights.getFeatureFlag(ctx as never, { key: 'my-flag', distinctId: 'u1' })).rejects.toThrow(
       'local feature flag evaluation is not configured'
     )
   })
@@ -145,7 +145,7 @@ describe('local-eval configuration', () => {
   // throwing, so callers' fallback paths still work during the brief warm-up window.
   test('returns undefined when PAK is configured but definitions have not been cached yet', async () => {
     const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = {
       runQuery: jest.fn(async () => ({
         localEvalConfigured: true,
@@ -154,7 +154,7 @@ describe('local-eval configuration', () => {
       })),
     }
 
-    const value = await posthog.getFeatureFlag(ctx as never, { key: 'my-flag', distinctId: 'u1' })
+    const value = await insights.getFeatureFlag(ctx as never, { key: 'my-flag', distinctId: 'u1' })
     expect(value).toBeUndefined()
   })
 })
@@ -255,10 +255,10 @@ describe('captureException', () => {
 describe('$-prefixed property serialization', () => {
   test('serializes properties with $-prefixed keys as JSON strings', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: '$ai_generation',
       properties: {
@@ -281,10 +281,10 @@ describe('$-prefixed property serialization', () => {
 
   test('serializes identify properties with $set and $set_once', async () => {
     const component = { lib: { identify: 'identify_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.identify(ctx as never, {
+    await insights.identify(ctx as never, {
       distinctId: 'user-1',
       properties: {
         $set: { name: 'Alice' },
@@ -302,10 +302,10 @@ describe('$-prefixed property serialization', () => {
 
   test('passes undefined when properties are not provided', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'simple_event',
     })
@@ -316,7 +316,7 @@ describe('$-prefixed property serialization', () => {
 
   test('preserves nested objects and arrays through serialization', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
     const properties = {
@@ -328,7 +328,7 @@ describe('$-prefixed property serialization', () => {
       boolValue: false,
     }
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: '$ai_generation',
       properties,
@@ -340,10 +340,10 @@ describe('$-prefixed property serialization', () => {
 
   test('serializes groups with string and number values', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'test',
       groups: { company: 'acme', project_id: 42 },
@@ -356,10 +356,10 @@ describe('$-prefixed property serialization', () => {
 
   test('serializes captureException additionalProperties', async () => {
     const component = { lib: { captureException: 'captureException_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.captureException(ctx as never, {
+    await insights.captureException(ctx as never, {
       error: new Error('test'),
       distinctId: 'user-1',
       additionalProperties: { $ai_trace_id: 'trace-123', page: '/checkout' },
@@ -375,10 +375,10 @@ describe('$-prefixed property serialization', () => {
 
   test('handles empty objects', async () => {
     const component = { lib: { capture: 'capture_ref' } }
-    const posthog = new PostHog(component as never)
+    const insights = new Insights(component as never)
     const ctx = mockSchedulerCtx()
 
-    await posthog.capture(ctx as never, {
+    await insights.capture(ctx as never, {
       distinctId: 'user-1',
       event: 'test',
       properties: {},

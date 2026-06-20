@@ -411,23 +411,23 @@ describe('Lazy SessionRecording', () => {
             })
 
             it('ignores invalid persisted JSON config when checking freshness', () => {
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_REMOTE_CONFIG]: '{not json',
                 })
 
                 expect(sessionRecording['_isRemoteConfigFresh']()).toBe(false)
-                expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBe('{not json')
+                expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBe('{not json')
             })
 
             it('ignores invalid persisted JSON config when reading remote config', () => {
-                posthog.persistence?.register({
+                insights.persistence?.register({
                     [SESSION_RECORDING_REMOTE_CONFIG]: '{not json',
                 })
 
                 const result = sessionRecording['_lazyLoadedSessionRecording']['_remoteConfig']
 
                 expect(result).toBeUndefined()
-                expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBe('{not json')
+                expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG)).toBe('{not json')
             })
 
             it('trusts stale config once recording has started (long-lived SPA)', () => {
@@ -1221,7 +1221,7 @@ describe('Lazy SessionRecording', () => {
 
             it('restarts recorder when session rotates externally while idle', () => {
                 // Regression test: analytics events (e.g. $pageleave, $exception) can trigger
-                // session rotation via checkAndGetSessionAndWindowId in posthog-core while the
+                // session rotation via checkAndGetSessionAndWindowId in insights-core while the
                 // recorder is idle. _onSessionIdCallback must restart the recorder in this case
                 // because _updateWindowAndSessionIds returns early when _isIdle is true.
                 const firstActivityTimestamp = startingTimestamp + 100
@@ -1243,7 +1243,7 @@ describe('Lazy SessionRecording', () => {
                 expect(sessionRecording['_lazyLoadedSessionRecording']['_isIdle']).toEqual(true)
 
                 // Step 4: simulate what happens when an analytics event (e.g. $pageleave)
-                // triggers session rotation. In production, posthog-core calls
+                // triggers session rotation. In production, insights-core calls
                 // checkAndGetSessionAndWindowId() during _calculate_event_properties,
                 // which rotates the session in the session manager and then fires the
                 // _onSessionIdCallback synchronously.
@@ -1270,7 +1270,7 @@ describe('Lazy SessionRecording', () => {
                 emitActiveEvent(firstActivityTimestamp)
                 const firstSessionId = sessionRecording['_lazyLoadedSessionRecording']['_sessionId']
 
-                const recordMock = assignableWindow.__PosthogExtensions__.rrweb.record as Mock
+                const recordMock = assignableWindow.__InsightsExtensions__.rrweb.record as Mock
                 expect(recordMock).toHaveBeenCalledTimes(1)
 
                 emitInactiveEvent(idleTriggerTimestamp, true)
@@ -1387,7 +1387,7 @@ describe('Lazy SessionRecording', () => {
             })
         })
 
-        describe('rotation after persistence is cleared (posthog.reset)', () => {
+        describe('rotation after persistence is cleared (insights.reset)', () => {
             beforeEach(() => {
                 sessionRecording.onRemoteConfig(
                     makeFlagsResponse({
@@ -1398,18 +1398,18 @@ describe('Lazy SessionRecording', () => {
                 )
             })
 
-            it('restarts rrweb on the rotation that follows posthog.reset() when remote config is preserved', () => {
+            it('restarts rrweb on the rotation that follows insights.reset() when remote config is preserved', () => {
                 // Sanity: the recorder started on remote-config arrival.
-                const recordMock = assignableWindow.__PosthogExtensions__.rrweb.record as Mock
+                const recordMock = assignableWindow.__InsightsExtensions__.rrweb.record as Mock
                 expect(recordMock).toHaveBeenCalledTimes(1)
 
-                // Simulate posthog.reset() with the fix in place: snapshot the
+                // Simulate insights.reset() with the fix in place: snapshot the
                 // recording remote config, clear all persistence, then re-register
-                // the snapshotted config. This is exactly what posthog-core.ts does.
-                const preservedConfig = posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG)
+                // the snapshotted config. This is exactly what insights-core.ts does.
+                const preservedConfig = insights.get_property(SESSION_RECORDING_REMOTE_CONFIG)
                 expect(preservedConfig).toBeDefined()
-                posthog.persistence?.clear()
-                posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: preservedConfig })
+                insights.persistence?.clear()
+                insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: preservedConfig })
 
                 // resetSessionId() forces a new session id on the next
                 // checkAndGetSessionAndWindowId() call.
@@ -2790,13 +2790,13 @@ describe('Lazy SessionRecording', () => {
             )
 
             // simulate sessionManager teardown (cookieless opt-out) before a late rrweb event
-            ;(posthog as any).sessionManager = undefined
-            ;(posthog.capture as jest.Mock).mockClear()
+            ;(insights as any).sessionManager = undefined
+            ;(insights.capture as jest.Mock).mockClear()
 
             expect(() =>
                 sessionRecording.onRRwebEmit(createIncrementalSnapshot({ data: { source: 1 } }) as eventWithTime)
             ).not.toThrow()
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         })
     })
 
@@ -3328,7 +3328,7 @@ describe('Lazy SessionRecording', () => {
             expect(lazy).toBeUndefined()
             // Once the lazy recorder exists but start has not run, both should be false.
             // We simulate that by constructing it directly without driving the script load.
-            const standalone = new LazyLoadedSessionRecording(posthog)
+            const standalone = new LazyLoadedSessionRecording(insights)
             expect(standalone.sdkDebugProperties.$sdk_debug_rrweb_attached).toBe(false)
             expect(standalone.sdkDebugProperties.$sdk_debug_rrweb_start_attempted).toBe(false)
         })
@@ -3349,16 +3349,16 @@ describe('Lazy SessionRecording', () => {
 
         it('reports start_attempted: true but attached: false when rrweb.record returns undefined', () => {
             loadScriptMock.mockImplementation((_ph: any, _path: any, callback: any) => {
-                assignableWindow.__PosthogExtensions__.rrweb = {
+                assignableWindow.__InsightsExtensions__.rrweb = {
                     record: jest.fn(() => undefined),
                     version: 'fake',
                     wasMaxDepthReached: jest.fn(() => false),
                     resetMaxDepthState: jest.fn(),
                 }
-                assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot = jest.fn()
-                assignableWindow.__PosthogExtensions__.rrweb.record.addCustomEvent = jest.fn()
-                assignableWindow.__PosthogExtensions__.initSessionRecording = () => {
-                    return new LazyLoadedSessionRecording(posthog)
+                assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot = jest.fn()
+                assignableWindow.__InsightsExtensions__.rrweb.record.addCustomEvent = jest.fn()
+                assignableWindow.__InsightsExtensions__.initSessionRecording = () => {
+                    return new LazyLoadedSessionRecording(insights)
                 }
                 callback()
             })
@@ -4147,7 +4147,7 @@ describe('Lazy SessionRecording', () => {
         it('does not start recording from stale persisted config', () => {
             const CONFIG_TTL = RECORDING_REMOTE_CONFIG_TTL_MS
 
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -4317,7 +4317,7 @@ describe('Lazy SessionRecording', () => {
 
     describe('V2 Trigger Groups Integration', () => {
         it('registers session properties when trigger group matches and is sampled', () => {
-            const registerSpy = jest.spyOn(posthog, 'register_for_session')
+            const registerSpy = jest.spyOn(insights, 'register_for_session')
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4403,7 +4403,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('tracks multiple trigger groups with union behavior', () => {
-            const registerSpy = jest.spyOn(posthog, 'register_for_session')
+            const registerSpy = jest.spyOn(insights, 'register_for_session')
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4461,7 +4461,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('triggers immediately when trigger group has empty conditions', () => {
-            const registerSpy = jest.spyOn(posthog, 'register_for_session')
+            const registerSpy = jest.spyOn(insights, 'register_for_session')
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4504,7 +4504,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('respects sampleRate < 1.0 and samples out when triggered', () => {
-            const registerSpy = jest.spyOn(posthog, 'register_for_session')
+            const registerSpy = jest.spyOn(insights, 'register_for_session')
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4550,7 +4550,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('matchType all requires ALL conditions to match before triggering', () => {
-            const registerSpy = jest.spyOn(posthog, 'register_for_session')
+            const registerSpy = jest.spyOn(insights, 'register_for_session')
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4604,7 +4604,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('respects minDurationMs and delays full recording until duration passes', () => {
-            const registerSpy = jest.spyOn(posthog, 'register_for_session')
+            const registerSpy = jest.spyOn(insights, 'register_for_session')
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4710,7 +4710,7 @@ describe('Lazy SessionRecording', () => {
             // filters to express OR between clauses (e.g. "purchase amount > 100" OR
             // "purchase by a VIP"). An earlier .find()-based implementation only ever
             // evaluated the first clause, making subsequent same-name entries unreachable.
-            posthog.persistence?.register({ $stored_person_properties: { tier: 'vip' } })
+            insights.persistence?.register({ $stored_person_properties: { tier: 'vip' } })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4755,7 +4755,7 @@ describe('Lazy SessionRecording', () => {
 
         it('does not activate when all same-name event clauses fail', () => {
             // Companion regression: when no same-name clause passes, activation is still blocked.
-            posthog.persistence?.register({ $stored_person_properties: { tier: 'free' } })
+            insights.persistence?.register({ $stored_person_properties: { tier: 'free' } })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4797,14 +4797,14 @@ describe('Lazy SessionRecording', () => {
             expect(sessionRecording.status).toBe('buffering')
 
             // A later event that matches the second clause should still activate.
-            posthog.persistence?.register({ $stored_person_properties: { tier: 'vip' } })
+            insights.persistence?.register({ $stored_person_properties: { tier: 'vip' } })
             simpleEventEmitter.emit('eventCaptured', { event: 'purchase', properties: { amount: 50 } })
             expect(sessionRecording.status).toBe('sampled')
         })
 
         it('blocks trigger activation when group-level property filters fail', () => {
             // Set person properties
-            posthog.persistence?.register({ $stored_person_properties: { country: 'DE' } })
+            insights.persistence?.register({ $stored_person_properties: { country: 'DE' } })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({
@@ -4834,7 +4834,7 @@ describe('Lazy SessionRecording', () => {
             expect(sessionRecording.status).toBe('buffering')
 
             // Update person properties to US
-            posthog.persistence?.register({ $stored_person_properties: { country: 'US' } })
+            insights.persistence?.register({ $stored_person_properties: { country: 'US' } })
 
             // Now it should match
             simpleEventEmitter.emit('eventCaptured', { event: '$exception' })
@@ -4842,7 +4842,7 @@ describe('Lazy SessionRecording', () => {
         })
 
         it('checks both group-level and per-event properties (both must pass)', () => {
-            posthog.persistence?.register({ $stored_person_properties: { country: 'US' } })
+            insights.persistence?.register({ $stored_person_properties: { country: 'US' } })
 
             sessionRecording.onRemoteConfig(
                 makeFlagsResponse({

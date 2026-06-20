@@ -172,7 +172,7 @@ describe('xhr wrapper', () => {
                 expect(setHeaderCalls).toEqual(expect.arrayContaining([{ header: name, value }]))
 
                 // Recording-side: the wrapper recorded the header into
-                // the network request payload that PostHog emits. If
+                // the network request payload that Insights emits. If
                 // this assertion holds, the wrapper definitely ran.
                 expect(captured).not.toBeNull()
                 expect(captured!.requests[0].requestHeaders).toEqual(expect.objectContaining({ [name]: value }))

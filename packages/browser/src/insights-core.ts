@@ -117,7 +117,7 @@ import {
 } from '@hanzo/insights-core'
 import { uuidv7 } from './uuidv7'
 import { ExternalIntegrations } from './extensions/external-integration'
-import type { PostHogSurveys } from './posthog-surveys'
+import type { InsightsSurveys } from './insights-surveys'
 import type { Autocapture } from './autocapture'
 import type { DeadClicksAutocapture } from './extensions/dead-clicks-autocapture'
 import type { ExceptionObserver } from './extensions/exception-autocapture'
@@ -129,7 +129,7 @@ import type { SiteApps } from './site-apps'
 import type { SessionRecording } from './extensions/replay/session-recording'
 import type { Extension } from './extensions/types'
 import type { Toolbar } from './extensions/toolbar'
-import type { PostHogFeatureFlags } from './posthog-featureflags'
+import type { InsightsFeatureFlags } from './insights-featureflags'
 import type { WebExperiments } from './web-experiments'
 
 /*
@@ -476,7 +476,7 @@ export class Insights implements InsightsInterface {
 
         // Eagerly construct extensions from default classes so they're available before init().
         // For the slim bundle, these remain undefined until _initExtensions sets them from config.
-        const ext = PostHog.__defaultExtensionClasses ?? {}
+        const ext = Insights.__defaultExtensionClasses ?? {}
         this.featureFlags = ext.featureFlags && new ext.featureFlags(this)
         this.toolbar = ext.toolbar && new ext.toolbar(this)
         this.surveys = ext.surveys && new ext.surveys(this)
@@ -514,16 +514,16 @@ export class Insights implements InsightsInterface {
      * @example
      * ```js
      * // basic initialization
-     * insights.init('<ph_project_api_key>', {
-     *     api_host: '<ph_client_api_host>'
+     * insights.init('<hi_project_api_key>', {
+     *     api_host: '<hi_client_api_host>'
      * })
      * ```
      *
      * @example
      * ```js
      * // multiple instances
-     * insights.init('<ph_project_api_key>', {}, 'project1')
-     * insights.init('<ph_project_api_key>', {}, 'project2')
+     * insights.init('<hi_project_api_key>', {}, 'project1')
+     * insights.init('<hi_project_api_key>', {}, 'project2')
      * ```
      *
      * @public
@@ -1119,7 +1119,7 @@ export class Insights implements InsightsInterface {
                         try {
                             ;(item as any).call(this)
                         } catch (e) {
-                            logger.error('Error executing queued PostHog call', item, e)
+                            logger.error('Error executing queued Insights call', item, e)
                         }
                     } else if (isArray(item) && fn_name === 'alias') {
                         alias_calls.push(item)
@@ -1148,7 +1148,7 @@ export class Insights implements InsightsInterface {
                             thisArg[item[0]].apply(thisArg, item.slice(1))
                         }
                     } catch (e) {
-                        logger.error('Error executing queued PostHog call', item, e)
+                        logger.error('Error executing queued Insights call', item, e)
                     }
                 })
             }
@@ -2352,18 +2352,18 @@ export class Insights implements InsightsInterface {
 
     private _validateIdentifyId(id: string | undefined): id is string {
         if (!id || isEmptyString(id)) {
-            logger.critical('Unique user id has not been set in posthog.identify')
+            logger.critical('Unique user id has not been set in insights.identify')
             return false
         }
         if (id === COOKIELESS_SENTINEL_VALUE) {
             logger.critical(
-                `The string "${id}" was set in posthog.identify which indicates an error. This ID is only used as a sentinel value.`
+                `The string "${id}" was set in insights.identify which indicates an error. This ID is only used as a sentinel value.`
             )
             return false
         }
         if (isDistinctIdStringLike(id) || ['undefined', 'null'].includes(id.toLowerCase())) {
             logger.critical(
-                `The string "${id}" was set in posthog.identify which indicates an error. This ID should be unique to the user and not a hardcoded string.`
+                `The string "${id}" was set in insights.identify which indicates an error. This ID should be unique to the user and not a hardcoded string.`
             )
             return false
         }
@@ -2869,7 +2869,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.setIdentity('user_123', 'a1b2c3d4e5f6...')
+     * insights.setIdentity('user_123', 'a1b2c3d4e5f6...')
      * ```
      *
      * @public
@@ -2886,7 +2886,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.clearIdentity()
+     * insights.clearIdentity()
      * ```
      *
      * @public
@@ -3093,7 +3093,7 @@ export class Insights implements InsightsInterface {
             if (isBoolean(this.config.debug)) {
                 if (this.config.debug) {
                     Config.DEBUG = true
-                    localStore._is_supported() && localStore._set('ph_debug', true)
+                    localStore._is_supported() && localStore._set('hi_debug', true)
                     logger.info('set_config', {
                         config,
                         oldConfig,
@@ -3101,7 +3101,7 @@ export class Insights implements InsightsInterface {
                     })
                 } else {
                     Config.DEBUG = false
-                    localStore._is_supported() && localStore._remove('ph_debug')
+                    localStore._is_supported() && localStore._remove('hi_debug')
                 }
             }
 
@@ -3121,7 +3121,7 @@ export class Insights implements InsightsInterface {
 
     /**
      * @internal
-     * Allows wrapper SDKs (e.g. posthog-flutter, posthog-react-native) to override the
+     * Allows wrapper SDKs (e.g. insights-flutter, insights-react-native) to override the
      * `$lib` and `$lib_version` properties sent with every event.
      *
      * This is not a public API and may change without notice.
@@ -3287,7 +3287,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.addExceptionStep('Checkout button clicked', {
+     * insights.addExceptionStep('Checkout button clicked', {
      *   checkout_id: 'ch_123',
      * })
      * ```
@@ -3297,7 +3297,7 @@ export class Insights implements InsightsInterface {
     }
 
     /**
-     * Capture a log entry and send it to the PostHog logs endpoint.
+     * Capture a log entry and send it to the Insights logs endpoint.
      *
      * {@label Logs}
      *
@@ -3305,7 +3305,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.captureLog({
+     * insights.captureLog({
      *   body: 'checkout completed',
      *   level: 'info',
      *   attributes: { order_id: 'ord_789', amount_cents: 4999 },
@@ -3328,12 +3328,12 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
-     * posthog.logger.error('payment failed', { error_code: 'E001' })
+     * insights.logger.info('checkout completed', { order_id: 'ord_789' })
+     * insights.logger.error('payment failed', { error_code: 'E001' })
      * ```
      */
     get logger() {
-        return this.logs?.logger ?? PostHog._noopLogger
+        return this.logs?.logger ?? Insights._noopLogger
     }
 
     /**
@@ -4037,7 +4037,7 @@ export class Insights implements InsightsInterface {
 
     private _checkLocalStorageForDebug(debugConfig: boolean | undefined) {
         const explicitlyFalse = isBoolean(debugConfig) && !debugConfig
-        const isTrueInLocalStorage = localStore._is_supported() && localStore._get('ph_debug') === 'true'
+        const isTrueInLocalStorage = localStore._is_supported() && localStore._get('hi_debug') === 'true'
         return explicitlyFalse ? false : isTrueInLocalStorage ? true : debugConfig
     }
 }

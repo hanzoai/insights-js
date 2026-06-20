@@ -587,12 +587,12 @@ describe('insights core', () => {
         })
 
         it('should not abort queued calls when one call throws', () => {
-            const posthog = defaultPostHog()
-            const captureSpy = jest.spyOn(posthog, 'capture').mockImplementation()
-            ;(posthog as any).parseInvalidJson = (payload: string) => JSON.parse(payload)
+            const insights = defaultInsights()
+            const captureSpy = jest.spyOn(insights, 'capture').mockImplementation()
+            ;(insights as any).parseInvalidJson = (payload: string) => JSON.parse(payload)
 
             expect(() => {
-                posthog._execute_array([
+                insights._execute_array([
                     ['parseInvalidJson', '{not json'],
                     ['capture', 'test-event'],
                 ])
@@ -600,7 +600,7 @@ describe('insights core', () => {
 
             expect(captureSpy).toHaveBeenCalledWith('test-event')
             captureSpy.mockRestore()
-            delete (posthog as any).parseInvalidJson
+            delete (insights as any).parseInvalidJson
         })
     })
 })

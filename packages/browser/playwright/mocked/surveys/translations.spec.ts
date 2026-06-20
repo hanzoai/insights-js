@@ -1,6 +1,6 @@
 import { getSurveyResponseKey } from '@/extensions/surveys/surveys-extension-utils'
 import { pollUntilEventCaptured } from '../utils/event-capture-utils'
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start } from '../utils/setup'
 
 const startOptions = {
@@ -60,7 +60,7 @@ test.describe('surveys - translations', () => {
         await start(startOptions, page, context)
         await surveysAPICall
 
-        const survey = page.locator('.PostHogSurvey-translation-test')
+        const survey = page.locator('.InsightsSurvey-translation-test')
         await expect(survey.locator('.survey-form')).toBeVisible()
         await expect(survey.locator('.survey-question')).toHaveText('¿Cómo fue tu experiencia?')
         await expect(survey.locator('label:has-text("Buena")')).toBeVisible()

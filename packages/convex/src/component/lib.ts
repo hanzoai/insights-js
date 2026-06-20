@@ -46,7 +46,7 @@ export const identify = action({
     const { projectToken, host } = readConfig()
     if (!projectToken) return
     const client = getClient(projectToken, host)
-    // posthog-node's `identifyImmediate` is missing an `await` on `identifyStatelessImmediate`
+    // insights-node's `identifyImmediate` is missing an `await` on `identifyStatelessImmediate`
     // (packages/node/src/client.ts:674), so the returned promise resolves before the event hits
     // the wire. We sidestep that by composing the `$identify` event the same way `identifyImmediate`
     // does and routing it through `captureImmediate`, which awaits correctly.
@@ -81,7 +81,7 @@ export const groupIdentify = action({
     const { projectToken, host } = readConfig()
     if (!projectToken) return
     const client = getClient(projectToken, host)
-    // posthog-node doesn't expose a `groupIdentifyImmediate`, so we send the same `$groupidentify`
+    // insights-node doesn't expose a `groupIdentifyImmediate`, so we send the same `$groupidentify`
     // event via `captureImmediate` to keep parity with capture/identify/alias/captureException —
     // resolve when the network call completes, without resorting to shutdown().
     await client.captureImmediate({
@@ -136,7 +136,7 @@ export const captureException = action({
 
 // --- Feature flag remote evaluation ---
 //
-// These actions hit PostHog's `/flags` endpoint directly via `posthog-node`. Use them when
+// These actions hit Insights's `/flags` endpoint directly via `insights-node`. Use them when
 // local evaluation isn't available (no personal API key) or can't reach a verdict (experience
 // continuity flags, static cohorts, properties you don't have in your server context). They
 // require an action context — that's the trade for not needing flag definitions cached upfront.
@@ -173,7 +173,7 @@ export const evaluateFlag = action({
     const { projectToken, host } = readConfig()
     if (!projectToken) return null
     const client = getClient(projectToken, host)
-    // Scope the request to just the flag the caller asked about — otherwise PostHog evaluates
+    // Scope the request to just the flag the caller asked about — otherwise Insights evaluates
     // every flag in the project on every call. Honour an explicit `flagKeys` override when given.
     const snapshot = await client.evaluateFlags(args.distinctId, {
       ...remoteFlagsOptions(args),
@@ -231,7 +231,7 @@ export const evaluateAllFlags = action({
 export const getFlagDefinitions = query({
   args: {},
   handler: async (ctx) => {
-    const localEvalConfigured = !!(env.POSTHOG_PERSONAL_API_KEY ?? '').trim()
+    const localEvalConfigured = !!(env.INSIGHTS_PERSONAL_API_KEY ?? '').trim()
     const row = await ctx.db.query('flagDefinitions').order('desc').first()
     if (!row) {
       return { localEvalConfigured, data: null, fetchedAt: null, etag: undefined }
@@ -267,10 +267,10 @@ export const _getCurrentEtag = internalQuery({
 })
 
 /**
- * Fetches flag definitions from PostHog's local-evaluation endpoint and stores them in the
+ * Fetches flag definitions from Insights's local-evaluation endpoint and stores them in the
  * `flagDefinitions` table. Called automatically by the cron registered in `crons.ts` when
- * `POSTHOG_PERSONAL_API_KEY` is set, and also exposed publicly so the client's
- * `reloadFeatureFlags(ctx)` method (parity with `posthog-node`) can trigger an on-demand refresh.
+ * `INSIGHTS_PERSONAL_API_KEY` is set, and also exposed publicly so the client's
+ * `reloadFeatureFlags(ctx)` method (parity with `insights-node`) can trigger an on-demand refresh.
  */
 export const refreshFlagDefinitions = action({
   args: {},
@@ -291,13 +291,13 @@ export const refreshFlagDefinitions = action({
     }
     if (etag) headers['If-None-Match'] = etag
 
-    // PostHog's `/flags/definitions` endpoint sits behind a warm-on-demand cache. The first
+    // Insights's `/flags/definitions` endpoint sits behind a warm-on-demand cache. The first
     // call after a flag is created — or any time the cache evicts — comes back as a 503 with
     // "Required data not found in cache. … Please try again later." Retry transient 5xx (and
     // 429s, since rate limiting on a one-minute cron is similarly worth waiting out) with
     // bounded exponential backoff so a single cold-cache hit doesn't make callers wait a full
     // cron tick. Tests override the delays via env var to keep retry-heavy cases snappy.
-    const testOverride = Number(process.env.POSTHOG_FLAGS_RETRY_DELAY_MS_OVERRIDE)
+    const testOverride = Number(process.env.INSIGHTS_FLAGS_RETRY_DELAY_MS_OVERRIDE)
     const RETRY_DELAYS_MS =
       Number.isFinite(testOverride) && testOverride >= 0
         ? [testOverride, testOverride, testOverride]
@@ -308,7 +308,7 @@ export const refreshFlagDefinitions = action({
       try {
         response = await fetch(url, { method: 'GET', headers })
       } catch (err) {
-        console.warn('[PostHog] Failed to fetch flag definitions:', err)
+        console.warn('[Insights] Failed to fetch flag definitions:', err)
         return { status: 'error' as const, reason: 'fetch-failed' as const }
       }
       const transient = response.status === 429 || (response.status >= 500 && response.status < 600)
@@ -322,7 +322,7 @@ export const refreshFlagDefinitions = action({
         // ignore
       }
       console.warn(
-        `[PostHog] Flag definitions fetch returned ${response.status}; retrying in ${wait}ms (attempt ${attempt}/${RETRY_DELAYS_MS.length}).`
+        `[Insights] Flag definitions fetch returned ${response.status}; retrying in ${wait}ms (attempt ${attempt}/${RETRY_DELAYS_MS.length}).`
       )
       await new Promise((r) => setTimeout(r, wait))
     }
@@ -332,13 +332,13 @@ export const refreshFlagDefinitions = action({
     }
     if (response.status === 401 || response.status === 403) {
       console.warn(
-        `[PostHog] Flag definitions fetch failed with ${response.status}. ` +
+        `[Insights] Flag definitions fetch failed with ${response.status}. ` +
           `Check that the personal/feature-flags-secure API key has read access to feature flags.`
       )
       return { status: 'error' as const, reason: 'auth' as const }
     }
     if (response.status === 402) {
-      console.warn('[PostHog] Feature flags quota limit exceeded — disabling local evaluation.')
+      console.warn('[Insights] Feature flags quota limit exceeded — disabling local evaluation.')
       await ctx.runMutation(internal.lib._setFlagDefinitions, {
         data: JSON.stringify({ flags: [], groupTypeMapping: {}, cohorts: {} }),
         etag: undefined,
@@ -346,7 +346,7 @@ export const refreshFlagDefinitions = action({
       return { status: 'error' as const, reason: 'quota' as const }
     }
     if (response.status === 429) {
-      console.warn('[PostHog] Rate limited while fetching flag definitions (after retries).')
+      console.warn('[Insights] Rate limited while fetching flag definitions (after retries).')
       return { status: 'error' as const, reason: 'rate-limited' as const }
     }
     if (response.status !== 200) {
@@ -356,7 +356,7 @@ export const refreshFlagDefinitions = action({
       } catch {
         // ignore — body wasn't readable
       }
-      // PostHog returns 503 with `Required data not found in cache` for two indistinguishable
+      // Insights returns 503 with `Required data not found in cache` for two indistinguishable
       // cases: (a) the project has zero flag definitions configured, and (b) the warm-on-demand
       // cache evicted and hasn't repopulated yet. We can't tell which, so we treat them the same
       // way: if we have no existing defs cached, persist an empty snapshot so eval methods can
@@ -375,29 +375,29 @@ export const refreshFlagDefinitions = action({
             etag: undefined,
           })
           console.info(
-            "[PostHog] No flag definitions returned (project may have no flags yet, or PostHog's cache is warming). Cached an empty snapshot."
+            "[Insights] No flag definitions returned (project may have no flags yet, or Insights's cache is warming). Cached an empty snapshot."
           )
           return { status: 'empty' as const }
         }
         if (Date.now() - existing.fetchedAt > STALE_AFTER_MS) {
           // We had cached defs but haven't successfully refreshed them in a while — could be that
-          // every flag was deleted upstream and PostHog now responds with "no flags in cache" 503s.
+          // every flag was deleted upstream and Insights now responds with "no flags in cache" 503s.
           // Replace with an empty snapshot rather than serving stale data indefinitely.
           await ctx.runMutation(internal.lib._setFlagDefinitions, {
             data: JSON.stringify({ flags: [], groupTypeMapping: {}, cohorts: {} }),
             etag: undefined,
           })
           console.info(
-            '[PostHog] Cached flag definitions are >5 minutes stale and PostHog reports an empty cache. Replaced with an empty snapshot.'
+            '[Insights] Cached flag definitions are >5 minutes stale and Insights reports an empty cache. Replaced with an empty snapshot.'
           )
           return { status: 'empty' as const }
         }
-        // Recent cached defs — keep them while PostHog's cache potentially warms back up.
+        // Recent cached defs — keep them while Insights's cache potentially warms back up.
         return { status: 'stale' as const }
       }
 
       console.warn(
-        `[PostHog] Unexpected status ${response.status} fetching flag definitions from ${url.replace(projectToken, '<token>')}. ` +
+        `[Insights] Unexpected status ${response.status} fetching flag definitions from ${url.replace(projectToken, '<token>')}. ` +
           `Response body: ${bodyText}`
       )
       return { status: 'error' as const, reason: 'unexpected-status' as const }
@@ -407,11 +407,11 @@ export const refreshFlagDefinitions = action({
     try {
       body = (await response.json()) as typeof body
     } catch (err) {
-      console.warn('[PostHog] Failed to parse flag definitions response:', err)
+      console.warn('[Insights] Failed to parse flag definitions response:', err)
       return { status: 'error' as const, reason: 'parse-failed' as const }
     }
     if (!('flags' in body)) {
-      console.warn('[PostHog] Flag definitions response missing `flags` field.')
+      console.warn('[Insights] Flag definitions response missing `flags` field.')
       return { status: 'error' as const, reason: 'invalid-shape' as const }
     }
 

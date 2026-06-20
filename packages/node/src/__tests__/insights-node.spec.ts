@@ -239,7 +239,7 @@ describe('Insights Node.js', () => {
     it('should await the network request when identifyImmediate is awaited', async () => {
       expect(mockedFetch).toHaveBeenCalledTimes(0)
 
-      await posthog.identifyImmediate({ distinctId: '123', properties: { foo: 'bar' } })
+      await insights.identifyImmediate({ distinctId: '123', properties: { foo: 'bar' } })
 
       // Without awaiting the underlying request, the batch endpoint would not have been hit yet
       // (regression guard for the missing-await bug in identifyImmediate).
@@ -692,7 +692,7 @@ describe('Insights Node.js', () => {
         })
       })
 
-      const ph = new PostHog('TEST_API_KEY', {
+      const ph = new Insights('TEST_API_KEY', {
         host: 'http://example.com',
         fetch: hangingFetch as any,
         fetchRetryCount: 0,
@@ -709,13 +709,13 @@ describe('Insights Node.js', () => {
 
       // shutdown() joins the promise queue (waits for capture's async prepareEventMessage),
       // then flushes. The flush calls fetchWithRetry → hangingFetch → abort fires after 10ms.
-      // _flush() catch emits 'error' (posthog-core-stateless.ts:1159) and re-throws.
-      // doShutdown() catches the PostHogFetchError and returns cleanly.
+      // _flush() catch emits 'error' (insights-core-stateless.ts:1159) and re-throws.
+      // doShutdown() catches the InsightsFetchError and returns cleanly.
       await ph.shutdown()
 
       expect(hangingFetch).toHaveBeenCalled()
       expect(errors).toHaveLength(1)
-      expect(errors[0].name).toBe('PostHogFetchNetworkError')
+      expect(errors[0].name).toBe('InsightsFetchNetworkError')
       expect(errors[0].error.name).toBe('AbortError')
     }, 10000)
   })
@@ -974,22 +974,22 @@ describe('Insights Node.js', () => {
     })
 
     it('should trim whitespace-sensitive api keys and host during initialization', async () => {
-      posthog = new PostHog('  TEST_API_KEY\n', {
+      insights = new Insights('  TEST_API_KEY\n', {
         host: '  http://example.com\t ',
         fetchRetryCount: 0,
         personalApiKey: '  TEST_PERSONAL_API_KEY\t ',
         disableCompression: true,
       })
 
-      expect(posthog.apiKey).toEqual('TEST_API_KEY')
-      expect(posthog.host).toEqual('http://example.com')
-      expect(posthog.options.personalApiKey).toEqual('TEST_PERSONAL_API_KEY')
+      expect(insights.apiKey).toEqual('TEST_API_KEY')
+      expect(insights.host).toEqual('http://example.com')
+      expect(insights.options.personalApiKey).toEqual('TEST_PERSONAL_API_KEY')
     })
 
     it('should not start local evaluation polling or fetch flags when api key is missing', async () => {
       mockedFetch.mockClear()
 
-      posthog = new PostHog('  \n\t ', {
+      insights = new Insights('  \n\t ', {
         host: 'http://example.com',
         fetchRetryCount: 0,
         personalApiKey: 'TEST_PERSONAL_API_KEY',
@@ -1001,16 +1001,16 @@ describe('Insights Node.js', () => {
       jest.runOnlyPendingTimers()
       await waitForPromises()
 
-      expect(posthog.isDisabled).toEqual(true)
-      expect(await posthog.getFeatureFlag('feature-1', 'distinct_id')).toBeUndefined()
-      expect(await posthog.getAllFlagsAndPayloads('distinct_id')).toEqual({
+      expect(insights.isDisabled).toEqual(true)
+      expect(await insights.getFeatureFlag('feature-1', 'distinct_id')).toBeUndefined()
+      expect(await insights.getAllFlagsAndPayloads('distinct_id')).toEqual({
         featureFlags: {},
         featureFlagPayloads: {},
       })
-      expect((await posthog.evaluateFlags('distinct_id')).keys).toEqual([])
+      expect((await insights.evaluateFlags('distinct_id')).keys).toEqual([])
 
-      posthog.capture({ distinctId: 'distinct_id', event: 'node test event', sendFeatureFlags: true })
-      await posthog.captureImmediate({
+      insights.capture({ distinctId: 'distinct_id', event: 'node test event', sendFeatureFlags: true })
+      await insights.captureImmediate({
         distinctId: 'distinct_id',
         event: 'node immediate event',
         sendFeatureFlags: true,
@@ -2795,7 +2795,7 @@ describe('Insights Node.js', () => {
     })
 
     it('should return undefined without fetching when api key is missing', async () => {
-      const posthogWithoutProjectKey = new PostHog('  \n\t ', {
+      const insightsWithoutProjectKey = new Insights('  \n\t ', {
         host: 'http://example.com',
         fetchRetryCount: 0,
         disableCompression: true,
@@ -2803,7 +2803,7 @@ describe('Insights Node.js', () => {
       })
       mockedFetch.mockClear()
 
-      await expect(posthogWithoutProjectKey.getRemoteConfigPayload('test-flag')).resolves.toBeUndefined()
+      await expect(insightsWithoutProjectKey.getRemoteConfigPayload('test-flag')).resolves.toBeUndefined()
       expect(mockedFetch).not.toHaveBeenCalled()
     })
 

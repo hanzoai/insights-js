@@ -119,7 +119,7 @@ export class ErrorTracking {
       }
 
       // Offline/timeout failures are expected, not application errors.
-      if (isPostHogFetchNetworkError(error)) {
+      if (isInsightsFetchNetworkError(error)) {
         return
       }
 
@@ -158,7 +158,7 @@ export class ErrorTracking {
       }
 
       // Offline/timeout failures are expected, not application errors.
-      if (isPostHogFetchNetworkError(error)) {
+      if (isInsightsFetchNetworkError(error)) {
         return
       }
 

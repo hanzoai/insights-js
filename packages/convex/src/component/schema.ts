@@ -3,7 +3,7 @@ import { v } from 'convex/values'
 
 export default defineSchema({
   /**
-   * Singleton table holding the latest feature flag definitions fetched from the PostHog API.
+   * Singleton table holding the latest feature flag definitions fetched from the Insights API.
    * The cron action upserts a single row; clients read it for local evaluation.
    *
    * `data` is a JSON-stringified `FlagDefinitions` object to bypass Convex's restriction on

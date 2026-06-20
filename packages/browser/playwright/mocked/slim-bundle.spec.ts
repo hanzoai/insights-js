@@ -1,17 +1,17 @@
-import { test, expect } from './utils/posthog-playwright-test-base'
-import { Compression, FlagsResponse, PostHogConfig } from '@/types'
-import { PostHog } from '@/posthog-core'
+import { test, expect } from './utils/insights-playwright-test-base'
+import { Compression, FlagsResponse, InsightsConfig } from '@/types'
+import { Insights } from '@/insights-core'
 
 /**
- * Regression test for https://github.com/PostHog/posthog-js/issues/3313
+ * Regression test for https://github.com/Insights/insights-js/issues/3313
  *
- * When users import the slim bundle (`posthog-js/dist/module.slim`) together with
- * extension bundles (`posthog-js/dist/extension-bundles`), property mangling can
+ * When users import the slim bundle (`insights-js/dist/module.slim`) together with
+ * extension bundles (`insights-js/dist/extension-bundles`), property mangling can
  * cause crashes because the two files are compiled as separate rollup entries and
  * terser may mangle `_`-prefixed properties to different names in each bundle.
  *
  * For example, `_internalEventEmitter` might be mangled to `ti` in extension-bundles
- * but `oe` in module.slim, so `PostHogFeatureFlags.reloadFeatureFlags()` crashes with:
+ * but `oe` in module.slim, so `InsightsFeatureFlags.reloadFeatureFlags()` crashes with:
  *   TypeError: Cannot read properties of undefined (reading 'emit')
  */
 
@@ -22,8 +22,8 @@ async function waitForSlimBundleReady(page: import('@playwright/test').Page) {
     await page.waitForFunction(() => (window as any).__slim_bundle_ready === true, null, { timeout: 5000 })
 }
 
-/** Helper: init PostHog on the page with the given extension bundle(s). */
-async function initPostHogWithExtensions(
+/** Helper: init Insights on the page with the given extension bundle(s). */
+async function initInsightsWithExtensions(
     page: import('@playwright/test').Page,
     extensionVarName: string,
     extraConfig: Record<string, any> = {}
@@ -31,7 +31,7 @@ async function initPostHogWithExtensions(
     return page.evaluate(
         ([extName, extra]) => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any)[extName]
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -41,7 +41,7 @@ async function initPostHogWithExtensions(
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
                     ...extra,
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
                 return null
             } catch (e: any) {
                 return e.message
@@ -116,7 +116,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
         await page.goto(SLIM_BUNDLE_URL)
         await waitForSlimBundleReady(page)
 
-        const initError = await initPostHogWithExtensions(page, 'FeatureFlagsExtensions')
+        const initError = await initInsightsWithExtensions(page, 'FeatureFlagsExtensions')
         await page.waitForTimeout(1000)
 
         expect(initError).toBeNull()
@@ -132,7 +132,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
 
         const error = await page.evaluate(() => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any).FeatureFlagsExtensions
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -141,7 +141,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                     capture_pageview: false,
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
                 ph.reloadFeatureFlags()
                 return null
             } catch (e: any) {
@@ -163,7 +163,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
 
         const flagValue = await page.evaluate(() => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any).FeatureFlagsExtensions
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -173,7 +173,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
                     bootstrap: { featureFlags: { 'test-flag': true } },
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
                 return { value: ph.getFeatureFlag('test-flag'), error: null }
             } catch (e: any) {
                 return { value: null, error: e.message }
@@ -196,7 +196,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
 
         const error = await page.evaluate(() => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any).ErrorTrackingExtensions
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -205,7 +205,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                     capture_pageview: false,
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
                 ph.captureException(new Error('test error'), { extra: 'data' })
                 return null
             } catch (e: any) {
@@ -229,7 +229,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
 
         const error = await page.evaluate(() => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any).ToolbarExtensions
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -238,7 +238,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                     capture_pageview: false,
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
                 // loadToolbar returns false when there are no toolbar params — that's fine,
                 // we just want to make sure it doesn't throw.
                 ph.loadToolbar({})
@@ -265,7 +265,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
         const error = await page.evaluate(() => {
             return new Promise<string | null>((resolve) => {
                 try {
-                    const ph = (window as any).posthog as PostHog
+                    const ph = (window as any).insights as Insights
                     const extensions = (window as any).SurveysExtensions
                     ph.init('test-token', {
                         api_host: 'https://localhost:1234',
@@ -274,7 +274,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                         capture_pageview: false,
                         __extensionClasses: { ...extensions },
                         opt_out_useragent_filter: true,
-                    } as Partial<PostHogConfig>)
+                    } as Partial<InsightsConfig>)
                     ph.getSurveys(() => {
                         resolve(null)
                     })
@@ -301,7 +301,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
 
         const error = await page.evaluate(() => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any).AnalyticsExtensions
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -311,7 +311,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                     autocapture: true,
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
                 return null
             } catch (e: any) {
                 return e.message
@@ -341,7 +341,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
             await page.goto(SLIM_BUNDLE_URL)
             await waitForSlimBundleReady(page)
 
-            const error = await initPostHogWithExtensions(page, extName)
+            const error = await initInsightsWithExtensions(page, extName)
             await page.waitForTimeout(1000)
 
             expect(error).toBeNull()
@@ -360,7 +360,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
 
         const result = await page.evaluate(() => {
             try {
-                const ph = (window as any).posthog as PostHog
+                const ph = (window as any).insights as Insights
                 const extensions = (window as any).AllExtensions
                 ph.init('test-token', {
                     api_host: 'https://localhost:1234',
@@ -370,7 +370,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
                     __extensionClasses: { ...extensions },
                     opt_out_useragent_filter: true,
                     bootstrap: { featureFlags: { 'test-flag': 'variant-a' } },
-                } as Partial<PostHogConfig>)
+                } as Partial<InsightsConfig>)
 
                 // Exercise multiple TreeShakeable<T> code paths in one test:
                 const flagValue = ph.getFeatureFlag('test-flag')

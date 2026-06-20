@@ -6,11 +6,11 @@ describe('InsightsContext component', () => {
     const insights = {} as unknown as Insights
 
     beforeEach(() => {
-        setDefaultPostHogInstance(posthogJs)
+        setDefaultInsightsInstance(insightsJs)
     })
 
     afterEach(() => {
-        setDefaultPostHogInstance(undefined)
+        setDefaultInsightsInstance(undefined)
     })
 
     it('should return a client instance from the context if available', () => {

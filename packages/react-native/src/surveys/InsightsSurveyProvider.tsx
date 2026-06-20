@@ -130,8 +130,8 @@ export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.
   }, [activeSurvey, flags, surveys, seenSurveys, activatedSurveys])
 
   const translatedActiveSurvey = useMemo(() => {
-    return activeSurvey ? applySurveyTranslationForUser(activeSurvey, posthog) : undefined
-  }, [activeSurvey, posthog])
+    return activeSurvey ? applySurveyTranslationForUser(activeSurvey, insights) : undefined
+  }, [activeSurvey, insights])
 
   // Merge survey appearance so that components and hooks can use a consistent model
   const surveyAppearance = useMemo<SurveyAppearanceTheme>(() => {

@@ -1,58 +1,58 @@
 import * as React from 'react'
 import { render } from '@testing-library/react'
-import { PostHogProvider } from '../PostHogProviderSlim'
-import { PostHogContext } from '../PostHogContext'
-import type { PostHog } from '@hanzo/insights'
+import { InsightsProvider } from '../InsightsProviderSlim'
+import { InsightsContext } from '../InsightsContext'
+import type { Insights } from '@hanzo/insights'
 
-// Do NOT call setDefaultPostHogInstance — this simulates the slim bundle
+// Do NOT call setDefaultInsightsInstance — this simulates the slim bundle
 // where no default instance exists.
 
-let contextClient: PostHog | undefined
+let contextClient: Insights | undefined
 
 function ClientConsumer() {
-    const { client } = React.useContext(PostHogContext)
+    const { client } = React.useContext(InsightsContext)
     contextClient = client
     return <div>consumed</div>
 }
 
-describe('PostHogProvider (slim)', () => {
+describe('InsightsProvider (slim)', () => {
     afterEach(() => {
         contextClient = undefined
     })
 
     it('renders children', () => {
-        const client = { config: {} } as unknown as PostHog
+        const client = { config: {} } as unknown as Insights
         const { getByText } = render(
-            <PostHogProvider client={client}>
+            <InsightsProvider client={client}>
                 <div>Hello</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
         expect(getByText('Hello')).toBeTruthy()
     })
 
     it('provides the exact client instance via context', () => {
-        const client = { config: {} } as unknown as PostHog
+        const client = { config: {} } as unknown as Insights
         render(
-            <PostHogProvider client={client}>
+            <InsightsProvider client={client}>
                 <ClientConsumer />
-            </PostHogProvider>
+            </InsightsProvider>
         )
         expect(contextClient).toBe(client)
     })
 
     it('provides bootstrap from client config', () => {
         const bootstrap = { featureFlags: { 'test-flag': true } }
-        const client = { config: { bootstrap } } as unknown as PostHog
+        const client = { config: { bootstrap } } as unknown as Insights
 
         function BootstrapConsumer() {
-            const { bootstrap: ctx } = React.useContext(PostHogContext)
+            const { bootstrap: ctx } = React.useContext(InsightsContext)
             return <div data-testid="bootstrap">{JSON.stringify(ctx)}</div>
         }
 
         const { getByTestId } = render(
-            <PostHogProvider client={client}>
+            <InsightsProvider client={client}>
                 <BootstrapConsumer />
-            </PostHogProvider>
+            </InsightsProvider>
         )
         expect(JSON.parse(getByTestId('bootstrap').textContent!)).toEqual(bootstrap)
     })

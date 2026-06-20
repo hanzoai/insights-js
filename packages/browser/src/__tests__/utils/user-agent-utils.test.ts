@@ -206,7 +206,7 @@ describe('user-agent-utils', () => {
                 expectedBrowser: 'Chrome',
             },
             {
-                // see https://github.com/PostHog/posthog-js/issues/3574
+                // see https://github.com/Insights/insights-js/issues/3574
                 // Oculus Browser is Chromium-based, so its UA includes both
                 // `OculusBrowser` and `Chrome` (and on newer headsets also `SamsungBrowser`).
                 name: 'Oculus Browser on Quest 2',

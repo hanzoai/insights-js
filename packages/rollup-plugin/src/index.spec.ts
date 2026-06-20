@@ -1,5 +1,5 @@
 import type { OutputOptions } from 'rollup'
-import posthogRollupPlugin from './index.js'
+import insightsRollupPlugin from './index.js'
 
 const options = {
     personalApiKey: 'phx_test',
@@ -13,10 +13,10 @@ type TestPlugin = {
     }
 }
 
-const testPlugin = (...args: Parameters<typeof posthogRollupPlugin>): TestPlugin =>
-    posthogRollupPlugin(...args) as unknown as TestPlugin
+const testPlugin = (...args: Parameters<typeof insightsRollupPlugin>): TestPlugin =>
+    insightsRollupPlugin(...args) as unknown as TestPlugin
 
-describe('posthogRollupPlugin', () => {
+describe('insightsRollupPlugin', () => {
     it('enables hidden sourcemaps in Vite and Rollup when maps are deleted after upload', () => {
         const plugin = testPlugin(options)
 

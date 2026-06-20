@@ -1,42 +1,42 @@
 import React from 'react'
-import type { PostHogConfig, BootstrapConfig } from '@hanzo/insights'
-import { ClientPostHogProvider } from '../client/ClientPostHogProvider.js'
+import type { InsightsConfig, BootstrapConfig } from '@hanzo/insights'
+import { ClientInsightsProvider } from '../client/ClientInsightsProvider.js'
 import { NEXTJS_CLIENT_DEFAULTS, resolveApiKey, resolveHostOrDefault } from '../shared/config.js'
 
-export interface PagesPostHogProviderProps {
+export interface PagesInsightsProviderProps {
     /**
-     * PostHog project API key (starts with phc_).
-     * If omitted, reads from `NEXT_PUBLIC_POSTHOG_KEY` env var.
+     * Insights project API key (starts with phc_).
+     * If omitted, reads from `NEXT_PUBLIC_INSIGHTS_KEY` env var.
      */
     apiKey?: string
-    /** Optional posthog-js configuration overrides. */
-    clientOptions?: Partial<PostHogConfig>
-    /** Server-evaluated bootstrap data from getServerSidePostHog. */
+    /** Optional insights-js configuration overrides. */
+    clientOptions?: Partial<InsightsConfig>
+    /** Server-evaluated bootstrap data from getServerSideInsights. */
     bootstrap?: BootstrapConfig
     children: React.ReactNode
 }
 
 /**
- * PostHog provider for Next.js Pages Router.
+ * Insights provider for Next.js Pages Router.
  *
  * Place this in your `pages/_app.tsx` wrapping `<Component {...pageProps} />`.
  *
  * @example
  * ```tsx
- * import { PostHogProvider } from '@hanzo/insights-next/pages'
+ * import { InsightsProvider } from '@hanzo/insights-next/pages'
  *
  * export default function App({ Component, pageProps }: AppProps) {
  *   return (
- *     <PostHogProvider apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY!}>
+ *     <InsightsProvider apiKey={process.env.NEXT_PUBLIC_INSIGHTS_KEY!}>
  *       <Component {...pageProps} />
- *     </PostHogProvider>
+ *     </InsightsProvider>
  *   )
  * }
  * ```
  */
 let apiKeyWarned = false
 
-export function PostHogProvider({ apiKey: apiKeyProp, clientOptions, bootstrap, children }: PagesPostHogProviderProps) {
+export function InsightsProvider({ apiKey: apiKeyProp, clientOptions, bootstrap, children }: PagesInsightsProviderProps) {
     const apiKey = resolveApiKey(apiKeyProp)
     if (!apiKey) {
         return <>{children}</>
@@ -46,20 +46,20 @@ export function PostHogProvider({ apiKey: apiKeyProp, clientOptions, bootstrap, 
         apiKeyWarned = true
         // eslint-disable-next-line no-console
         console.warn(
-            `[PostHog Next.js] apiKey "${apiKey}" does not start with "phc_". This may not be a valid PostHog project API key.`
+            `[Insights Next.js] apiKey "${apiKey}" does not start with "phc_". This may not be a valid Insights project API key.`
         )
     }
 
     const host = resolveHostOrDefault(clientOptions?.api_host)
-    const resolvedOptions: Partial<PostHogConfig> = {
+    const resolvedOptions: Partial<InsightsConfig> = {
         ...NEXTJS_CLIENT_DEFAULTS,
         ...clientOptions,
         ...(host ? { api_host: host } : {}),
     }
 
     return (
-        <ClientPostHogProvider apiKey={apiKey} options={resolvedOptions} bootstrap={bootstrap}>
+        <ClientInsightsProvider apiKey={apiKey} options={resolvedOptions} bootstrap={bootstrap}>
             {children}
-        </ClientPostHogProvider>
+        </ClientInsightsProvider>
     )
 }

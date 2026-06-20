@@ -1,19 +1,19 @@
 import { _resetDeprecationWarningsForTests } from '@/client'
-import { PostHog } from '@/entrypoints/index.node'
+import { Insights } from '@/entrypoints/index.node'
 import { FeatureFlagEvaluations } from '@/feature-flag-evaluations'
-import { EventMessage, PostHogOptions } from '@/types'
+import { EventMessage, InsightsOptions } from '@/types'
 import { apiImplementation, apiImplementationV4, waitForPromises } from './utils'
-import { PostHogV2FlagsResponse } from '@hanzo/insights-core'
+import { InsightsV2FlagsResponse } from '@hanzo/insights-core'
 
 jest.spyOn(console, 'debug').mockImplementation()
 
 const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
 
-const posthogImmediateResolveOptions: PostHogOptions = {
+const insightsImmediateResolveOptions: InsightsOptions = {
   fetchRetryCount: 0,
 }
 
-const flagsResponseFixture = (): PostHogV2FlagsResponse => ({
+const flagsResponseFixture = (): InsightsV2FlagsResponse => ({
   flags: {
     'variant-flag': {
       key: 'variant-flag',
@@ -70,25 +70,25 @@ const flagsResponseFixture = (): PostHogV2FlagsResponse => ({
 })
 
 describe('evaluateFlags', () => {
-  let posthog: PostHog
+  let insights: Insights
   let captures: any[] = []
 
   // Per-test setup helper. The vast majority of tests want the same defaults; tests with
   // custom options (`featureFlagsLogWarnings: false`, `personalApiKey: ...`) call this
   // explicitly with overrides so the deviation stands out.
-  const setup = (overrides: Partial<PostHogOptions> = {}): PostHog => {
-    posthog = new PostHog('TEST_API_KEY', {
+  const setup = (overrides: Partial<InsightsOptions> = {}): Insights => {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
       ...overrides,
     })
     captures = []
-    posthog.on('capture', (message) => captures.push(message))
-    return posthog
+    insights.on('capture', (message) => captures.push(message))
+    return insights
   }
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   describe('remote evaluation', () => {
@@ -98,7 +98,7 @@ describe('evaluateFlags', () => {
     })
 
     it('makes a single /flags call and returns a FeatureFlagEvaluations instance', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
 
       expect(flags).toBeInstanceOf(FeatureFlagEvaluations)
       expect(mockedFetch).toHaveBeenCalledTimes(1)
@@ -107,7 +107,7 @@ describe('evaluateFlags', () => {
     })
 
     it('does not fire $feature_flag_called events for flags that are not accessed', async () => {
-      await posthog.evaluateFlags('user-1')
+      await insights.evaluateFlags('user-1')
       await waitForPromises()
 
       const flagCalled = captures.filter((m) => m.event === '$feature_flag_called')
@@ -115,7 +115,7 @@ describe('evaluateFlags', () => {
     })
 
     it('isEnabled returns true/false and fires $feature_flag_called on first access', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
 
       expect(flags.isEnabled('boolean-flag')).toBe(true)
       expect(flags.isEnabled('disabled-flag')).toBe(false)
@@ -132,7 +132,7 @@ describe('evaluateFlags', () => {
     })
 
     it('getFlag returns variant/true/false/undefined and carries full metadata', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
 
       expect(flags.getFlag('variant-flag')).toBe('variant-value')
       expect(flags.getFlag('boolean-flag')).toBe(true)
@@ -163,7 +163,7 @@ describe('evaluateFlags', () => {
     })
 
     it('dedupes $feature_flag_called events across repeated access for the same distinctId+value', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag')
       flags.isEnabled('boolean-flag')
       flags.getFlag('boolean-flag')
@@ -176,10 +176,10 @@ describe('evaluateFlags', () => {
     })
 
     it('fires separate $feature_flag_called events for the same flag+variant under different group contexts', async () => {
-      const flags1 = await posthog.evaluateFlags('user-1', { groups: { company: 'org-a' } })
+      const flags1 = await insights.evaluateFlags('user-1', { groups: { company: 'org-a' } })
       flags1.isEnabled('boolean-flag')
 
-      const flags2 = await posthog.evaluateFlags('user-1', { groups: { company: 'org-b' } })
+      const flags2 = await insights.evaluateFlags('user-1', { groups: { company: 'org-b' } })
       flags2.isEnabled('boolean-flag')
 
       // Same user, same flag, same variant but different group — both must fire.
@@ -193,7 +193,7 @@ describe('evaluateFlags', () => {
     })
 
     it('dedupes $feature_flag_called events across repeated access under the same group context', async () => {
-      const flags = await posthog.evaluateFlags('user-1', { groups: { company: 'org-a' } })
+      const flags = await insights.evaluateFlags('user-1', { groups: { company: 'org-a' } })
       flags.isEnabled('boolean-flag')
       flags.isEnabled('boolean-flag')
 
@@ -205,10 +205,10 @@ describe('evaluateFlags', () => {
     })
 
     it('dedupes $feature_flag_called events when the same groups are passed in different key order', async () => {
-      const flags1 = await posthog.evaluateFlags('user-1', { groups: { company: 'org-a', team: 'red' } })
+      const flags1 = await insights.evaluateFlags('user-1', { groups: { company: 'org-a', team: 'red' } })
       flags1.isEnabled('boolean-flag')
 
-      const flags2 = await posthog.evaluateFlags('user-1', { groups: { team: 'red', company: 'org-a' } })
+      const flags2 = await insights.evaluateFlags('user-1', { groups: { team: 'red', company: 'org-a' } })
       flags2.isEnabled('boolean-flag')
 
       await waitForPromises()
@@ -219,10 +219,10 @@ describe('evaluateFlags', () => {
     })
 
     it('dedupes $feature_flag_called events when groups is undefined vs empty object', async () => {
-      const flags1 = await posthog.evaluateFlags('user-1')
+      const flags1 = await insights.evaluateFlags('user-1')
       flags1.isEnabled('boolean-flag')
 
-      const flags2 = await posthog.evaluateFlags('user-1', { groups: {} })
+      const flags2 = await insights.evaluateFlags('user-1', { groups: {} })
       flags2.isEnabled('boolean-flag')
 
       // Both produce no group suffix — must dedupe to a single event.
@@ -234,7 +234,7 @@ describe('evaluateFlags', () => {
     })
 
     it('getFlagPayload returns parsed payload without firing an event', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       expect(flags.getFlagPayload('variant-flag')).toEqual({ key: 'value' })
       expect(flags.getFlagPayload('missing-flag')).toBeUndefined()
 
@@ -243,14 +243,14 @@ describe('evaluateFlags', () => {
     })
 
     it('uses distinctId from context when not passed explicitly', async () => {
-      const flags = await posthog.withContext({ distinctId: 'context-user' }, () => posthog.evaluateFlags())
+      const flags = await insights.withContext({ distinctId: 'context-user' }, () => insights.evaluateFlags())
 
       expect(flags).toBeInstanceOf(FeatureFlagEvaluations)
       expect(flags.keys.sort()).toEqual(['boolean-flag', 'disabled-flag', 'variant-flag'])
     })
 
     it('forwards flagKeys to the /flags request to scope the evaluation', async () => {
-      await posthog.evaluateFlags('user-1', { flagKeys: ['boolean-flag', 'variant-flag'] })
+      await insights.evaluateFlags('user-1', { flagKeys: ['boolean-flag', 'variant-flag'] })
 
       expect(mockedFetch).toHaveBeenCalledTimes(1)
       const [, init] = mockedFetch.mock.calls[0]
@@ -259,13 +259,13 @@ describe('evaluateFlags', () => {
     })
 
     it('returns an empty snapshot when no distinctId is available', async () => {
-      const flags = await posthog.evaluateFlags()
+      const flags = await insights.evaluateFlags()
 
       expect(flags.keys).toEqual([])
     })
 
     it('does not fire $feature_flag_called events from an empty-distinctId snapshot', async () => {
-      const flags = await posthog.evaluateFlags()
+      const flags = await insights.evaluateFlags()
       flags.isEnabled('any-flag')
       flags.getFlag('any-flag')
 
@@ -281,7 +281,7 @@ describe('evaluateFlags', () => {
     })
 
     it('onlyAccessed returns a snapshot with only accessed flags', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag')
       flags.getFlag('variant-flag')
 
@@ -291,7 +291,7 @@ describe('evaluateFlags', () => {
 
     it('onlyAccessed returns empty when no flags accessed', async () => {
       // The method honors its name: nothing accessed → empty snapshot, no fallback.
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       const accessed = flags.onlyAccessed()
 
       expect(accessed.keys).toEqual([])
@@ -301,7 +301,7 @@ describe('evaluateFlags', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
       setup({ featureFlagsLogWarnings: false })
 
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.onlyAccessed()
       flags.only(['does-not-exist'])
 
@@ -312,7 +312,7 @@ describe('evaluateFlags', () => {
     it('only returns a filtered snapshot and warns about missing keys', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       const only = flags.only(['boolean-flag', 'does-not-exist'])
 
       expect(only.keys).toEqual(['boolean-flag'])
@@ -321,7 +321,7 @@ describe('evaluateFlags', () => {
     })
 
     it('filtered snapshots do not back-propagate access to the parent', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag')
       const filtered = flags.onlyAccessed()
 
@@ -334,7 +334,7 @@ describe('evaluateFlags', () => {
       // Filtered snapshots are intended for `capture()`. Calling `isEnabled()` on a slice
       // for a key that was filtered out should not fire `$feature_flag_called` with
       // `$feature_flag_error: flag_missing` — the flag wasn't missing, just sliced away.
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       const filtered = flags.only(['boolean-flag'])
 
       expect(filtered.isEnabled('variant-flag')).toBe(false)
@@ -357,8 +357,8 @@ describe('evaluateFlags', () => {
     })
 
     it('capture({ flags }) attaches $feature/* and $active_feature_flags from the snapshot', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
-      posthog.capture({ distinctId: 'user-1', event: 'page_viewed', flags })
+      const flags = await insights.evaluateFlags('user-1')
+      insights.capture({ distinctId: 'user-1', event: 'page_viewed', flags })
       await waitForPromises()
 
       const pageViewed = captures.find((m) => m.event === 'page_viewed')
@@ -372,9 +372,9 @@ describe('evaluateFlags', () => {
     })
 
     it('capture({ flags: flags.onlyAccessed() }) only attaches accessed flags', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag')
-      posthog.capture({ distinctId: 'user-1', event: 'page_viewed', flags: flags.onlyAccessed() })
+      insights.capture({ distinctId: 'user-1', event: 'page_viewed', flags: flags.onlyAccessed() })
       await waitForPromises()
 
       const pageViewed = captures.find((m) => m.event === 'page_viewed')
@@ -387,11 +387,11 @@ describe('evaluateFlags', () => {
     })
 
     it('does not trigger an additional /flags request on capture', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       const callsAfterEvaluate = mockedFetch.mock.calls.length
 
-      posthog.capture({ distinctId: 'user-1', event: 'page_viewed', flags })
-      await posthog.flush()
+      insights.capture({ distinctId: 'user-1', event: 'page_viewed', flags })
+      await insights.flush()
 
       const flagCallsAfterCapture = mockedFetch.mock.calls.filter((c) =>
         (c[0] as string).includes('/flags/?v=2')
@@ -404,16 +404,16 @@ describe('evaluateFlags', () => {
 
     it('flags option takes precedence over sendFeatureFlags and warns when both passed', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       const callsBefore = mockedFetch.mock.calls.filter((c) => (c[0] as string).includes('/flags/?v=2')).length
 
-      posthog.capture({
+      insights.capture({
         distinctId: 'user-1',
         event: 'page_viewed',
         flags: flags.only(['boolean-flag']),
         sendFeatureFlags: true,
       })
-      await posthog.flush()
+      await insights.flush()
 
       const callsAfter = mockedFetch.mock.calls.filter((c) => (c[0] as string).includes('/flags/?v=2')).length
       expect(callsAfter).toEqual(callsBefore)
@@ -431,10 +431,10 @@ describe('evaluateFlags', () => {
     })
 
     it('captureException forwards flags through to the $exception event', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag')
 
-      posthog.captureException(new Error('boom'), 'user-1', undefined, undefined, flags.onlyAccessed())
+      insights.captureException(new Error('boom'), 'user-1', undefined, undefined, flags.onlyAccessed())
 
       // captureException → addPendingPromise(buildEventMessage().then(msg => capture(...)))
       // → capture itself queues async work via prepareEventMessage. The 'capture' event
@@ -456,11 +456,11 @@ describe('evaluateFlags', () => {
     it('captureExceptionImmediate forwards the flags snapshot to captureImmediate', async () => {
       // captureStatelessImmediate doesn't fire the EventEmitter 'capture' event (it sends
       // directly), so we verify forwarding by spying on captureImmediate itself.
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       const filtered = flags.only(['boolean-flag'])
-      const spy = jest.spyOn(posthog, 'captureImmediate').mockResolvedValue(undefined)
+      const spy = jest.spyOn(insights, 'captureImmediate').mockResolvedValue(undefined)
 
-      await posthog.captureExceptionImmediate(new Error('boom'), 'user-1', undefined, filtered)
+      await insights.captureExceptionImmediate(new Error('boom'), 'user-1', undefined, filtered)
       await waitForPromises()
 
       expect(spy).toHaveBeenCalledTimes(1)
@@ -482,7 +482,7 @@ describe('evaluateFlags', () => {
       response.errorsWhileComputingFlags = true
       mockedFetch.mockImplementation(apiImplementationV4(response))
 
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag') // known flag — only response-level error
       flags.isEnabled('missing-flag') // missing — both errors combined
 
@@ -501,7 +501,7 @@ describe('evaluateFlags', () => {
       ;(response as any).quotaLimited = ['feature_flags']
       mockedFetch.mockImplementation(apiImplementationV4(response))
 
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('boolean-flag')
 
       await waitForPromises()
@@ -522,7 +522,7 @@ describe('evaluateFlags', () => {
     it('getFeatureFlag emits a deprecation warning pointing at evaluateFlags', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-      await posthog.getFeatureFlag('boolean-flag', 'user-1')
+      await insights.getFeatureFlag('boolean-flag', 'user-1')
 
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('`getFeatureFlag` is deprecated'))
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('evaluateFlags'))
@@ -532,7 +532,7 @@ describe('evaluateFlags', () => {
     it('isFeatureEnabled emits exactly one deprecation warning per call (no cascade)', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-      await posthog.isFeatureEnabled('boolean-flag', 'user-1')
+      await insights.isFeatureEnabled('boolean-flag', 'user-1')
 
       const deprecation = warnSpy.mock.calls.filter(
         (call) => typeof call[0] === 'string' && /is deprecated/.test(call[0])
@@ -545,7 +545,7 @@ describe('evaluateFlags', () => {
     it('getFeatureFlagPayload emits a deprecation warning', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-      await posthog.getFeatureFlagPayload('variant-flag', 'user-1')
+      await insights.getFeatureFlagPayload('variant-flag', 'user-1')
 
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('`getFeatureFlagPayload` is deprecated'))
       warnSpy.mockRestore()
@@ -554,8 +554,8 @@ describe('evaluateFlags', () => {
     it('capture(sendFeatureFlags: true) emits a deprecation warning', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-      posthog.capture({ distinctId: 'user-1', event: 'page_viewed', sendFeatureFlags: true })
-      await posthog.flush()
+      insights.capture({ distinctId: 'user-1', event: 'page_viewed', sendFeatureFlags: true })
+      await insights.flush()
 
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('`sendFeatureFlags` is deprecated'))
       warnSpy.mockRestore()
@@ -564,9 +564,9 @@ describe('evaluateFlags', () => {
     it('dedupes deprecation warnings across repeated calls', async () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
-      await posthog.getFeatureFlag('boolean-flag', 'user-1')
-      await posthog.getFeatureFlag('variant-flag', 'user-2')
-      await posthog.getFeatureFlag('disabled-flag', 'user-3')
+      await insights.getFeatureFlag('boolean-flag', 'user-1')
+      await insights.getFeatureFlag('variant-flag', 'user-2')
+      await insights.getFeatureFlag('disabled-flag', 'user-3')
 
       const deprecation = warnSpy.mock.calls.filter(
         (call) => typeof call[0] === 'string' && /`getFeatureFlag` is deprecated/.test(call[0])
@@ -597,7 +597,7 @@ describe('evaluateFlags', () => {
     })
 
     it('evaluates flags locally and tags events with locally_evaluated=true', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       expect(flags.isEnabled('local-flag')).toBe(true)
 
       await waitForPromises()
@@ -616,7 +616,7 @@ describe('evaluateFlags', () => {
     })
 
     it('attaches $feature_flag_definitions_loaded_at on locally-evaluated $feature_flag_called events', async () => {
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       flags.isEnabled('local-flag')
 
       await waitForPromises()
@@ -632,12 +632,12 @@ describe('evaluateFlags', () => {
     })
 
     it('applies flag and payload overrides to the snapshot', async () => {
-      posthog.overrideFeatureFlags({
+      insights.overrideFeatureFlags({
         flags: { 'boolean-flag': false, 'new-flag': 'variant-a' },
         payloads: { 'variant-flag': { overridden: true } },
       })
 
-      const flags = await posthog.evaluateFlags('user-1')
+      const flags = await insights.evaluateFlags('user-1')
       expect(flags.isEnabled('boolean-flag')).toBe(false)
       expect(flags.getFlag('new-flag')).toBe('variant-a')
       expect(flags.getFlagPayload('variant-flag')).toEqual({ overridden: true })

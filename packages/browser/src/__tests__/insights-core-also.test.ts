@@ -350,11 +350,11 @@ describe('insights core', () => {
         it.each(['XHR', 'fetch', 'sendBeacon'] as const)(
             'passes the %s transport override to the request',
             (transport) => {
-                const posthog = posthogWith({ ...defaultConfig, request_batching: false }, defaultOverrides)
+                const insights = insightsWith({ ...defaultConfig, request_batching: false }, defaultOverrides)
 
-                posthog.capture('event-name', { foo: 'bar', length: 0 }, { transport })
+                insights.capture('event-name', { foo: 'bar', length: 0 }, { transport })
 
-                expect(posthog._send_request).toHaveBeenCalledWith(
+                expect(insights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         transport,
                     })
@@ -589,53 +589,53 @@ describe('insights core', () => {
         })
 
         describe('initial person props and $identify interaction', () => {
-            const setupPosthogWithInitialProps = () => {
-                posthog = posthogWith(
+            const setupInsightsWithInitialProps = () => {
+                insights = insightsWith(
                     {
-                        api_host: 'https://custom.posthog.com',
+                        api_host: 'https://custom.insights.hanzo.ai',
                     },
                     overrides
                 )
 
-                posthog.persistence.get_initial_props = () => ({
-                    $initial_current_url: 'https://posthog.com',
+                insights.persistence.get_initial_props = () => ({
+                    $initial_current_url: 'https://insights.hanzo.ai',
                 })
-                posthog.sessionPropsManager.getSetOnceProps = () => ({})
-                posthog.persistence.props[ENABLE_PERSON_PROCESSING] = true
-                return posthog
+                insights.sessionPropsManager.getSetOnceProps = () => ({})
+                insights.persistence.props[ENABLE_PERSON_PROCESSING] = true
+                return insights
             }
 
             it('$identify as first event includes initial props and marks as sent', () => {
-                const posthog = setupPosthogWithInitialProps()
-                expect(posthog._personProcessingSetOncePropertiesSent).toBe(false)
+                const insights = setupInsightsWithInitialProps()
+                expect(insights._personProcessingSetOncePropertiesSent).toBe(false)
 
-                const result = posthog._calculate_set_once_properties(undefined, true, true)
-                expect(result).toEqual({ $initial_current_url: 'https://posthog.com' })
-                expect(posthog._personProcessingSetOncePropertiesSent).toBe(true)
+                const result = insights._calculate_set_once_properties(undefined, true, true)
+                expect(result).toEqual({ $initial_current_url: 'https://insights.hanzo.ai' })
+                expect(insights._personProcessingSetOncePropertiesSent).toBe(true)
             })
 
             it('$identify after another event has already sent props still includes initial props', () => {
-                const posthog = setupPosthogWithInitialProps()
+                const insights = setupInsightsWithInitialProps()
 
                 // First normal event sends and marks initial props
-                const firstResult = posthog._calculate_set_once_properties(undefined, true, false)
-                expect(firstResult).toEqual({ $initial_current_url: 'https://posthog.com' })
-                expect(posthog._personProcessingSetOncePropertiesSent).toBe(true)
+                const firstResult = insights._calculate_set_once_properties(undefined, true, false)
+                expect(firstResult).toEqual({ $initial_current_url: 'https://insights.hanzo.ai' })
+                expect(insights._personProcessingSetOncePropertiesSent).toBe(true)
 
                 // $identify still includes them even though they've been sent
-                const identifyResult = posthog._calculate_set_once_properties(undefined, true, true)
-                expect(identifyResult).toEqual({ $initial_current_url: 'https://posthog.com' })
+                const identifyResult = insights._calculate_set_once_properties(undefined, true, true)
+                expect(identifyResult).toEqual({ $initial_current_url: 'https://insights.hanzo.ai' })
             })
 
             it('normal event after initial props have been sent does not include them', () => {
-                const posthog = setupPosthogWithInitialProps()
+                const insights = setupInsightsWithInitialProps()
 
                 // First event sends initial props
-                posthog._calculate_set_once_properties(undefined, true, false)
-                expect(posthog._personProcessingSetOncePropertiesSent).toBe(true)
+                insights._calculate_set_once_properties(undefined, true, false)
+                expect(insights._personProcessingSetOncePropertiesSent).toBe(true)
 
                 // Second normal event should NOT include initial props
-                const result = posthog._calculate_set_once_properties(undefined, true, false)
+                const result = insights._calculate_set_once_properties(undefined, true, false)
                 expect(result).toBeUndefined()
             })
         })
@@ -972,15 +972,15 @@ describe('insights core', () => {
                 const token = 'auto-identify-test-' + uuidv7()
 
                 // First instance creates an anonymous user in persistence
-                const first = posthogWith({ token })
+                const first = insightsWith({ token })
                 expect(first.get_distinct_id()).toBeTruthy()
                 expect(first.persistence.get_property(USER_STATE)).toBe('anonymous')
 
-                const identifySpy = jest.spyOn(PostHog.prototype, 'identify')
-                const captureSpy = jest.spyOn(PostHog.prototype, 'capture')
+                const identifySpy = jest.spyOn(Insights.prototype, 'identify')
+                const captureSpy = jest.spyOn(Insights.prototype, 'capture')
 
                 // Second instance bootstraps with an identified user
-                const second = posthogWith({
+                const second = insightsWith({
                     token,
                     bootstrap: {
                         distinctID: 'user-123',
@@ -1011,13 +1011,13 @@ describe('insights core', () => {
                 const token = 'auto-identify-same-' + uuidv7()
 
                 // First instance creates an anonymous user
-                const first = posthogWith({ token })
+                const first = insightsWith({ token })
                 const anonId = first.get_distinct_id()
 
-                const identifySpy = jest.spyOn(PostHog.prototype, 'identify')
+                const identifySpy = jest.spyOn(Insights.prototype, 'identify')
 
                 // Second instance bootstraps with the same anonymous ID
-                posthogWith({
+                insightsWith({
                     token,
                     bootstrap: {
                         distinctID: anonId,
@@ -1035,12 +1035,12 @@ describe('insights core', () => {
                 const token = 'auto-identify-non-true-' + uuidv7()
 
                 // First instance creates an anonymous user
-                posthogWith({ token })
+                insightsWith({ token })
 
-                const identifySpy = jest.spyOn(PostHog.prototype, 'identify')
+                const identifySpy = jest.spyOn(Insights.prototype, 'identify')
 
                 // Second instance bootstraps with isIdentifiedID that is not true
-                posthogWith({
+                insightsWith({
                     token,
                     bootstrap: {
                         distinctID: 'user-456',
@@ -1054,10 +1054,10 @@ describe('insights core', () => {
             it('does not call identify when there is no existing persisted ID (first visit)', () => {
                 const token = 'auto-identify-first-visit-' + uuidv7()
 
-                const identifySpy = jest.spyOn(PostHog.prototype, 'identify')
+                const identifySpy = jest.spyOn(Insights.prototype, 'identify')
 
                 // First visit with bootstrap - no prior persistence
-                const posthog = posthogWith({
+                const insights = insightsWith({
                     token,
                     bootstrap: {
                         distinctID: 'user-789',
@@ -1066,22 +1066,22 @@ describe('insights core', () => {
                 })
 
                 expect(identifySpy).not.toHaveBeenCalled()
-                expect(posthog.get_distinct_id()).toBe('user-789')
-                expect(posthog.persistence.get_property(USER_STATE)).toBe('identified')
+                expect(insights.get_distinct_id()).toBe('user-789')
+                expect(insights.persistence.get_property(USER_STATE)).toBe('identified')
             })
 
             it('does not call identify when existing user is already identified', () => {
                 const token = 'auto-identify-already-id-' + uuidv7()
 
                 // First instance: create and identify a user
-                const first = posthogWith({ token }, { capture: jest.fn() })
+                const first = insightsWith({ token }, { capture: jest.fn() })
                 first.identify('existing-user')
                 expect(first.persistence.get_property(USER_STATE)).toBe('identified')
 
-                const identifySpy = jest.spyOn(PostHog.prototype, 'identify')
+                const identifySpy = jest.spyOn(Insights.prototype, 'identify')
 
                 // Second instance bootstraps with a different identified user
-                const second = posthogWith({
+                const second = insightsWith({
                     token,
                     bootstrap: {
                         distinctID: 'new-user',
@@ -1312,15 +1312,15 @@ describe('insights core', () => {
         })
 
         it('sends $groupidentify with $group_set for an existing group when properties provided', () => {
-            posthog.group('organization', 'org::5')
-            jest.mocked(posthog.capture).mockClear()
+            insights.group('organization', 'org::5')
+            jest.mocked(insights.capture).mockClear()
 
-            posthog.group('organization', 'org::5', { name: 'PostHog' })
+            insights.group('organization', 'org::5', { name: 'Insights' })
 
-            expect(posthog.capture).toHaveBeenCalledWith('$groupidentify', {
+            expect(insights.capture).toHaveBeenCalledWith('$groupidentify', {
                 $group_type: 'organization',
                 $group_key: 'org::5',
-                $group_set: { name: 'PostHog' },
+                $group_set: { name: 'Insights' },
             })
         })
 
@@ -1409,7 +1409,7 @@ describe('insights core', () => {
 
     describe('reset()', () => {
         it('preserves session-recording remote config across reset()', async () => {
-            const posthog = await createPosthogInstance(uuidv7(), { persistence: 'memory' })
+            const insights = await createInsightsInstance(uuidv7(), { persistence: 'memory' })
 
             // Simulate the recording remote config landing in persistence,
             // as RemoteConfigLoader would do after a /decide round trip.
@@ -1421,26 +1421,26 @@ describe('insights core', () => {
                 masking: { maskAllInputs: true },
                 canvasRecording: { enabled: true, fps: 4, quality: '0.6' },
             }
-            posthog.persistence!.register({ [SESSION_RECORDING_REMOTE_CONFIG]: remoteConfig })
+            insights.persistence!.register({ [SESSION_RECORDING_REMOTE_CONFIG]: remoteConfig })
 
             // And some user state that *should* be cleared.
-            posthog.persistence!.register({ some_user_prop: 'should-be-gone' })
+            insights.persistence!.register({ some_user_prop: 'should-be-gone' })
 
-            posthog.reset()
+            insights.reset()
 
             // Recording remote config survives — without this, start('session_id_changed')
             // bails on the next session rotation and the new session opens with no FullSnapshot.
-            expect(posthog.persistence!.props[SESSION_RECORDING_REMOTE_CONFIG]).toEqual(remoteConfig)
+            expect(insights.persistence!.props[SESSION_RECORDING_REMOTE_CONFIG]).toEqual(remoteConfig)
 
             // User state is still cleared.
-            expect(posthog.persistence!.props['some_user_prop']).toBeUndefined()
+            expect(insights.persistence!.props['some_user_prop']).toBeUndefined()
         })
 
         it('does not crash when no recording remote config has been stored', async () => {
-            const posthog = await createPosthogInstance(uuidv7(), { persistence: 'memory' })
+            const insights = await createInsightsInstance(uuidv7(), { persistence: 'memory' })
 
-            expect(() => posthog.reset()).not.toThrow()
-            expect(posthog.persistence!.props[SESSION_RECORDING_REMOTE_CONFIG]).toBeUndefined()
+            expect(() => insights.reset()).not.toThrow()
+            expect(insights.persistence!.props[SESSION_RECORDING_REMOTE_CONFIG]).toBeUndefined()
         })
     })
 

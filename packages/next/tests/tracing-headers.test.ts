@@ -6,9 +6,9 @@ describe('readTracingHeaders', () => {
             const headers = {
                 get: (name: string) => {
                     const map: Record<string, string> = {
-                        'x-posthog-session-id': 'session-123',
-                        'x-posthog-distinct-id': 'user-456',
-                        'x-posthog-window-id': 'window-789',
+                        'x-insights-session-id': 'session-123',
+                        'x-insights-distinct-id': 'user-456',
+                        'x-insights-window-id': 'window-789',
                     }
                     return map[name] ?? null
                 },
@@ -45,9 +45,9 @@ describe('readTracingHeaders', () => {
     describe('with plain record (IncomingHttpHeaders)', () => {
         it('extracts all three headers', () => {
             const headers: Record<string, string | string[] | undefined> = {
-                'x-posthog-session-id': 'session-123',
-                'x-posthog-distinct-id': 'user-456',
-                'x-posthog-window-id': 'window-789',
+                'x-insights-session-id': 'session-123',
+                'x-insights-distinct-id': 'user-456',
+                'x-insights-window-id': 'window-789',
             }
 
             expect(readTracingHeaders(headers)).toEqual({
@@ -67,9 +67,9 @@ describe('readTracingHeaders', () => {
 
         it('takes the first value from string[] headers', () => {
             const headers: Record<string, string | string[] | undefined> = {
-                'x-posthog-session-id': ['session-a', 'session-b'],
-                'x-posthog-distinct-id': ['user-a'],
-                'x-posthog-window-id': 'window-single',
+                'x-insights-session-id': ['session-a', 'session-b'],
+                'x-insights-distinct-id': ['user-a'],
+                'x-insights-window-id': 'window-single',
             }
 
             expect(readTracingHeaders(headers)).toEqual({
@@ -81,9 +81,9 @@ describe('readTracingHeaders', () => {
 
         it('returns undefined for undefined values', () => {
             const headers: Record<string, string | string[] | undefined> = {
-                'x-posthog-session-id': undefined,
-                'x-posthog-distinct-id': undefined,
-                'x-posthog-window-id': undefined,
+                'x-insights-session-id': undefined,
+                'x-insights-distinct-id': undefined,
+                'x-insights-window-id': undefined,
             }
 
             expect(readTracingHeaders(headers)).toEqual({

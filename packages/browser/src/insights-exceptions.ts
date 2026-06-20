@@ -143,11 +143,11 @@ export class InsightsExceptions {
                 }
 
                 if (
-                    !this._instance.config.error_tracking.__capturePostHogExceptions &&
-                    this._isPostHogException(exceptionList)
+                    !this._instance.config.error_tracking.__captureInsightsExceptions &&
+                    this._isInsightsException(exceptionList)
                 ) {
-                    this._addDroppedExceptionStep('Exception dropped: thrown by the PostHog SDK')
-                    logger.info('Skipping exception capture because it was thrown by the PostHog SDK')
+                    this._addDroppedExceptionStep('Exception dropped: thrown by the Insights SDK')
+                    logger.info('Skipping exception capture because it was thrown by the Insights SDK')
                     return
                 }
             }

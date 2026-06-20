@@ -38,7 +38,7 @@ describe('Toolbar', () => {
         if (document.getElementById(TOOLBAR_ID)) {
             document.body.removeChild(document.getElementById(TOOLBAR_ID)!)
         }
-        assignableWindow.ph_load_toolbar = jest.fn(() => {
+        assignableWindow.hi_load_toolbar = jest.fn(() => {
             const mockToolbarElement = document.createElement('div')
             mockToolbarElement.setAttribute('id', TOOLBAR_ID)
             document.body.appendChild(mockToolbarElement)
@@ -54,7 +54,7 @@ describe('Toolbar', () => {
         const history = { replaceState: jest.fn() } as unknown as History
 
         const defaultHashState = {
-            action: 'ph_authorize',
+            action: 'hi_authorize',
             desiredHash: '#myhash',
             projectId: 3,
             projectOwnerId: 722725,
@@ -100,8 +100,8 @@ describe('Toolbar', () => {
             jest.spyOn(toolbar, 'loadToolbar')
         })
 
-        it('should initialize the toolbar when the hash state contains action "ph_authorize"', () => {
-            // the default hash state in the test setup contains the action "ph_authorize"
+        it('should initialize the toolbar when the hash state contains action "hi_authorize"', () => {
+            // the default hash state in the test setup contains the action "hi_authorize"
             toolbar.maybeLoadToolbar(aLocation(), storage, history)
 
             expect(toolbar.loadToolbar).toHaveBeenCalledWith({
@@ -112,7 +112,7 @@ describe('Toolbar', () => {
         })
 
         it('should initialize the toolbar when there are editor params in the session', () => {
-            // if the hash state does not contain ph_authorize then look in storage
+            // if the hash state does not contain hi_authorize then look in storage
             localStorage.getItem.mockImplementation(() => JSON.stringify(toolbarParams))
 
             const hashState = { ...defaultHashState, action: undefined }
@@ -173,7 +173,7 @@ describe('Toolbar', () => {
 
         it('should load if not previously loaded', () => {
             expect(toolbar.loadToolbar(toolbarParams)).toBe(true)
-            expect(assignableWindow.ph_load_toolbar).toHaveBeenCalledWith(
+            expect(assignableWindow.hi_load_toolbar).toHaveBeenCalledWith(
                 { ...toolbarParams, apiURL: 'http://api.example.com' },
                 instance
             )
@@ -201,7 +201,7 @@ describe('Toolbar', () => {
 
         it('should load if not previously loaded', () => {
             expect(toolbar.loadToolbar(minimalToolbarParams)).toBe(true)
-            expect(assignableWindow.ph_load_toolbar).toHaveBeenCalledWith(
+            expect(assignableWindow.hi_load_toolbar).toHaveBeenCalledWith(
                 {
                     ...minimalToolbarParams,
                     apiURL: 'http://api.example.com',

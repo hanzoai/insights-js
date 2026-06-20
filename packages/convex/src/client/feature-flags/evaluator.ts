@@ -5,12 +5,12 @@ import type {
   FlagDefinitions,
   FlagPropertyValue,
   JsonType,
-  PostHogFeatureFlag,
+  InsightsFeatureFlag,
 } from './types.js'
 import { hashSHA1 } from './crypto.js'
 import { InconclusiveMatchError, RequiresServerEvaluation, matchCohort, matchProperty } from './match-property.js'
 
-// Matches posthog-node's hashing constant exactly; the value is larger than Number.MAX_SAFE_INTEGER
+// Matches insights-node's hashing constant exactly; the value is larger than Number.MAX_SAFE_INTEGER
 // by design and we don't want the no-loss-of-precision rule to coerce it to a different number.
 // eslint-disable-next-line no-loss-of-precision
 const LONG_SCALE = 0xfffffffffffffff
@@ -26,15 +26,15 @@ export type EvaluationResult = {
 }
 
 export class LocalFeatureFlagEvaluator {
-  readonly flags: PostHogFeatureFlag[]
-  readonly flagsByKey: Record<string, PostHogFeatureFlag>
+  readonly flags: InsightsFeatureFlag[]
+  readonly flagsByKey: Record<string, InsightsFeatureFlag>
   readonly groupTypeMapping: Record<string, string>
   readonly cohorts: FlagDefinitions['cohorts']
   debugMode: boolean = false
 
   constructor(definitions: FlagDefinitions) {
     this.flags = definitions.flags ?? []
-    this.flagsByKey = this.flags.reduce<Record<string, PostHogFeatureFlag>>((acc, flag) => {
+    this.flagsByKey = this.flags.reduce<Record<string, InsightsFeatureFlag>>((acc, flag) => {
       acc[flag.key] = flag
       return acc
     }, {})
@@ -188,7 +188,7 @@ export class LocalFeatureFlagEvaluator {
   }
 
   async computeFlagAndPayloadLocally(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     ctx: FeatureFlagEvaluationContext,
     options: { matchValue?: FeatureFlagValue } = {}
   ): Promise<EvaluationResult> {
@@ -198,7 +198,7 @@ export class LocalFeatureFlagEvaluator {
   }
 
   private async computeFlagValueLocally(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     ctx: FeatureFlagEvaluationContext
   ): Promise<FeatureFlagValue> {
     const { distinctId, groups, personProperties, groupProperties } = ctx
@@ -249,7 +249,7 @@ export class LocalFeatureFlagEvaluator {
   }
 
   private getBucketingValueForFlag(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     distinctId: string,
     properties: Record<string, any>
   ): string | undefined {
@@ -337,7 +337,7 @@ export class LocalFeatureFlagEvaluator {
   }
 
   private async matchFeatureFlagProperties(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     bucketingValue: string,
     properties: Record<string, any>,
     ctx: FeatureFlagEvaluationContext
@@ -407,7 +407,7 @@ export class LocalFeatureFlagEvaluator {
   }
 
   private async isConditionMatch(
-    flag: PostHogFeatureFlag,
+    flag: InsightsFeatureFlag,
     bucketingValue: string,
     condition: FeatureFlagCondition,
     properties: Record<string, any>,
@@ -440,12 +440,12 @@ export class LocalFeatureFlagEvaluator {
     return true
   }
 
-  private async getMatchingVariant(flag: PostHogFeatureFlag, bucketingValue: string): Promise<string | undefined> {
+  private async getMatchingVariant(flag: InsightsFeatureFlag, bucketingValue: string): Promise<string | undefined> {
     const hashValue = await _hash(flag.key, bucketingValue, 'variant')
     return this.variantLookupTable(flag).find((v) => hashValue >= v.valueMin && hashValue < v.valueMax)?.key
   }
 
-  private variantLookupTable(flag: PostHogFeatureFlag): { valueMin: number; valueMax: number; key: string }[] {
+  private variantLookupTable(flag: InsightsFeatureFlag): { valueMin: number; valueMax: number; key: string }[] {
     const table: { valueMin: number; valueMax: number; key: string }[] = []
     let valueMin = 0
     const multivariates = flag.filters?.multivariate?.variants || []

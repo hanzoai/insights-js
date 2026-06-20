@@ -25,12 +25,12 @@
             {
               "id": "add_to_app.(js|ts)",
               "name": "Add to App.(js|ts)",
-              "code": "\n\n// Add to App.(js|ts)\nimport { useInsights, InsightsProvider } from '@hanzo/insights-react-native'\n\nexport function MyApp() {\n    return (\n        <InsightsProvider apiKey=\"<ph_project_api_key>\" options={{\n            host: '<ph_client_api_host>',\n        }}>\n            <MyComponent />\n        </InsightsProvider>\n    )\n}\n\n// And access the Insights client via the useInsights hook\nimport { useInsights } from '@hanzo/insights-react-native'\n\nconst MyComponent = () => {\n    const insights = useInsights()\n\n    useEffect(() => {\n        insights.capture(\"event_name\")\n    }, [insights])\n}\n\n\n\n"
+              "code": "\n\n// Add to App.(js|ts)\nimport { useInsights, InsightsProvider } from '@hanzo/insights-react-native'\n\nexport function MyApp() {\n    return (\n        <InsightsProvider apiKey=\"<hi_project_api_key>\" options={{\n            host: '<hi_client_api_host>',\n        }}>\n            <MyComponent />\n        </InsightsProvider>\n    )\n}\n\n// And access the Insights client via the useInsights hook\nimport { useInsights } from '@hanzo/insights-react-native'\n\nconst MyComponent = () => {\n    const insights = useInsights()\n\n    useEffect(() => {\n        insights.capture(\"event_name\")\n    }, [insights])\n}\n\n\n\n"
             },
             {
               "id": "using_with_existing_client",
               "name": "Using with existing client",
-              "code": "\n\n// Using with existing client\nimport { Insights } from '@hanzo/insights-react-native'\n\nconst insights = new Insights('<ph_project_api_key>', {\n    host: '<ph_client_api_host>'\n})\n\nexport function MyApp() {\n    return (\n        <InsightsProvider client={insights}>\n            <MyComponent />\n        </InsightsProvider>\n    )\n}\n\n\n\n"
+              "code": "\n\n// Using with existing client\nimport { Insights } from '@hanzo/insights-react-native'\n\nconst insights = new Insights('<hi_project_api_key>', {\n    host: '<hi_client_api_host>'\n})\n\nexport function MyApp() {\n    return (\n        <InsightsProvider client={insights}>\n            <MyComponent />\n        </InsightsProvider>\n    )\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -58,7 +58,7 @@
             {
               "id": "insights.ts",
               "name": "insights.ts",
-              "code": "\n\n// insights.ts\nimport Insights from '@hanzo/insights-react-native'\n\nexport const insights = new Insights('<ph_project_api_key>', {\n  host: '<ph_client_api_host>'\n})\n\n// Then you can access Insights by importing your instance\n// Another file:\nimport { insights } from './insights'\n\nexport function MyApp1() {\n    useEffect(async () => {\n        insights.capture('event_name')\n    }, [insights])\n\n    return <View>Your app code</View>\n}\n\n\n\n"
+              "code": "\n\n// insights.ts\nimport Insights from '@hanzo/insights-react-native'\n\nexport const insights = new Insights('<hi_project_api_key>', {\n  host: '<hi_client_api_host>'\n})\n\n// Then you can access Insights by importing your instance\n// Another file:\nimport { insights } from './insights'\n\nexport function MyApp1() {\n    useEffect(async () => {\n        insights.capture('event_name')\n    }, [insights])\n\n    return <View>Your app code</View>\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -155,11 +155,11 @@
             "id": "void",
             "name": "void"
           },
-          "path": "dist/posthog-rn.d.ts"
+          "path": "dist/insights-rn.d.ts"
         },
         {
           "category": "Capture",
-          "description": "Captures a structured log record and sends it to PostHog's logs product (`/i/v1/logs`). Low-level primitive — most callers will prefer `posthog.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which wrap this with a level pre-set.\nRecords are buffered per-session, rate-limited, batched into OTLP payloads, and flushed on a timer, on AppState change, or when the buffer reaches capacity. Configure flush cadence, rate cap, and a `beforeSend` filter via the `logs` option on `new PostHog(...)`.\nNote — naming collision: `posthog.captureLog()` (this method) is the **logs product** API. There is also a separate, pre-existing `sessionReplayConfig.captureLog` boolean that controls whether **session replay** records the device's `console.*` output. The two are unrelated: this method emits structured records to the logs pipeline regardless of whether session replay is on.",
+          "description": "Captures a structured log record and sends it to Insights's logs product (`/i/v1/logs`). Low-level primitive — most callers will prefer `insights.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which wrap this with a level pre-set.\nRecords are buffered per-session, rate-limited, batched into OTLP payloads, and flushed on a timer, on AppState change, or when the buffer reaches capacity. Configure flush cadence, rate cap, and a `beforeSend` filter via the `logs` option on `new Insights(...)`.\nNote — naming collision: `insights.captureLog()` (this method) is the **logs product** API. There is also a separate, pre-existing `sessionReplayConfig.captureLog` boolean that controls whether **session replay** records the device's `console.*` output. The two are unrelated: this method emits structured records to the logs pipeline regardless of whether session replay is on.",
           "details": null,
           "id": "captureLog",
           "showDocs": true,
@@ -168,7 +168,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.captureLog({\n  body: 'checkout completed',\n  level: 'info',\n  attributes: { order_id: 'ord_789', amount_cents: 4999 },\n})\n\n\n\n"
+              "code": "\n\ninsights.captureLog({\n  body: 'checkout completed',\n  level: 'info',\n  attributes: { order_id: 'ord_789', amount_cents: 4999 },\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -317,7 +317,7 @@
             {
               "id": "getdeviceid",
               "name": "Generated example for getDeviceId",
-              "code": "// Generated example for getDeviceId\nposthog.getDeviceId();"
+              "code": "// Generated example for getDeviceId\ninsights.getDeviceId();"
             }
           ],
           "releaseTag": "public",
@@ -326,7 +326,7 @@
             "id": "string",
             "name": "string"
           },
-          "path": "dist/posthog-rn.d.ts"
+          "path": "dist/insights-rn.d.ts"
         },
         {
           "category": "Identification",
@@ -509,7 +509,7 @@
             {
               "id": "getsurveydisplaylanguageoverride",
               "name": "Generated example for getSurveyDisplayLanguageOverride",
-              "code": "// Generated example for getSurveyDisplayLanguageOverride\nposthog.getSurveyDisplayLanguageOverride();"
+              "code": "// Generated example for getSurveyDisplayLanguageOverride\ninsights.getSurveyDisplayLanguageOverride();"
             }
           ],
           "releaseTag": "public",
@@ -518,7 +518,7 @@
             "id": "string | null",
             "name": "string | null"
           },
-          "path": "dist/posthog-rn.d.ts"
+          "path": "dist/insights-rn.d.ts"
         },
         {
           "category": "",
@@ -831,7 +831,7 @@
         },
         {
           "category": "Identification",
-          "description": "Resets the user's ID and anonymous ID after logout.\nTo reset the user's ID and anonymous ID, call reset. Usually you would do this right after the user logs out. This also clears all stored super properties and more.\nBy default (when `propertiesToKeep` is not provided), the app lifecycle properties (`InstalledAppBuild` and `InstalledAppVersion`) are automatically preserved to prevent duplicate \"Application Installed\" events on the next app launch.\nIf you pass `propertiesToKeep` explicitly, only the properties you specify will be preserved. To keep the default app lifecycle behavior, include `PostHogPersistedProperty.InstalledAppBuild` and `PostHogPersistedProperty.InstalledAppVersion` in your array.\nNote: The event queue (`PostHogPersistedProperty.Queue`) and logs queue (`PostHogPersistedProperty.LogsQueue`) are always preserved regardless of what is passed in `propertiesToKeep`, to ensure in-flight data is not lost.",
+          "description": "Resets the user's ID and anonymous ID after logout.\nTo reset the user's ID and anonymous ID, call reset. Usually you would do this right after the user logs out. This also clears all stored super properties and more.\nBy default (when `propertiesToKeep` is not provided), the app lifecycle properties (`InstalledAppBuild` and `InstalledAppVersion`) are automatically preserved to prevent duplicate \"Application Installed\" events on the next app launch.\nIf you pass `propertiesToKeep` explicitly, only the properties you specify will be preserved. To keep the default app lifecycle behavior, include `InsightsPersistedProperty.InstalledAppBuild` and `InsightsPersistedProperty.InstalledAppVersion` in your array.\nNote: The event queue (`InsightsPersistedProperty.Queue`) and logs queue (`InsightsPersistedProperty.LogsQueue`) are always preserved regardless of what is passed in `propertiesToKeep`, to ensure in-flight data is not lost.",
           "details": null,
           "id": "reset",
           "showDocs": true,
@@ -2635,8 +2635,8 @@
           "name": "errorTracking"
         },
         {
-          "description": "Logs feature configuration. Enables structured log capture via `posthog.captureLog(...)` or `posthog.logger.info(...)`. Records ship to PostHog's logs product (`/i/v1/logs`) in OTLP format, batched on a timer, AppState change, buffer fill, or manual `flushLogs()`.\nCapture is **unconditional** — calling the API ships records as long as the SDK is initialized and the user hasn't opted out. The only blockers are `optedOut`, missing/empty `body`, and missing API key.\nAll fields below are optional; per-SDK defaults apply (mobile defaults are tuned for cellular bandwidth and battery, ~50 logs/sec ceiling).",
-          "type": "PostHogLogsConfig",
+          "description": "Logs feature configuration. Enables structured log capture via `insights.captureLog(...)` or `insights.logger.info(...)`. Records ship to Insights's logs product (`/i/v1/logs`) in OTLP format, batched on a timer, AppState change, buffer fill, or manual `flushLogs()`.\nCapture is **unconditional** — calling the API ships records as long as the SDK is initialized and the user hasn't opted out. The only blockers are `optedOut`, missing/empty `body`, and missing API key.\nAll fields below are optional; per-SDK defaults apply (mobile defaults are tuned for cellular bandwidth and battery, ~50 logs/sec ceiling).",
+          "type": "InsightsLogsConfig",
           "name": "logs"
         },
         {
@@ -2861,7 +2861,7 @@
       "properties": [
         {
           "type": "boolean",
-          "name": "__posthog_previously_captured_error"
+          "name": "__insights_previously_captured_error"
         }
       ],
       "path": "../core/src/error-tracking/types.ts"
@@ -2942,7 +2942,7 @@
       "id": "SendLogsBatchOutcome",
       "name": "SendLogsBatchOutcome",
       "properties": [],
-      "path": "../core/src/posthog-core-stateless.ts",
+      "path": "../core/src/insights-core-stateless.ts",
       "example": "{\n    kind: 'ok';\n} | {\n    kind: 'too-large';\n} | {\n    kind: 'retry-later';\n    error: unknown;\n} | {\n    kind: 'fatal';\n    error: unknown;\n}"
     },
     {

@@ -66,17 +66,17 @@ describe('Insights Core', () => {
     })
 
     it('should call groupIdentify for a new group even without properties', async () => {
-      posthog.group('other', 'team')
+      insights.group('other', 'team')
       await waitForPromises()
 
       expect(mocks.fetch).toHaveBeenCalledTimes(2) // 1 for flags, 1 for groupIdentify
       const batchCall = mocks.fetch.mock.calls[1]
-      expect(batchCall[0]).toEqual('https://us.i.posthog.com/batch/')
+      expect(batchCall[0]).toEqual('https://us.i.insights.hanzo.ai/batch/')
       expect(parseBody(batchCall)).toMatchObject({
         batch: [
           {
             event: '$groupidentify',
-            distinct_id: posthog.getDistinctId(),
+            distinct_id: insights.getDistinctId(),
             properties: {
               $group_type: 'other',
               $group_key: 'team',
@@ -88,11 +88,11 @@ describe('Insights Core', () => {
     })
 
     it('should not call groupIdentify when group already exists with same key and no properties', async () => {
-      posthog.group('other', 'team')
+      insights.group('other', 'team')
       await waitForPromises()
       mocks.fetch.mockClear()
 
-      posthog.group('other', 'team')
+      insights.group('other', 'team')
       await waitForPromises()
 
       // No new fetch calls for groupIdentify (only flags reload if needed)
@@ -108,11 +108,11 @@ describe('Insights Core', () => {
     })
 
     it('should call groupIdentify for an existing group when properties are provided', async () => {
-      posthog.group('other', 'team')
+      insights.group('other', 'team')
       await waitForPromises()
       mocks.fetch.mockClear()
 
-      posthog.group('other', 'team', { name: 'My Team' })
+      insights.group('other', 'team', { name: 'My Team' })
       await waitForPromises()
 
       const groupIdentifyCalls = mocks.fetch.mock.calls.filter((call) => {

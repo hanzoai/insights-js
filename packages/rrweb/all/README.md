@@ -18,7 +18,7 @@ npm install @rrweb/all
 ## Usage
 
 ```js
-import { record, replay, pack, unpack } from '@posthog/rrweb-all';
+import { record, replay, pack, unpack } from '@insights/rrweb-all';
 
 // use record, replay, pack, unpack as you would with the individual packages.
 ```
@@ -138,8 +138,8 @@ See the [guide](../../guide.md) for more info on rrweb.
       </a>
     </td>
     <td align="center">
-      <a href="https://posthog.com?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
-        <img width="195px" src="https://www.rrweb.io/logos/posthog.png">
+      <a href="https://insights.hanzo.ai?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
+        <img width="195px" src="https://www.rrweb.io/logos/insights.png">
       </a>
     </td>
     <td align="center">

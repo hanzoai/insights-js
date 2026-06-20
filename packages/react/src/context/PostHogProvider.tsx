@@ -1,34 +1,34 @@
 /* eslint-disable no-console */
-import type { PostHogConfig } from '@hanzo/insights'
+import type { InsightsConfig } from '@hanzo/insights'
 
 import React, { useEffect, useMemo, useRef } from 'react'
-import { PostHog, PostHogContext } from './PostHogContext'
-import { getDefaultPostHogInstance } from './posthog-default'
+import { Insights, InsightsContext } from './InsightsContext'
+import { getDefaultInsightsInstance } from './insights-default'
 import { isDeepEqual } from '../utils/object-utils'
 
 interface PreviousInitialization {
     apiKey: string
-    options: Partial<PostHogConfig>
+    options: Partial<InsightsConfig>
 }
 
 type WithOptionalChildren<T> = T & { children?: React.ReactNode | undefined }
 
 /**
- * Props for the PostHogProvider component.
+ * Props for the InsightsProvider component.
  * This is a discriminated union type that ensures mutually exclusive props:
  *
  * - If `client` is provided, `apiKey` and `options` must not be provided
  * - If `apiKey` is provided, `client` must not be provided, and `options` is optional
  */
-type PostHogProviderProps =
-    | { client: PostHog; apiKey?: never; options?: never }
-    | { apiKey: string; options?: Partial<PostHogConfig>; client?: never }
+type InsightsProviderProps =
+    | { client: Insights; apiKey?: never; options?: never }
+    | { apiKey: string; options?: Partial<InsightsConfig>; client?: never }
 
 /**
- * PostHogProvider is a React context provider for PostHog analytics.
+ * InsightsProvider is a React context provider for Insights analytics.
  * It can be initialized in two mutually exclusive ways:
  *
- * 1. By providing an existing PostHog `client` instance
+ * 1. By providing an existing Insights `client` instance
  * 2. By providing an `apiKey` (and optionally `options`) to create a new client
  *
  * These initialization methods are mutually exclusive - you must use one or the other,
@@ -36,35 +36,35 @@ type PostHogProviderProps =
  *
  * We strongly suggest you memoize the `options` object to ensure that you don't
  * accidentally trigger unnecessary re-renders. We'll properly detect if the options
- * have changed and only call `posthogJs.set_config` if they have, but it's better to
+ * have changed and only call `insightsJs.set_config` if they have, but it's better to
  * avoid unnecessary re-renders in the first place.
  */
-export function PostHogProvider({ children, client, apiKey, options }: WithOptionalChildren<PostHogProviderProps>) {
+export function InsightsProvider({ children, client, apiKey, options }: WithOptionalChildren<InsightsProviderProps>) {
     // Used to detect if the client was already initialized
     // This is used to prevent double initialization when running under React.StrictMode
     // We're not storing a simple boolean here because we want to be able to detect if the
     // apiKey or options have changed.
     const previousInitializationRef = useRef<PreviousInitialization | null>(null)
 
-    const posthog = useMemo(() => {
+    const insights = useMemo(() => {
         if (client) {
             if (apiKey) {
                 console.warn(
-                    '[PostHog.js] You have provided both `client` and `apiKey` to `PostHogProvider`. `apiKey` will be ignored in favour of `client`.'
+                    '[Insights.js] You have provided both `client` and `apiKey` to `InsightsProvider`. `apiKey` will be ignored in favour of `client`.'
                 )
             }
             if (options) {
                 console.warn(
-                    '[PostHog.js] You have provided both `client` and `options` to `PostHogProvider`. `options` will be ignored in favour of `client`.'
+                    '[Insights.js] You have provided both `client` and `options` to `InsightsProvider`. `options` will be ignored in favour of `client`.'
                 )
             }
             return client
         }
 
-        // Indirection so the slim bundle can omit the posthog-js runtime import.
+        // Indirection so the slim bundle can omit the insights-js runtime import.
         // Always defined here: the full entrypoint (index.ts) calls
-        // setDefaultPostHogInstance(posthogJs) before any component renders.
-        const defaultInstance = getDefaultPostHogInstance() as PostHog
+        // setDefaultInsightsInstance(insightsJs) before any component renders.
+        const defaultInstance = getDefaultInsightsInstance() as Insights
 
         if (apiKey) {
             // return the global client, we'll initialize it in the useEffect
@@ -72,14 +72,14 @@ export function PostHogProvider({ children, client, apiKey, options }: WithOptio
         }
 
         console.warn(
-            '[PostHog.js] No `apiKey` or `client` were provided to `PostHogProvider`. Using default global `window.posthog` instance. You must initialize it manually. This is not recommended behavior.'
+            '[Insights.js] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global `window.insights` instance. You must initialize it manually. This is not recommended behavior.'
         )
         return defaultInstance
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [client, apiKey, JSON.stringify(options)]) // Stringify options to be a stable reference
 
     // TRICKY: The init needs to happen in a useEffect rather than useMemo, as useEffect does not happen during SSR. Otherwise
-    // we'd end up trying to call posthogJs.init() on the server, which can cause issues around hydration and double-init.
+    // we'd end up trying to call insightsJs.init() on the server, which can cause issues around hydration and double-init.
     useEffect(() => {
         if (client || !apiKey) {
             // if the user has passed their own client, assume they will also handle calling init().
@@ -87,13 +87,13 @@ export function PostHogProvider({ children, client, apiKey, options }: WithOptio
             return
         }
         // See comment in useMemo above for why this indirection exists.
-        const defaultInstance = getDefaultPostHogInstance() as PostHog
+        const defaultInstance = getDefaultInsightsInstance() as Insights
         const previousInitialization = previousInitializationRef.current
 
         if (!previousInitialization) {
             // If it's the first time running this, but it has been loaded elsewhere, warn the user about it.
             if (defaultInstance.__loaded) {
-                console.warn('[PostHog.js] `posthog` was already loaded elsewhere. This may cause issues.')
+                console.warn('[Insights.js] `insights` was already loaded elsewhere. This may cause issues.')
             }
 
             // Init global client
@@ -116,7 +116,7 @@ export function PostHogProvider({ children, client, apiKey, options }: WithOptio
             // ourselves because we wouldn't know if we should call `.reset()` or not, for example.
             if (apiKey !== previousInitialization.apiKey) {
                 console.warn(
-                    "[PostHog.js] You have provided a different `apiKey` to `PostHogProvider` than the one that was already initialized. This is not supported by our provider and we'll keep using the previous key. If you need to toggle between API Keys you need to control the `client` yourself and pass it in as a prop rather than an `apiKey` prop."
+                    "[Insights.js] You have provided a different `apiKey` to `InsightsProvider` than the one that was already initialized. This is not supported by our provider and we'll keep using the previous key. If you need to toggle between API Keys you need to control the `client` yourself and pass it in as a prop rather than an `apiKey` prop."
                 )
             }
 
@@ -136,10 +136,10 @@ export function PostHogProvider({ children, client, apiKey, options }: WithOptio
     }, [client, apiKey, JSON.stringify(options)]) // Stringify options to be a stable reference
 
     return (
-        <PostHogContext.Provider
-            value={{ client: posthog, bootstrap: options?.bootstrap ?? client?.config?.bootstrap }}
+        <InsightsContext.Provider
+            value={{ client: insights, bootstrap: options?.bootstrap ?? client?.config?.bootstrap }}
         >
             {children}
-        </PostHogContext.Provider>
+        </InsightsContext.Provider>
     )
 }

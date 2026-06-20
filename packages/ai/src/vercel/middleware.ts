@@ -410,7 +410,7 @@ const extractAdditionalTokenValues = (providerMetadata: unknown, usage: unknown)
 // The server applies exclusive cache token accounting based on the model name, so any Claude model
 // needs its V3 input tokens adjusted to exclude cache tokens — not just those routed through a
 // provider whose name contains "anthropic". Accepts the resolved modelId string (not the raw model)
-// so it sees the same id the server does after posthogModelOverride / response.modelId fallbacks.
+// so it sees the same id the server does after insightsModelOverride / response.modelId fallbacks.
 const isAnthropicClaudeModel = (modelId: string, provider: string): boolean => {
   if (provider.toLowerCase().includes('anthropic')) {
     return true
@@ -460,15 +460,15 @@ export const wrapVercelLanguageModel = <T extends LanguageModel>(
 
   // Shared `captureAiGeneration` options for every call site in this wrapper.
   const baseOptions = {
-    distinctId: mergedOptions.posthogDistinctId,
+    distinctId: mergedOptions.insightsDistinctId,
     traceId,
-    properties: mergedOptions.posthogProperties,
-    groups: mergedOptions.posthogGroups,
-    privacyMode: mergedOptions.posthogPrivacyMode,
-    modelOverride: mergedOptions.posthogModelOverride,
-    providerOverride: mergedOptions.posthogProviderOverride,
-    costOverride: mergedOptions.posthogCostOverride,
-    captureImmediate: mergedOptions.posthogCaptureImmediate,
+    properties: mergedOptions.insightsProperties,
+    groups: mergedOptions.insightsGroups,
+    privacyMode: mergedOptions.insightsPrivacyMode,
+    modelOverride: mergedOptions.insightsModelOverride,
+    providerOverride: mergedOptions.insightsProviderOverride,
+    costOverride: mergedOptions.insightsCostOverride,
+    captureImmediate: mergedOptions.insightsCaptureImmediate,
   }
 
   // Create wrapped model using Object.create to preserve the prototype chain

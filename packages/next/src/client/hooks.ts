@@ -1,8 +1,8 @@
 'use client'
 
 export {
-    usePostHog,
+    useInsights,
     useFeatureFlagResult as useFeatureFlag,
     useActiveFeatureFlags,
-    PostHogFeature,
+    InsightsFeature,
 } from '@hanzo/insights-react'

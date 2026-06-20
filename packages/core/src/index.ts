@@ -17,14 +17,14 @@ export {
   toOtlpAnyValue,
   toOtlpKeyValueList,
 } from './logs/logs-utils'
-export { PostHogLogs } from './logs'
+export { InsightsLogs } from './logs'
 export type {
   BeforeSendLogFn,
   BufferedLogEntry,
   CaptureLogger,
   LogSdkContext,
-  PostHogLogsConfig,
-  ResolvedPostHogLogsConfig,
+  InsightsLogsConfig,
+  ResolvedInsightsLogsConfig,
 } from './logs/types'
 // Re-export the user-facing OTLP log types straight from `@hanzo/insights-types`
 // via the `logs/types` barrel so consumers don't have to import from two

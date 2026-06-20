@@ -32,7 +32,7 @@ function getClientIp(req: Request): string | undefined {
 }
 
 function buildRequestContextData(req: Request): Partial<ContextData> {
-  const { sessionId, distinctId } = getPostHogTracingHeaderValues(req.headers)
+  const { sessionId, distinctId } = getInsightsTracingHeaderValues(req.headers)
   const properties: Record<string, any> = {}
 
   addProperty(properties, '$current_url', req.originalUrl || req.url)
@@ -49,17 +49,17 @@ function buildRequestContextData(req: Request): Partial<ContextData> {
 }
 
 export function setupExpressRequestContext(
-  _posthog: PostHogBackendClient,
+  _insights: InsightsBackendClient,
   app: {
     use: (middleware: ExpressMiddleware) => unknown
   }
 ): void {
-  app.use(posthogRequestContext(_posthog))
+  app.use(insightsRequestContext(_insights))
 }
 
-function posthogRequestContext(posthog: PostHogBackendClient): ExpressMiddleware {
+function insightsRequestContext(insights: InsightsBackendClient): ExpressMiddleware {
   return (req, _res, next): void => {
-    posthog.withContext(buildRequestContextData(req), () => next())
+    insights.withContext(buildRequestContextData(req), () => next())
   }
 }
 

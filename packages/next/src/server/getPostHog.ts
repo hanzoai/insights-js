@@ -1,39 +1,39 @@
 import 'server-only'
 
 import { isFunction } from '@hanzo/insights-core'
-import type { PostHogOptions, IPostHog } from '@hanzo/insights-node'
+import type { InsightsOptions, IInsights } from '@hanzo/insights-node'
 import { cookies, headers } from 'next/headers.js'
 import { getOrCreateNodeClient } from './nodeClientCache.js'
-import { readPostHogCookie, isOptedOut } from '../shared/cookie.js'
+import { readInsightsCookie, isOptedOut } from '../shared/cookie.js'
 import { resolveApiKey, resolveHostOrDefault } from '../shared/config.js'
 import { readTracingHeaders, buildContextData } from '../shared/tracing-headers.js'
 
 /**
- * Returns a PostHog server client scoped to the current request.
+ * Returns a Insights server client scoped to the current request.
  *
- * Reads the user's identity from the PostHog cookie and returns a
+ * Reads the user's identity from the Insights cookie and returns a
  * request-scoped client. Methods like `getAllFlags()`, `getFeatureFlagResult()`,
  * and `capture()` automatically use the current user's identity.
  *
  * Calls `cookies()` and `headers()` internally, which opts the route into dynamic rendering.
  *
- * @param apiKey - PostHog project API key. If omitted, reads from `NEXT_PUBLIC_POSTHOG_KEY`.
- * @param options - Optional `posthog-node` configuration (e.g., `{ host: '...' }`).
- * @returns A `posthog-node` client scoped to the current user.
+ * @param apiKey - Insights project API key. If omitted, reads from `NEXT_PUBLIC_INSIGHTS_KEY`.
+ * @param options - Optional `insights-node` configuration (e.g., `{ host: '...' }`).
+ * @returns A `insights-node` client scoped to the current user.
  *
  * @example
  * ```ts
- * import { getPostHog } from '@hanzo/insights-next'
+ * import { getInsights } from '@hanzo/insights-next'
  *
  * export default async function Page() {
- *     const posthog = await getPostHog()
- *     const flags = await posthog.getAllFlags()
- *     posthog.capture({ event: 'page_viewed' })
+ *     const insights = await getInsights()
+ *     const flags = await insights.getAllFlags()
+ *     insights.capture({ event: 'page_viewed' })
  *     return <div>...</div>
  * }
  * ```
  */
-export async function getPostHog(apiKey?: string, options?: Partial<PostHogOptions>): Promise<IPostHog> {
+export async function getInsights(apiKey?: string, options?: Partial<InsightsOptions>): Promise<IInsights> {
     const resolvedApiKey = resolveApiKey(apiKey)
     const host = resolveHostOrDefault(options?.host)
     const resolvedOptions = { ...options, host }
@@ -49,7 +49,7 @@ export async function getPostHog(apiKey?: string, options?: Partial<PostHogOptio
         return client
     }
 
-    const state = readPostHogCookie(cookieStore, resolvedApiKey)
+    const state = readInsightsCookie(cookieStore, resolvedApiKey)
     const headerStore = await headers()
     const tracing = readTracingHeaders(headerStore)
     const contextData = buildContextData(tracing, state)
@@ -69,5 +69,5 @@ export async function getPostHog(apiKey?: string, options?: Partial<PostHogOptio
             }
             return value
         },
-    }) as IPostHog
+    }) as IInsights
 }
