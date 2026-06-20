@@ -32,9 +32,9 @@ const demos = [
 export default function Home() {
     return (
         <div>
-            <h1 className="text-3xl font-bold mb-2">@posthog/next Example</h1>
+            <h1 className="text-3xl font-bold mb-2">@hanzo/insights-next Example</h1>
             <p className="text-gray-600 mb-8">
-                Explore each demo to see how @posthog/next integrates with Next.js App Router.
+                Explore each demo to see how @hanzo/insights-next integrates with Next.js App Router.
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
                 {demos.map((demo) => (

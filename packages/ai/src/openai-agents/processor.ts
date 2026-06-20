@@ -1,4 +1,4 @@
-import type { PostHog, EventMessage } from 'posthog-node'
+import type { PostHog, EventMessage } from '@hanzo/insights-node'
 import type {
   TracingProcessor,
   Trace,
@@ -105,7 +105,7 @@ export interface PostHogTracingProcessorOptions {
  *
  * @example
  * ```typescript
- * import { PostHogTracingProcessor } from '@posthog/ai/openai-agents'
+ * import { PostHogTracingProcessor } from '@hanzo/insights-ai/openai-agents'
  * import { addTraceProcessor } from '@openai/agents'
  *
  * const processor = new PostHogTracingProcessor({

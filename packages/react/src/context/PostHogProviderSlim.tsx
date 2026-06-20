@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react'
-import type { PostHog } from 'posthog-js'
+import type { PostHog } from '@hanzo/insights'
 import { PostHogContext } from './PostHogContext'
 
 /**
- * Slim PostHogProvider for use with @posthog/react/slim.
+ * Slim PostHogProvider for use with @hanzo/insights-react/slim.
  *
  * Only accepts a pre-initialized `client` instance. Does not support
  * `apiKey`/`options` props since the slim bundle has no posthog-js runtime.

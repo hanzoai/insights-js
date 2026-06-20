@@ -1,6 +1,6 @@
 'use client'
 
-import { usePostHog, useFeatureFlag, useActiveFeatureFlags } from '@posthog/next'
+import { usePostHog, useFeatureFlag, useActiveFeatureFlags } from '@hanzo/insights-next'
 
 export default function ClientHooksContent() {
     const posthog = usePostHog()
@@ -11,7 +11,7 @@ export default function ClientHooksContent() {
         <div>
             <h1 className="text-2xl font-bold mb-2">Client-Side Hooks</h1>
             <p className="text-gray-600 mb-6">
-                These hooks from <code className="bg-gray-100 px-1 rounded">@posthog/next</code> provide real-time
+                These hooks from <code className="bg-gray-100 px-1 rounded">@hanzo/insights-next</code> provide real-time
                 feature flag values on the client. Create a flag called{' '}
                 <code className="bg-gray-100 px-1 rounded">example-flag</code> in your PostHog project to see values
                 below.

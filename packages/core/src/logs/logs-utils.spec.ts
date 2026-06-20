@@ -1,4 +1,4 @@
-import type { CaptureLogOptions, LogSeverityLevel } from '@posthog/types'
+import type { CaptureLogOptions, LogSeverityLevel } from '@hanzo/insights-types'
 import type { LogSdkContext } from './types'
 import {
   buildOtlpLogRecord,
@@ -239,7 +239,7 @@ describe('logs-utils', () => {
   describe('buildOtlpLogsPayload', () => {
     it('wraps log records in the OTLP envelope with scope name and version', () => {
       const record = buildOtlpLogRecord({ body: 'test' }, minimalSdkContext)
-      const payload = buildOtlpLogsPayload([record], { 'service.name': 'my-app' }, 'posthog-js', '1.371.0')
+      const payload = buildOtlpLogsPayload([record], { 'service.name': 'my-app' }, '@hanzo/insights', '1.371.0')
 
       expect(payload.resourceLogs).toHaveLength(1)
       expect(payload.resourceLogs[0].resource.attributes).toEqual([
@@ -247,7 +247,7 @@ describe('logs-utils', () => {
       ])
       expect(payload.resourceLogs[0].scopeLogs).toHaveLength(1)
       expect(payload.resourceLogs[0].scopeLogs[0].scope).toEqual({
-        name: 'posthog-js',
+        name: '@hanzo/insights',
         version: '1.371.0',
       })
       expect(payload.resourceLogs[0].scopeLogs[0].logRecords).toHaveLength(1)

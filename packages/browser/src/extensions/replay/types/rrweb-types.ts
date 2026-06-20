@@ -1,4 +1,4 @@
-// Type definitions copied from the in-repo @posthog/rrweb-types and @posthog/rrweb-snapshot packages
+// Type definitions copied from the in-repo @hanzo/rrweb-types and @hanzo/rrweb-snapshot packages
 // (a fork of upstream @rrweb/types and rrweb-snapshot, both MIT licensed: https://github.com/rrweb-io/rrweb)
 //
 // These types are inlined here to avoid requiring users to install peer dependencies

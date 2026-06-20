@@ -35,7 +35,7 @@ import {
     TRIGGER_PENDING,
 } from './triggerMatching'
 import { sampleOnProperty } from '../../sampling'
-import { isBoolean, isNull, isNullish, isNumber } from '@posthog/core'
+import { isBoolean, isNull, isNullish, isNumber } from '@hanzo/insights-core'
 import { createLogger } from '../../../utils/logger'
 import { matchTriggerPropertyFilters } from '../../../utils/property-utils'
 

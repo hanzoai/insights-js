@@ -649,8 +649,8 @@ describe('request', () => {
                 CompressionStream: jest.fn(),
             }))
 
-            jest.doMock('@posthog/core', () => ({
-                ...jest.requireActual('@posthog/core'),
+            jest.doMock('@hanzo/insights-core', () => ({
+                ...jest.requireActual('@hanzo/insights-core'),
                 gzipCompress: mockedIsolatedGzipCompress,
                 isNativeAsyncGzipError: (error: unknown) =>
                     error &&

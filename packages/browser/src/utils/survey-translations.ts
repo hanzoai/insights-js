@@ -3,8 +3,8 @@ import { Survey } from '../posthog-surveys-types'
 import { STORED_PERSON_PROPERTIES_KEY } from '../constants'
 import { createLogger } from './logger'
 import { getBrowserLanguage } from './event-utils'
-import { isFunction } from '@posthog/core'
-import { applySurveyTranslation, detectSurveyLanguage } from '@posthog/core/surveys'
+import { isFunction } from '@hanzo/insights-core'
+import { applySurveyTranslation, detectSurveyLanguage } from '@hanzo/insights-core/surveys'
 
 const logger = createLogger('[SurveyTranslations]')
 
