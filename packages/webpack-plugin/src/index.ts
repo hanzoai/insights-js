@@ -1,6 +1,5 @@
 import { Logger, createLogger } from '@hanzo/insights-core'
 import { PluginConfig, resolveConfig, ResolvedPluginConfig } from './config'
-import { runSourcemapCli } from '@posthog/plugin-utils'
 import webpack from 'webpack'
 import { spawnLocal } from '@hanzo/insights-core/process'
 import path from 'path'
@@ -56,6 +55,7 @@ export class InsightsWebpackPlugin {
         if (!config.sourcemaps.enabled) return
 
         const outputDirectory = compilation.outputOptions.path
+        const args: string[] = ['sourcemap', 'process']
         const chunkArray = Array.from(compilation.chunks)
 
         if (chunkArray.length == 0) {
@@ -63,11 +63,10 @@ export class InsightsWebpackPlugin {
             return
         }
 
-        const filePaths: string[] = []
         chunkArray.forEach((chunk) =>
             chunk.files.forEach((file) => {
                 const chunkPath = path.resolve(outputDirectory, file)
-                filePaths.push(chunkPath)
+                args.push('--file', chunkPath)
             })
         )
 

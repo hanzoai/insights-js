@@ -4,7 +4,7 @@
   "description": "Hanzo Insights AI integrations for LLM observability.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/ai"
   },
   "main": "dist/index.cjs",
@@ -142,7 +142,7 @@
     "url": "https://hanzo.ai"
   },
   "bugs": {
-    "url": "https://github.com/hanzoai/insights-js/issues"
+    "url": "https://github.com/hanzoinsights/insights-js/issues"
   },
   "homepage": "https://docs.hanzo.ai/insights/ai"
 }

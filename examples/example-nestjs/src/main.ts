@@ -2,8 +2,8 @@
 
 import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
-import { PostHog } from 'posthog-node'
-import { PostHogInterceptor } from 'posthog-node/nestjs'
+import { PostHog } from '@hanzo/insights-node'
+import { PostHogInterceptor } from '@hanzo/insights-node/nestjs'
 import { AppModule } from './app.module'
 
 const { POSTHOG_PROJECT_API_KEY, POSTHOG_HOST } = process.env

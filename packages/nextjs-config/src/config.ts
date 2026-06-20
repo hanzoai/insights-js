@@ -55,7 +55,7 @@ export function withInsightsConfig(userNextConfig: UserProvidedConfig, insightsC
     const timer = setTimeout(() => {
       if (!invoked) {
         console.warn(
-          '[@posthog/nextjs-config] withPostHogConfig was loaded but Next.js never invoked the config function it returns. ' +
+          '[@hanzo/insights-nextjs] withPostHogConfig was loaded but Next.js never invoked the config function it returns. ' +
             'This usually means another config wrapper (e.g. withNextIntl, withSentryConfig) is wrapping withPostHogConfig ' +
             'and producing a plain object that drops the PostHog hooks. Move withPostHogConfig(...) to be the OUTERMOST ' +
             'wrapper in next.config.js so source maps upload and other build hooks run. ' +

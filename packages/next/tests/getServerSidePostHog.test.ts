@@ -4,7 +4,7 @@ const mockEnterContext = jest.fn()
 const mockGetAllFlags = jest.fn()
 const mockGetAllFlagsAndPayloads = jest.fn()
 
-jest.mock('posthog-node', () => ({
+jest.mock('@hanzo/insights-node', () => ({
     PostHog: jest.fn().mockImplementation(() => ({
         enterContext: mockEnterContext,
         getAllFlags: mockGetAllFlags,
@@ -35,7 +35,7 @@ describe('getServerSidePostHog', () => {
     })
 
     it('returns a posthog client', async () => {
-        const { PostHog } = require('posthog-node')
+        const { PostHog } = require('@hanzo/insights-node')
         const ctx = createMockContext({
             ph_phc_test123_posthog: JSON.stringify({
                 distinct_id: 'user_abc',
@@ -84,7 +84,7 @@ describe('getServerSidePostHog', () => {
     })
 
     it('warns and returns a disabled client when no apiKey provided and env not set', async () => {
-        const { PostHog } = require('posthog-node')
+        const { PostHog } = require('@hanzo/insights-node')
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
         const ctx = createMockContext({})
 
@@ -100,7 +100,7 @@ describe('getServerSidePostHog', () => {
     })
 
     it('trims apiKey and host before creating the node client', async () => {
-        const { PostHog } = require('posthog-node')
+        const { PostHog } = require('@hanzo/insights-node')
         const ctx = createMockContext({})
 
         await getServerSidePostHog(ctx, '  phc_test123\n', { host: '  https://custom.posthog.com/\t ' })
@@ -111,7 +111,7 @@ describe('getServerSidePostHog', () => {
     })
 
     it('defaults host when it is omitted', async () => {
-        const { PostHog } = require('posthog-node')
+        const { PostHog } = require('@hanzo/insights-node')
         const ctx = createMockContext({})
 
         await getServerSidePostHog(ctx, 'phc_default_host_test')

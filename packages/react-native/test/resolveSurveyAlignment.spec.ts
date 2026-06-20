@@ -1,4 +1,4 @@
-import { SurveyPosition } from '@posthog/core'
+import { SurveyPosition } from '@hanzo/insights-core'
 import { resolveSurveyAlignment } from '../src/surveys/surveys-utils'
 
 describe('resolveSurveyAlignment', () => {

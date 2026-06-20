@@ -13,7 +13,7 @@
     "image": "tsx image-generation.ts"
   },
   "dependencies": {
-    "@posthog/ai": "*",
+    "@hanzo/insights-ai": "*",
     "@opentelemetry/sdk-node": "^0.200.0",
     "@opentelemetry/resources": "^2.0.0",
     "@opentelemetry/instrumentation-openai": "^0.12.0",

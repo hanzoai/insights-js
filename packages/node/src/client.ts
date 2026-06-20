@@ -164,7 +164,12 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
    * @param options - Configuration options for the client
    */
   constructor(apiKey: string, options: InsightsOptions = {}) {
-    super(apiKey, options)
+    const normalizedApiKey = normalizeApiKey(apiKey)
+    const normalizedOptions = {
+      ...options,
+      host: normalizeHost(options.host),
+      personalApiKey: normalizePersonalApiKey(options.personalApiKey),
+    }
 
     super(normalizedApiKey, normalizedOptions)
 

@@ -1,4 +1,4 @@
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { relative, isAbsolute, sep } from 'path'
 
 export function createRelativePathModifier(basePath: string = process.cwd()) {
