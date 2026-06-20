@@ -218,7 +218,7 @@ export interface DeadClickCandidate {
 /**
  * Controls buffering and payload limits for exception steps added via `addExceptionStep`.
  *
- * NOTE: This type is also defined in `@posthog/core` (exception-steps.ts). Keep both in sync.
+ * NOTE: This type is also defined in `@hanzo/insights-core` (exception-steps.ts). Keep both in sync.
  */
 export type ExceptionStepsConfig = {
     /**

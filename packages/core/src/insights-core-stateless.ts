@@ -1,4 +1,4 @@
-import type { OtlpLogsPayload } from '@posthog/types'
+import type { OtlpLogsPayload } from '@hanzo/insights-types'
 import { SimpleEventEmitter } from './eventemitter'
 import { getFeatureFlagValue, normalizeFlagsResponse } from './featureFlagUtils'
 import { gzipCompress, isGzipSupported } from './gzip'
@@ -199,7 +199,7 @@ export abstract class InsightsCoreStateless {
   abstract setPersistedProperty<T>(key: InsightsPersistedProperty, value: T | null): void
 
   constructor(apiKey: string, options: InsightsCoreOptions = {}) {
-    assert(apiKey, "You must pass your Insights project's api key.")
+    const missingApiKey = !apiKey
 
     this.apiKey = apiKey
     this.host = removeTrailingSlash(options.host || 'https://us.i.insights.com')
@@ -227,6 +227,9 @@ export abstract class InsightsCoreStateless {
     this._initPromise = Promise.resolve()
     this._isInitialized = true
     this._logger = createLogger('[Insights]', this.logMsgIfDebug.bind(this))
+    if (missingApiKey) {
+      this._logger.error("You must pass your Insights project's api key. The client will be disabled.")
+    }
     // Support both evaluationContexts (new) and evaluationEnvironments (deprecated)
     this.evaluationContexts = options?.evaluationContexts ?? options?.evaluationEnvironments
     if (options?.evaluationEnvironments && !options?.evaluationContexts) {
@@ -1263,7 +1266,7 @@ export abstract class InsightsCoreStateless {
     const url = `${this.host}/i/v1/logs?token=${encodeURIComponent(this.apiKey)}`
 
     const gzippedPayload = !this.disableCompression ? await gzipCompress(serialized, this.isDebug) : null
-    const fetchOptions: PostHogFetchOptions = {
+    const fetchOptions: InsightsFetchOptions = {
       method: 'POST',
       headers: {
         ...this.getCustomHeaders(),
@@ -1276,18 +1279,18 @@ export abstract class InsightsCoreStateless {
     try {
       await this.fetchWithRetry(url, fetchOptions, {
         retryCheck: (err) => {
-          if (isPostHogFetchContentTooLargeError(err)) {
+          if (isInsightsFetchContentTooLargeError(err)) {
             return false
           }
-          return isPostHogFetchError(err)
+          return isInsightsFetchError(err)
         },
       })
       return { kind: 'ok' }
     } catch (err) {
-      if (isPostHogFetchContentTooLargeError(err)) {
+      if (isInsightsFetchContentTooLargeError(err)) {
         return { kind: 'too-large' }
       }
-      if (err instanceof PostHogFetchNetworkError) {
+      if (err instanceof InsightsFetchNetworkError) {
         return { kind: 'retry-later', error: err }
       }
       return { kind: 'fatal', error: err }
@@ -1300,12 +1303,6 @@ export abstract class InsightsCoreStateless {
     retryOptions?: Partial<RetriableOptions>,
     requestTimeout?: number
   ): Promise<InsightsFetchResponse> {
-    ;(AbortSignal as any).timeout ??= function timeout(ms: number) {
-      const ctrl = new AbortController()
-      setTimeout(() => ctrl.abort(), ms)
-      return ctrl.signal
-    }
-
     const body = options.body ? options.body : ''
     let reqByteLength = -1
     try {
@@ -1325,6 +1322,10 @@ export abstract class InsightsCoreStateless {
 
     return await retriable(
       async () => {
+        const ctrl = new AbortController()
+        const timeoutMs = requestTimeout ?? this.requestTimeout
+        const timer = safeSetTimeout(() => ctrl.abort(), timeoutMs)
+
         let res: InsightsFetchResponse | null = null
         try {
           res = await this.fetch(url, {
@@ -1334,6 +1335,8 @@ export abstract class InsightsCoreStateless {
         } catch (e) {
           // fetch will only throw on network errors or on timeouts
           throw new InsightsFetchNetworkError(e)
+        } finally {
+          clearTimeout(timer)
         }
         // If we're in no-cors mode, we can't access the response status
         // We only throw on HTTP errors if we're not in no-cors mode

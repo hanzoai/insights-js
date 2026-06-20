@@ -7,8 +7,8 @@
     "chat": "tsx chat.ts"
   },
   "dependencies": {
-    "posthog-node": "*",
-    "@posthog/ai": "*",
+    "@hanzo/insights-node": "*",
+    "@hanzo/insights-ai": "*",
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@opentelemetry/instrumentation-aws-sdk": "^0.48.0",
     "@opentelemetry/sdk-node": "^0.200.0",

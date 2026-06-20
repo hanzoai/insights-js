@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePostHog } from '@posthog/next'
+import { usePostHog } from '@hanzo/insights-next'
 
 export default function AuthPage() {
     const posthog = usePostHog()

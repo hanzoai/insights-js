@@ -3,7 +3,7 @@ import { isErrorEvent } from '@/utils'
 
 // Structural subset of the DOM `ErrorEvent`. Avoids leaking a DOM-only global
 // into the public type surface so non-DOM consumers (e.g. React Native, whose
-// tsconfig lib excludes DOM) can still consume `@posthog/core` types via tools
+// tsconfig lib excludes DOM) can still consume `@hanzo/insights-core` types via tools
 // like api-extractor that resolve symbols transitively.
 interface ErrorEventLike {
   message: string

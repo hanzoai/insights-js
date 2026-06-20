@@ -4,7 +4,7 @@ import { PostHogPageView } from '../src/client/PostHogPageView'
 
 const mockCapture = jest.fn()
 const mockUsePostHog = jest.fn(() => ({ capture: mockCapture }))
-jest.mock('@posthog/react', () => ({
+jest.mock('@hanzo/insights-react', () => ({
     usePostHog: () => mockUsePostHog(),
 }))
 

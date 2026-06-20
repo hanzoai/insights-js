@@ -227,6 +227,7 @@ export enum InsightsPersistedProperty {
   Surveys = 'surveys', // only used by insights-react-native
   RemoteConfig = 'remote_config',
   FlagsEndpointWasHit = 'flags_endpoint_was_hit', // only used by insights-react-native
+  DeviceId = 'device_id', // only used by insights-react-native
 }
 
 export type InsightsFetchOptions = {

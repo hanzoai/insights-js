@@ -1,5 +1,5 @@
 import React from 'react'
-import type { PostHogConfig, BootstrapConfig } from 'posthog-js'
+import type { PostHogConfig, BootstrapConfig } from '@hanzo/insights'
 import { ClientPostHogProvider } from '../client/ClientPostHogProvider.js'
 import { NEXTJS_CLIENT_DEFAULTS, resolveApiKey, resolveHostOrDefault } from '../shared/config.js'
 
@@ -23,7 +23,7 @@ export interface PagesPostHogProviderProps {
  *
  * @example
  * ```tsx
- * import { PostHogProvider } from '@posthog/next/pages'
+ * import { PostHogProvider } from '@hanzo/insights-next/pages'
  *
  * export default function App({ Component, pageProps }: AppProps) {
  *   return (

@@ -249,7 +249,7 @@ function App() {
         <div className="app">
             <header className="hero">
                 <div className="hero-left">
-                    <div className="hero-eyebrow">@posthog/convex · v1</div>
+                    <div className="hero-eyebrow">@hanzo/insights-convex · v1</div>
                     <h1 className="hero-title">
                         PostHog inside Convex<span className="hero-title-dot">.</span>
                     </h1>
@@ -643,7 +643,7 @@ function App() {
                     </Section>
 
                     {/* 5. AI Generation */}
-                    <Section num="05" title="AI generation" subtitle="@posthog/ai · action context">
+                    <Section num="05" title="AI generation" subtitle="@hanzo/insights-ai · action context">
                         <p className="section-lede">
                             Captures <code>$ai_generation</code> events. OpenTelemetry is the recommended path — it
                             slots in alongside any other OTel instrumentation you already have. Manual capture is the
@@ -823,7 +823,7 @@ function App() {
 
             <footer className="footer">
                 <span>
-                    @posthog/convex ·{' '}
+                    @hanzo/insights-convex ·{' '}
                     <a href="https://github.com/PostHog/posthog-js/tree/main/packages/convex">readme</a> ·{' '}
                     <a href="https://posthog.com/docs/product-analytics">analytics</a> ·{' '}
                     <a href="https://posthog.com/docs/feature-flags">feature flags</a> ·{' '}

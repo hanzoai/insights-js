@@ -26,7 +26,7 @@ export type {
   PostHogLogsConfig,
   ResolvedPostHogLogsConfig,
 } from './logs/types'
-// Re-export the user-facing OTLP log types straight from `@posthog/types`
+// Re-export the user-facing OTLP log types straight from `@hanzo/insights-types`
 // via the `logs/types` barrel so consumers don't have to import from two
 // packages to type their `captureLog` calls.
 export type { CaptureLogOptions, LogAttributeValue, LogAttributes, LogSeverityLevel } from './logs/types'

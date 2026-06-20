@@ -1,5 +1,5 @@
-import { createLogger, Logger, PostHogPersistedProperty, Survey } from '@posthog/core'
-import { applySurveyTranslation, detectSurveyLanguage } from '@posthog/core/surveys'
+import { createLogger, Logger, PostHogPersistedProperty, Survey } from '@hanzo/insights-core'
+import { applySurveyTranslation, detectSurveyLanguage } from '@hanzo/insights-core/surveys'
 import { PostHog } from '../posthog-rn'
 
 const logger = createLogger('[SurveyTranslations]')

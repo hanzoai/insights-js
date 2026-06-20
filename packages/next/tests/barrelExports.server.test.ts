@@ -22,15 +22,15 @@ jest.mock('next/headers.js', () => ({
 jest.mock('next/server.js', () => ({
     NextResponse: { next: jest.fn(), rewrite: jest.fn() },
 }))
-jest.mock('@posthog/react', () => ({
+jest.mock('@hanzo/insights-react', () => ({
     PostHogContext: { Provider: ({ children }: { children: unknown }) => children },
     usePostHog: jest.fn(),
     useFeatureFlagResult: jest.fn(),
     useActiveFeatureFlags: jest.fn(),
     PostHogFeature: jest.fn(() => null),
 }))
-jest.mock('posthog-js', () => ({ __esModule: true, default: { __loaded: false, init: jest.fn() } }))
-jest.mock('posthog-node', () => ({ PostHog: jest.fn() }))
+jest.mock('@hanzo/insights', () => ({ __esModule: true, default: { __loaded: false, init: jest.fn() } }))
+jest.mock('@hanzo/insights-node', () => ({ PostHog: jest.fn() }))
 
 import * as pagesNode from '../src/pages'
 import * as pagesEdge from '../src/pages.edge'
@@ -41,7 +41,7 @@ import * as indexReactServer from '../src/index.react-server'
 const asRecord = (mod: unknown) => mod as Record<string, unknown>
 
 describe('server barrels (default / edge / react-server exports conditions)', () => {
-    describe("@posthog/next/pages → 'default' / 'react-server' → pages", () => {
+    describe("@hanzo/insights-next/pages → 'default' / 'react-server' → pages", () => {
         it.each([
             ['PostHogProvider', 'function'],
             ['PostHogPageView', 'function'],
@@ -54,7 +54,7 @@ describe('server barrels (default / edge / react-server exports conditions)', ()
         })
     })
 
-    describe("@posthog/next/pages → 'edge' → pages.edge", () => {
+    describe("@hanzo/insights-next/pages → 'edge' → pages.edge", () => {
         it.each([
             ['PostHogProvider', 'function'],
             ['postHogMiddleware', 'function'],
@@ -69,7 +69,7 @@ describe('server barrels (default / edge / react-server exports conditions)', ()
         })
     })
 
-    describe("@posthog/next → 'default' → index", () => {
+    describe("@hanzo/insights-next → 'default' → index", () => {
         it.each([
             ['PostHogProvider', 'function'],
             ['PostHogPageView', 'function'],
@@ -81,7 +81,7 @@ describe('server barrels (default / edge / react-server exports conditions)', ()
         })
     })
 
-    describe("@posthog/next → 'edge' → index.edge", () => {
+    describe("@hanzo/insights-next → 'edge' → index.edge", () => {
         it.each([
             ['postHogMiddleware', 'function'],
             ['PostHogPageView', 'function'],
@@ -95,7 +95,7 @@ describe('server barrels (default / edge / react-server exports conditions)', ()
         })
     })
 
-    describe("@posthog/next → 'react-server' → index.react-server", () => {
+    describe("@hanzo/insights-next → 'react-server' → index.react-server", () => {
         it.each([
             ['PostHogProvider', 'function'],
             ['PostHogPageView', 'function'],

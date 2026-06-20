@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/rrweb",
+    "name": "@hanzo/rrweb",
     "version": "0.0.67",
     "description": "record and replay the web",
     "scripts": {
@@ -21,7 +21,7 @@
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "https://github.com/PostHog/posthog-js"
+        "url": "https://github.com/hanzoinsights/insights-js"
     },
     "main": "./dist/rrweb.umd.cjs",
     "module": "./dist/rrweb.js",
@@ -49,9 +49,9 @@
     "author": "yanzhen@smartx.com",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/PostHog/posthog-js/issues"
+        "url": "https://github.com/hanzoinsights/insights-js/issues"
     },
-    "homepage": "https://github.com/PostHog/posthog-js#readme",
+    "homepage": "https://github.com/hanzoinsights/insights-js#readme",
     "devDependencies": {
         "@types/dom-mediacapture-transform": "0.1.4",
         "@types/jest-image-snapshot": "^6.1.0",
@@ -73,13 +73,13 @@
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "@posthog/rrweb-types": "workspace:*",
-        "@posthog/rrweb-utils": "workspace:*",
+        "@hanzo/rrweb-types": "workspace:*",
+        "@hanzo/rrweb-utils": "workspace:*",
         "@types/css-font-loading-module": "0.0.7",
         "@xstate/fsm": "^1.4.0",
         "base64-arraybuffer": "^1.0.1",
         "mitt": "^3.0.0",
-        "@posthog/rrdom": "workspace:*",
-        "@posthog/rrweb-snapshot": "workspace:*"
+        "@hanzo/rrdom": "workspace:*",
+        "@hanzo/rrweb-snapshot": "workspace:*"
     }
 }

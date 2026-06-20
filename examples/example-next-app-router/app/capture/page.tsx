@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { usePostHog } from '@posthog/next'
+import { usePostHog } from '@hanzo/insights-next'
 
 export default function CapturePage() {
     const posthog = usePostHog()

@@ -1,5 +1,5 @@
-import { PostHog } from 'posthog-node'
-import type { PostHogOptions } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
+import type { PostHogOptions } from '@hanzo/insights-node'
 
 const cache = new Map<string, PostHog>()
 

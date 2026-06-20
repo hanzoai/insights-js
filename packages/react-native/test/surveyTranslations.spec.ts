@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals'
-import { Survey, SurveyQuestionType, SurveyType } from '@posthog/core'
+import { Survey, SurveyQuestionType, SurveyType } from '@hanzo/insights-core'
 import { applySurveyTranslationForUser, detectUserLanguage } from '../src/surveys/survey-translations'
 import { PostHog } from '../src/posthog-rn'
 

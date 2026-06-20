@@ -3,12 +3,12 @@
   "description": "Send analytics events to Hanzo Insights from your Convex backend.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/convex"
   },
   "homepage": "https://docs.hanzo.ai/insights/convex",
   "bugs": {
-    "url": "https://github.com/hanzoai/insights-js/issues"
+    "url": "https://github.com/hanzoinsights/insights-js/issues"
   },
   "author": {
     "name": "Hanzo AI",

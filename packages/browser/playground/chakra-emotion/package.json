@@ -11,7 +11,7 @@
     "dependencies": {
         "@chakra-ui/react": "^3.27.0",
         "@emotion/react": "^11.14.0",
-        "posthog-js": "link:../../..",
+        "@hanzo/insights": "link:../../..",
         "react": "^19.2.1",
         "react-dom": "^19.2.1"
     },

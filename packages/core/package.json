@@ -19,6 +19,9 @@
       "utils": [
         "dist/utils/index.d.ts"
       ],
+      "process": [
+        "dist/process/index.d.ts"
+      ],
       "vendor/*": [
         "dist/vendor/*.d.ts"
       ]
@@ -26,7 +29,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/core"
   },
   "files": [
@@ -73,14 +76,21 @@
       "types": "./dist/utils/index.d.ts",
       "require": "./dist/utils/index.js",
       "import": "./dist/utils/index.mjs"
+    },
+    "./process": {
+      "types": "./dist/process/index.d.ts",
+      "require": "./dist/process/index.js",
+      "import": "./dist/process/index.mjs"
     }
   },
   "dependencies": {
-    "@posthog/types": "workspace:*"
+    "@hanzo/insights-types": "workspace:*",
+    "cross-spawn": "^7.0.6"
   },
   "devDependencies": {
     "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
+    "@types/cross-spawn": "^6.0.6",
     "@types/jest": "catalog:",
     "jest": "catalog:"
   }

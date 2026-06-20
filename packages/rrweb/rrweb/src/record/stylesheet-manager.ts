@@ -1,7 +1,7 @@
 import {
   resetStylesheetLoadTracking,
   stringifyRule,
-} from '@posthog/rrweb-snapshot';
+} from '@hanzo/rrweb-snapshot';
 import type {
   elementNode,
   serializedNodeWithId,
@@ -9,7 +9,7 @@ import type {
   adoptedStyleSheetParam,
   attributeMutation,
   mutationCallBack,
-} from '@posthog/rrweb-types';
+} from '@hanzo/rrweb-types';
 import { StyleSheetMirror } from '../utils';
 
 export class StylesheetManager {

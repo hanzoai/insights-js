@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/react-slim",
+    "name": "@hanzo/react-slim",
     "private": true,
     "main": "../dist/umd/slim/index.js",
     "module": "../dist/esm/slim/index.js",
