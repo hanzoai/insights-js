@@ -52,7 +52,7 @@ jest.mock('next/server.js', () => ({
     },
 }))
 
-const COOKIE_NAME = 'ph_phc_test123_posthog'
+const COOKIE_NAME = 'hi_phc_test123_insights'
 
 describe('postHogMiddleware', () => {
     const originalEnv = process.env
@@ -81,22 +81,22 @@ describe('postHogMiddleware', () => {
     })
 
     describe('apiKey resolution', () => {
-        it('reads apiKey from NEXT_PUBLIC_POSTHOG_KEY when not in config', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_from_env'
+        it('reads apiKey from NEXT_PUBLIC_INSIGHTS_KEY when not in config', async () => {
+            process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_from_env'
             const middleware = postHogMiddleware({})
             const req = new MockNextRequest('https://example.com/')
 
             await middleware(req as any)
 
             expect(mockCookiesSet).toHaveBeenCalledWith(
-                'ph_phc_from_env_posthog',
+                'hi_phc_from_env_insights',
                 expect.any(String),
                 expect.any(Object)
             )
         })
 
         it('prefers config apiKey over env var', async () => {
-            process.env.NEXT_PUBLIC_POSTHOG_KEY = 'phc_from_env'
+            process.env.NEXT_PUBLIC_INSIGHTS_KEY = 'phc_from_env'
             const middleware = postHogMiddleware({ apiKey: 'phc_test123' })
             const req = new MockNextRequest('https://example.com/')
 
@@ -115,14 +115,14 @@ describe('postHogMiddleware', () => {
         })
 
         it('warns and skips cookie seeding when neither config nor env var provides apiKey', async () => {
-            delete process.env.NEXT_PUBLIC_POSTHOG_KEY
+            delete process.env.NEXT_PUBLIC_INSIGHTS_KEY
             const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
             const middleware = postHogMiddleware({})
             const req = new MockNextRequest('https://example.com/')
 
             await middleware(req as any)
 
-            expect(warnSpy).toHaveBeenCalledWith('[PostHog Next.js] apiKey is required — PostHog will not be initialized')
+            expect(warnSpy).toHaveBeenCalledWith('[Insights Next.js] apiKey is required — Insights will not be initialized')
             expect(mockCookiesSet).not.toHaveBeenCalled()
             expect(mockNextResponseNext).toHaveBeenCalled()
             warnSpy.mockRestore()
@@ -147,7 +147,7 @@ describe('postHogMiddleware', () => {
                 })
             )
 
-            // Verify the cookie value is valid PostHog cookie JSON
+            // Verify the cookie value is valid Insights cookie JSON
             const cookieValue = mockCookiesSet.mock.calls[0][1]
             const parsed = JSON.parse(cookieValue)
             expect(parsed.distinct_id).toBe('mock-anon-id')
@@ -245,7 +245,7 @@ describe('postHogMiddleware', () => {
     })
 
     describe('proxy', () => {
-        it('proxies ingest requests to PostHog host', async () => {
+        it('proxies ingest requests to Insights host', async () => {
             const middleware = postHogMiddleware({
                 apiKey: 'phc_test123',
                 proxy: true,
@@ -256,7 +256,7 @@ describe('postHogMiddleware', () => {
 
             expect(mockNextResponseRewrite).toHaveBeenCalledWith(expect.any(URL))
             const rewriteUrl: URL = mockNextResponseRewrite.mock.calls[0][0]
-            expect(rewriteUrl.origin).toBe('https://us.i.posthog.com')
+            expect(rewriteUrl.origin).toBe('https://us.i.insights.hanzo.ai')
             expect(rewriteUrl.pathname).toBe('/e/')
         })
 
@@ -322,7 +322,7 @@ describe('postHogMiddleware', () => {
             await middleware(req as any)
 
             const rewriteUrl: URL = mockNextResponseRewrite.mock.calls[0][0]
-            expect(rewriteUrl.origin).toBe('https://us.i.posthog.com')
+            expect(rewriteUrl.origin).toBe('https://us.i.insights.hanzo.ai')
             expect(rewriteUrl.pathname).toBe('/e/')
         })
 
@@ -343,28 +343,28 @@ describe('postHogMiddleware', () => {
         it('supports custom host', async () => {
             const middleware = postHogMiddleware({
                 apiKey: 'phc_test123',
-                proxy: { host: 'https://eu.i.posthog.com' },
+                proxy: { host: 'https://eu.i.insights.hanzo.ai' },
             })
             const req = new MockNextRequest('https://example.com/ingest/e/')
 
             await middleware(req as any)
 
             const rewriteUrl: URL = mockNextResponseRewrite.mock.calls[0][0]
-            expect(rewriteUrl.origin).toBe('https://eu.i.posthog.com')
+            expect(rewriteUrl.origin).toBe('https://eu.i.insights.hanzo.ai')
             expect(rewriteUrl.pathname).toBe('/e/')
         })
 
         it('trims custom proxy host before rewriting', async () => {
             const middleware = postHogMiddleware({
                 apiKey: 'phc_test123',
-                proxy: { host: '  https://eu.i.posthog.com/\t ' },
+                proxy: { host: '  https://eu.i.insights.hanzo.ai/\t ' },
             })
             const req = new MockNextRequest('https://example.com/ingest/e/')
 
             await middleware(req as any)
 
             const rewriteUrl: URL = mockNextResponseRewrite.mock.calls[0][0]
-            expect(rewriteUrl.origin).toBe('https://eu.i.posthog.com')
+            expect(rewriteUrl.origin).toBe('https://eu.i.insights.hanzo.ai')
             expect(rewriteUrl.pathname).toBe('/e/')
         })
 

@@ -1,26 +1,26 @@
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { GestureResponderEvent, StyleProp, View, ViewStyle } from 'react-native'
-import { PostHog, PostHogOptions } from './posthog-rn'
+import { Insights, InsightsOptions } from './insights-rn'
 import { autocaptureFromTouchEvent } from './autocapture'
 import { useNavigationTracker } from './hooks/useNavigationTracker'
-import { PostHogContext } from './PostHogContext'
-import { PostHogAutocaptureOptions } from './types'
-import { defaultPostHogLabelProp } from './autocapture'
+import { InsightsContext } from './InsightsContext'
+import { InsightsAutocaptureOptions } from './types'
+import { defaultInsightsLabelProp } from './autocapture'
 
 /**
- * Props for the PostHogProvider component.
+ * Props for the InsightsProvider component.
  *
  * @public
  */
-export interface PostHogProviderProps {
-  /** The child components to render within the PostHog context */
+export interface InsightsProviderProps {
+  /** The child components to render within the Insights context */
   children: React.ReactNode
-  /** PostHog configuration options */
-  options?: PostHogOptions
-  /** Your PostHog API key */
+  /** Insights configuration options */
+  options?: InsightsOptions
+  /** Your Insights API key */
   apiKey?: string
-  /** An existing PostHog client instance */
-  client?: PostHog
+  /** An existing Insights client instance */
+  client?: Insights
   /**
    * Autocapture configuration - can be a boolean or detailed options.
    *
@@ -32,7 +32,7 @@ export interface PostHogProviderProps {
    * Set to `true` to enable all autocapture features (including touches).
    * Set to `false` to disable all autocapture features.
    */
-  autocapture?: boolean | PostHogAutocaptureOptions
+  autocapture?: boolean | InsightsAutocaptureOptions
   /**
    * Enable debug mode for additional logging
    *
@@ -43,51 +43,51 @@ export interface PostHogProviderProps {
   style?: StyleProp<ViewStyle>
 }
 
-function PostHogNavigationHook({
+function InsightsNavigationHook({
   options,
   client,
 }: {
-  options?: PostHogAutocaptureOptions
-  client?: PostHog
+  options?: InsightsAutocaptureOptions
+  client?: Insights
 }): JSX.Element | null {
   useNavigationTracker(options?.navigation, options?.navigationRef, client)
   return null
 }
 
 /**
- * PostHogProvider is a React component that provides PostHog functionality to your React Native app. You can find all configuration options in the [React Native SDK docs](https://posthog.com/docs/libraries/react-native#configuration-options).
+ * InsightsProvider is a React component that provides Insights functionality to your React Native app. You can find all configuration options in the [React Native SDK docs](https://insights.hanzo.ai/docs/libraries/react-native#configuration-options).
  *
- * Autocapturing navigation requires further configuration. See the [React Native SDK navigation docs](https://posthog.com/docs/libraries/react-native#capturing-screen-views)
+ * Autocapturing navigation requires further configuration. See the [React Native SDK navigation docs](https://insights.hanzo.ai/docs/libraries/react-native#capturing-screen-views)
  * for more information about autocapturing navigation.
  *
- * This is the recommended way to set up PostHog for React Native. This utilizes the Context API to pass the PostHog client around, enable autocapture.
+ * This is the recommended way to set up Insights for React Native. This utilizes the Context API to pass the Insights client around, enable autocapture.
  *
  * {@label Initialization}
  *
  * @example
  * ```jsx
  * // Add to App.(js|ts)
- * import { usePostHog, PostHogProvider } from 'posthog-react-native'
+ * import { useInsights, InsightsProvider } from 'insights-react-native'
  *
  * export function MyApp() {
  *     return (
- *         <PostHogProvider apiKey="<ph_project_api_key>" options={{
- *             host: '<ph_client_api_host>',
+ *         <InsightsProvider apiKey="<hi_project_api_key>" options={{
+ *             host: '<hi_client_api_host>',
  *         }}>
  *             <MyComponent />
- *         </PostHogProvider>
+ *         </InsightsProvider>
  *     )
  * }
  *
- * // And access the PostHog client via the usePostHog hook
- * import { usePostHog } from 'posthog-react-native'
+ * // And access the Insights client via the useInsights hook
+ * import { useInsights } from 'insights-react-native'
  *
  * const MyComponent = () => {
- *     const posthog = usePostHog()
+ *     const insights = useInsights()
  *
  *     useEffect(() => {
- *         posthog.capture("event_name")
- *     }, [posthog])
+ *         insights.capture("event_name")
+ *     }, [insights])
  * }
  *
  * ```
@@ -95,26 +95,26 @@ function PostHogNavigationHook({
  * @example
  * ```jsx
  * // Using with existing client
- * import { PostHog } from 'posthog-react-native'
+ * import { Insights } from 'insights-react-native'
  *
- * const posthog = new PostHog('<ph_project_api_key>', {
- *     host: '<ph_client_api_host>'
+ * const insights = new Insights('<hi_project_api_key>', {
+ *     host: '<hi_client_api_host>'
  * })
  *
  * export function MyApp() {
  *     return (
- *         <PostHogProvider client={posthog}>
+ *         <InsightsProvider client={insights}>
  *             <MyComponent />
- *         </PostHogProvider>
+ *         </InsightsProvider>
  *     )
  * }
  * ```
  *
  * @public
  *
- * @param props - The PostHogProvider props
+ * @param props - The InsightsProvider props
  */
-export const PostHogProvider = ({
+export const InsightsProvider = ({
   children,
   client,
   options,
@@ -122,14 +122,14 @@ export const PostHogProvider = ({
   autocapture,
   style,
   debug = false,
-}: PostHogProviderProps): JSX.Element | null => {
+}: InsightsProviderProps): JSX.Element | null => {
   const captureAll = autocapture === true
   const captureNone = autocapture === false
 
-  const posthog = useMemo(() => {
+  const insights = useMemo(() => {
     if (client && apiKey) {
       console.warn(
-        'You have provided both a client and an apiKey to PostHogProvider. The apiKey will be ignored in favour of the client.'
+        'You have provided both a client and an apiKey to InsightsProvider. The apiKey will be ignored in favour of the client.'
       )
     }
 
@@ -143,7 +143,7 @@ export const PostHogProvider = ({
         options?.captureAppLifecycleEvents !== undefined ? options.captureAppLifecycleEvents : !captureNone,
     }
 
-    return new PostHog(apiKey ?? '', parsedOptions)
+    return new Insights(apiKey ?? '', parsedOptions)
   }, [client, apiKey]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const autocaptureOptions = useMemo(
@@ -151,13 +151,13 @@ export const PostHogProvider = ({
     [autocapture]
   )
 
-  const captureTouches = !captureNone && posthog && (captureAll || autocaptureOptions?.captureTouches)
-  const captureScreens = !captureNone && posthog && (captureAll || (autocaptureOptions?.captureScreens ?? true)) // Default to true if not set
-  const phLabelProp = autocaptureOptions?.customLabelProp || defaultPostHogLabelProp
+  const captureTouches = !captureNone && insights && (captureAll || autocaptureOptions?.captureTouches)
+  const captureScreens = !captureNone && insights && (captureAll || (autocaptureOptions?.captureScreens ?? true)) // Default to true if not set
+  const phLabelProp = autocaptureOptions?.customLabelProp || defaultInsightsLabelProp
 
   useEffect(() => {
-    posthog.debug(debug)
-  }, [debug, posthog])
+    insights.debug(debug)
+  }, [debug, insights])
 
   const onTouch = useCallback(
     (type: 'start' | 'move' | 'end', e: GestureResponderEvent) => {
@@ -167,22 +167,22 @@ export const PostHogProvider = ({
       }
 
       if (type === 'end') {
-        autocaptureFromTouchEvent(e, posthog, autocaptureOptions)
+        autocaptureFromTouchEvent(e, insights, autocaptureOptions)
       }
     },
-    [captureTouches, posthog, autocaptureOptions]
+    [captureTouches, insights, autocaptureOptions]
   )
 
   return (
     <View
-      {...{ [phLabelProp]: 'PostHogProvider' }} // Dynamically setting customLabelProp (default: ph-label)
+      {...{ [phLabelProp]: 'InsightsProvider' }} // Dynamically setting customLabelProp (default: ph-label)
       style={style || { flex: 1 }}
       onTouchEndCapture={captureTouches ? (e) => onTouch('end', e) : undefined}
     >
-      <PostHogContext.Provider value={{ client: posthog }}>
-        {captureScreens && <PostHogNavigationHook options={autocaptureOptions} client={posthog} />}
+      <InsightsContext.Provider value={{ client: insights }}>
+        {captureScreens && <InsightsNavigationHook options={autocaptureOptions} client={insights} />}
         {children}
-      </PostHogContext.Provider>
+      </InsightsContext.Provider>
     </View>
   )
 }

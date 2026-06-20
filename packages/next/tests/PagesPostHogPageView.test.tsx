@@ -1,11 +1,11 @@
 import React from 'react'
 import { render } from '@testing-library/react'
-import { PostHogPageView } from '../src/pages/PostHogPageView'
+import { InsightsPageView } from '../src/pages/InsightsPageView'
 
 const mockCapture = jest.fn()
-const mockUsePostHog = jest.fn(() => ({ capture: mockCapture }))
+const mockUseInsights = jest.fn(() => ({ capture: mockCapture }))
 jest.mock('@hanzo/insights-react', () => ({
-    usePostHog: () => mockUsePostHog(),
+    useInsights: () => mockUseInsights(),
 }))
 
 let mockRouter = { asPath: '/initial', isReady: true }
@@ -13,15 +13,15 @@ jest.mock('next/router.js', () => ({
     useRouter: () => mockRouter,
 }))
 
-describe('Pages PostHogPageView', () => {
+describe('Pages InsightsPageView', () => {
     beforeEach(() => {
         mockCapture.mockClear()
-        mockUsePostHog.mockClear()
+        mockUseInsights.mockClear()
         mockRouter = { asPath: '/initial', isReady: true }
     })
 
     it('captures a $pageview event on mount', () => {
-        render(<PostHogPageView />)
+        render(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledWith('$pageview', {
             $current_url: 'http://localhost/initial',
         })
@@ -29,43 +29,43 @@ describe('Pages PostHogPageView', () => {
 
     it('includes query params and hash fragments from asPath', () => {
         mockRouter = { asPath: '/search?q=hello&page=2#section', isReady: true }
-        render(<PostHogPageView />)
+        render(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledWith('$pageview', {
             $current_url: 'http://localhost/search?q=hello&page=2#section',
         })
     })
 
     it('captures a new $pageview when asPath changes', () => {
-        const { rerender } = render(<PostHogPageView />)
+        const { rerender } = render(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledTimes(1)
 
         mockRouter = { asPath: '/new-page', isReady: true }
-        rerender(<PostHogPageView />)
+        rerender(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledTimes(2)
         expect(mockCapture).toHaveBeenLastCalledWith('$pageview', {
             $current_url: 'http://localhost/new-page',
         })
     })
 
-    it('does not capture if posthog client is not available', () => {
-        mockUsePostHog.mockReturnValueOnce(null)
-        render(<PostHogPageView />)
+    it('does not capture if insights client is not available', () => {
+        mockUseInsights.mockReturnValueOnce(null)
+        render(<InsightsPageView />)
         expect(mockCapture).not.toHaveBeenCalled()
     })
 
     it('does not capture if router is not ready', () => {
         mockRouter = { asPath: '/initial', isReady: false }
-        render(<PostHogPageView />)
+        render(<InsightsPageView />)
         expect(mockCapture).not.toHaveBeenCalled()
     })
 
     it('captures pageview once router becomes ready', () => {
         mockRouter = { asPath: '/initial', isReady: false }
-        const { rerender } = render(<PostHogPageView />)
+        const { rerender } = render(<InsightsPageView />)
         expect(mockCapture).not.toHaveBeenCalled()
 
         mockRouter = { asPath: '/initial', isReady: true }
-        rerender(<PostHogPageView />)
+        rerender(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledTimes(1)
         expect(mockCapture).toHaveBeenCalledWith('$pageview', {
             $current_url: 'http://localhost/initial',

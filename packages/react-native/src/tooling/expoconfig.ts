@@ -62,7 +62,7 @@ export function addInsightsWithBundledScriptsToBundleShellScript(script: string)
 }
 
 export function disableUserScriptSandboxing(xcodeProject: any): void {
-  // posthog-cli needs to read .git/ for release auto-detection, which the
+  // insights-cli needs to read .git/ for release auto-detection, which the
   // Xcode 14+ user script sandbox blocks.
   //
   // Scope: withXcodeProject only exposes the main app's .xcodeproj (the Pods
@@ -79,11 +79,11 @@ export function disableUserScriptSandboxing(xcodeProject: any): void {
   }
 }
 
-type PostHogPluginProps = {
+type InsightsPluginProps = {
   /**
    * Whether to disable Xcode's user script sandboxing (ENABLE_USER_SCRIPT_SANDBOXING=NO).
    *
-   * posthog-cli reads .git/ during sourcemap uploads for release auto-detection;
+   * insights-cli reads .git/ during sourcemap uploads for release auto-detection;
    * sandboxing (on by default in Xcode 14+) blocks that, so uploads lose git info
    * or fail silently.
    *
@@ -97,7 +97,7 @@ type PostHogPluginProps = {
   disableSandboxing?: boolean
 }
 
-const withIosPlugin = (config: any, props: PostHogPluginProps = {}) => {
+const withIosPlugin = (config: any, props: InsightsPluginProps = {}) => {
   return withXcodeProject(config, (config: any) => {
     const xcodeProject = config.modResults
 
@@ -111,7 +111,7 @@ const withIosPlugin = (config: any, props: PostHogPluginProps = {}) => {
     if (props.disableSandboxing !== false) {
       disableUserScriptSandboxing(xcodeProject)
       console.warn(
-        '[posthog-react-native] Setting ENABLE_USER_SCRIPT_SANDBOXING=NO on all Xcode ' +
+        '[insights-react-native] Setting ENABLE_USER_SCRIPT_SANDBOXING=NO on all Xcode ' +
           'build configurations so sourcemap uploads can resolve git metadata. ' +
           "If your org requires sandboxing to stay enabled, set `{ disableSandboxing: false }` " +
           'on the plugin in app.json — note that stock Expo projects may fail to build under ' +
@@ -136,5 +136,5 @@ module.exports = (config: any) => {
 // named exports above callable from tests.
 module.exports = postHogPlugin
 module.exports.modifyExistingXcodeBuildScript = modifyExistingXcodeBuildScript
-module.exports.addPostHogWithBundledScriptsToBundleShellScript = addPostHogWithBundledScriptsToBundleShellScript
+module.exports.addInsightsWithBundledScriptsToBundleShellScript = addInsightsWithBundledScriptsToBundleShellScript
 module.exports.disableUserScriptSandboxing = disableUserScriptSandboxing

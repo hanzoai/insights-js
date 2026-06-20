@@ -62,13 +62,13 @@ describe('insights.set_config', () => {
 
                 expect(insights.config.debug).toBe(expectedDebug)
                 expect(Config.DEBUG).toBe(expectedDebug)
-                expect(localStorage.getItem('ph_debug')).toBe(expectedStorage)
+                expect(localStorage.getItem('hi_debug')).toBe(expectedStorage)
             }
         )
 
-        it('should read ph_debug from localStorage when debug defaults to false', () => {
-            // Even if ph_debug is in localStorage, default config sets debug to false
-            localStorage.setItem('ph_debug', 'true')
+        it('should read hi_debug from localStorage when debug defaults to false', () => {
+            // Even if hi_debug is in localStorage, default config sets debug to false
+            localStorage.setItem('hi_debug', 'true')
             const token = uuidv7()
 
             const insights = defaultInsights().init(token, {}, token)!
@@ -80,22 +80,22 @@ describe('insights.set_config', () => {
         it('should persist debug=true to localStorage when set', () => {
             const token = uuidv7()
             const insights = defaultInsights().init(token, {}, token)!
-            expect(localStorage.getItem('ph_debug')).toBeNull()
+            expect(localStorage.getItem('hi_debug')).toBeNull()
 
             insights.set_config({ debug: true })
 
-            expect(localStorage.getItem('ph_debug')).toBe('true')
+            expect(localStorage.getItem('hi_debug')).toBe('true')
         })
 
-        it('should remove ph_debug from localStorage when debug is set to false', () => {
+        it('should remove hi_debug from localStorage when debug is set to false', () => {
             // localStore._get returns raw value, so we set 'true' without JSON serialization
-            localStorage.setItem('ph_debug', 'true')
+            localStorage.setItem('hi_debug', 'true')
             const token = uuidv7()
             const insights = defaultInsights().init(token, {}, token)!
 
             insights.set_config({ debug: false })
 
-            expect(localStorage.getItem('ph_debug')).toBeNull()
+            expect(localStorage.getItem('hi_debug')).toBeNull()
         })
 
         it('should toggle debug mode multiple times', () => {
@@ -105,17 +105,17 @@ describe('insights.set_config', () => {
             insights.set_config({ debug: true })
             expect(insights.config.debug).toBe(true)
             expect(Config.DEBUG).toBe(true)
-            expect(localStorage.getItem('ph_debug')).toBe('true')
+            expect(localStorage.getItem('hi_debug')).toBe('true')
 
             insights.set_config({ debug: false })
             expect(insights.config.debug).toBe(false)
             expect(Config.DEBUG).toBe(false)
-            expect(localStorage.getItem('ph_debug')).toBeNull()
+            expect(localStorage.getItem('hi_debug')).toBeNull()
 
             insights.set_config({ debug: true })
             expect(insights.config.debug).toBe(true)
             expect(Config.DEBUG).toBe(true)
-            expect(localStorage.getItem('ph_debug')).toBe('true')
+            expect(localStorage.getItem('hi_debug')).toBe('true')
         })
 
         it('should not modify debug if not a boolean', () => {

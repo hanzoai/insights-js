@@ -161,7 +161,7 @@ describe('InsightsConversations', () => {
         })
 
         it('should not load for toolbar internal instance', () => {
-            mockInsights.config.name = 'ph_toolbar_internal'
+            mockInsights.config.name = 'hi_toolbar_internal'
             conversations.onRemoteConfig(validRemoteConfig as RemoteConfig)
 
             expect(assignableWindow.__InsightsExtensions__?.loadExternalDependency).not.toHaveBeenCalled()

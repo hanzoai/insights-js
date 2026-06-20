@@ -955,12 +955,12 @@
             {
               "id": "basic_initialization",
               "name": "basic initialization",
-              "code": "\n\n// basic initialization\ninsights.init('<ph_project_api_key>', {\n    api_host: '<ph_client_api_host>'\n})\n\n\n"
+              "code": "\n\n// basic initialization\ninsights.init('<hi_project_api_key>', {\n    api_host: '<hi_client_api_host>'\n})\n\n\n"
             },
             {
               "id": "multiple_instances",
               "name": "multiple instances",
-              "code": "\n\n// multiple instances\ninsights.init('<ph_project_api_key>', {}, 'project1')\ninsights.init('<ph_project_api_key>', {}, 'project2')\n\n\n\n"
+              "code": "\n\n// multiple instances\ninsights.init('<hi_project_api_key>', {}, 'project1')\ninsights.init('<hi_project_api_key>', {}, 'project2')\n\n\n\n"
             }
           ],
           "releaseTag": "public",

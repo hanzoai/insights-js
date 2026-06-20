@@ -501,7 +501,7 @@ export class TriggerGroupMatching implements TriggerStatusMatching {
     public readonly group: import('../../../types').SessionRecordingTriggerGroup
 
     constructor(
-        private readonly _instance: PostHog,
+        private readonly _instance: Insights,
         group: import('../../../types').SessionRecordingTriggerGroup,
         onFlagStarted: (flag: string, variant: string | null) => void
     ) {

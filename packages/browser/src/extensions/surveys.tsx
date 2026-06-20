@@ -404,7 +404,7 @@ export class SurveyManager {
     private _translateSurveyForRendering(survey: Survey): { survey: Survey; language: string | null } {
         // Rendering entry points accept the raw API survey. The translation helper is idempotent,
         // but keeping this central avoids each entry point growing its own language rules.
-        return applySurveyTranslationForUser(survey, this._posthog)
+        return applySurveyTranslationForUser(survey, this._insights)
     }
 
     private _handleUrlPrefill(survey: Survey, surveyLanguage?: string | null): boolean {

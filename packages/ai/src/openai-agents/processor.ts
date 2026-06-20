@@ -1,4 +1,4 @@
-import type { PostHog, EventMessage } from '@hanzo/insights-node'
+import type { Insights, EventMessage } from '@hanzo/insights-node'
 import type {
   TracingProcessor,
   Trace,
@@ -23,7 +23,7 @@ import { version } from '../../package.json'
 /**
  * Normalize OpenAI Responses API input items to include a `role` field.
  * Items like `function_call` and `function_call_result` don't have a role,
- * causing PostHog's trace viewer to default them to "user".
+ * causing Insights's trace viewer to default them to "user".
  */
 function normalizeInputRoles(input: unknown): unknown {
   if (!Array.isArray(input)) {
@@ -89,8 +89,8 @@ interface TraceMetadata {
 
 export type DistinctIdResolver = string | ((trace: Trace) => string | null | undefined)
 
-export interface PostHogTracingProcessorOptions {
-  client: PostHog
+export interface InsightsTracingProcessorOptions {
+  client: Insights
   distinctId?: DistinctIdResolver
   privacyMode?: boolean
   groups?: Record<string, any>
@@ -98,25 +98,25 @@ export interface PostHogTracingProcessorOptions {
 }
 
 /**
- * A tracing processor that sends OpenAI Agents SDK traces to PostHog.
+ * A tracing processor that sends OpenAI Agents SDK traces to Insights.
  *
  * Implements the TracingProcessor interface from the OpenAI Agents SDK
- * and maps agent traces, spans, and generations to PostHog's LLM analytics events.
+ * and maps agent traces, spans, and generations to Insights's LLM analytics events.
  *
  * @example
  * ```typescript
- * import { PostHogTracingProcessor } from '@hanzo/insights-ai/openai-agents'
+ * import { InsightsTracingProcessor } from '@hanzo/insights-ai/openai-agents'
  * import { addTraceProcessor } from '@openai/agents'
  *
- * const processor = new PostHogTracingProcessor({
- *   client: posthog,
+ * const processor = new InsightsTracingProcessor({
+ *   client: insights,
  *   distinctId: 'user@example.com',
  * })
  * addTraceProcessor(processor)
  * ```
  */
-export class PostHogTracingProcessor implements TracingProcessor {
-  private _client: PostHog
+export class InsightsTracingProcessor implements TracingProcessor {
+  private _client: Insights
   private _distinctId: DistinctIdResolver | undefined
   private _privacyMode: boolean
   private _groups: Record<string, any>
@@ -126,7 +126,7 @@ export class PostHogTracingProcessor implements TracingProcessor {
   private _traceMetadata: Map<string, TraceMetadata> = new Map()
   private _maxTrackedEntries = 10000
 
-  constructor(options: PostHogTracingProcessorOptions) {
+  constructor(options: InsightsTracingProcessorOptions) {
     this._client = options.client
     this._distinctId = options.distinctId
     this._privacyMode = options.privacyMode ?? false
@@ -210,7 +210,7 @@ export class PostHogTracingProcessor implements TracingProcessor {
     errorProperties: Record<string, any>
   ): Record<string, any> {
     const properties: Record<string, any> = {
-      $ai_lib: 'posthog-ai',
+      $ai_lib: 'insights-ai',
       $ai_lib_version: version,
       $ai_trace_id: traceId,
       $ai_span_id: spanId,
@@ -294,7 +294,7 @@ export class PostHogTracingProcessor implements TracingProcessor {
       const latency = startTime != null ? Date.now() / 1000 - startTime : undefined
 
       const properties: Record<string, any> = {
-        $ai_lib: 'posthog-ai',
+        $ai_lib: 'insights-ai',
         $ai_lib_version: version,
         $ai_trace_id: traceId,
         $ai_trace_name: traceName,

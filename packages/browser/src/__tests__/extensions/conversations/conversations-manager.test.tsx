@@ -266,7 +266,7 @@ describe('ConversationsManager', () => {
 
     describe('restore token flow', () => {
         it('should call restore endpoint when restore token exists in URL', async () => {
-            window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-1')
+            window.history.replaceState({}, '', '/?hi_conv_restore=restore-token-1')
 
             manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
@@ -284,7 +284,7 @@ describe('ConversationsManager', () => {
         })
 
         it('should apply restored ticket/session and clear restore token from URL', async () => {
-            window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-2')
+            window.history.replaceState({}, '', '/?hi_conv_restore=restore-token-2')
 
             manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
@@ -299,7 +299,7 @@ describe('ConversationsManager', () => {
                 statusCode: 200,
                 json: { status: 'invalid' },
             }
-            window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-3')
+            window.history.replaceState({}, '', '/?hi_conv_restore=restore-token-3')
 
             manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
@@ -316,7 +316,7 @@ describe('ConversationsManager', () => {
                     migrated_ticket_ids: ['ticket-unchanged-session'],
                 },
             }
-            window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-4')
+            window.history.replaceState({}, '', '/?hi_conv_restore=restore-token-4')
 
             manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
@@ -332,7 +332,7 @@ describe('ConversationsManager', () => {
                     detail: 'Internal server error',
                 },
             }
-            window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-5')
+            window.history.replaceState({}, '', '/?hi_conv_restore=restore-token-5')
 
             manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
@@ -343,7 +343,7 @@ describe('ConversationsManager', () => {
         it('should clear restore token from URL when restoreFromToken is called directly', async () => {
             manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
-            window.history.replaceState({}, '', '/?ph_conv_restore=manual-token')
+            window.history.replaceState({}, '', '/?hi_conv_restore=manual-token')
 
             await act(async () => {
                 await manager.restoreFromToken('manual-token')

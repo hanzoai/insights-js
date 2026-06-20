@@ -4,7 +4,7 @@
  * Smoke tests for the per-runtime barrels resolved by the `browser`
  * exports condition. Asserts that client-only barrels expose the
  * documented client-safe surface and DO NOT re-export anything that
- * pulls in `server-only` or `posthog-node`. If a server-only symbol
+ * pulls in `server-only` or `insights-node`. If a server-only symbol
  * leaks in here, Next.js's enforcement plugin will reject the client
  * bundle in consumer apps.
  */
@@ -15,11 +15,11 @@ jest.mock('next/navigation.js', () => ({
     useSearchParams: jest.fn(),
 }))
 jest.mock('@hanzo/insights-react', () => ({
-    PostHogContext: { Provider: ({ children }: { children: unknown }) => children },
-    usePostHog: jest.fn(),
+    InsightsContext: { Provider: ({ children }: { children: unknown }) => children },
+    useInsights: jest.fn(),
     useFeatureFlagResult: jest.fn(),
     useActiveFeatureFlags: jest.fn(),
-    PostHogFeature: jest.fn(() => null),
+    InsightsFeature: jest.fn(() => null),
 }))
 jest.mock('@hanzo/insights', () => ({ __esModule: true, default: { __loaded: false, init: jest.fn() } }))
 
@@ -31,14 +31,14 @@ const asRecord = (mod: unknown) => mod as Record<string, unknown>
 describe('client barrels (browser exports condition)', () => {
     describe("@hanzo/insights-next/pages → 'browser' → pages.client", () => {
         it.each([
-            ['PostHogProvider', 'function'],
-            ['PostHogPageView', 'function'],
+            ['InsightsProvider', 'function'],
+            ['InsightsPageView', 'function'],
             ['DEFAULT_INGEST_PATH', 'string'],
         ])('exposes %s as %s', (name, expectedType) => {
             expect(typeof asRecord(pagesClient)[name]).toBe(expectedType)
         })
 
-        it.each(['getServerSidePostHog', 'getPostHog', 'postHogMiddleware'])(
+        it.each(['getServerSideInsights', 'getInsights', 'postHogMiddleware'])(
             'omits %s',
             (name) => {
                 expect(asRecord(pagesClient)[name]).toBeUndefined()
@@ -48,17 +48,17 @@ describe('client barrels (browser exports condition)', () => {
 
     describe("@hanzo/insights-next → 'browser' → index.client", () => {
         it.each([
-            ['PostHogPageView', 'function'],
-            ['usePostHog', 'function'],
+            ['InsightsPageView', 'function'],
+            ['useInsights', 'function'],
             ['useFeatureFlag', 'function'],
             ['useActiveFeatureFlags', 'function'],
-            ['PostHogFeature', 'function'],
+            ['InsightsFeature', 'function'],
             ['DEFAULT_INGEST_PATH', 'string'],
         ])('exposes %s as %s', (name, expectedType) => {
             expect(typeof asRecord(indexClient)[name]).toBe(expectedType)
         })
 
-        it.each(['PostHogProvider', 'getPostHog', 'postHogMiddleware'])('omits %s', (name) => {
+        it.each(['InsightsProvider', 'getInsights', 'postHogMiddleware'])('omits %s', (name) => {
             expect(asRecord(indexClient)[name]).toBeUndefined()
         })
     })

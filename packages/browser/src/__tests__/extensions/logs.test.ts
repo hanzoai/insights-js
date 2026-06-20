@@ -231,14 +231,14 @@ describe('logs entrypoint', () => {
 
         it('should use custom serviceName from config when provided', () => {
             const postHogWithServiceName = {
-                ...mockPostHog,
+                ...mockInsights,
                 config: {
-                    ...mockPostHog.config,
+                    ...mockInsights.config,
                     logs: { serviceName: 'my-custom-service' },
                 },
-            } as unknown as PostHog
+            } as unknown as Insights
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
             initializeLogs(postHogWithServiceName)
 
             expect(mockResourceFromAttributes).toHaveBeenCalledWith({
@@ -251,18 +251,18 @@ describe('logs entrypoint', () => {
 
         it('should fall back to default service name when serviceName is not provided', () => {
             const postHogWithoutServiceName = {
-                ...mockPostHog,
+                ...mockInsights,
                 config: {
-                    ...mockPostHog.config,
+                    ...mockInsights.config,
                     logs: { captureConsoleLogs: true },
                 },
-            } as unknown as PostHog
+            } as unknown as Insights
 
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
             initializeLogs(postHogWithoutServiceName)
 
             expect(mockResourceFromAttributes).toHaveBeenCalledWith({
-                'service.name': 'posthog-browser-logs',
+                'service.name': 'insights-browser-logs',
                 host: 'example.com',
                 'session.id': 'session-123',
                 'window.id': 'window-456',

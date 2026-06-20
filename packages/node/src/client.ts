@@ -54,7 +54,7 @@ const MAX_CACHE_SIZE = 50 * 1000
 
 const WAITUNTIL_DEBOUNCE_MS = 50
 const WAITUNTIL_MAX_WAIT_MS = 500
-const DEFAULT_NODE_HOST = 'https://us.i.posthog.com'
+const DEFAULT_NODE_HOST = 'https://us.i.insights.hanzo.ai'
 
 // Process-wide dedup for deprecation warnings — without this, calling a deprecated
 // method in a loop would spam logs. Matches Python's `warnings.warn` default-dedup behavior.
@@ -66,7 +66,7 @@ function emitDeprecationWarningOnce(id: string, message: string): void {
   }
   _emittedDeprecations.add(id)
   // eslint-disable-next-line no-console
-  console.warn(`[PostHog] ${message}`)
+  console.warn(`[Insights] ${message}`)
 }
 
 /**
@@ -217,7 +217,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
     this.maxCacheSize = normalizedOptions.maxCacheSize || MAX_CACHE_SIZE
   }
 
-  protected override enqueue(type: string, message: any, options?: PostHogCaptureOptions): void {
+  protected override enqueue(type: string, message: any, options?: InsightsCaptureOptions): void {
     super.enqueue(type, message, options)
     this.scheduleDebouncedFlush()
   }
@@ -1073,7 +1073,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
     emitDeprecationWarningOnce(
       'getFeatureFlag',
       '`getFeatureFlag` is deprecated and will be removed in a future major version. ' +
-        'Use `posthog.evaluateFlags(distinctId, ...)` and call `flags.getFlag(key)` instead — ' +
+        'Use `insights.evaluateFlags(distinctId, ...)` and call `flags.getFlag(key)` instead — ' +
         'this consolidates flag evaluation into a single `/flags` request per incoming request.'
     )
     const result = await this._getFeatureFlagResult(key, distinctId, {
@@ -1145,7 +1145,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
     emitDeprecationWarningOnce(
       'getFeatureFlagPayload',
       '`getFeatureFlagPayload` is deprecated and will be removed in a future major version. ' +
-        'Use `posthog.evaluateFlags(distinctId, ...)` and call `flags.getFlagPayload(key)` instead — ' +
+        'Use `insights.evaluateFlags(distinctId, ...)` and call `flags.getFlagPayload(key)` instead — ' +
         'this consolidates flag evaluation into a single `/flags` request per incoming request.'
     )
     // Check for payload overrides first - they take precedence over all evaluation
@@ -1331,7 +1331,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
     emitDeprecationWarningOnce(
       'isFeatureEnabled',
       '`isFeatureEnabled` is deprecated and will be removed in a future major version. ' +
-        'Use `posthog.evaluateFlags(distinctId, ...)` and call `flags.isEnabled(key)` instead — ' +
+        'Use `insights.evaluateFlags(distinctId, ...)` and call `flags.isEnabled(key)` instead — ' +
         'this consolidates flag evaluation into a single `/flags` request per incoming request.'
     )
     // Bypass the public `getFeatureFlag` so the user only sees one deprecation warning per call.
@@ -1609,7 +1609,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
 
     if (!resolvedDistinctId) {
       this._logger.warn(
-        '[PostHog] distinctId is required to evaluate feature flags — pass it explicitly or use withContext()'
+        '[Insights] distinctId is required to evaluate feature flags — pass it explicitly or use withContext()'
       )
       return new FeatureFlagEvaluations({
         host: this._getFeatureFlagEvaluationsHost(),
@@ -1668,7 +1668,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
           variant: typeof value === 'string' ? value : undefined,
           payload: localResult.payloads[key],
           id: flagDef?.id,
-          // The local-evaluation flag definition (`PostHogFeatureFlag`) does not carry a
+          // The local-evaluation flag definition (`InsightsFeatureFlag`) does not carry a
           // version field; only the remote `/flags` response does via `metadata.version`.
           version: undefined,
           reason: 'Evaluated locally',
@@ -1815,7 +1815,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
           if (this.options.featureFlagsLogWarnings !== false) {
             // These warnings guide API usage (misuse of `onlyAccessed()` / `only()`) and
             // should always surface — unlike `this._logger.warn` which is gated on debug mode.
-            console.warn(`[PostHog] ${message}`)
+            console.warn(`[Insights] ${message}`)
           }
         },
       }
@@ -2442,7 +2442,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
         if (flags) {
           if (sendFeatureFlags) {
             console.warn(
-              '[PostHog] Both `flags` and `sendFeatureFlags` were passed to capture(); using `flags` and ignoring `sendFeatureFlags`.'
+              '[Insights] Both `flags` and `sendFeatureFlags` were passed to capture(); using `flags` and ignoring `sendFeatureFlags`.'
             )
           }
           return flags._getEventProperties()
@@ -2452,7 +2452,7 @@ export abstract class InsightsBackendClient extends InsightsCoreStateless implem
           emitDeprecationWarningOnce(
             'sendFeatureFlags',
             '`sendFeatureFlags` is deprecated and will be removed in a future major version. ' +
-              'Pass a `flags` snapshot from `posthog.evaluateFlags(...)` instead — it avoids a ' +
+              'Pass a `flags` snapshot from `insights.evaluateFlags(...)` instead — it avoids a ' +
               'second `/flags` request per capture and guarantees the event carries the exact ' +
               'flag values your code branched on.'
           )

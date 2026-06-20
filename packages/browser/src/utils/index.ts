@@ -232,7 +232,7 @@ export function migrateConfigField<T>(
     return defaultValue
 }
 
-const TOOLBAR_INTERNAL_INSTANCE_NAME = 'ph_toolbar_internal'
+const TOOLBAR_INTERNAL_INSTANCE_NAME = 'hi_toolbar_internal'
 
 export function isToolbarInstance(config: Pick<InsightsConfig, 'name'>): boolean {
     return config.name === TOOLBAR_INTERNAL_INSTANCE_NAME

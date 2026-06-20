@@ -30,7 +30,7 @@ export class WebVitalsAutocapture {
         this.startIfEnabled()
     }
 
-    private get _perfConfig(): PostHogConfig['capture_performance'] {
+    private get _perfConfig(): InsightsConfig['capture_performance'] {
         return this._instance.config.capture_performance
     }
 

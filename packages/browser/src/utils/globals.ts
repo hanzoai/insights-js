@@ -150,10 +150,10 @@ export type AssignableWindow = Window &
          * These are used to handle our toolbar state.
          * @see {Toolbar} from extensions/toolbar.ts
          */
-        ph_load_toolbar: any
-        ph_load_editor: any
-        ph_toolbar_state: any
-    } & Record<`__$$ph_site_app_${string}`, any>
+        hi_load_toolbar: any
+        hi_load_editor: any
+        hi_toolbar_state: any
+    } & Record<`__$$hi_site_app_${string}`, any>
 
 /**
  * This is our contract between (potentially) lazily loaded extensions and the SDK

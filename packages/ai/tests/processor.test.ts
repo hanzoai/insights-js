@@ -1,6 +1,6 @@
 import type { SpanProcessor, ReadableSpan, Span } from '@opentelemetry/sdk-trace-base'
 import type { Context } from '@opentelemetry/api'
-import { PostHogSpanProcessor } from '../src/otel'
+import { InsightsSpanProcessor } from '../src/otel'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 
@@ -30,7 +30,7 @@ function makeSpan(name: string, attributes: Record<string, unknown> = {}): Reada
   return { name, attributes } as unknown as ReadableSpan
 }
 
-describe('PostHogSpanProcessor', () => {
+describe('InsightsSpanProcessor', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -40,32 +40,32 @@ describe('PostHogSpanProcessor', () => {
       name: 'default host',
       apiKey: 'phc_test123',
       host: undefined,
-      expectedUrl: 'https://us.i.posthog.com/i/v0/ai/otel',
+      expectedUrl: 'https://us.i.insights.hanzo.ai/i/v0/ai/otel',
       expectedApiKey: 'phc_test123',
     },
     {
       name: 'custom host',
       apiKey: 'phc_test456',
-      host: 'https://eu.i.posthog.com',
-      expectedUrl: 'https://eu.i.posthog.com/i/v0/ai/otel',
+      host: 'https://eu.i.insights.hanzo.ai',
+      expectedUrl: 'https://eu.i.insights.hanzo.ai/i/v0/ai/otel',
       expectedApiKey: 'phc_test456',
     },
     {
       name: 'trailing slash',
       apiKey: 'phc_test789',
-      host: 'https://custom.posthog.com/',
-      expectedUrl: 'https://custom.posthog.com/i/v0/ai/otel',
+      host: 'https://custom.insights.hanzo.ai/',
+      expectedUrl: 'https://custom.insights.hanzo.ai/i/v0/ai/otel',
       expectedApiKey: 'phc_test789',
     },
     {
       name: 'trimmed whitespace-sensitive values',
       apiKey: '  phc_test999\t ',
-      host: '  https://custom.posthog.com/\n',
-      expectedUrl: 'https://custom.posthog.com/i/v0/ai/otel',
+      host: '  https://custom.insights.hanzo.ai/\n',
+      expectedUrl: 'https://custom.insights.hanzo.ai/i/v0/ai/otel',
       expectedApiKey: 'phc_test999',
     },
   ])('configures the OTLP exporter correctly with $name', ({ apiKey, host, expectedUrl, expectedApiKey }) => {
-    new PostHogSpanProcessor({ apiKey, host })
+    new InsightsSpanProcessor({ apiKey, host })
 
     expect(OTLPTraceExporter).toHaveBeenCalledWith({
       url: expectedUrl,
@@ -80,7 +80,7 @@ describe('PostHogSpanProcessor', () => {
     ['blank', { apiKey: '  \n\t ' }],
   ])('disables and no-ops when apiKey is %s', async (_case, options) => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const processor = new PostHogSpanProcessor(options as any)
+    const processor = new InsightsSpanProcessor(options as any)
 
     processor.onStart({} as Span, {} as Context)
     processor.onEnd(makeSpan('gen_ai.chat'))
@@ -90,14 +90,14 @@ describe('PostHogSpanProcessor', () => {
     expect(OTLPTraceExporter).not.toHaveBeenCalled()
     expect(BatchSpanProcessor).not.toHaveBeenCalled()
     expect(warnSpy).toHaveBeenCalledWith(
-      '[PostHogSpanProcessor] apiKey is missing or blank; the processor will be disabled.'
+      '[InsightsSpanProcessor] apiKey is missing or blank; the processor will be disabled.'
     )
     warnSpy.mockRestore()
   })
 
   it('delegates onStart to the inner processor', () => {
     const inner = mockProcessor()
-    const processor = new PostHogSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
+    const processor = new InsightsSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
 
     const span = {} as Span
     const ctx = {} as Context
@@ -108,7 +108,7 @@ describe('PostHogSpanProcessor', () => {
 
   it('delegates shutdown', async () => {
     const inner = mockProcessor()
-    const processor = new PostHogSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
+    const processor = new InsightsSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
 
     await processor.shutdown()
     expect(inner.shutdown).toHaveBeenCalled()
@@ -116,17 +116,17 @@ describe('PostHogSpanProcessor', () => {
 
   it('delegates forceFlush', async () => {
     const inner = mockProcessor()
-    const processor = new PostHogSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
+    const processor = new InsightsSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
 
     await processor.forceFlush()
     expect(inner.forceFlush).toHaveBeenCalled()
   })
 })
 
-describe('PostHogSpanProcessor AI span filtering', () => {
+describe('InsightsSpanProcessor AI span filtering', () => {
   it('forwards spans with AI name prefixes', () => {
     const inner = mockProcessor()
-    const processor = new PostHogSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
+    const processor = new InsightsSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
 
     processor.onEnd(makeSpan('gen_ai.chat'))
     processor.onEnd(makeSpan('llm.completion'))
@@ -138,7 +138,7 @@ describe('PostHogSpanProcessor AI span filtering', () => {
 
   it('drops non-AI spans', () => {
     const inner = mockProcessor()
-    const processor = new PostHogSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
+    const processor = new InsightsSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
 
     processor.onEnd(makeSpan('http.request'))
     processor.onEnd(makeSpan('db.query'))
@@ -149,7 +149,7 @@ describe('PostHogSpanProcessor AI span filtering', () => {
 
   it('detects AI spans by attribute keys', () => {
     const inner = mockProcessor()
-    const processor = new PostHogSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
+    const processor = new InsightsSpanProcessor({ apiKey: 'phc_test', _spanProcessor: inner })
 
     processor.onEnd(makeSpan('some.operation', { 'gen_ai.model': 'gpt-4' }))
     processor.onEnd(makeSpan('other.operation', { 'http.method': 'GET' }))

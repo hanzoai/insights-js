@@ -74,7 +74,7 @@ await captureAiGeneration(phClient, {
 await phClient.shutdown()
 ```
 
-`captureAiGeneration` is the same primitive that every other `@posthog/ai` wrapper funnels through, so the resulting events are indistinguishable from those produced by `withTracing`, `OpenAI`, `Anthropic`, etc.
+`captureAiGeneration` is the same primitive that every other `@insights/ai` wrapper funnels through, so the resulting events are indistinguishable from those produced by `withTracing`, `OpenAI`, `Anthropic`, etc.
 
 ## OpenTelemetry
 
@@ -82,7 +82,7 @@ await phClient.shutdown()
 - You can pass custom `mappers` in `InsightsSpanProcessor` options to support additional span schemas.
 
 ```bash
-npm install @posthog/ai @opentelemetry/sdk-node @opentelemetry/sdk-trace-base @opentelemetry/exporter-trace-otlp-http
+npm install @insights/ai @opentelemetry/sdk-node @opentelemetry/sdk-trace-base @opentelemetry/exporter-trace-otlp-http
 ```
 
 For dynamic properties, pass values in `experimental_telemetry.metadata` on each AI SDK call.

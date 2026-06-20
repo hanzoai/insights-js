@@ -1,5 +1,5 @@
 import { RemoteConfig } from '@/types'
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForRemoteConfig } from '../utils/setup'
 
 const baseOptions = {
@@ -56,28 +56,28 @@ test.describe('V2 Trigger Groups - session rotation', () => {
     test('clears trigger activation and re-samples on session rotation', async ({ page }) => {
         // Verify initial state: buffering (trigger pending, not yet fired)
         const initialStatus = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(initialStatus).toBe('buffering')
 
         // Capture session A ID
         const sessionA = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.sessionId
+            return (window as WindowWithInsights).insights?.sessionRecording?.sessionId
         })
 
         // Activate the trigger
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('purchase')
+            ;(window as WindowWithInsights).insights?.capture('purchase')
         })
 
         const afterActivate = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterActivate).toBe('sampled')
 
         // Force session rotation
         await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             ph?.sessionManager?.resetSessionId()
             // Trigger a capture to force the session manager to issue a new ID
             ph?.capture('$pageview')
@@ -86,24 +86,24 @@ test.describe('V2 Trigger Groups - session rotation', () => {
 
         // Verify new session ID
         const sessionB = await page.evaluate(() => {
-            const ph = (window as WindowWithPostHog).posthog
+            const ph = (window as WindowWithInsights).insights
             return ph?.sessionManager?.checkAndGetSessionAndWindowId(true).sessionId
         })
         expect(sessionB).not.toBe(sessionA)
 
         // Status should be buffering again — trigger needs to fire in the new session
         const afterRotation = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterRotation).toBe('buffering')
 
         // Activate trigger again in session B
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('purchase')
+            ;(window as WindowWithInsights).insights?.capture('purchase')
         })
 
         const afterReactivate = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterReactivate).toBe('sampled')
     })
@@ -148,7 +148,7 @@ test.describe('V2 Trigger Groups - URL blocklist interaction', () => {
     test('pauses on blocklisted URL and resumes with activation intact', async ({ page }) => {
         // Initial: buffering (URL trigger pending)
         const initialStatus = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(initialStatus).toBe('buffering')
 
@@ -160,7 +160,7 @@ test.describe('V2 Trigger Groups - URL blocklist interaction', () => {
         await page.waitForTimeout(300)
 
         const afterActivate = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterActivate).toBe('sampled')
 
@@ -172,7 +172,7 @@ test.describe('V2 Trigger Groups - URL blocklist interaction', () => {
         await page.waitForTimeout(300)
 
         const afterBlocked = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterBlocked).toBe('paused')
 
@@ -184,7 +184,7 @@ test.describe('V2 Trigger Groups - URL blocklist interaction', () => {
         await page.waitForTimeout(300)
 
         const afterResume = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterResume).toBe('sampled')
     })
@@ -198,7 +198,7 @@ test.describe('V2 Trigger Groups - URL blocklist interaction', () => {
         await page.waitForTimeout(300)
 
         const activated = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(activated).toBe('sampled')
 
@@ -211,7 +211,7 @@ test.describe('V2 Trigger Groups - URL blocklist interaction', () => {
 
         // Should still be sampled — URL trigger activation is sticky for the session
         const afterNav = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status
+            return (window as WindowWithInsights).insights?.sessionRecording?.status
         })
         expect(afterNav).toBe('sampled')
     })

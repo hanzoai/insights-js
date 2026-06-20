@@ -3,16 +3,16 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 /**
- * These tests validate the sed expressions used in tooling/posthog-xcode.sh
+ * These tests validate the sed expressions used in tooling/insights-xcode.sh
  * to parse a git remote URL into {host, owner/repo}. Rather than re-declare
  * the regexes here (and risk drift), we extract them at test runtime from the
  * shell script itself — so the tests cannot diverge from the source.
  *
- * Also contains regression tests for issue #3682: posthog-xcode.sh was
+ * Also contains regression tests for issue #3682: insights-xcode.sh was
  * resolving REACT_NATIVE_XCODE to /bin/sh when invoked by the Expo plugin.
  */
 
-const SCRIPT_PATH = path.resolve(__dirname, '..', 'tooling', 'posthog-xcode.sh')
+const SCRIPT_PATH = path.resolve(__dirname, '..', 'tooling', 'insights-xcode.sh')
 
 const extractSed = (label: 'GIT_HOST' | 'GIT_REPO_PATH'): string => {
   const contents = fs.readFileSync(SCRIPT_PATH, 'utf8')
@@ -31,7 +31,7 @@ const runSed = (sedExpr: string, input: string): string => {
   return execSync(`printf %s '${input}' | sed -E '${escaped}'`).toString().trim()
 }
 
-describe('posthog-xcode.sh remote URL parsing', () => {
+describe('insights-xcode.sh remote URL parsing', () => {
   const HOST_SED = extractSed('GIT_HOST')
   const REPO_SED = extractSed('GIT_REPO_PATH')
 
@@ -41,8 +41,8 @@ describe('posthog-xcode.sh remote URL parsing', () => {
   })
 
   const cases: Array<[string, string, string]> = [
-    ['git@github.com:PostHog/posthog-js.git', 'github.com', 'PostHog/posthog-js'],
-    ['https://github.com/PostHog/posthog-js.git', 'github.com', 'PostHog/posthog-js'],
+    ['git@github.com:Insights/insights-js.git', 'github.com', 'Insights/insights-js'],
+    ['https://github.com/Insights/insights-js.git', 'github.com', 'Insights/insights-js'],
     ['git@gitlab.com:foo/bar.git', 'gitlab.com', 'foo/bar'],
     ['https://gitlab.com/foo/bar.git', 'gitlab.com', 'foo/bar'],
     ['git@bitbucket.org:foo/bar.git', 'bitbucket.org', 'foo/bar'],
@@ -60,8 +60,8 @@ describe('posthog-xcode.sh remote URL parsing', () => {
   })
 
   it('constructs the expected remote_url for github', () => {
-    const { host, repo } = parse('git@github.com:PostHog/posthog-js.git')
-    expect(`https://${host}/${repo}.git`).toBe('https://github.com/PostHog/posthog-js.git')
+    const { host, repo } = parse('git@github.com:Insights/insights-js.git')
+    expect(`https://${host}/${repo}.git`).toBe('https://github.com/Insights/insights-js.git')
   })
 
   it('constructs the expected remote_url for self-hosted', () => {
@@ -72,11 +72,11 @@ describe('posthog-xcode.sh remote URL parsing', () => {
 
 // Regression tests for issue #3682:
 // The Expo plugin wraps the bundle phase as:
-//   /bin/sh posthog-xcode.sh /bin/sh react-native-xcode.sh ...
-// making $1 = /bin/sh inside posthog-xcode.sh.  REACT_NATIVE_XCODE then
+//   /bin/sh insights-xcode.sh /bin/sh react-native-xcode.sh ...
+// making $1 = /bin/sh inside insights-xcode.sh.  REACT_NATIVE_XCODE then
 // resolves to /bin/sh (a binary), so the grep/sed patch against it silently
-// no-ops and the packager sourcemap is deleted before posthog-cli reads it.
-describe('posthog-xcode.sh REACT_NATIVE_XCODE resolution', () => {
+// no-ops and the packager sourcemap is deleted before insights-cli reads it.
+describe('insights-xcode.sh REACT_NATIVE_XCODE resolution', () => {
   const scriptContents = fs.readFileSync(SCRIPT_PATH, 'utf8')
 
   // Extract the REACT_NATIVE_XCODE_DEFAULT + resolution block from the script
@@ -87,7 +87,7 @@ describe('posthog-xcode.sh REACT_NATIVE_XCODE resolution', () => {
     const match = scriptContents.match(
       /REACT_NATIVE_XCODE_DEFAULT="[^"]+"[\s\S]+?(?:fi|REACT_NATIVE_XCODE="\$\{[^}]+\}")/
     )
-    if (!match) throw new Error('Could not locate REACT_NATIVE_XCODE assignment in posthog-xcode.sh')
+    if (!match) throw new Error('Could not locate REACT_NATIVE_XCODE assignment in insights-xcode.sh')
     return match[0]
   }
 

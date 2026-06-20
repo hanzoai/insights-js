@@ -178,8 +178,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should not read object properties after the body size limit is reached', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const getterAfterLimit = jest.fn(() => {
                 throw new Error('should not be read')
@@ -224,8 +224,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should not leak body truncation state to subsequent logs', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log('x'.repeat(10001))
             assignableWindow.console.log('small message')
@@ -246,8 +246,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should not corrupt truncated strings with escaped characters', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log('\\'.repeat(9998))
 
@@ -362,8 +362,8 @@ describe('logs entrypoint', () => {
 
         it('should omit unreadable properties when logging', () => {
             const originalConsoleLog = assignableWindow.console.log as jest.Mock
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const objectWithUnreadableProperties: any = {}
             Object.defineProperty(objectWithUnreadableProperties, 'toJSON', {
@@ -394,8 +394,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should serialize representative objects without corrupting body or attributes', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const payload: any = {
                 message: 'hello "quoted"\nline',
@@ -435,8 +435,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should serialize Error objects with their details intact', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const error = new Error('boom') as Error & { code?: string }
             error.name = 'CustomError'
@@ -459,8 +459,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should handle toJSON returning itself without recursing forever', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const payload = {
                 toJSON() {
@@ -473,8 +473,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should omit object properties whose toJSON returns non-serializable values', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log({
                 kept: 'value',
@@ -491,8 +491,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should serialize boxed primitives like JSON.stringify does', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             assignableWindow.console.log(new String('abc'), new Number(123), new Boolean(false))
 
@@ -504,8 +504,8 @@ describe('logs entrypoint', () => {
         })
 
         it('should fall back when Object.prototype.toString throws', () => {
-            const initializeLogs = assignableWindow.__PosthogExtensions__.logs.initializeLogs
-            initializeLogs(mockPostHog)
+            const initializeLogs = assignableWindow.__InsightsExtensions__.logs.initializeLogs
+            initializeLogs(mockInsights)
 
             const payload = { kept: 'value' }
             Object.defineProperty(payload, Symbol.toStringTag, {

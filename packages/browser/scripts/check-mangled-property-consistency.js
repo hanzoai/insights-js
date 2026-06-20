@@ -9,7 +9,7 @@
  * properties to different short names, causing runtime crashes when combined:
  *   TypeError: Cannot read properties of undefined (reading 'emit')
  *
- * See https://github.com/PostHog/posthog-js/issues/3313
+ * See https://github.com/Insights/insights-js/issues/3313
  *
  * This script parses the source maps to extract original→mangled property
  * mappings from each bundle, then asserts every property that appears in

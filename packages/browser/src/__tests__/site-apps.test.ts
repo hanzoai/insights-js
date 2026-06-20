@@ -35,8 +35,8 @@ describe('SiteApps', () => {
                 // Simulate async loading
                 setTimeout(() => {
                     const id = _url.split('/').pop()
-                    if (isFunction(assignableWindow[`__$$ph_site_app_${id}_callback`])) {
-                        assignableWindow[`__$$ph_site_app_${id}_callback`]()
+                    if (isFunction(assignableWindow[`__$$hi_site_app_${id}_callback`])) {
+                        assignableWindow[`__$$hi_site_app_${id}_callback`]()
                     }
                     callback()
                 }, 0)

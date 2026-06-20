@@ -1,6 +1,6 @@
 import { resolveBinaryPath } from './utils'
 
-const DEFAULT_PLUGIN_HOST = 'https://us.i.posthog.com'
+const DEFAULT_PLUGIN_HOST = 'https://us.i.insights.hanzo.ai'
 
 function normalizeApiKey(value?: unknown): string {
     return typeof value === 'string' ? value.trim() : ''
@@ -65,7 +65,7 @@ export function resolveConfig(options: PluginConfig, resolveOptions?: ResolveCon
     const cwd = resolveOptions?.cwd ?? process.cwd()
     const cliBinaryPath =
         options.cliBinaryPath ??
-        resolveBinaryPath('posthog-cli', {
+        resolveBinaryPath('insights-cli', {
             path: process.env.PATH ?? '',
             cwd,
         })
