@@ -2,12 +2,12 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi } from 'vitest';
-import { Mirror } from '@posthog/rrweb-snapshot';
+import { Mirror } from '@hanzo/rrweb-snapshot';
 
 // jsdom's ShadowRoot doesn't pass isNativeShadowDom's toString check,
 // so we mock it to always return true
-vi.mock('@posthog/rrweb-snapshot', async () => {
-  const actual = await vi.importActual('@posthog/rrweb-snapshot');
+vi.mock('@hanzo/rrweb-snapshot', async () => {
+  const actual = await vi.importActual('@hanzo/rrweb-snapshot');
   return {
     ...actual,
     isNativeShadowDom: () => true,

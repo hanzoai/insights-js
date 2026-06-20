@@ -68,7 +68,7 @@ const buildTypes = {
  * Configuration for the slim build (no posthog-js runtime dependency)
  */
 const buildSlimEsm = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: 'src/slim.ts',
     output: {
         file: 'dist/esm/slim/index.js',
@@ -79,7 +79,7 @@ const buildSlimEsm = {
 }
 
 const buildSlimUmd = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: 'src/slim.ts',
     output: {
         file: 'dist/umd/slim/index.js',
@@ -89,14 +89,14 @@ const buildSlimUmd = {
         esModule: false,
         globals: {
             react: 'React',
-            'posthog-js': 'posthog',
+            '@hanzo/insights': 'posthog',
         },
     },
     plugins,
 }
 
 const buildSlimTypes = {
-    external: ['posthog-js', 'react'],
+    external: ['@hanzo/insights', 'react'],
     input: 'src/slim.ts',
     output: {
         file: 'dist/types/slim/index.d.ts',

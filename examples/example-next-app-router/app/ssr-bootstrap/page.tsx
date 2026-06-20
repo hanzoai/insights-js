@@ -1,6 +1,6 @@
 'use client'
 
-import { useFeatureFlag, useActiveFeatureFlags } from '@posthog/next'
+import { useFeatureFlag, useActiveFeatureFlags } from '@hanzo/insights-next'
 
 export default function SSRBootstrapPage() {
     // These values are available immediately on first render - no flicker.

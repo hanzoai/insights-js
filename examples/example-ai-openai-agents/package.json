@@ -8,8 +8,8 @@
     "multi-agent": "tsx --require dotenv/config multi-agent.ts"
   },
   "dependencies": {
-    "posthog-node": "*",
-    "@posthog/ai": "*",
+    "@hanzo/insights-node": "*",
+    "@hanzo/insights-ai": "*",
     "@openai/agents": "^0.8.0",
     "zod": "^4.0.0"
   },

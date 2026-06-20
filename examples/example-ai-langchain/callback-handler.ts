@@ -2,7 +2,7 @@
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@posthog/ai/otel'
+import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
 import { LangChainInstrumentation } from '@traceloop/instrumentation-langchain'
 import { ChatOpenAI } from '@langchain/openai'
 import { HumanMessage } from '@langchain/core/messages'

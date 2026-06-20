@@ -1,4 +1,4 @@
-import { ErrorTracking as CoreErrorTracking } from '@posthog/core'
+import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { createRelativePathModifier } from '@/extensions/error-tracking/modifiers/relative-path.node'
 
 describe('relative path modifier', () => {

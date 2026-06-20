@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import posthogJs from 'posthog-js'
-import { PostHogContext } from '@posthog/react'
-import type { BootstrapConfig, PostHogConfig } from 'posthog-js'
+import posthogJs from '@hanzo/insights'
+import { PostHogContext } from '@hanzo/insights-react'
+import type { BootstrapConfig, PostHogConfig } from '@hanzo/insights'
 
 export type { BootstrapConfig }
 

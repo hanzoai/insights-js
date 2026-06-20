@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import PostHogOpenAI from '../src/openai'
 import PostHogAnthropic from '../src/anthropic'
 import PostHogGemini from '../src/gemini'
@@ -18,7 +18,7 @@ import type {
 
 // --- Mocks ---
 
-jest.mock('posthog-node', () => ({
+jest.mock('@hanzo/insights-node', () => ({
   PostHog: jest.fn().mockImplementation(() => ({
     capture: jest.fn(),
     captureImmediate: jest.fn(),

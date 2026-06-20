@@ -1,4 +1,4 @@
-import { FeatureFlagValue, JsonType } from '@posthog/core'
+import { FeatureFlagValue, JsonType } from '@hanzo/insights-core'
 
 import { FeatureFlagError } from './types'
 

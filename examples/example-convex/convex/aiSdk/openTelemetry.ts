@@ -7,7 +7,7 @@ import { BasicTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-tra
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
-import { PostHogTraceExporter } from '@posthog/ai/otel'
+import { PostHogTraceExporter } from '@hanzo/insights-ai/otel'
 import { action } from '../_generated/server'
 import { v } from 'convex/values'
 

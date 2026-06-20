@@ -1,4 +1,4 @@
-import { postHogMiddleware } from '@posthog/next'
+import { postHogMiddleware } from '@hanzo/insights-next'
 
 export default postHogMiddleware({ proxy: true })
 

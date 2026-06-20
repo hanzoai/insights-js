@@ -1,5 +1,5 @@
 import type { GetServerSidePropsContext } from 'next'
-import type { PostHogOptions, IPostHog } from 'posthog-node'
+import type { PostHogOptions, IPostHog } from '@hanzo/insights-node'
 import { getOrCreateNodeClient } from '../server/nodeClientCache.js'
 import { cookieStoreFromHeader, readPostHogCookie, isOptedOut } from '../shared/cookie.js'
 import { resolveApiKey, resolveHostOrDefault } from '../shared/config.js'
@@ -19,7 +19,7 @@ import { readTracingHeaders, buildContextData } from '../shared/tracing-headers.
  *
  * @example
  * ```tsx
- * import { getServerSidePostHog } from '@posthog/next/pages'
+ * import { getServerSidePostHog } from '@hanzo/insights-next/pages'
  *
  * export const getServerSideProps: GetServerSideProps = async (ctx) => {
  *   const posthog = await getServerSidePostHog(ctx)

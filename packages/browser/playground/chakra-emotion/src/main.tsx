@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import App from './app'
-import { posthog } from 'posthog-js'
+import { posthog } from '@hanzo/insights'
 
 posthog.init(import.meta.env.VITE_POSTHOG_KEY || 'phc_local', {
     api_host: import.meta.env.VITE_POSTHOG_HOST || 'http://localhost:8010',
