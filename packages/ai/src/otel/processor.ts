@@ -69,7 +69,7 @@ class NoopSpanProcessor implements SpanProcessor {
  *
  * @example
  * ```ts
- * import { PostHogSpanProcessor } from '@posthog/ai/otel'
+ * import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
  * import { NodeSDK } from '@opentelemetry/sdk-node'
  *
  * const sdk = new NodeSDK({

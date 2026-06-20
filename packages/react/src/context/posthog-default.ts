@@ -1,4 +1,4 @@
-import type { PostHog } from 'posthog-js'
+import type { PostHog } from '@hanzo/insights'
 
 // Process-level singleton, mirroring the posthog-js default export which is
 // itself a module-level singleton. Safe because setDefaultPostHogInstance is

@@ -1,7 +1,7 @@
-import type { LogAttributeValue } from '@posthog/types'
+import type { LogAttributeValue } from '@hanzo/insights-types'
 import { buildOtlpLogRecord, buildOtlpLogsPayload } from './logs-utils'
-import { Logger, PostHogPersistedProperty } from '../types'
-import type { PostHogCoreStateless } from '../posthog-core-stateless'
+import { Logger, InsightsPersistedProperty } from '../types'
+import type { InsightsCoreStateless } from '../insights-core-stateless'
 import { isArray, safeSetTimeout } from '../utils'
 import type {
   BeforeSendLogFn,
@@ -34,7 +34,7 @@ export class PostHogLogs {
   private _droppedWarned = false
 
   constructor(
-    private readonly _instance: PostHogCoreStateless,
+    private readonly _instance: InsightsCoreStateless,
     private readonly _config: ResolvedPostHogLogsConfig,
     private readonly _logger: Logger,
     private readonly _getContext: () => LogSdkContext,
@@ -190,7 +190,7 @@ export class PostHogLogs {
   private async _flushInner(): Promise<void> {
     this._clearFlushTimer()
 
-    let queue = this._instance.getPersistedProperty<BufferedLogEntry[]>(PostHogPersistedProperty.LogsQueue) ?? []
+    let queue = this._instance.getPersistedProperty<BufferedLogEntry[]>(InsightsPersistedProperty.LogsQueue) ?? []
     if (queue.length === 0) {
       return
     }
@@ -243,7 +243,7 @@ export class PostHogLogs {
         this._maxBatchRecordsPerPost = Math.min(this._config.maxBatchRecordsPerPost, this._maxBatchRecordsPerPost + 1)
       }
       await this._persistQueueAdvance(batch.length)
-      queue = this._instance.getPersistedProperty<BufferedLogEntry[]>(PostHogPersistedProperty.LogsQueue) ?? []
+      queue = this._instance.getPersistedProperty<BufferedLogEntry[]>(InsightsPersistedProperty.LogsQueue) ?? []
       sentCount += batch.length
 
       if (outcome.kind === 'fatal') {
@@ -254,8 +254,8 @@ export class PostHogLogs {
 
   private async _persistQueueAdvance(consumed: number): Promise<void> {
     // Re-read the queue in case captures landed mid-flush, then drop the head.
-    const refreshed = this._instance.getPersistedProperty<BufferedLogEntry[]>(PostHogPersistedProperty.LogsQueue) ?? []
-    this._instance.setPersistedProperty(PostHogPersistedProperty.LogsQueue, refreshed.slice(consumed))
+    const refreshed = this._instance.getPersistedProperty<BufferedLogEntry[]>(InsightsPersistedProperty.LogsQueue) ?? []
+    this._instance.setPersistedProperty(InsightsPersistedProperty.LogsQueue, refreshed.slice(consumed))
     // Wait for the advance to hit disk before the next batch sends, matching
     // events' `flushStorage()` contract. Prevents duplicates if the app crashes
     // after the HTTP success but before the queue-advance persists.
@@ -292,13 +292,13 @@ export class PostHogLogs {
       return
     }
 
-    const queue = this._instance.getPersistedProperty<BufferedLogEntry[]>(PostHogPersistedProperty.LogsQueue) ?? []
+    const queue = this._instance.getPersistedProperty<BufferedLogEntry[]>(InsightsPersistedProperty.LogsQueue) ?? []
     if (queue.length >= this._maxBufferSize) {
       queue.shift()
       this._logger.info('Logs queue is full, dropping oldest record.')
     }
     queue.push(entry)
-    this._instance.setPersistedProperty(PostHogPersistedProperty.LogsQueue, queue)
+    this._instance.setPersistedProperty(InsightsPersistedProperty.LogsQueue, queue)
 
     // Threshold trigger: at-capacity means flushing now reclaims space before
     // the next capture has to shift something out.

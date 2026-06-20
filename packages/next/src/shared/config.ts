@@ -1,5 +1,5 @@
-import type { PostHogConfig } from 'posthog-js'
-import type { PostHogOptions } from 'posthog-node'
+import type { PostHogConfig } from '@hanzo/insights'
+import type { PostHogOptions } from '@hanzo/insights-node'
 import { DEFAULT_API_HOST } from './constants.js'
 
 /**

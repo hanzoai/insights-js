@@ -8,7 +8,7 @@ import type {
   OtlpLogsPayload,
   OtlpSeverityEntry,
   OtlpSeverityText,
-} from '@posthog/types'
+} from '@hanzo/insights-types'
 import type { LogSdkContext } from './types'
 import { isArray, isBoolean, isNull, isUndefined } from '../utils'
 

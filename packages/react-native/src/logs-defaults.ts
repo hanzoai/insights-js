@@ -1,5 +1,5 @@
 import { Platform } from 'react-native'
-import type { PostHogLogsConfig, ResolvedPostHogLogsConfig } from '@posthog/core'
+import type { PostHogLogsConfig, ResolvedPostHogLogsConfig } from '@hanzo/insights-core'
 
 // Mobile defaults. Tuned for cellular radio tail (longer flush interval keeps
 // the radio asleep) and cellular data cost (tighter per-interval rate cap).

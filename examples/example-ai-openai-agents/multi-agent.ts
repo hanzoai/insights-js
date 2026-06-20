@@ -1,7 +1,7 @@
 /** OpenAI Agents SDK multi-agent with handoffs, tracked by PostHog. */
 
-import { PostHog } from 'posthog-node'
-import { instrument } from '@posthog/ai/openai-agents'
+import { PostHog } from '@hanzo/insights-node'
+import { instrument } from '@hanzo/insights-ai/openai-agents'
 import { Agent, run, tool } from '@openai/agents'
 import { z } from 'zod'
 

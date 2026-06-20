@@ -4,7 +4,7 @@
   "description": "Rollup plugin for Hanzo Insights source map upload.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hanzoai/insights-js.git",
+    "url": "git+https://github.com/hanzoinsights/insights-js.git",
     "directory": "packages/rollup-plugin"
   },
   "type": "module",

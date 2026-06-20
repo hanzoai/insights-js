@@ -3,7 +3,7 @@ export default {
     clearMocks: true,
     coverageDirectory: 'coverage',
     moduleNameMapper: {
-        '^@posthog/plugin-utils$': '<rootDir>/../plugin-utils/src',
+        '^@hanzo/insights-plugin-utils$': '<rootDir>/../plugin-utils/src',
         '^(\\.{1,2}/.*)\\.js$': '$1',
     },
     silent: true,

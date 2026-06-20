@@ -7,7 +7,7 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'json', 'node', 'tsx'],
   moduleNameMapper: {
-    '^@posthog/core/surveys$': '<rootDir>/../core/src/surveys/index.ts',
+    '^@hanzo/insights-core/surveys$': '<rootDir>/../core/src/surveys/index.ts',
   },
   collectCoverage: true,
   clearMocks: true,

@@ -1,9 +1,9 @@
-import { PostHog } from 'posthog-node'
+import { PostHog } from '@hanzo/insights-node'
 import { captureAiGeneration } from '../src/captureAiGeneration'
 import { AIEvent } from '../src/utils'
 import { version } from '../package.json'
 
-jest.mock('posthog-node')
+jest.mock('@hanzo/insights-node')
 
 const baseRequiredOptions = {
   model: 'gpt-5',

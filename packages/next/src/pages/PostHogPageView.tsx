@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router.js'
-import { usePostHog } from '@posthog/react'
+import { usePostHog } from '@hanzo/insights-react'
 import { getCurrentUrl } from '../shared/browser.js'
 
 /**
@@ -14,7 +14,7 @@ import { getCurrentUrl } from '../shared/browser.js'
  * @example
  * ```tsx
  * // pages/_app.tsx
- * import { PostHogProvider, PostHogPageView } from '@posthog/next/pages'
+ * import { PostHogProvider, PostHogPageView } from '@hanzo/insights-next/pages'
  *
  * export default function App({ Component, pageProps }: AppProps) {
  *   return (

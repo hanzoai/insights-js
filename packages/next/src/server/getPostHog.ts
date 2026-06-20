@@ -1,7 +1,7 @@
 import 'server-only'
 
-import { isFunction } from '@posthog/core'
-import type { PostHogOptions, IPostHog } from 'posthog-node'
+import { isFunction } from '@hanzo/insights-core'
+import type { PostHogOptions, IPostHog } from '@hanzo/insights-node'
 import { cookies, headers } from 'next/headers.js'
 import { getOrCreateNodeClient } from './nodeClientCache.js'
 import { readPostHogCookie, isOptedOut } from '../shared/cookie.js'
@@ -23,7 +23,7 @@ import { readTracingHeaders, buildContextData } from '../shared/tracing-headers.
  *
  * @example
  * ```ts
- * import { getPostHog } from '@posthog/next'
+ * import { getPostHog } from '@hanzo/insights-next'
  *
  * export default async function Page() {
  *     const posthog = await getPostHog()

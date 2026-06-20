@@ -5,4 +5,4 @@ export {
     useFeatureFlagResult as useFeatureFlag,
     useActiveFeatureFlags,
     PostHogFeature,
-} from '@posthog/react'
+} from '@hanzo/insights-react'

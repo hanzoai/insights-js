@@ -18,7 +18,7 @@ const mapFiles = fs.readdirSync(RRWEB_DIST).filter((file) => file.startsWith('im
 
 if (mapFiles.length === 0) {
     // Fail loudly rather than silently shipping without the sourcemap.
-    console.error('error: no image-bitmap-data-url-worker-*.js.map files found in @posthog/rrweb dist')
+    console.error('error: no image-bitmap-data-url-worker-*.js.map files found in @hanzo/rrweb dist')
     process.exit(1)
 }
 
