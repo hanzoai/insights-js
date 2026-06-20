@@ -2,13 +2,13 @@
 
 import { Suspense, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation.js'
-import { usePostHog } from '@hanzo/insights-react'
+import { useInsights } from '@hanzo/insights-react'
 import { getCurrentUrl } from '../shared/browser.js'
 
 /**
  * Tracks pageviews on route change in Next.js App Router.
  *
- * Place this component inside your `PostHogProvider` (typically in `app/layout.tsx`).
+ * Place this component inside your `InsightsProvider` (typically in `app/layout.tsx`).
  * It will automatically capture a `$pageview` event whenever the route changes.
  *
  * Includes its own Suspense boundary (required by `useSearchParams()`), so you
@@ -17,23 +17,23 @@ import { getCurrentUrl } from '../shared/browser.js'
  * @example
  * ```tsx
  * // app/layout.tsx
- * import { PostHogProvider, PostHogPageView } from '@hanzo/insights-next'
+ * import { InsightsProvider, InsightsPageView } from '@hanzo/insights-next'
  *
  * export default function RootLayout({ children }: { children: React.ReactNode }) {
  *   return (
  *     <html>
  *       <body>
- *         <PostHogProvider apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY!}>
- *           <PostHogPageView />
+ *         <InsightsProvider apiKey={process.env.NEXT_PUBLIC_INSIGHTS_KEY!}>
+ *           <InsightsPageView />
  *           {children}
- *         </PostHogProvider>
+ *         </InsightsProvider>
  *       </body>
  *     </html>
  *   )
  * }
  * ```
  */
-export function PostHogPageView() {
+export function InsightsPageView() {
     return (
         <Suspense fallback={null}>
             <PageViewTracker />
@@ -44,17 +44,17 @@ export function PostHogPageView() {
 function PageViewTracker() {
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    const posthog = usePostHog()
+    const insights = useInsights()
 
     useEffect(() => {
         const search = searchParams.toString()
         const currentUrl = getCurrentUrl(search ? `${pathname}?${search}` : pathname)
-        if (!posthog || !currentUrl) {
+        if (!insights || !currentUrl) {
             return
         }
 
-        posthog.capture('$pageview', { $current_url: currentUrl })
-    }, [pathname, searchParams, posthog])
+        insights.capture('$pageview', { $current_url: currentUrl })
+    }, [pathname, searchParams, insights])
 
     return null
 }

@@ -443,7 +443,7 @@ describe('person processing', () => {
                 $referrer: 'https://www.google.com?q=bar',
                 $referring_domain: 'www.google.com',
                 utm_source: 'foo',
-                ph_keyword: 'bar',
+                hi_keyword: 'bar',
                 $search_engine: 'google',
             })
         })

@@ -5,16 +5,16 @@ describe('resolveConfig', () => {
         {
             name: 'trims whitespace-sensitive config values',
             personalApiKey: '  phx_personal_key\n',
-            host: '  https://eu.i.posthog.com/\t ',
+            host: '  https://eu.i.insights.hanzo.ai/\t ',
             expectedPersonalApiKey: 'phx_personal_key',
-            expectedHost: 'https://eu.i.posthog.com/',
+            expectedHost: 'https://eu.i.insights.hanzo.ai/',
         },
         {
             name: 'defaults a blank host after trimming whitespace',
             personalApiKey: 'phx_personal_key',
             host: ' \n\t ',
             expectedPersonalApiKey: 'phx_personal_key',
-            expectedHost: 'https://us.i.posthog.com',
+            expectedHost: 'https://us.i.insights.hanzo.ai',
         },
     ])('{$name}', ({ personalApiKey, host, expectedPersonalApiKey, expectedHost }) => {
         const config = resolveConfig(
@@ -22,7 +22,7 @@ describe('resolveConfig', () => {
                 personalApiKey,
                 projectId: 'project-id',
                 host,
-                cliBinaryPath: '/tmp/posthog-cli',
+                cliBinaryPath: '/tmp/insights-cli',
             },
             { defaultEnabled: false }
         )
@@ -36,7 +36,7 @@ describe('resolveConfig', () => {
             resolveConfig({
                 personalApiKey: '  \n\t ',
                 projectId: 'project-id',
-                cliBinaryPath: '/tmp/posthog-cli',
+                cliBinaryPath: '/tmp/insights-cli',
             })
         ).toThrow('personalApiKey is required when sourcemaps are enabled')
     })

@@ -1,38 +1,38 @@
 import type { GetServerSidePropsContext } from 'next'
-import type { PostHogOptions, IPostHog } from '@hanzo/insights-node'
+import type { InsightsOptions, IInsights } from '@hanzo/insights-node'
 import { getOrCreateNodeClient } from '../server/nodeClientCache.js'
-import { cookieStoreFromHeader, readPostHogCookie, isOptedOut } from '../shared/cookie.js'
+import { cookieStoreFromHeader, readInsightsCookie, isOptedOut } from '../shared/cookie.js'
 import { resolveApiKey, resolveHostOrDefault } from '../shared/config.js'
 import { readTracingHeaders, buildContextData } from '../shared/tracing-headers.js'
 
 /**
- * Creates a PostHog server client scoped to the current request.
+ * Creates a Insights server client scoped to the current request.
  *
- * Reads the user's identity from the PostHog cookie in request headers
+ * Reads the user's identity from the Insights cookie in request headers
  * and sets it as context via `enterContext()`. The returned client is
  * ready to use — methods like `getAllFlags()`, `getFeatureFlagResult()`,
  * and `capture()` automatically use the current user's identity.
  *
  * @param ctx - The Next.js GetServerSidePropsContext
- * @param apiKey - PostHog project API key. If omitted, reads from NEXT_PUBLIC_POSTHOG_KEY.
- * @param options - Optional posthog-node configuration
+ * @param apiKey - Insights project API key. If omitted, reads from NEXT_PUBLIC_INSIGHTS_KEY.
+ * @param options - Optional insights-node configuration
  *
  * @example
  * ```tsx
- * import { getServerSidePostHog } from '@hanzo/insights-next/pages'
+ * import { getServerSideInsights } from '@hanzo/insights-next/pages'
  *
  * export const getServerSideProps: GetServerSideProps = async (ctx) => {
- *   const posthog = await getServerSidePostHog(ctx)
- *   const flags = await posthog.getAllFlagsAndPayloads()
- *   return { props: { posthogBootstrap: flags } }
+ *   const insights = await getServerSideInsights(ctx)
+ *   const flags = await insights.getAllFlagsAndPayloads()
+ *   return { props: { insightsBootstrap: flags } }
  * }
  * ```
  */
-export async function getServerSidePostHog(
+export async function getServerSideInsights(
     ctx: GetServerSidePropsContext,
     apiKey?: string,
-    options?: Partial<PostHogOptions>
-): Promise<IPostHog> {
+    options?: Partial<InsightsOptions>
+): Promise<IInsights> {
     const resolvedApiKey = resolveApiKey(apiKey)
     const host = resolveHostOrDefault(options?.host)
     const resolvedOptions = { ...options, host }
@@ -45,7 +45,7 @@ export async function getServerSidePostHog(
     const cookieStore = cookieStoreFromHeader(ctx.req.headers.cookie || '')
 
     if (!isOptedOut(cookieStore, resolvedApiKey)) {
-        const state = readPostHogCookie(cookieStore, resolvedApiKey)
+        const state = readInsightsCookie(cookieStore, resolvedApiKey)
         const tracing = readTracingHeaders(ctx.req.headers)
         client.enterContext(buildContextData(tracing, state))
     }

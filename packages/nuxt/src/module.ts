@@ -8,7 +8,7 @@ import { dirname } from 'node:path'
 
 const filename = fileURLToPath(import.meta.url)
 const resolvedDirname = dirname(filename)
-const DEFAULT_NUXT_HOST = 'https://us.i.posthog.com'
+const DEFAULT_NUXT_HOST = 'https://us.i.insights.hanzo.ai'
 
 function normalizeApiKey(value?: unknown): string {
   return typeof value === 'string' ? value.trim() : ''

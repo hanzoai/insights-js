@@ -88,7 +88,7 @@ export class InsightsRNStorage {
       try {
         this.persist()
       } catch (err) {
-        console.warn('PostHog storage scheduled persist threw:', err)
+        console.warn('Insights storage scheduled persist threw:', err)
       }
     }, PERSIST_DEBOUNCE_MS)
   }
@@ -103,7 +103,7 @@ export class InsightsRNStorage {
     try {
       this.persist()
     } catch (err) {
-      console.warn('PostHog storage drain persist threw:', err)
+      console.warn('Insights storage drain persist threw:', err)
     }
   }
 
@@ -161,18 +161,18 @@ export class InsightsRNSyncMemoryStorage extends InsightsRNStorage {
 // Factory functions that bind the storage instance to the correct SDK-internal
 // file. The file names never leave this module — callers (including tests)
 // reach storages only through these helpers.
-export function createEventsStorage(customStorage: PostHogCustomStorage): PostHogRNStorage {
-  return new PostHogRNStorage(customStorage, EVENTS_STORAGE_FILE)
+export function createEventsStorage(customStorage: InsightsCustomStorage): InsightsRNStorage {
+  return new InsightsRNStorage(customStorage, EVENTS_STORAGE_FILE)
 }
 
-export function createLogsStorage(customStorage: PostHogCustomStorage): PostHogRNStorage {
-  return new PostHogRNStorage(customStorage, LOGS_STORAGE_FILE)
+export function createLogsStorage(customStorage: InsightsCustomStorage): InsightsRNStorage {
+  return new InsightsRNStorage(customStorage, LOGS_STORAGE_FILE)
 }
 
-export function createEventsMemoryStorage(): PostHogRNStorage {
-  return new PostHogRNSyncMemoryStorage(EVENTS_STORAGE_FILE)
+export function createEventsMemoryStorage(): InsightsRNStorage {
+  return new InsightsRNSyncMemoryStorage(EVENTS_STORAGE_FILE)
 }
 
-export function createLogsMemoryStorage(): PostHogRNStorage {
-  return new PostHogRNSyncMemoryStorage(LOGS_STORAGE_FILE)
+export function createLogsMemoryStorage(): InsightsRNStorage {
+  return new InsightsRNSyncMemoryStorage(LOGS_STORAGE_FILE)
 }

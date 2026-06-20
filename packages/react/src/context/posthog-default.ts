@@ -1,14 +1,14 @@
-import type { PostHog } from '@hanzo/insights'
+import type { Insights } from '@hanzo/insights'
 
-// Process-level singleton, mirroring the posthog-js default export which is
-// itself a module-level singleton. Safe because setDefaultPostHogInstance is
+// Process-level singleton, mirroring the insights-js default export which is
+// itself a module-level singleton. Safe because setDefaultInsightsInstance is
 // only called once at module evaluation time by src/index.ts.
-let defaultPostHogInstance: PostHog | undefined
+let defaultInsightsInstance: Insights | undefined
 
-export function setDefaultPostHogInstance(instance: PostHog | undefined): void {
-    defaultPostHogInstance = instance
+export function setDefaultInsightsInstance(instance: Insights | undefined): void {
+    defaultInsightsInstance = instance
 }
 
-export function getDefaultPostHogInstance(): PostHog | undefined {
-    return defaultPostHogInstance
+export function getDefaultInsightsInstance(): Insights | undefined {
+    return defaultInsightsInstance
 }

@@ -73,7 +73,7 @@ describe('Session ID manager', () => {
             expect(persistence.register).toHaveBeenCalledWith({
                 [SESSION_ID]: [timestamp, 'newUUID', timestamp],
             })
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newUUID')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newUUID')
         })
 
         it('generates an initial session id and window id, and saves them even if readOnly is true', () => {
@@ -85,7 +85,7 @@ describe('Session ID manager', () => {
             expect(persistence.register).toHaveBeenCalledWith({
                 [SESSION_ID]: [timestamp, 'newUUID', timestamp],
             })
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newUUID')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newUUID')
         })
 
         it('should allow bootstrapping of the session id', () => {
@@ -174,7 +174,7 @@ describe('Session ID manager', () => {
             expect(persistence.register).toHaveBeenCalledWith({
                 [SESSION_ID]: [timestamp, 'oldSessionID', timestampOfSessionStart],
             })
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newUUID')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newUUID')
         })
 
         it('generates a new session id and window id, and saves it when >30m since last event', () => {
@@ -195,7 +195,7 @@ describe('Session ID manager', () => {
             expect(persistence.register).toHaveBeenCalledWith({
                 [SESSION_ID]: [timestamp, 'newUUID', timestamp],
             })
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newUUID')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newUUID')
         })
 
         it('generates a new session id and window id, and saves it when >24 hours since start timestamp', () => {
@@ -219,7 +219,7 @@ describe('Session ID manager', () => {
             expect(persistence.register).toHaveBeenCalledWith({
                 [SESSION_ID]: [timestamp, 'newUUID', timestamp],
             })
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newUUID')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newUUID')
         })
 
         it('generates a new session id and window id, and saves it when >24 hours since start timestamp even when readonly is true', () => {
@@ -244,7 +244,7 @@ describe('Session ID manager', () => {
             expect(persistence.register).toHaveBeenCalledWith({
                 [SESSION_ID]: [timestamp, 'newUUID', timestamp],
             })
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newUUID')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newUUID')
         })
 
         it('uses the current time if no timestamp is provided', () => {
@@ -287,7 +287,7 @@ describe('Session ID manager', () => {
             const sessionIdManager = sessionIdMgr(persistence)
             sessionIdManager['_setWindowId']('newWindowId')
             expect(sessionIdManager['_getWindowId']()).toEqual('newWindowId')
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_window_id', 'newWindowId')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_window_id', 'newWindowId')
         })
         it('stores and retrieves a window_id if persistance is disabled and storage is not used', () => {
             persistence._disabled = true
@@ -698,22 +698,22 @@ describe('Session ID manager', () => {
         it('if primary_window_exists key does not exist, do not cycle window id', () => {
             // setup
             ;(sessionStore._parse as jest.Mock).mockImplementation((storeKey: string) =>
-                storeKey === 'ph_persistance-name_primary_window_exists' ? undefined : 'oldWindowId'
+                storeKey === 'hi_persistance-name_primary_window_exists' ? undefined : 'oldWindowId'
             )
             // expect
             expect(sessionIdMgr(persistence)['_windowId']).toEqual('oldWindowId')
             expect(sessionStore._remove).toHaveBeenCalledTimes(0)
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_primary_window_exists', true)
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_primary_window_exists', true)
         })
         it('if primary_window_exists key exists, cycle window id', () => {
             // setup
             ;(sessionStore._parse as jest.Mock).mockImplementation((storeKey: string) =>
-                storeKey === 'ph_persistance-name_primary_window_exists' ? true : 'oldWindowId'
+                storeKey === 'hi_persistance-name_primary_window_exists' ? true : 'oldWindowId'
             )
             // expect
             expect(sessionIdMgr(persistence)['_windowId']).toEqual(undefined)
-            expect(sessionStore._remove).toHaveBeenCalledWith('ph_persistance-name_window_id')
-            expect(sessionStore._set).toHaveBeenCalledWith('ph_persistance-name_primary_window_exists', true)
+            expect(sessionStore._remove).toHaveBeenCalledWith('hi_persistance-name_window_id')
+            expect(sessionStore._set).toHaveBeenCalledWith('hi_persistance-name_primary_window_exists', true)
         })
     })
 
@@ -945,11 +945,11 @@ describe('Session ID manager', () => {
             // (e.g. a race during cross-tab restoration) must not cause
             // this tab to spuriously time out — in-memory has the freshest
             // local view.
-            const realPersistence = new PostHogPersistence(memoryConfig)
+            const realPersistence = new InsightsPersistence(memoryConfig)
             const testTimestamp = 1603107479471
 
             const sessionIdManager = new SessionIdManager(
-                createMockPostHog({
+                createMockInsights({
                     config: memoryConfig,
                     persistence: realPersistence,
                     register: jest.fn(),

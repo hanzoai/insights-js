@@ -1,32 +1,32 @@
 {
-  "id": "posthog-js",
+  "id": "insights-js",
   "hogRef": "0.3",
   "info": {
     "version": "1.376.5",
-    "id": "posthog-js",
-    "title": "PostHog JavaScript Web SDK",
-    "description": "Posthog-js allows you to automatically capture usage and send events to PostHog.",
-    "slugPrefix": "posthog-js",
-    "specUrl": "https://github.com/PostHog/posthog-js"
+    "id": "insights-js",
+    "title": "Insights JavaScript Web SDK",
+    "description": "Insights-js allows you to automatically capture usage and send events to Insights.",
+    "slugPrefix": "insights-js",
+    "specUrl": "https://github.com/Insights/insights-js"
   },
   "classes": [
     {
-      "description": "This is the SDK reference for the PostHog JavaScript Web SDK. You can learn more about example usage in the [JavaScript Web SDK documentation](/docs/libraries/js). You can also follow [framework specific guides](/docs/frameworks) to integrate PostHog into your project.\nThis SDK is designed for browser environments. Use the PostHog [Node.js SDK](/docs/libraries/node) for server-side usage.",
-      "id": "PostHog",
-      "title": "PostHog",
+      "description": "This is the SDK reference for the Insights JavaScript Web SDK. You can learn more about example usage in the [JavaScript Web SDK documentation](/docs/libraries/js). You can also follow [framework specific guides](/docs/frameworks) to integrate Insights into your project.\nThis SDK is designed for browser environments. Use the Insights [Node.js SDK](/docs/libraries/node) for server-side usage.",
+      "id": "Insights",
+      "title": "Insights",
       "functions": [
         {
           "category": "",
-          "description": "Constructs a new instance of the `PostHog` class",
+          "description": "Constructs a new instance of the `Insights` class",
           "details": null,
-          "id": "PostHog",
+          "id": "Insights",
           "showDocs": true,
-          "title": "PostHog",
+          "title": "Insights",
           "examples": [
             {
-              "id": "posthog",
-              "name": "Generated example for PostHog",
-              "code": "// Generated example for PostHog\nposthog.PostHog();"
+              "id": "insights",
+              "name": "Generated example for Insights",
+              "code": "// Generated example for Insights\ninsights.Insights();"
             }
           ],
           "releaseTag": "public",
@@ -35,7 +35,7 @@
             "id": "any",
             "name": "any"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Error tracking",
@@ -48,7 +48,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.addExceptionStep('Checkout button clicked', {\n  checkout_id: 'ch_123',\n})\n\n\n\n"
+              "code": "\n\ninsights.addExceptionStep('Checkout button clicked', {\n  checkout_id: 'ch_123',\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -70,12 +70,12 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
           "description": "Creates an alias linking two distinct user identifiers. Learn more about [identifying users](/docs/product-analytics/identify)",
-          "details": "PostHog will use this to link two distinct_ids going forward (not retroactively). Call this when a user signs up to connect their anonymous session with their account.",
+          "details": "Insights will use this to link two distinct_ids going forward (not retroactively). Call this when a user signs up to connect their anonymous session with their account.",
           "id": "alias",
           "showDocs": true,
           "title": "alias",
@@ -83,12 +83,12 @@
             {
               "id": "link_anonymous_user_to_account_on_signup",
               "name": "link anonymous user to account on signup",
-              "code": "\n\n// link anonymous user to account on signup\nposthog.alias('user_12345')\n\n\n"
+              "code": "\n\n// link anonymous user to account on signup\ninsights.alias('user_12345')\n\n\n"
             },
             {
               "id": "explicit_alias_with_original_id",
               "name": "explicit alias with original ID",
-              "code": "\n\n// explicit alias with original ID\nposthog.alias('user_12345', 'anonymous_abc123')\n\n\n\n"
+              "code": "\n\n// explicit alias with original ID\ninsights.alias('user_12345', 'anonymous_abc123')\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -110,7 +110,7 @@
             "id": "CaptureResult | void | number",
             "name": "CaptureResult | void | number"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -123,7 +123,7 @@
             {
               "id": "cancelpendingsurvey",
               "name": "Generated example for cancelPendingSurvey",
-              "code": "// Generated example for cancelPendingSurvey\nposthog.cancelPendingSurvey();"
+              "code": "// Generated example for cancelPendingSurvey\ninsights.cancelPendingSurvey();"
             }
           ],
           "releaseTag": "public",
@@ -139,7 +139,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -152,7 +152,7 @@
             {
               "id": "canrendersurvey",
               "name": "Generated example for canRenderSurvey",
-              "code": "// Generated example for canRenderSurvey\nposthog.canRenderSurvey();"
+              "code": "// Generated example for canRenderSurvey\ninsights.canRenderSurvey();"
             }
           ],
           "releaseTag": "deprecated",
@@ -168,7 +168,7 @@
             "id": "SurveyRenderReason | null",
             "name": "SurveyRenderReason | null"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -181,7 +181,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.canRenderSurveyAsync(surveyId).then((result) => {\n    if (result.visible) {\n        // Survey can be rendered\n        console.log('Survey can be rendered')\n    } else {\n        // Survey cannot be rendered\n        console.log('Survey cannot be rendered:', result.disabledReason)\n    }\n})\n\n\n\n"
+              "code": "\n\ninsights.canRenderSurveyAsync(surveyId).then((result) => {\n    if (result.visible) {\n        // Survey can be rendered\n        console.log('Survey can be rendered')\n    } else {\n        // Survey cannot be rendered\n        console.log('Survey cannot be rendered:', result.disabledReason)\n    }\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -203,7 +203,7 @@
             "id": "Promise<SurveyRenderReason>",
             "name": "Promise<SurveyRenderReason>"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
@@ -216,7 +216,7 @@
             {
               "id": "basic_event_capture",
               "name": "basic event capture",
-              "code": "\n\n// basic event capture\nposthog.capture('cta-button-clicked', {\n    button_name: 'Get Started',\n    page: 'homepage'\n})\n\n\n\n\n\n"
+              "code": "\n\n// basic event capture\ninsights.capture('cta-button-clicked', {\n    button_name: 'Get Started',\n    page: 'homepage'\n})\n\n\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -244,7 +244,7 @@
             "id": "CaptureResult | undefined",
             "name": "CaptureResult | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Error tracking",
@@ -257,12 +257,12 @@
             {
               "id": "capture_a_caught_exception",
               "name": "Capture a caught exception",
-              "code": "\n\n// Capture a caught exception\ntry {\n  // something that might throw\n} catch (error) {\n  posthog.captureException(error)\n}\n\n\n"
+              "code": "\n\n// Capture a caught exception\ntry {\n  // something that might throw\n} catch (error) {\n  insights.captureException(error)\n}\n\n\n"
             },
             {
               "id": "with_additional_properties",
               "name": "With additional properties",
-              "code": "\n\n// With additional properties\nposthog.captureException(error, {\n  customProperty: 'value',\n  anotherProperty: ['I', 'can be a list'],\n  ...\n})\n\n\n\n"
+              "code": "\n\n// With additional properties\ninsights.captureException(error, {\n  customProperty: 'value',\n  anotherProperty: ['I', 'can be a list'],\n  ...\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -284,11 +284,11 @@
             "id": "CaptureResult | undefined",
             "name": "CaptureResult | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Logs",
-          "description": "Capture a log entry and send it to the PostHog logs endpoint.",
+          "description": "Capture a log entry and send it to the Insights logs endpoint.",
           "details": null,
           "id": "captureLog",
           "showDocs": true,
@@ -297,7 +297,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.captureLog({\n  body: 'checkout completed',\n  level: 'info',\n  attributes: { order_id: 'ord_789', amount_cents: 4999 },\n})\n\n\n\n"
+              "code": "\n\ninsights.captureLog({\n  body: 'checkout completed',\n  level: 'info',\n  attributes: { order_id: 'ord_789', amount_cents: 4999 },\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -313,7 +313,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "LLM analytics",
@@ -326,7 +326,7 @@
             {
               "id": "capturetracefeedback",
               "name": "Generated example for captureTraceFeedback",
-              "code": "// Generated example for captureTraceFeedback\nposthog.captureTraceFeedback();"
+              "code": "// Generated example for captureTraceFeedback\ninsights.captureTraceFeedback();"
             }
           ],
           "releaseTag": "public",
@@ -348,7 +348,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "LLM analytics",
@@ -361,7 +361,7 @@
             {
               "id": "capturetracemetric",
               "name": "Generated example for captureTraceMetric",
-              "code": "// Generated example for captureTraceMetric\nposthog.captureTraceMetric();"
+              "code": "// Generated example for captureTraceMetric\ninsights.captureTraceMetric();"
             }
           ],
           "releaseTag": "public",
@@ -389,11 +389,11 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Privacy",
-          "description": "Clear the user's opt in/out status of data capturing and cookies/localstorage for this PostHog instance",
+          "description": "Clear the user's opt in/out status of data capturing and cookies/localstorage for this Insights instance",
           "details": null,
           "id": "clear_opt_in_out_capturing",
           "showDocs": true,
@@ -402,7 +402,7 @@
             {
               "id": "clear_opt_in_out_capturing",
               "name": "Generated example for clear_opt_in_out_capturing",
-              "code": "// Generated example for clear_opt_in_out_capturing\nposthog.clear_opt_in_out_capturing();"
+              "code": "// Generated example for clear_opt_in_out_capturing\ninsights.clear_opt_in_out_capturing();"
             }
           ],
           "releaseTag": "public",
@@ -411,7 +411,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "",
@@ -424,7 +424,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.clearIdentity()\n\n\n\n"
+              "code": "\n\ninsights.clearIdentity()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -433,7 +433,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
@@ -446,7 +446,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.createPersonProfile()\n\n\n\n"
+              "code": "\n\ninsights.createPersonProfile()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -455,12 +455,12 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Initialization",
           "description": "Enables or disables debug mode for detailed logging.",
-          "details": "Debug mode logs all PostHog calls to the browser console for troubleshooting. Can also be enabled by adding `?__posthog_debug=true` to the URL.",
+          "details": "Debug mode logs all Insights calls to the browser console for troubleshooting. Can also be enabled by adding `?__insights_debug=true` to the URL.",
           "id": "debug",
           "showDocs": true,
           "title": "debug",
@@ -468,12 +468,12 @@
             {
               "id": "enable_debug_mode",
               "name": "enable debug mode",
-              "code": "\n\n// enable debug mode\nposthog.debug(true)\n\n\n"
+              "code": "\n\n// enable debug mode\ninsights.debug(true)\n\n\n"
             },
             {
               "id": "disable_debug_mode",
               "name": "disable debug mode",
-              "code": "\n\n// disable debug mode\nposthog.debug(false)\n\n\n\n"
+              "code": "\n\n// disable debug mode\ninsights.debug(false)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -489,7 +489,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -502,17 +502,17 @@
             {
               "id": "display_as_popover_(respects_all_conditions_defined_in_the_dashboard)",
               "name": "Display as popover (respects all conditions defined in the dashboard)",
-              "code": "\n\n// Display as popover (respects all conditions defined in the dashboard)\nposthog.displaySurvey('survey-id-123')\n\n\n"
+              "code": "\n\n// Display as popover (respects all conditions defined in the dashboard)\ninsights.displaySurvey('survey-id-123')\n\n\n"
             },
             {
               "id": "display_inline_in_a_specific_element",
               "name": "Display inline in a specific element",
-              "code": "\n\n// Display inline in a specific element\nposthog.displaySurvey('survey-id-123', {\n  displayType: DisplaySurveyType.Inline,\n  selector: '#survey-container'\n})\n\n\n"
+              "code": "\n\n// Display inline in a specific element\ninsights.displaySurvey('survey-id-123', {\n  displayType: DisplaySurveyType.Inline,\n  selector: '#survey-container'\n})\n\n\n"
             },
             {
               "id": "force_display_ignoring_conditions_and_delays",
               "name": "Force display ignoring conditions and delays",
-              "code": "\n\n// Force display ignoring conditions and delays\nposthog.displaySurvey('survey-id-123', {\n  displayType: DisplaySurveyType.Popover,\n  ignoreConditions: true,\n  ignoreDelay: true\n})\n\n\n\n"
+              "code": "\n\n// Force display ignoring conditions and delays\ninsights.displaySurvey('survey-id-123', {\n  displayType: DisplaySurveyType.Popover,\n  ignoreConditions: true,\n  ignoreDelay: true\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -534,12 +534,12 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
           "description": "Returns the current distinct ID for the user.",
-          "details": "This is either the auto-generated ID or the ID set via `identify()`. The distinct ID is used to associate events with users in PostHog.",
+          "details": "This is either the auto-generated ID or the ID set via `identify()`. The distinct ID is used to associate events with users in Insights.",
           "id": "get_distinct_id",
           "showDocs": true,
           "title": "get_distinct_id",
@@ -547,12 +547,12 @@
             {
               "id": "get_the_current_user_id",
               "name": "get the current user ID",
-              "code": "\n\n// get the current user ID\nconst userId = posthog.get_distinct_id()\nconsole.log('Current user:', userId)\n\n\n"
+              "code": "\n\n// get the current user ID\nconst userId = insights.get_distinct_id()\nconsole.log('Current user:', userId)\n\n\n"
             },
             {
               "id": "use_in_loaded_callback",
               "name": "use in loaded callback",
-              "code": "\n\n// use in loaded callback\nposthog.init('token', {\n    loaded: (posthog) => {\n        const id = posthog.get_distinct_id()\n        // use the ID\n    }\n})\n\n\n\n"
+              "code": "\n\n// use in loaded callback\ninsights.init('token', {\n    loaded: (insights) => {\n        const id = insights.get_distinct_id()\n        // use the ID\n    }\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -561,7 +561,7 @@
             "id": "string",
             "name": "string"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "",
@@ -574,7 +574,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nconst consentStatus = posthog.get_explicit_consent_status()\nif (consentStatus === \"granted\") {\n    // user has explicitly opted in\n} else if (consentStatus === \"denied\") {\n    // user has explicitly opted out\n} else if (consentStatus === \"pending\"){\n    // user has not made a choice, show consent banner\n}\n\n\n\n"
+              "code": "\n\nconst consentStatus = insights.get_explicit_consent_status()\nif (consentStatus === \"granted\") {\n    // user has explicitly opted in\n} else if (consentStatus === \"denied\") {\n    // user has explicitly opted out\n} else if (consentStatus === \"pending\"){\n    // user has not made a choice, show consent banner\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -583,20 +583,20 @@
             "id": "'granted' | 'denied' | 'pending'",
             "name": "'granted' | 'denied' | 'pending'"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
           "description": "Returns the value of a super property. Returns undefined if the property doesn't exist.",
-          "details": "get_property() can only be called after the PostHog library has finished loading. init() has a loaded function available to handle this automatically.",
+          "details": "get_property() can only be called after the Insights library has finished loading. init() has a loaded function available to handle this automatically.",
           "id": "get_property",
           "showDocs": true,
           "title": "get_property",
           "examples": [
             {
-              "id": "grab_value_for_'$user_id'_after_the_posthog_library_has_loaded",
-              "name": "grab value for '$user_id' after the posthog library has loaded",
-              "code": "\n\n// grab value for '$user_id' after the posthog library has loaded\nposthog.init('<YOUR PROJECT TOKEN>', {\n    loaded: function(posthog) {\n        user_id = posthog.get_property('$user_id');\n    }\n});\n\n\n\n"
+              "id": "grab_value_for_'$user_id'_after_the_insights_library_has_loaded",
+              "name": "grab value for '$user_id' after the insights library has loaded",
+              "code": "\n\n// grab value for '$user_id' after the insights library has loaded\ninsights.init('<YOUR PROJECT TOKEN>', {\n    loaded: function(insights) {\n        user_id = insights.get_property('$user_id');\n    }\n});\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -612,7 +612,7 @@
             "id": "Property | undefined",
             "name": "Property | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "",
@@ -625,7 +625,7 @@
             {
               "id": "get_session_id",
               "name": "Generated example for get_session_id",
-              "code": "// Generated example for get_session_id\nposthog.get_session_id();"
+              "code": "// Generated example for get_session_id\ninsights.get_session_id();"
             }
           ],
           "releaseTag": "public",
@@ -634,7 +634,7 @@
             "id": "string",
             "name": "string"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Session replay",
@@ -647,7 +647,7 @@
             {
               "id": "basic_usage",
               "name": "basic usage",
-              "code": "\n\n// basic usage\nposthog.get_session_replay_url()\n\n@example\n\njs // timestamp posthog.get_session_replay_url({ withTimestamp: true })\n\n\n@example\n\njs // timestamp and lookback posthog.get_session_replay_url({ withTimestamp: true, timestampLookBack: 30 // look back 30 seconds }) ```\n\n\n\n"
+              "code": "\n\n// basic usage\ninsights.get_session_replay_url()\n\n@example\n\njs // timestamp insights.get_session_replay_url({ withTimestamp: true })\n\n\n@example\n\njs // timestamp and lookback insights.get_session_replay_url({ withTimestamp: true, timestampLookBack: 30 // look back 30 seconds }) ```\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -663,7 +663,7 @@
             "id": "string",
             "name": "string"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -676,7 +676,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.getActiveMatchingSurveys((surveys) => {\n     // do something\n})\n\n\n\n"
+              "code": "\n\ninsights.getActiveMatchingSurveys((surveys) => {\n     // do something\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -698,7 +698,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -711,7 +711,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nconst posthog = usePostHog()\nconst activeFlags = useActiveFeatureFlags()\n\nconst [activeBetas, setActiveBetas] = useState([])\nconst [inactiveBetas, setInactiveBetas] = useState([])\nconst [comingSoonFeatures, setComingSoonFeatures] = useState([])\n\nuseEffect(() => {\n  posthog.getEarlyAccessFeatures((features) => {\n    // Filter features by stage\n    const betaFeatures = features.filter(feature => feature.stage === 'beta')\n    const conceptFeatures = features.filter(feature => feature.stage === 'concept')\n\n    setComingSoonFeatures(conceptFeatures)\n\n    if (!activeFlags || activeFlags.length === 0) {\n      setInactiveBetas(betaFeatures)\n      return\n    }\n\n    const activeBetas = betaFeatures.filter(\n            beta => activeFlags.includes(beta.flagKey)\n        );\n    const inactiveBetas = betaFeatures.filter(\n            beta => !activeFlags.includes(beta.flagKey)\n        );\n    setActiveBetas(activeBetas)\n    setInactiveBetas(inactiveBetas)\n  }, true, ['concept', 'beta'])\n}, [activeFlags])\n\n\n\n"
+              "code": "\n\nconst insights = useInsights()\nconst activeFlags = useActiveFeatureFlags()\n\nconst [activeBetas, setActiveBetas] = useState([])\nconst [inactiveBetas, setInactiveBetas] = useState([])\nconst [comingSoonFeatures, setComingSoonFeatures] = useState([])\n\nuseEffect(() => {\n  insights.getEarlyAccessFeatures((features) => {\n    // Filter features by stage\n    const betaFeatures = features.filter(feature => feature.stage === 'beta')\n    const conceptFeatures = features.filter(feature => feature.stage === 'concept')\n\n    setComingSoonFeatures(conceptFeatures)\n\n    if (!activeFlags || activeFlags.length === 0) {\n      setInactiveBetas(betaFeatures)\n      return\n    }\n\n    const activeBetas = betaFeatures.filter(\n            beta => activeFlags.includes(beta.flagKey)\n        );\n    const inactiveBetas = betaFeatures.filter(\n            beta => !activeFlags.includes(beta.flagKey)\n        );\n    setActiveBetas(activeBetas)\n    setInactiveBetas(inactiveBetas)\n  }, true, ['concept', 'beta'])\n}, [activeFlags])\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -739,7 +739,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -752,12 +752,12 @@
             {
               "id": "check_boolean_flag",
               "name": "check boolean flag",
-              "code": "\n\n// check boolean flag\nif (posthog.getFeatureFlag('new-feature')) {\n    // show new feature\n}\n\n\n"
+              "code": "\n\n// check boolean flag\nif (insights.getFeatureFlag('new-feature')) {\n    // show new feature\n}\n\n\n"
             },
             {
               "id": "check_multivariate_flag",
               "name": "check multivariate flag",
-              "code": "\n\n// check multivariate flag\nconst variant = posthog.getFeatureFlag('button-color')\nif (variant === 'red') {\n    // show red button\n}\n\n\n\n"
+              "code": "\n\n// check multivariate flag\nconst variant = insights.getFeatureFlag('button-color')\nif (variant === 'red') {\n    // show red button\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -769,7 +769,7 @@
               "name": "key"
             },
             {
-              "description": "(optional) If send_event: false, we won't send an $feature_flag_call event to PostHog. If fresh: true, we won't return cached values from localStorage - only values loaded from the server.",
+              "description": "(optional) If send_event: false, we won't send an $feature_flag_call event to Insights. If fresh: true, we won't return cached values from localStorage - only values loaded from the server.",
               "isOptional": true,
               "type": "FeatureFlagOptions",
               "name": "options"
@@ -779,7 +779,7 @@
             "id": "boolean | string | undefined",
             "name": "boolean | string | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -792,7 +792,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nif(posthog.getFeatureFlag('beta-feature') === 'some-value') {\n     const someValue = posthog.getFeatureFlagPayload('beta-feature')\n     // do something\n}\n\n\n\n"
+              "code": "\n\nif(insights.getFeatureFlag('beta-feature') === 'some-value') {\n     const someValue = insights.getFeatureFlagPayload('beta-feature')\n     // do something\n}\n\n\n\n"
             }
           ],
           "releaseTag": "deprecated",
@@ -808,7 +808,7 @@
             "id": "JsonType",
             "name": "JsonType"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -821,12 +821,12 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nconst result = posthog.getFeatureFlagResult('my-flag')\nif (result?.enabled) {\n    console.log('Flag is enabled with payload:', result.payload)\n}\n\n\n"
+              "code": "\n\nconst result = insights.getFeatureFlagResult('my-flag')\nif (result?.enabled) {\n    console.log('Flag is enabled with payload:', result.payload)\n}\n\n\n"
             },
             {
               "id": "multivariate_flag",
               "name": "multivariate flag",
-              "code": "\n\n// multivariate flag\nconst result = posthog.getFeatureFlagResult('button-color')\nif (result?.variant === 'red') {\n    showRedButton(result.payload)\n}\n\n\n\n"
+              "code": "\n\n// multivariate flag\nconst result = insights.getFeatureFlagResult('button-color')\nif (result?.variant === 'red') {\n    showRedButton(result.payload)\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -848,7 +848,7 @@
             "id": "FeatureFlagResult | undefined",
             "name": "FeatureFlagResult | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
@@ -861,7 +861,7 @@
             {
               "id": "getgroups",
               "name": "Generated example for getGroups",
-              "code": "// Generated example for getGroups\nposthog.getGroups();"
+              "code": "// Generated example for getGroups\ninsights.getGroups();"
             }
           ],
           "releaseTag": "public",
@@ -870,7 +870,7 @@
             "id": "Record<string, any>",
             "name": "Record<string, any>"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Initialization",
@@ -883,7 +883,7 @@
             {
               "id": "getpageviewid",
               "name": "Generated example for getPageViewId",
-              "code": "// Generated example for getPageViewId\nposthog.getPageViewId();"
+              "code": "// Generated example for getPageViewId\ninsights.getPageViewId();"
             }
           ],
           "releaseTag": "public",
@@ -892,20 +892,20 @@
             "id": "string | undefined",
             "name": "string | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
           "description": "Returns the value of the session super property named property_name. If no such property is set, getSessionProperty() will return the undefined value.",
-          "details": "This is based on browser-level `sessionStorage`, NOT the PostHog session. getSessionProperty() can only be called after the PostHog library has finished loading. init() has a loaded function available to handle this automatically.",
+          "details": "This is based on browser-level `sessionStorage`, NOT the Insights session. getSessionProperty() can only be called after the Insights library has finished loading. init() has a loaded function available to handle this automatically.",
           "id": "getSessionProperty",
           "showDocs": true,
           "title": "getSessionProperty",
           "examples": [
             {
-              "id": "grab_value_for_'user_id'_after_the_posthog_library_has_loaded",
-              "name": "grab value for 'user_id' after the posthog library has loaded",
-              "code": "\n\n// grab value for 'user_id' after the posthog library has loaded\nposthog.init('YOUR PROJECT TOKEN', {\n    loaded: function(posthog) {\n        user_id = posthog.getSessionProperty('user_id');\n    }\n});\n\n\n\n"
+              "id": "grab_value_for_'user_id'_after_the_insights_library_has_loaded",
+              "name": "grab value for 'user_id' after the insights library has loaded",
+              "code": "\n\n// grab value for 'user_id' after the insights library has loaded\ninsights.init('YOUR PROJECT TOKEN', {\n    loaded: function(insights) {\n        user_id = insights.getSessionProperty('user_id');\n    }\n});\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -921,7 +921,7 @@
             "id": "Property | undefined",
             "name": "Property | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -934,7 +934,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nfunction callback(surveys, context) {\n  // do something\n}\n\nposthog.getSurveys(callback, false)\n\n\n\n"
+              "code": "\n\nfunction callback(surveys, context) {\n  // do something\n}\n\ninsights.getSurveys(callback, false)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -956,7 +956,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
@@ -969,12 +969,12 @@
             {
               "id": "associate_user_with_an_organization",
               "name": "associate user with an organization",
-              "code": "\n\n// associate user with an organization\nposthog.group('organization', 'org_12345', {\n    name: 'Acme Corp',\n    plan: 'enterprise'\n})\n\n\n"
+              "code": "\n\n// associate user with an organization\ninsights.group('organization', 'org_12345', {\n    name: 'Acme Corp',\n    plan: 'enterprise'\n})\n\n\n"
             },
             {
               "id": "associate_with_multiple_group_types",
               "name": "associate with multiple group types",
-              "code": "\n\n// associate with multiple group types\nposthog.group('organization', 'org_12345')\nposthog.group('team', 'team_67890')\n\n\n\n"
+              "code": "\n\n// associate with multiple group types\ninsights.group('organization', 'org_12345')\ninsights.group('team', 'team_67890')\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1002,7 +1002,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Privacy",
@@ -1015,7 +1015,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nif (posthog.has_opted_in_capturing()) {\n    // show analytics features\n}\n\n\n\n"
+              "code": "\n\nif (insights.has_opted_in_capturing()) {\n    // show analytics features\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1024,7 +1024,7 @@
             "id": "boolean",
             "name": "boolean"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Privacy",
@@ -1037,7 +1037,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nif (posthog.has_opted_out_capturing()) {\n    // disable analytics features\n}\n\n\n\n"
+              "code": "\n\nif (insights.has_opted_out_capturing()) {\n    // disable analytics features\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1046,12 +1046,12 @@
             "id": "boolean",
             "name": "boolean"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
           "description": "Associates a user with a unique identifier instead of an auto-generated ID. Learn more about [identifying users](/docs/product-analytics/identify)",
-          "details": "By default, PostHog assigns each user a randomly generated `distinct_id`. Use this method to replace that ID with your own unique identifier (like a user ID from your database).",
+          "details": "By default, Insights assigns each user a randomly generated `distinct_id`. Use this method to replace that ID with your own unique identifier (like a user ID from your database).",
           "id": "identify",
           "showDocs": true,
           "title": "identify",
@@ -1059,17 +1059,17 @@
             {
               "id": "basic_identification",
               "name": "basic identification",
-              "code": "\n\n// basic identification\nposthog.identify('user_12345')\n\n\n"
+              "code": "\n\n// basic identification\ninsights.identify('user_12345')\n\n\n"
             },
             {
               "id": "identify_with_user_properties",
               "name": "identify with user properties",
-              "code": "\n\n// identify with user properties\nposthog.identify('user_12345', {\n    email: 'user@example.com',\n    plan: 'premium'\n})\n\n\n"
+              "code": "\n\n// identify with user properties\ninsights.identify('user_12345', {\n    email: 'user@example.com',\n    plan: 'premium'\n})\n\n\n"
             },
             {
               "id": "identify_with_set_and_set_once_properties",
               "name": "identify with set and set_once properties",
-              "code": "\n\n// identify with set and set_once properties\nposthog.identify('user_12345',\n    { last_login: new Date() },  // updates every time\n    { signup_date: new Date() }  // sets only once\n)\n\n\n\n"
+              "code": "\n\n// identify with set and set_once properties\ninsights.identify('user_12345',\n    { last_login: new Date() },  // updates every time\n    { signup_date: new Date() }  // sets only once\n)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1097,12 +1097,12 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Initialization",
-          "description": "Initializes a new instance of the PostHog capturing object.",
-          "details": "All new instances are added to the main posthog object as sub properties (such as `posthog.library_name`) and also returned by this function. [Learn more about configuration options](https://github.com/posthog/posthog-js/blob/6e0e873/src/posthog-core.js#L57-L91)",
+          "description": "Initializes a new instance of the Insights capturing object.",
+          "details": "All new instances are added to the main insights object as sub properties (such as `insights.library_name`) and also returned by this function. [Learn more about configuration options](https://github.com/insights/insights-js/blob/6e0e873/src/insights-core.js#L57-L91)",
           "id": "init",
           "showDocs": true,
           "title": "init",
@@ -1110,18 +1110,18 @@
             {
               "id": "basic_initialization",
               "name": "basic initialization",
-              "code": "\n\n// basic initialization\nposthog.init('<ph_project_api_key>', {\n    api_host: '<ph_client_api_host>'\n})\n\n\n"
+              "code": "\n\n// basic initialization\ninsights.init('<hi_project_api_key>', {\n    api_host: '<hi_client_api_host>'\n})\n\n\n"
             },
             {
               "id": "multiple_instances",
               "name": "multiple instances",
-              "code": "\n\n// multiple instances\nposthog.init('<ph_project_api_key>', {}, 'project1')\nposthog.init('<ph_project_api_key>', {}, 'project2')\n\n\n\n"
+              "code": "\n\n// multiple instances\ninsights.init('<hi_project_api_key>', {}, 'project1')\ninsights.init('<hi_project_api_key>', {}, 'project2')\n\n\n\n"
             }
           ],
           "releaseTag": "public",
           "params": [
             {
-              "description": "Your PostHog API token",
+              "description": "Your Insights API token",
               "isOptional": false,
               "type": "string",
               "name": "token"
@@ -1129,25 +1129,25 @@
             {
               "description": "A dictionary of config options to override",
               "isOptional": true,
-              "type": "OnlyValidKeys<Partial<PostHogConfig>, Partial<PostHogConfig>>",
+              "type": "OnlyValidKeys<Partial<InsightsConfig>, Partial<InsightsConfig>>",
               "name": "config"
             },
             {
-              "description": "The name for the new posthog instance that you want created",
+              "description": "The name for the new insights instance that you want created",
               "isOptional": true,
               "type": "string",
               "name": "name"
             }
           ],
           "returnType": {
-            "id": "PostHog",
-            "name": "PostHog"
+            "id": "Insights",
+            "name": "Insights"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Privacy",
-          "description": "Checks whether the PostHog library is currently capturing events.\nUsually this means that the user has not opted out of capturing, but the exact behaviour can be controlled by some config options.\nAdditionally, if the cookieless_mode is set to `'on_reject'`, we will capture events in cookieless mode if the user has opted out or been defaulted to opt-out.",
+          "description": "Checks whether the Insights library is currently capturing events.\nUsually this means that the user has not opted out of capturing, but the exact behaviour can be controlled by some config options.\nAdditionally, if the cookieless_mode is set to `'on_reject'`, we will capture events in cookieless mode if the user has opted out or been defaulted to opt-out.",
           "details": null,
           "id": "is_capturing",
           "showDocs": true,
@@ -1156,7 +1156,7 @@
             {
               "id": "is_capturing",
               "name": "Generated example for is_capturing",
-              "code": "// Generated example for is_capturing\nposthog.is_capturing();"
+              "code": "// Generated example for is_capturing\ninsights.is_capturing();"
             }
           ],
           "releaseTag": "public",
@@ -1165,7 +1165,7 @@
             "id": "boolean",
             "name": "boolean"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1178,12 +1178,12 @@
             {
               "id": "simple_feature_flag_check",
               "name": "simple feature flag check",
-              "code": "\n\n// simple feature flag check\nif (posthog.isFeatureEnabled('new-checkout')) {\n    showNewCheckout()\n}\n\n\n"
+              "code": "\n\n// simple feature flag check\nif (insights.isFeatureEnabled('new-checkout')) {\n    showNewCheckout()\n}\n\n\n"
             },
             {
               "id": "disable_event_tracking",
               "name": "disable event tracking",
-              "code": "\n\n// disable event tracking\nif (posthog.isFeatureEnabled('feature', { send_event: false })) {\n    // flag checked without sending $feature_flag_call event\n}\n\n\n\n"
+              "code": "\n\n// disable event tracking\nif (insights.isFeatureEnabled('feature', { send_event: false })) {\n    // flag checked without sending $feature_flag_call event\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1195,7 +1195,7 @@
               "name": "key"
             },
             {
-              "description": "(optional) If send_event: false, we won't send an $feature_flag_call event to PostHog. If fresh: true, we won't return cached values from localStorage - only values loaded from the server.",
+              "description": "(optional) If send_event: false, we won't send an $feature_flag_call event to Insights. If fresh: true, we won't return cached values from localStorage - only values loaded from the server.",
               "isOptional": true,
               "type": "FeatureFlagOptions",
               "name": "options"
@@ -1205,7 +1205,7 @@
             "id": "boolean | undefined",
             "name": "boolean | undefined"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Toolbar",
@@ -1218,7 +1218,7 @@
             {
               "id": "loadtoolbar",
               "name": "Generated example for loadToolbar",
-              "code": "// Generated example for loadToolbar\nposthog.loadToolbar();"
+              "code": "// Generated example for loadToolbar\ninsights.loadToolbar();"
             }
           ],
           "releaseTag": "public",
@@ -1234,11 +1234,11 @@
             "id": "boolean",
             "name": "boolean"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
-          "description": "Exposes a set of events that PostHog will emit. e.g. `eventCaptured` is emitted immediately before trying to send an event\nUnlike `onFeatureFlags` and `onSessionId` these are not called when the listener is registered, the first callback will be the next event _after_ registering a listener\nAvailable events: - `eventCaptured`: Emitted immediately before trying to send an event - `featureFlagsReloading`: Emitted when feature flags are being reloaded (e.g. after `identify()`, `group()`, or `reloadFeatureFlags()`)",
+          "description": "Exposes a set of events that Insights will emit. e.g. `eventCaptured` is emitted immediately before trying to send an event\nUnlike `onFeatureFlags` and `onSessionId` these are not called when the listener is registered, the first callback will be the next event _after_ registering a listener\nAvailable events: - `eventCaptured`: Emitted immediately before trying to send an event - `featureFlagsReloading`: Emitted when feature flags are being reloaded (e.g. after `identify()`, `group()`, or `reloadFeatureFlags()`)",
           "details": null,
           "id": "on",
           "showDocs": true,
@@ -1247,12 +1247,12 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.on('eventCaptured', (event) => {\n  console.log(event)\n})\n\n\n"
+              "code": "\n\ninsights.on('eventCaptured', (event) => {\n  console.log(event)\n})\n\n\n"
             },
             {
               "id": "track_when_feature_flags_are_reloading_to_show_a_loading_state",
               "name": "Track when feature flags are reloading to show a loading state",
-              "code": "\n\n// Track when feature flags are reloading to show a loading state\nposthog.on('featureFlagsReloading', () => {\n  console.log('Feature flags are being reloaded...')\n})\n\n\n\n"
+              "code": "\n\n// Track when feature flags are reloading to show a loading state\ninsights.on('featureFlagsReloading', () => {\n  console.log('Feature flags are being reloaded...')\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1274,7 +1274,7 @@
             "id": "() => void",
             "name": "() => void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1287,7 +1287,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.onFeatureFlags(function(featureFlags, featureFlagsVariants, { errorsLoading }) {\n    // do something\n})\n\n\n\n"
+              "code": "\n\ninsights.onFeatureFlags(function(featureFlags, featureFlagsVariants, { errorsLoading }) {\n    // do something\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1303,11 +1303,11 @@
             "id": "() => void",
             "name": "() => void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
-          "description": "Register an event listener that runs whenever the session id or window id change. If there is already a session id, the listener is called immediately in addition to being called on future changes.\nCan be used, for example, to sync the PostHog session id with a backend session.",
+          "description": "Register an event listener that runs whenever the session id or window id change. If there is already a session id, the listener is called immediately in addition to being called on future changes.\nCan be used, for example, to sync the Insights session id with a backend session.",
           "details": null,
           "id": "onSessionId",
           "showDocs": true,
@@ -1316,7 +1316,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.onSessionId(function(sessionId, windowId) { // do something })\n\n\n\n"
+              "code": "\n\ninsights.onSessionId(function(sessionId, windowId) { // do something })\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1332,11 +1332,11 @@
             "id": "() => void",
             "name": "() => void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
-          "description": "Register an event listener that runs when surveys are loaded.\nCallback parameters: - surveys: Survey[]: An array containing all survey objects fetched from PostHog using the getSurveys method - context:  isLoaded: boolean, error?: string : An object indicating if the surveys were loaded successfully",
+          "description": "Register an event listener that runs when surveys are loaded.\nCallback parameters: - surveys: Survey[]: An array containing all survey objects fetched from Insights using the getSurveys method - context:  isLoaded: boolean, error?: string : An object indicating if the surveys were loaded successfully",
           "details": null,
           "id": "onSurveysLoaded",
           "showDocs": true,
@@ -1345,7 +1345,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.onSurveysLoaded((surveys, context) => { // do something })\n\n\n"
+              "code": "\n\ninsights.onSurveysLoaded((surveys, context) => { // do something })\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1361,12 +1361,12 @@
             "id": "() => void",
             "name": "() => void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Privacy",
           "description": "Opts the user into data capturing and persistence.",
-          "details": "Enables event tracking and data persistence (cookies/localStorage) for this PostHog instance. By default, captures an `$opt_in` event unless disabled.",
+          "details": "Enables event tracking and data persistence (cookies/localStorage) for this Insights instance. By default, captures an `$opt_in` event unless disabled.",
           "id": "opt_in_capturing",
           "showDocs": true,
           "title": "opt_in_capturing",
@@ -1374,17 +1374,17 @@
             {
               "id": "simple_opt-in",
               "name": "simple opt-in",
-              "code": "\n\n// simple opt-in\nposthog.opt_in_capturing()\n\n\n"
+              "code": "\n\n// simple opt-in\ninsights.opt_in_capturing()\n\n\n"
             },
             {
               "id": "opt-in_with_custom_event_and_properties",
               "name": "opt-in with custom event and properties",
-              "code": "\n\n// opt-in with custom event and properties\nposthog.opt_in_capturing({\n    captureEventName: 'Privacy Accepted',\n    captureProperties: { source: 'banner' }\n})\n\n\n"
+              "code": "\n\n// opt-in with custom event and properties\ninsights.opt_in_capturing({\n    captureEventName: 'Privacy Accepted',\n    captureProperties: { source: 'banner' }\n})\n\n\n"
             },
             {
               "id": "opt-in_without_capturing_event",
               "name": "opt-in without capturing event",
-              "code": "\n\n// opt-in without capturing event\nposthog.opt_in_capturing({\n    captureEventName: false\n})\n\n\n\n"
+              "code": "\n\n// opt-in without capturing event\ninsights.opt_in_capturing({\n    captureEventName: false\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1400,12 +1400,12 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Privacy",
           "description": "Opts the user out of data capturing and persistence.",
-          "details": "Disables event tracking and data persistence (cookies/localStorage) for this PostHog instance. If `opt_out_persistence_by_default` is true, SDK persistence will also be disabled.",
+          "details": "Disables event tracking and data persistence (cookies/localStorage) for this Insights instance. If `opt_out_persistence_by_default` is true, SDK persistence will also be disabled.",
           "id": "opt_out_capturing",
           "showDocs": true,
           "title": "opt_out_capturing",
@@ -1413,7 +1413,7 @@
             {
               "id": "opt_user_out_(e.g.,_on_privacy_settings_page)",
               "name": "opt user out (e.g., on privacy settings page)",
-              "code": "\n\n// opt user out (e.g., on privacy settings page)\nposthog.opt_out_capturing()\n\n\n\n"
+              "code": "\n\n// opt user out (e.g., on privacy settings page)\ninsights.opt_out_capturing()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1422,7 +1422,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "",
@@ -1435,7 +1435,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.push(['register', { a: 'b' }]);\n\n\n"
+              "code": "\n\ninsights.push(['register', { a: 'b' }]);\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1451,7 +1451,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
@@ -1464,12 +1464,12 @@
             {
               "id": "register_session-specific_properties",
               "name": "register session-specific properties",
-              "code": "\n\n// register session-specific properties\nposthog.register_for_session({\n    current_page_type: 'checkout',\n    ab_test_variant: 'control'\n})\n\n\n"
+              "code": "\n\n// register session-specific properties\ninsights.register_for_session({\n    current_page_type: 'checkout',\n    ab_test_variant: 'control'\n})\n\n\n"
             },
             {
               "id": "register_properties_for_user_flow_tracking",
               "name": "register properties for user flow tracking",
-              "code": "\n\n// register properties for user flow tracking\nposthog.register_for_session({\n    selected_plan: 'pro',\n    completed_steps: 3,\n    flow_id: 'signup_flow_v2'\n})\n\n\n\n"
+              "code": "\n\n// register properties for user flow tracking\ninsights.register_for_session({\n    selected_plan: 'pro',\n    completed_steps: 3,\n    flow_id: 'signup_flow_v2'\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1485,7 +1485,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
@@ -1498,12 +1498,12 @@
             {
               "id": "register_once-only_properties",
               "name": "register once-only properties",
-              "code": "\n\n// register once-only properties\nposthog.register_once({\n    first_login_date: new Date().toISOString(),\n    initial_referrer: document.referrer\n})\n\n\n"
+              "code": "\n\n// register once-only properties\ninsights.register_once({\n    first_login_date: new Date().toISOString(),\n    initial_referrer: document.referrer\n})\n\n\n"
             },
             {
               "id": "override_existing_value_if_it_matches_default",
               "name": "override existing value if it matches default",
-              "code": "\n\n// override existing value if it matches default\nposthog.register_once(\n    { user_type: 'premium' },\n    'unknown'  // overwrite if current value is 'unknown'\n)\n\n\n\n"
+              "code": "\n\n// override existing value if it matches default\ninsights.register_once(\n    { user_type: 'premium' },\n    'unknown'  // overwrite if current value is 'unknown'\n)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1531,7 +1531,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
@@ -1544,17 +1544,17 @@
             {
               "id": "register_a_single_property",
               "name": "register a single property",
-              "code": "\n\n// register a single property\nposthog.register({ plan: 'premium' })\n\n\n\n\n"
+              "code": "\n\n// register a single property\ninsights.register({ plan: 'premium' })\n\n\n\n\n"
             },
             {
               "id": "register_multiple_properties",
               "name": "register multiple properties",
-              "code": "\n\n// register multiple properties\nposthog.register({\n    email: 'user@example.com',\n    account_type: 'business',\n    signup_date: '2023-01-15'\n})\n\n\n"
+              "code": "\n\n// register multiple properties\ninsights.register({\n    email: 'user@example.com',\n    account_type: 'business',\n    signup_date: '2023-01-15'\n})\n\n\n"
             },
             {
               "id": "register_with_custom_expiration",
               "name": "register with custom expiration",
-              "code": "\n\n// register with custom expiration\nposthog.register({ campaign: 'summer_sale' }, 7) // expires in 7 days\n\n\n\n"
+              "code": "\n\n// register with custom expiration\ninsights.register({ campaign: 'summer_sale' }, 7) // expires in 7 days\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1576,7 +1576,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1589,7 +1589,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.reloadFeatureFlags()\n\n\n\n"
+              "code": "\n\ninsights.reloadFeatureFlags()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1598,7 +1598,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Surveys",
@@ -1611,7 +1611,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.renderSurvey(coolSurveyID, '#survey-container')\n\n\n\n"
+              "code": "\n\ninsights.renderSurvey(coolSurveyID, '#survey-container')\n\n\n\n"
             }
           ],
           "releaseTag": "deprecated",
@@ -1633,7 +1633,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
@@ -1646,12 +1646,12 @@
             {
               "id": "reset_on_user_logout",
               "name": "reset on user logout",
-              "code": "\n\n// reset on user logout\nfunction logout() {\n    posthog.reset()\n    // redirect to login page\n}\n\n\n"
+              "code": "\n\n// reset on user logout\nfunction logout() {\n    insights.reset()\n    // redirect to login page\n}\n\n\n"
             },
             {
               "id": "reset_and_generate_new_device_id",
               "name": "reset and generate new device ID",
-              "code": "\n\n// reset and generate new device ID\nposthog.reset(true)  // also resets device_id\n\n\n\n"
+              "code": "\n\n// reset and generate new device ID\ninsights.reset(true)  // also resets device_id\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1667,7 +1667,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1680,7 +1680,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.resetGroupPropertiesForFlags()\n\n\n\n"
+              "code": "\n\ninsights.resetGroupPropertiesForFlags()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1696,7 +1696,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
@@ -1709,7 +1709,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.resetGroups()\n\n\n\n"
+              "code": "\n\ninsights.resetGroups()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1718,7 +1718,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1731,7 +1731,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.resetPersonPropertiesForFlags()\n\n\n\n"
+              "code": "\n\ninsights.resetPersonPropertiesForFlags()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1740,7 +1740,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Session replay",
@@ -1753,7 +1753,7 @@
             {
               "id": "stop_session_recording_if_it's_running",
               "name": "Stop session recording if it's running",
-              "code": "\n\n// Stop session recording if it's running\nif (posthog.sessionRecordingStarted()) {\n  posthog.stopSessionRecording()\n}\n\n\n\n"
+              "code": "\n\n// Stop session recording if it's running\nif (insights.sessionRecordingStarted()) {\n  insights.stopSessionRecording()\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1762,11 +1762,11 @@
             "id": "boolean",
             "name": "boolean"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Initialization",
-          "description": "Updates the configuration of the PostHog instance.",
+          "description": "Updates the configuration of the Insights instance.",
           "details": null,
           "id": "set_config",
           "showDocs": true,
@@ -1775,7 +1775,7 @@
             {
               "id": "set_config",
               "name": "Generated example for set_config",
-              "code": "// Generated example for set_config\nposthog.set_config();"
+              "code": "// Generated example for set_config\ninsights.set_config();"
             }
           ],
           "releaseTag": "public",
@@ -1783,7 +1783,7 @@
             {
               "description": "A dictionary of new configuration values to update",
               "isOptional": false,
-              "type": "Partial<PostHogConfig>",
+              "type": "Partial<InsightsConfig>",
               "name": "config"
             }
           ],
@@ -1791,7 +1791,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1804,12 +1804,12 @@
             {
               "id": "set_properties_with_reload",
               "name": "Set properties with reload",
-              "code": "\n\n// Set properties with reload\nposthog.setGroupPropertiesForFlags({'organization': { name: 'CYZ', employees: '11' } })\n\n\n"
+              "code": "\n\n// Set properties with reload\ninsights.setGroupPropertiesForFlags({'organization': { name: 'CYZ', employees: '11' } })\n\n\n"
             },
             {
               "id": "set_properties_without_reload",
               "name": "Set properties without reload",
-              "code": "\n\n// Set properties without reload\nposthog.setGroupPropertiesForFlags({'organization': { name: 'CYZ', employees: '11' } }, false)\n\n\n\n"
+              "code": "\n\n// Set properties without reload\ninsights.setGroupPropertiesForFlags({'organization': { name: 'CYZ', employees: '11' } }, false)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1831,7 +1831,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "",
@@ -1844,7 +1844,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.setIdentity('user_123', 'a1b2c3d4e5f6...')\n\n\n\n"
+              "code": "\n\ninsights.setIdentity('user_123', 'a1b2c3d4e5f6...')\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1866,11 +1866,11 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
-          "description": "Marks the current user as a test user by setting the `$internal_or_test_user` person property to `true`. This also enables person processing for the current user.\nThis is useful for using in a cohort your internal/test filters for your posthog org.",
+          "description": "Marks the current user as a test user by setting the `$internal_or_test_user` person property to `true`. This also enables person processing for the current user.\nThis is useful for using in a cohort your internal/test filters for your insights org.",
           "details": null,
           "id": "setInternalOrTestUser",
           "showDocs": true,
@@ -1879,7 +1879,7 @@
             {
               "id": "manually_mark_as_test_user",
               "name": "Manually mark as test user",
-              "code": "\n\n// Manually mark as test user\nposthog.setInternalOrTestUser()\n\n// Or use internal_or_test_user_hostname config for automatic detection\nposthog.init('token', { internal_or_test_user_hostname: 'localhost' })\n\n\n"
+              "code": "\n\n// Manually mark as test user\ninsights.setInternalOrTestUser()\n\n// Or use internal_or_test_user_hostname config for automatic detection\ninsights.init('token', { internal_or_test_user_hostname: 'localhost' })\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1888,12 +1888,12 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Identification",
           "description": "Sets properties on the person profile associated with the current `distinct_id`. Learn more about [identifying users](/docs/product-analytics/identify)",
-          "details": "Updates user properties that are stored with the person profile in PostHog. If `person_profiles` is set to `identified_only` and no profile exists, this will create one.",
+          "details": "Updates user properties that are stored with the person profile in Insights. If `person_profiles` is set to `identified_only` and no profile exists, this will create one.",
           "id": "setPersonProperties",
           "showDocs": true,
           "title": "setPersonProperties",
@@ -1901,12 +1901,12 @@
             {
               "id": "set_user_properties",
               "name": "set user properties",
-              "code": "\n\n// set user properties\nposthog.setPersonProperties({\n    email: 'user@example.com',\n    plan: 'premium'\n})\n\n\n"
+              "code": "\n\n// set user properties\ninsights.setPersonProperties({\n    email: 'user@example.com',\n    plan: 'premium'\n})\n\n\n"
             },
             {
               "id": "set_properties",
               "name": "set properties",
-              "code": "\n\n// set properties\nposthog.setPersonProperties(\n    { name: 'Max Hedgehog' },  // $set properties\n    { initial_url: '/blog' }   // $set_once properties\n)\n\n\n\n"
+              "code": "\n\n// set properties\ninsights.setPersonProperties(\n    { name: 'Max Hedgehog' },  // $set properties\n    { initial_url: '/blog' }   // $set_once properties\n)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1928,7 +1928,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -1941,12 +1941,12 @@
             {
               "id": "set_properties",
               "name": "Set properties",
-              "code": "\n\n// Set properties\nposthog.setPersonPropertiesForFlags({'property1': 'value', property2: 'value2'})\n\n\n"
+              "code": "\n\n// Set properties\ninsights.setPersonPropertiesForFlags({'property1': 'value', property2: 'value2'})\n\n\n"
             },
             {
               "id": "set_properties_without_reloading",
               "name": "Set properties without reloading",
-              "code": "\n\n// Set properties without reloading\nposthog.setPersonPropertiesForFlags({'property1': 'value', property2: 'value2'}, false)\n\n\n\n"
+              "code": "\n\n// Set properties without reloading\ninsights.setPersonPropertiesForFlags({'property1': 'value', property2: 'value2'}, false)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1968,7 +1968,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Error tracking",
@@ -1981,12 +1981,12 @@
             {
               "id": "start_with_default_exception_autocapture_rules._no-op_if_already_enabled",
               "name": "Start with default exception autocapture rules. No-op if already enabled",
-              "code": "\n\n// Start with default exception autocapture rules. No-op if already enabled\nposthog.startExceptionAutocapture()\n\n\n"
+              "code": "\n\n// Start with default exception autocapture rules. No-op if already enabled\ninsights.startExceptionAutocapture()\n\n\n"
             },
             {
               "id": "start_and_override_controls",
               "name": "Start and override controls",
-              "code": "\n\n// Start and override controls\nposthog.startExceptionAutocapture({\n  // you don't have to send all of these (unincluded values will use the default)\n  capture_unhandled_errors: true || false,\n  capture_unhandled_rejections: true || false,\n  capture_console_errors: true || false\n})\n\n\n\n"
+              "code": "\n\n// Start and override controls\ninsights.startExceptionAutocapture({\n  // you don't have to send all of these (unincluded values will use the default)\n  capture_unhandled_errors: true || false,\n  capture_unhandled_rejections: true || false,\n  capture_console_errors: true || false\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2002,7 +2002,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Session replay",
@@ -2015,12 +2015,12 @@
             {
               "id": "start_and_ignore_controls",
               "name": "Start and ignore controls",
-              "code": "\n\n// Start and ignore controls\nposthog.startSessionRecording(true)\n\n\n"
+              "code": "\n\n// Start and ignore controls\ninsights.startSessionRecording(true)\n\n\n"
             },
             {
               "id": "start_and_override_controls",
               "name": "Start and override controls",
-              "code": "\n\n// Start and override controls\nposthog.startSessionRecording({\n  // you don't have to send all of these\n  sampling: true || false,\n  linked_flag: true || false,\n  url_trigger: true || false,\n  event_trigger: true || false\n})\n\n\n\n"
+              "code": "\n\n// Start and override controls\ninsights.startSessionRecording({\n  // you don't have to send all of these\n  sampling: true || false,\n  linked_flag: true || false,\n  url_trigger: true || false,\n  event_trigger: true || false\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2036,7 +2036,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Error tracking",
@@ -2049,7 +2049,7 @@
             {
               "id": "stop_capturing_exceptions_automatically",
               "name": "Stop capturing exceptions automatically",
-              "code": "\n\n// Stop capturing exceptions automatically\nposthog.stopExceptionAutocapture()\n\n\n\n"
+              "code": "\n\n// Stop capturing exceptions automatically\ninsights.stopExceptionAutocapture()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2058,7 +2058,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Session replay",
@@ -2071,7 +2071,7 @@
             {
               "id": "stop_session_recording",
               "name": "Stop session recording",
-              "code": "\n\n// Stop session recording\nposthog.stopSessionRecording()\n\n\n\n"
+              "code": "\n\n// Stop session recording\ninsights.stopSessionRecording()\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2080,7 +2080,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
@@ -2093,7 +2093,7 @@
             {
               "id": "remove_a_session_property",
               "name": "remove a session property",
-              "code": "\n\n// remove a session property\nposthog.unregister_for_session('current_flow')\n\n\n\n"
+              "code": "\n\n// remove a session property\ninsights.unregister_for_session('current_flow')\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2109,7 +2109,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Capture",
@@ -2122,7 +2122,7 @@
             {
               "id": "remove_a_super_property",
               "name": "remove a super property",
-              "code": "\n\n// remove a super property\nposthog.unregister('plan_type')\n\n\n\n"
+              "code": "\n\n// remove a super property\ninsights.unregister('plan_type')\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2138,7 +2138,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -2151,7 +2151,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nconst toggleBeta = (betaKey) => {\n  if (activeBetas.some(\n    beta => beta.flagKey === betaKey\n  )) {\n    posthog.updateEarlyAccessFeatureEnrollment(\n      betaKey,\n      false\n    )\n    setActiveBetas(\n      prevActiveBetas => prevActiveBetas.filter(\n        item => item.flagKey !== betaKey\n      )\n    );\n    return\n  }\n\n  posthog.updateEarlyAccessFeatureEnrollment(\n    betaKey,\n    true\n  )\n  setInactiveBetas(\n    prevInactiveBetas => prevInactiveBetas.filter(\n      item => item.flagKey !== betaKey\n    )\n  );\n}\n\nconst registerInterest = (featureKey) => {\n  posthog.updateEarlyAccessFeatureEnrollment(\n    featureKey,\n    true\n  )\n  // Update UI to show user has registered\n}\n\n\n\n"
+              "code": "\n\nconst toggleBeta = (betaKey) => {\n  if (activeBetas.some(\n    beta => beta.flagKey === betaKey\n  )) {\n    insights.updateEarlyAccessFeatureEnrollment(\n      betaKey,\n      false\n    )\n    setActiveBetas(\n      prevActiveBetas => prevActiveBetas.filter(\n        item => item.flagKey !== betaKey\n      )\n    );\n    return\n  }\n\n  insights.updateEarlyAccessFeatureEnrollment(\n    betaKey,\n    true\n  )\n  setInactiveBetas(\n    prevInactiveBetas => prevInactiveBetas.filter(\n      item => item.flagKey !== betaKey\n    )\n  );\n}\n\nconst registerInterest = (featureKey) => {\n  insights.updateEarlyAccessFeatureEnrollment(\n    featureKey,\n    true\n  )\n  // Update UI to show user has registered\n}\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2179,7 +2179,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         },
         {
           "category": "Feature flags",
@@ -2192,7 +2192,7 @@
             {
               "id": "replace_all_flags_with_server-evaluated_values",
               "name": "Replace all flags with server-evaluated values",
-              "code": "\n\n// Replace all flags with server-evaluated values\nposthog.updateFlags({\n  'my-flag': true,\n  'my-experiment': 'variant-a'\n})\n\n// Merge with existing flags (update only specified flags)\nposthog.updateFlags(\n  { 'my-flag': true },\n  undefined,\n  { merge: true }\n)\n\n// With payloads\nposthog.updateFlags(\n  { 'my-flag': true },\n  { 'my-flag': { some: 'data' } }\n)\n\n\n\n"
+              "code": "\n\n// Replace all flags with server-evaluated values\ninsights.updateFlags({\n  'my-flag': true,\n  'my-experiment': 'variant-a'\n})\n\n// Merge with existing flags (update only specified flags)\ninsights.updateFlags(\n  { 'my-flag': true },\n  undefined,\n  { merge: true }\n)\n\n// With payloads\ninsights.updateFlags(\n  { 'my-flag': true },\n  { 'my-flag': { some: 'data' } }\n)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -2220,7 +2220,7 @@
             "id": "void",
             "name": "void"
           },
-          "path": "lib/src/posthog-core.d.ts"
+          "path": "lib/src/insights-core.d.ts"
         }
       ]
     }
@@ -2230,7 +2230,7 @@
       "id": "ActionStepStringMatching",
       "name": "ActionStepStringMatching",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "\"contains\" | \"exact\" | \"regex\""
     },
     {
@@ -2288,7 +2288,7 @@
           "name": "url"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "BasicSurveyQuestion",
@@ -2299,7 +2299,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "Compression",
@@ -2328,7 +2328,7 @@
           "name": "domains"
         },
         {
-          "description": "Whether conversations are enabled for this team When true, the conversations API is available (posthog.conversations.*)",
+          "description": "Whether conversations are enabled for this team When true, the conversations API is available (insights.conversations.*)",
           "type": "boolean",
           "name": "enabled"
         },
@@ -2373,7 +2373,7 @@
           "name": "widgetPosition"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "ConversationsTraits",
@@ -2388,20 +2388,20 @@
           "name": "name"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "ConversationsWidgetState",
       "name": "ConversationsWidgetState",
       "properties": [],
-      "path": "lib/src/posthog-conversations-types.d.ts",
+      "path": "lib/src/insights-conversations-types.d.ts",
       "example": "\"open\" | \"closed\""
     },
     {
       "id": "DisplaySurveyOptions",
       "name": "DisplaySurveyOptions",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "DisplaySurveyPopoverOptions | DisplaySurveyInlineOptions"
     },
     {
@@ -2428,13 +2428,13 @@
           "name": "skipShownEvent"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "DisplaySurveyType",
       "name": "DisplaySurveyType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof DisplaySurveyType)[keyof typeof DisplaySurveyType]"
     },
     {
@@ -2557,7 +2557,7 @@
           "name": "unread_count"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "GetTicketsOptions",
@@ -2579,7 +2579,7 @@
           "name": "status"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "GetTicketsResponse",
@@ -2596,7 +2596,7 @@
           "name": "results"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "JSONContent",
@@ -2623,7 +2623,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "LinkSurveyQuestion",
@@ -2638,7 +2638,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "MarkAsReadResponse",
@@ -2655,7 +2655,7 @@
           "name": "unread_count"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "Message",
@@ -2697,13 +2697,13 @@
           "name": "rich_content"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "MessageAuthorType",
       "name": "MessageAuthorType",
       "properties": [],
-      "path": "lib/src/posthog-conversations-types.d.ts",
+      "path": "lib/src/insights-conversations-types.d.ts",
       "example": "\"customer\" | \"AI\" | \"human\""
     },
     {
@@ -2731,7 +2731,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "NetworkRecordOptions",
@@ -2779,15 +2779,15 @@
       "path": "lib/src/types.d.ts"
     },
     {
-      "id": "PostHogConfig",
-      "name": "PostHogConfig",
+      "id": "InsightsConfig",
+      "name": "InsightsConfig",
       "properties": [],
       "path": "lib/src/types.d.ts",
-      "example": "Omit<BasePostHogConfig, 'loaded'> & {\n    loaded: (posthog: PostHogInterface) => void;\n    __extensionClasses?: {\n        exceptions?: ExtensionConstructor<PostHogExceptions>;\n        historyAutocapture?: ExtensionConstructor<HistoryAutocapture>;\n        tracingHeaders?: ExtensionConstructor<TracingHeaders>;\n        siteApps?: ExtensionConstructor<SiteApps>;\n        sessionRecording?: ExtensionConstructor<SessionRecording>;\n        autocapture?: ExtensionConstructor<Autocapture>;\n        productTours?: ExtensionConstructor<PostHogProductTours>;\n        heatmaps?: ExtensionConstructor<Heatmaps>;\n        webVitalsAutocapture?: ExtensionConstructor<WebVitalsAutocapture>;\n        exceptionObserver?: ExtensionConstructor<ExceptionObserver>;\n        deadClicksAutocapture?: ExtensionConstructor<DeadClicksAutocapture>;\n        surveys?: ExtensionConstructor<PostHogSurveys>;\n        toolbar?: ExtensionConstructor<Toolbar>;\n        experiments?: ExtensionConstructor<WebExperiments>;\n        conversations?: ExtensionConstructor<PostHogConversations>;\n        featureFlags?: ExtensionConstructor<PostHogFeatureFlags>;\n        logs?: ExtensionConstructor<PostHogLogs>;\n    };\n}"
+      "example": "Omit<BaseInsightsConfig, 'loaded'> & {\n    loaded: (insights: InsightsInterface) => void;\n    __extensionClasses?: {\n        exceptions?: ExtensionConstructor<InsightsExceptions>;\n        historyAutocapture?: ExtensionConstructor<HistoryAutocapture>;\n        tracingHeaders?: ExtensionConstructor<TracingHeaders>;\n        siteApps?: ExtensionConstructor<SiteApps>;\n        sessionRecording?: ExtensionConstructor<SessionRecording>;\n        autocapture?: ExtensionConstructor<Autocapture>;\n        productTours?: ExtensionConstructor<InsightsProductTours>;\n        heatmaps?: ExtensionConstructor<Heatmaps>;\n        webVitalsAutocapture?: ExtensionConstructor<WebVitalsAutocapture>;\n        exceptionObserver?: ExtensionConstructor<ExceptionObserver>;\n        deadClicksAutocapture?: ExtensionConstructor<DeadClicksAutocapture>;\n        surveys?: ExtensionConstructor<InsightsSurveys>;\n        toolbar?: ExtensionConstructor<Toolbar>;\n        experiments?: ExtensionConstructor<WebExperiments>;\n        conversations?: ExtensionConstructor<InsightsConversations>;\n        featureFlags?: ExtensionConstructor<InsightsFeatureFlags>;\n        logs?: ExtensionConstructor<InsightsLogs>;\n    };\n}"
     },
     {
-      "id": "PostHogInterface",
-      "name": "PostHogInterface",
+      "id": "InsightsInterface",
+      "name": "InsightsInterface",
       "properties": [],
       "path": "lib/src/types.d.ts",
       "example": "\"config\" | \"init\""
@@ -2857,7 +2857,7 @@
           "name": "tour_type"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourAppearance",
@@ -2913,7 +2913,7 @@
           "name": "zIndex"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourBannerConfig",
@@ -2936,20 +2936,20 @@
           "name": "selector"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourButtonAction",
       "name": "ProductTourButtonAction",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"dismiss\" | \"link\" | \"next_step\" | \"previous_step\" | \"trigger_tour\""
     },
     {
       "id": "ProductTourCallback",
       "name": "ProductTourCallback",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "(tours: ProductTour[], context?: {\n    isLoaded: boolean;\n    error?: string;\n}) => void"
     },
     {
@@ -2997,48 +2997,48 @@
           "name": "urlMatchType"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourDismissReason",
       "name": "ProductTourDismissReason",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"user_clicked_skip\" | \"user_clicked_outside\" | \"escape_key\" | \"element_unavailable\" | \"container_unavailable\""
     },
     {
       "id": "ProductTourDisplayFrequency",
       "name": "ProductTourDisplayFrequency",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"show_once\" | \"until_interacted\" | \"always\""
     },
     {
       "id": "ProductTourEventName",
       "name": "ProductTourEventName",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "(typeof ProductTourEventName)[keyof typeof ProductTourEventName]"
     },
     {
       "id": "ProductTourEventProperties",
       "name": "ProductTourEventProperties",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "(typeof ProductTourEventProperties)[keyof typeof ProductTourEventProperties]"
     },
     {
       "id": "ProductTourRenderReason",
       "name": "ProductTourRenderReason",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"auto\" | \"api\" | \"trigger\" | \"event\""
     },
     {
       "id": "ProductTourSelectorError",
       "name": "ProductTourSelectorError",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"not_found\" | \"multiple_matches\" | \"not_visible\""
     },
     {
@@ -3121,7 +3121,7 @@
           "name": "useManualSelector"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourStepButton",
@@ -3146,7 +3146,7 @@
           "name": "tourId"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourStepButtons",
@@ -3161,7 +3161,7 @@
           "name": "secondary"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourStepTranslation",
@@ -3184,13 +3184,13 @@
           "name": "survey"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourStepType",
       "name": "ProductTourStepType",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"element\" | \"modal\" | \"survey\" | \"banner\""
     },
     {
@@ -3234,20 +3234,20 @@
           "name": "upperBoundLabel"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "ProductTourSurveyQuestionType",
       "name": "ProductTourSurveyQuestionType",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"open\" | \"rating\""
     },
     {
       "id": "ProductTourType",
       "name": "ProductTourType",
       "properties": [],
-      "path": "lib/src/posthog-product-tours-types.d.ts",
+      "path": "lib/src/insights-product-tours-types.d.ts",
       "example": "\"tour\" | \"announcement\" | \"banner\""
     },
     {
@@ -3263,13 +3263,13 @@
           "name": "types"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "PropertyFilters",
       "name": "PropertyFilters",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "{\n    [propertyName: string]: {\n        values: string[];\n        operator: PropertyOperator;\n    };\n}"
     },
     {
@@ -3283,7 +3283,7 @@
       "id": "PropertyOperator",
       "name": "PropertyOperator",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "\"gt\" | \"lt\""
     },
     {
@@ -3327,7 +3327,7 @@
           "name": "upperBoundLabel"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "RemoteConfig",
@@ -3454,7 +3454,7 @@
           "name": "request_url"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "RequestRestoreLinkResponse",
@@ -3465,7 +3465,7 @@
           "name": "ok"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "RequestWithOptions",
@@ -3551,7 +3551,7 @@
           "name": "widget_session_id"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "RestoreFromTokenResponse",
@@ -3578,13 +3578,13 @@
           "name": "widget_session_id"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "RestoreFromTokenStatus",
       "name": "RestoreFromTokenStatus",
       "properties": [],
-      "path": "lib/src/posthog-conversations-types.d.ts",
+      "path": "lib/src/insights-conversations-types.d.ts",
       "example": "\"success\" | \"expired\" | \"invalid\" | \"used\""
     },
     {
@@ -3603,7 +3603,7 @@
       "name": "SendMessagePayload",
       "properties": [
         {
-          "description": "Distinct ID for linking to PostHog Person",
+          "description": "Distinct ID for linking to Insights Person",
           "type": "string",
           "name": "distinct_id"
         },
@@ -3648,7 +3648,7 @@
           "name": "widget_session_id"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "SendMessageResponse",
@@ -3680,7 +3680,7 @@
           "name": "unread_count"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "SessionContext",
@@ -3697,7 +3697,7 @@
           "name": "session_replay_url"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "SessionRecordingEventTrigger",
@@ -3813,7 +3813,7 @@
           "name": "reason"
         }
       ],
-      "path": "lib/src/posthog-product-tours-types.d.ts"
+      "path": "lib/src/insights-product-tours-types.d.ts"
     },
     {
       "id": "SiteApp",
@@ -3834,7 +3834,7 @@
       "name": "SiteAppLoader",
       "properties": [],
       "path": "lib/src/types.d.ts",
-      "example": "{\n    id: string;\n    init: (config: {\n        posthog: PostHog;\n        callback: (success: boolean) => void;\n    }) => {\n        processEvent?: (globals: SiteAppGlobals) => void;\n    };\n}"
+      "example": "{\n    id: string;\n    init: (config: {\n        insights: Insights;\n        callback: (success: boolean) => void;\n    }) => {\n        processEvent?: (globals: SiteAppGlobals) => void;\n    };\n}"
     },
     {
       "id": "SnippetArrayItem",
@@ -3920,7 +3920,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveyActionType",
@@ -3939,7 +3939,7 @@
           "name": "steps"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveyAppearance",
@@ -4000,13 +4000,13 @@
           "name": "zIndex"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveyCallback",
       "name": "SurveyCallback",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(surveys: Survey[], context?: {\n    isLoaded: boolean;\n    error?: string;\n}) => void"
     },
     {
@@ -4028,7 +4028,7 @@
           "name": "prefillFromUrl"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveyElement",
@@ -4083,27 +4083,27 @@
           "name": "text"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveyEventName",
       "name": "SurveyEventName",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyEventName)[keyof typeof SurveyEventName]"
     },
     {
       "id": "SurveyEventProperties",
       "name": "SurveyEventProperties",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyEventProperties)[keyof typeof SurveyEventProperties]"
     },
     {
       "id": "SurveyEventType",
       "name": "SurveyEventType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyEventType)[keyof typeof SurveyEventType]"
     },
     {
@@ -4119,82 +4119,82 @@
           "name": "propertyFilters"
         }
       ],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveyPosition",
       "name": "SurveyPosition",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyPosition)[keyof typeof SurveyPosition]"
     },
     {
       "id": "SurveyQuestion",
       "name": "SurveyQuestion",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "BasicSurveyQuestion | LinkSurveyQuestion | RatingSurveyQuestion | MultipleSurveyQuestion"
     },
     {
       "id": "SurveyQuestionBranchingType",
       "name": "SurveyQuestionBranchingType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyQuestionBranchingType)[keyof typeof SurveyQuestionBranchingType]"
     },
     {
       "id": "SurveyQuestionDescriptionContentType",
       "name": "SurveyQuestionDescriptionContentType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "\"html\" | \"text\""
     },
     {
       "id": "SurveyQuestionType",
       "name": "SurveyQuestionType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyQuestionType)[keyof typeof SurveyQuestionType]"
     },
     {
       "id": "SurveyResponseValue",
       "name": "SurveyResponseValue",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts"
+      "path": "lib/src/insights-surveys-types.d.ts"
     },
     {
       "id": "SurveySchedule",
       "name": "SurveySchedule",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveySchedule)[keyof typeof SurveySchedule]"
     },
     {
       "id": "SurveyTabPosition",
       "name": "SurveyTabPosition",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyTabPosition)[keyof typeof SurveyTabPosition]"
     },
     {
       "id": "SurveyType",
       "name": "SurveyType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyType)[keyof typeof SurveyType]"
     },
     {
       "id": "SurveyWidgetType",
       "name": "SurveyWidgetType",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "(typeof SurveyWidgetType)[keyof typeof SurveyWidgetType]"
     },
     {
       "id": "SurveyWithTypeAndAppearance",
       "name": "SurveyWithTypeAndAppearance",
       "properties": [],
-      "path": "lib/src/posthog-surveys-types.d.ts",
+      "path": "lib/src/insights-surveys-types.d.ts",
       "example": "\"id\" | \"type\" | \"appearance\""
     },
     {
@@ -4242,13 +4242,13 @@
           "name": "unread_count"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "TicketStatus",
       "name": "TicketStatus",
       "properties": [],
-      "path": "lib/src/posthog-conversations-types.d.ts",
+      "path": "lib/src/insights-conversations-types.d.ts",
       "example": "\"new\" | \"open\" | \"pending\" | \"on_hold\" | \"resolved\""
     },
     {
@@ -4264,7 +4264,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "TipTapMark",
@@ -4279,7 +4279,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "TipTapNode",
@@ -4306,7 +4306,7 @@
           "name": "type"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "UserProvidedTraits",
@@ -4321,13 +4321,13 @@
           "name": "name"
         }
       ],
-      "path": "lib/src/posthog-conversations-types.d.ts"
+      "path": "lib/src/insights-conversations-types.d.ts"
     },
     {
       "id": "WidgetPosition",
       "name": "WidgetPosition",
       "properties": [],
-      "path": "lib/src/posthog-conversations-types.d.ts",
+      "path": "lib/src/insights-conversations-types.d.ts",
       "example": "\"bottom_left\" | \"bottom_right\" | \"top_left\" | \"top_right\""
     }
   ],

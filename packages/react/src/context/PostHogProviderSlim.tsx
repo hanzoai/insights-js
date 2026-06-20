@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react'
-import type { PostHog } from '@hanzo/insights'
-import { PostHogContext } from './PostHogContext'
+import type { Insights } from '@hanzo/insights'
+import { InsightsContext } from './InsightsContext'
 
 /**
- * Slim PostHogProvider for use with @hanzo/insights-react/slim.
+ * Slim InsightsProvider for use with @hanzo/insights-react/slim.
  *
  * Only accepts a pre-initialized `client` instance. Does not support
- * `apiKey`/`options` props since the slim bundle has no posthog-js runtime.
+ * `apiKey`/`options` props since the slim bundle has no insights-js runtime.
  */
-export function PostHogProvider({ client, children }: { client: PostHog; children?: React.ReactNode }) {
+export function InsightsProvider({ client, children }: { client: Insights; children?: React.ReactNode }) {
     const value = useMemo(() => ({ client, bootstrap: client.config?.bootstrap }), [client])
-    return <PostHogContext.Provider value={value}>{children}</PostHogContext.Provider>
+    return <InsightsContext.Provider value={value}>{children}</InsightsContext.Provider>
 }

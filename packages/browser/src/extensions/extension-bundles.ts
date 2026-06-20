@@ -11,7 +11,7 @@
  * import insights from '@hanzo/insights/slim'
  * import { ReplayExtensions, AnalyticsExtensions } from '@hanzo/insights/extensions'
  *
- * insights.init('ph_key', {
+ * insights.init('hi_key', {
  *   __extensionClasses: {
  *     ...SessionReplayExtensions,
  *     ...AnalyticsExtensions,
@@ -38,7 +38,7 @@ type ExtensionClasses = NonNullable<InsightsConfig['__extensionClasses']>
 
 /** Feature flags. */
 export const FeatureFlagsExtensions = {
-    featureFlags: PostHogFeatureFlags,
+    featureFlags: InsightsFeatureFlags,
 } as const satisfies ExtensionClasses
 
 /** Session replay. */
@@ -58,7 +58,7 @@ export const AnalyticsExtensions = {
 /** Exception and error capture. Requires both the observer (capture hook) and exceptions (forwarding). */
 export const ErrorTrackingExtensions = {
     exceptionObserver: ExceptionObserver,
-    exceptions: PostHogExceptions,
+    exceptions: InsightsExceptions,
 } as const satisfies ExtensionClasses
 
 /** In-app product tours. Includes feature flags for targeting. */

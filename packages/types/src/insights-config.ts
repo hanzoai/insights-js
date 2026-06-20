@@ -153,7 +153,7 @@ export interface PerformanceCaptureConfig {
      * Use chrome's web vitals library to wrap fetch and capture web vitals
      *
      * When `cookieless_mode` is active, there is no client-side SessionIdManager; vitals are still
-     * captured. Nested `$web_vitals_*_event` payloads omit `$session_id` / `$window_id`; PostHog ingestion assigns
+     * captured. Nested `$web_vitals_*_event` payloads omit `$session_id` / `$window_id`; Insights ingestion assigns
      * `$session_id` server-side for cookieless traffic when project cookieless settings are enabled (same as other events).
      */
     web_vitals?: boolean
@@ -222,7 +222,7 @@ export interface DeadClickCandidate {
  */
 export type ExceptionStepsConfig = {
     /**
-     * Determines whether PostHog should collect exception steps and attach them to the next captured exception.
+     * Determines whether Insights should collect exception steps and attach them to the next captured exception.
      *
      * @default true
      */
@@ -618,7 +618,7 @@ export interface SurveyConfig {
 }
 
 /**
- * Options for the captureLog API and posthog.logger convenience methods.
+ * Options for the captureLog API and insights.logger convenience methods.
  */
 export interface LogCaptureOptions {
     /**
@@ -1277,7 +1277,7 @@ export interface InsightsConfig {
     /**
      * List of feature flag keys to remotely evaluate for this SDK instance.
      * When set, only these flags are evaluated by `/flags`; omitted flags are not remotely evaluated.
-     * Dependencies of the requested flags may still be evaluated internally by PostHog.
+     * Dependencies of the requested flags may still be evaluated internally by Insights.
      * If unset, all eligible flags are evaluated.
      *
      * Examples: ['checkout-redesign', 'new-onboarding']
@@ -1597,9 +1597,9 @@ export interface InsightsConfig {
     override_display_language?: string | null
 
     /**
-     * A list of hostnames for which to inject PostHog tracing headers to all requests
-     * (X-POSTHOG-DISTINCT-ID, X-POSTHOG-SESSION-ID, X-POSTHOG-WINDOW-ID). Used to link
-     * frontend sessions to backend traces (see https://posthog.com/docs/llm-analytics/link-session-replay).
+     * A list of hostnames for which to inject Insights tracing headers to all requests
+     * (X-INSIGHTS-DISTINCT-ID, X-INSIGHTS-SESSION-ID, X-INSIGHTS-WINDOW-ID). Used to link
+     * frontend sessions to backend traces (see https://insights.hanzo.ai/docs/llm-analytics/link-session-replay).
      */
     addTracingHeaders?: string[]
 

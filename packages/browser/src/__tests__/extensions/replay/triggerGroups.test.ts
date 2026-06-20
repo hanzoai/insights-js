@@ -16,9 +16,9 @@ import {
 } from '../../../extensions/replay/external/triggerMatching'
 import { SessionRecordingTriggerGroup } from '../../../types'
 import { matchTriggerPropertyFilters } from '../../../utils/property-utils'
-import { createMockPostHog } from '../../helpers/posthog-instance'
+import { createMockInsights } from '../../helpers/insights-instance'
 
-const fakePostHog = createMockPostHog({
+const fakeInsights = createMockInsights({
     register_for_session: () => {},
     onFeatureFlags: () => () => {}, // Returns cleanup function
     get_property: () => undefined,
@@ -74,7 +74,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             expect(matcher.group).toEqual(group)
         })
 
@@ -90,7 +90,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             expect(matcher.group).toEqual(group)
         })
 
@@ -105,7 +105,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             expect(matcher.group).toEqual(group)
         })
 
@@ -121,7 +121,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             expect(matcher.group.minDurationMs).toBe(0)
         })
     })
@@ -341,7 +341,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             const onActivate = jest.fn()
             matcher.checkEventTriggerConditions('purchase', onActivate, 'session-1')
             expect(onActivate).toHaveBeenCalledWith('event', 'purchase')
@@ -358,7 +358,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             const onActivate = jest.fn()
             matcher.checkEventTriggerConditions('pageview', onActivate, 'session-1')
             expect(onActivate).not.toHaveBeenCalled()
@@ -380,7 +380,7 @@ describe('V2 Trigger Groups', () => {
                 },
             }
 
-            const matcher = new TriggerGroupMatching(fakePostHog, group, () => {})
+            const matcher = new TriggerGroupMatching(fakeInsights, group, () => {})
             const onActivate = jest.fn()
             matcher.checkEventTriggerConditions('purchase', onActivate, 'session-1')
             expect(onActivate).toHaveBeenCalledWith('event', 'purchase')

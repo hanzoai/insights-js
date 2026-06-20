@@ -22,7 +22,7 @@ describe('external-scripts-loader', () => {
         const callback = jest.fn()
         beforeEach(() => {
             callback.mockClear()
-            delete mockPostHog.config.__preview_external_dependency_versioned_paths
+            delete mockInsights.config.__preview_external_dependency_versioned_paths
         })
 
         it('appends scripts to body by default', () => {
@@ -99,13 +99,13 @@ describe('external-scripts-loader', () => {
         it.each([
             [
                 'uses versioned asset paths on the normal asset host when the preview flag is enabled as a boolean',
-                'https://us.posthog.com',
+                'https://insights.hanzo.ai',
                 true,
-                'https://us-assets.i.posthog.com/static/1.0.0/recorder.js',
+                'https://us-assets.i.insights.hanzo.ai/static/1.0.0/recorder.js',
             ],
             [
                 'uses a configured asset host override for versioned asset paths',
-                'https://us.posthog.com',
+                'https://insights.hanzo.ai',
                 'https://cdn-preview.example.com/',
                 'https://cdn-preview.example.com/static/1.0.0/recorder.js',
             ],
@@ -116,35 +116,35 @@ describe('external-scripts-loader', () => {
                 'https://my-proxy.example.com/static/1.0.0/recorder.js',
             ],
         ])('%s', (_, apiHost, previewFlag, expectedSrc) => {
-            const posthog = {
+            const insights = {
                 config: {
                     api_host: apiHost,
                     external_scripts_inject_target: 'body',
                     __preview_external_dependency_versioned_paths: previewFlag,
                 },
                 version: '1.0.0',
-            } as PostHog
-            posthog.requestRouter = new RequestRouter(posthog)
+            } as Insights
+            insights.requestRouter = new RequestRouter(insights)
 
-            assignableWindow.__PosthogExtensions__.loadExternalDependency(posthog, 'recorder', callback)
+            assignableWindow.__InsightsExtensions__.loadExternalDependency(insights, 'recorder', callback)
 
             expect(document!.getElementsByTagName('script')[0].src).toBe(expectedSrc)
         })
 
         it('uses eu-assets on the EU region', () => {
-            const euPostHog = {
+            const euInsights = {
                 config: {
-                    api_host: 'https://eu.i.posthog.com',
+                    api_host: 'https://eu.i.insights.hanzo.ai',
                     external_scripts_inject_target: 'body',
                 },
                 version: '1.0.0',
-            } as PostHog
-            euPostHog.requestRouter = new RequestRouter(euPostHog)
+            } as Insights
+            euInsights.requestRouter = new RequestRouter(euInsights)
 
-            assignableWindow.__PosthogExtensions__.loadExternalDependency(euPostHog, 'recorder', callback)
+            assignableWindow.__InsightsExtensions__.loadExternalDependency(euInsights, 'recorder', callback)
 
             expect(document!.getElementsByTagName('script')[0].src).toBe(
-                'https://eu-assets.i.posthog.com/static/recorder.js?v=1.0.0'
+                'https://eu-assets.i.insights.hanzo.ai/static/recorder.js?v=1.0.0'
             )
         })
 
@@ -172,15 +172,15 @@ describe('external-scripts-loader', () => {
     })
 
     describe('remote-config loading', () => {
-        const posthog = {
+        const insights = {
             config: {
-                api_host: 'https://us.posthog.com',
+                api_host: 'https://insights.hanzo.ai',
                 token: 'test-token',
                 external_scripts_inject_target: 'body',
             },
             version: '1.0.0',
-        } as PostHog
-        posthog.requestRouter = new RequestRouter(posthog)
+        } as Insights
+        insights.requestRouter = new RequestRouter(insights)
 
         const callback = jest.fn()
         beforeEach(() => {
@@ -188,11 +188,11 @@ describe('external-scripts-loader', () => {
         })
 
         it('loads remote-config from the token-specific path', () => {
-            assignableWindow.__PosthogExtensions__.loadExternalDependency(posthog, 'remote-config', callback)
+            assignableWindow.__InsightsExtensions__.loadExternalDependency(insights, 'remote-config', callback)
 
             const scripts = document!.getElementsByTagName('script')
             expect(scripts.length).toBe(1)
-            expect(scripts[0].src).toBe('https://us-assets.i.posthog.com/array/test-token/config.js')
+            expect(scripts[0].src).toBe('https://us-assets.i.insights.hanzo.ai/array/test-token/config.js')
         })
     })
 })

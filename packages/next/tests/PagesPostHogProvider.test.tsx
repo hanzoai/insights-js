@@ -1,81 +1,81 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { PostHogProvider } from '../src/pages/PostHogProvider'
+import { InsightsProvider } from '../src/pages/InsightsProvider'
 
-const mockClientPostHogProvider = jest.fn(({ children }: { children: React.ReactNode }) => (
+const mockClientInsightsProvider = jest.fn(({ children }: { children: React.ReactNode }) => (
     <div data-testid="client-provider">{children}</div>
 ))
-jest.mock('../src/client/ClientPostHogProvider', () => ({
-    ClientPostHogProvider: (props: any) => mockClientPostHogProvider(props),
+jest.mock('../src/client/ClientInsightsProvider', () => ({
+    ClientInsightsProvider: (props: any) => mockClientInsightsProvider(props),
 }))
 
-describe('Pages PostHogProvider', () => {
+describe('Pages InsightsProvider', () => {
     beforeEach(() => {
         jest.clearAllMocks()
     })
 
-    it('renders children inside ClientPostHogProvider', () => {
+    it('renders children inside ClientInsightsProvider', () => {
         render(
-            <PostHogProvider apiKey="phc_test123">
+            <InsightsProvider apiKey="phc_test123">
                 <div data-testid="child">Hello</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
         expect(screen.getByTestId('client-provider')).toBeInTheDocument()
         expect(screen.getByTestId('child')).toBeInTheDocument()
     })
 
-    it('passes apiKey to ClientPostHogProvider', () => {
+    it('passes apiKey to ClientInsightsProvider', () => {
         render(
-            <PostHogProvider apiKey="phc_test123">
+            <InsightsProvider apiKey="phc_test123">
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(expect.objectContaining({ apiKey: 'phc_test123' }))
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(expect.objectContaining({ apiKey: 'phc_test123' }))
     })
 
-    it('warns and renders children without ClientPostHogProvider when apiKey is empty and env var is not set', () => {
-        delete process.env.NEXT_PUBLIC_POSTHOG_KEY
+    it('warns and renders children without ClientInsightsProvider when apiKey is empty and env var is not set', () => {
+        delete process.env.NEXT_PUBLIC_INSIGHTS_KEY
         const warnSpy = jest.spyOn(console, 'warn').mockImplementation()
 
         render(
-            <PostHogProvider apiKey="">
+            <InsightsProvider apiKey="">
                 <div data-testid="child">Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
 
         expect(screen.getByTestId('child')).toBeInTheDocument()
-        expect(mockClientPostHogProvider).not.toHaveBeenCalled()
-        expect(warnSpy).toHaveBeenCalledWith('[PostHog Next.js] apiKey is required — PostHog will not be initialized')
+        expect(mockClientInsightsProvider).not.toHaveBeenCalled()
+        expect(warnSpy).toHaveBeenCalledWith('[Insights Next.js] apiKey is required — Insights will not be initialized')
         warnSpy.mockRestore()
     })
 
-    it('trims apiKey and api_host before passing them to ClientPostHogProvider', () => {
+    it('trims apiKey and api_host before passing them to ClientInsightsProvider', () => {
         render(
-            <PostHogProvider
+            <InsightsProvider
                 apiKey={'  phc_test123\n'}
-                clientOptions={{ api_host: '  https://custom.posthog.com/\t ' }}
+                clientOptions={{ api_host: '  https://custom.insights.hanzo.ai/\t ' }}
             >
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 apiKey: 'phc_test123',
-                options: expect.objectContaining({ api_host: 'https://custom.posthog.com/' }),
+                options: expect.objectContaining({ api_host: 'https://custom.insights.hanzo.ai/' }),
             })
         )
     })
 
     it('applies NEXTJS_CLIENT_DEFAULTS to options', () => {
         render(
-            <PostHogProvider apiKey="phc_test123">
+            <InsightsProvider apiKey="phc_test123">
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 options: expect.objectContaining({
-                    api_host: 'https://us.i.posthog.com',
+                    api_host: 'https://us.i.insights.hanzo.ai',
                     persistence: 'localStorage+cookie',
                     opt_out_capturing_persistence_type: 'cookie',
                     opt_out_persistence_by_default: true,
@@ -86,11 +86,11 @@ describe('Pages PostHogProvider', () => {
 
     it('allows user clientOptions to override defaults', () => {
         render(
-            <PostHogProvider apiKey="phc_test123" clientOptions={{ persistence: 'memory' }}>
+            <InsightsProvider apiKey="phc_test123" clientOptions={{ persistence: 'memory' }}>
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 options: expect.objectContaining({
                     persistence: 'memory',
@@ -101,49 +101,49 @@ describe('Pages PostHogProvider', () => {
     })
 
     it('resolves api_host from env when not provided', () => {
-        process.env.NEXT_PUBLIC_POSTHOG_HOST = 'https://env-host.posthog.com'
+        process.env.NEXT_PUBLIC_INSIGHTS_HOST = 'https://env-host.insights.hanzo.ai'
         render(
-            <PostHogProvider apiKey="phc_test123">
+            <InsightsProvider apiKey="phc_test123">
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 options: expect.objectContaining({
-                    api_host: 'https://env-host.posthog.com',
+                    api_host: 'https://env-host.insights.hanzo.ai',
                 }),
             })
         )
-        delete process.env.NEXT_PUBLIC_POSTHOG_HOST
+        delete process.env.NEXT_PUBLIC_INSIGHTS_HOST
     })
 
     it('trims apiKey and api_host from env vars', () => {
-        process.env.NEXT_PUBLIC_POSTHOG_KEY = '  phc_from_env\n'
-        process.env.NEXT_PUBLIC_POSTHOG_HOST = '  https://env-host.posthog.com/\t '
+        process.env.NEXT_PUBLIC_INSIGHTS_KEY = '  phc_from_env\n'
+        process.env.NEXT_PUBLIC_INSIGHTS_HOST = '  https://env-host.insights.hanzo.ai/\t '
         render(
-            <PostHogProvider>
+            <InsightsProvider>
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(
             expect.objectContaining({
                 apiKey: 'phc_from_env',
                 options: expect.objectContaining({
-                    api_host: 'https://env-host.posthog.com/',
+                    api_host: 'https://env-host.insights.hanzo.ai/',
                 }),
             })
         )
-        delete process.env.NEXT_PUBLIC_POSTHOG_KEY
-        delete process.env.NEXT_PUBLIC_POSTHOG_HOST
+        delete process.env.NEXT_PUBLIC_INSIGHTS_KEY
+        delete process.env.NEXT_PUBLIC_INSIGHTS_HOST
     })
 
-    it('passes bootstrap prop through to ClientPostHogProvider', () => {
+    it('passes bootstrap prop through to ClientInsightsProvider', () => {
         const bootstrap = { featureFlags: { 'flag-a': true } }
         render(
-            <PostHogProvider apiKey="phc_test123" bootstrap={bootstrap}>
+            <InsightsProvider apiKey="phc_test123" bootstrap={bootstrap}>
                 <div>Child</div>
-            </PostHogProvider>
+            </InsightsProvider>
         )
-        expect(mockClientPostHogProvider).toHaveBeenCalledWith(expect.objectContaining({ bootstrap }))
+        expect(mockClientInsightsProvider).toHaveBeenCalledWith(expect.objectContaining({ bootstrap }))
     })
 })

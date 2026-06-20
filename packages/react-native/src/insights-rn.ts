@@ -110,8 +110,8 @@ export interface InsightsOptions extends InsightsCoreOptions {
 
   /**
    * Logs feature configuration. Enables structured log capture via
-   * `posthog.captureLog(...)` or `posthog.logger.info(...)`. Records ship to
-   * PostHog's logs product (`/i/v1/logs`) in OTLP format, batched on a timer,
+   * `insights.captureLog(...)` or `insights.logger.info(...)`. Records ship to
+   * Insights's logs product (`/i/v1/logs`) in OTLP format, batched on a timer,
    * AppState change, buffer fill, or manual `flushLogs()`.
    *
    * Capture is **unconditional** — calling the API ships records as long as
@@ -123,14 +123,14 @@ export interface InsightsOptions extends InsightsCoreOptions {
    *
    * @example Minimal — just service tagging, defaults for everything else
    * ```ts
-   * new PostHog(key, {
+   * new Insights(key, {
    *   logs: { serviceName: 'my-app', environment: 'production' }
    * })
    * ```
    *
    * @example Tune for higher-volume logging
    * ```ts
-   * new PostHog(key, {
+   * new Insights(key, {
    *   logs: {
    *     serviceName: 'my-app',
    *     rateCap: { maxLogs: 5000, windowMs: 60000 },
@@ -140,7 +140,7 @@ export interface InsightsOptions extends InsightsCoreOptions {
    * })
    * ```
    */
-  logs?: PostHogLogsConfig
+  logs?: InsightsLogsConfig
 
   /**
    * Overrides the language used when rendering translated survey copy.
@@ -161,7 +161,7 @@ export class Insights extends InsightsCore {
   private _disableSurveys: boolean
   private _disableRemoteConfig: boolean
   private _errorTracking: ErrorTracking
-  private _logs: PostHogLogs
+  private _logs: InsightsLogs
   // Resolved logs config — kept around so lifecycle handlers (AppState
   // background, _shutdown) can read the configured flush-time budgets without
   // reaching back into the user's options object.
@@ -188,8 +188,8 @@ export class Insights extends InsightsCore {
    * // insights.ts
    * import Insights from 'insights-react-native'
    *
-   * export const insights = new Insights('<ph_project_api_key>', {
-   *   host: '<ph_client_api_host>'
+   * export const insights = new Insights('<hi_project_api_key>', {
+   *   host: '<hi_client_api_host>'
    * })
    *
    * // Then you can access Insights by importing your instance
@@ -285,10 +285,10 @@ export class Insights extends InsightsCore {
       // Seed device_id from the anonymous id at init time so existing installs
       // get a stable device-level identifier; once set, it survives identify()
       // and reset() independently of anonymous_id.
-      if (!this.getPersistedProperty(PostHogPersistedProperty.DeviceId)) {
+      if (!this.getPersistedProperty(InsightsPersistedProperty.DeviceId)) {
         const anonId = this.getAnonymousId()
         if (anonId) {
-          this.setPersistedProperty(PostHogPersistedProperty.DeviceId, anonId)
+          this.setPersistedProperty(InsightsPersistedProperty.DeviceId, anonId)
         }
       }
 
@@ -536,11 +536,11 @@ export class Insights extends InsightsCore {
    * duplicate "Application Installed" events on the next app launch.
    *
    * If you pass `propertiesToKeep` explicitly, only the properties you specify will be preserved.
-   * To keep the default app lifecycle behavior, include `PostHogPersistedProperty.InstalledAppBuild`
-   * and `PostHogPersistedProperty.InstalledAppVersion` in your array.
+   * To keep the default app lifecycle behavior, include `InsightsPersistedProperty.InstalledAppBuild`
+   * and `InsightsPersistedProperty.InstalledAppVersion` in your array.
    *
-   * Note: The event queue (`PostHogPersistedProperty.Queue`) and logs queue
-   * (`PostHogPersistedProperty.LogsQueue`) are always preserved regardless of
+   * Note: The event queue (`InsightsPersistedProperty.Queue`) and logs queue
+   * (`InsightsPersistedProperty.LogsQueue`) are always preserved regardless of
    * what is passed in `propertiesToKeep`, to ensure in-flight data is not lost.
    *
    * {@label Identification}
@@ -644,17 +644,17 @@ export class Insights extends InsightsCore {
   }
 
   /**
-   * Captures a structured log record and sends it to PostHog's logs product
+   * Captures a structured log record and sends it to Insights's logs product
    * (`/i/v1/logs`). Low-level primitive — most callers will prefer
-   * `posthog.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which
+   * `insights.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which
    * wrap this with a level pre-set.
    *
    * Records are buffered per-session, rate-limited, batched into OTLP
    * payloads, and flushed on a timer, on AppState change, or when the
    * buffer reaches capacity. Configure flush cadence, rate cap, and a
-   * `beforeSend` filter via the `logs` option on `new PostHog(...)`.
+   * `beforeSend` filter via the `logs` option on `new Insights(...)`.
    *
-   * Note — naming collision: `posthog.captureLog()` (this method) is the
+   * Note — naming collision: `insights.captureLog()` (this method) is the
    * **logs product** API. There is also a separate, pre-existing
    * `sessionReplayConfig.captureLog` boolean that controls whether
    * **session replay** records the device's `console.*` output. The two
@@ -665,7 +665,7 @@ export class Insights extends InsightsCore {
    *
    * @example
    * ```ts
-   * posthog.captureLog({
+   * insights.captureLog({
    *   body: 'checkout completed',
    *   level: 'info',
    *   attributes: { order_id: 'ord_789', amount_cents: 4999 },
@@ -701,7 +701,7 @@ export class Insights extends InsightsCore {
    *
    * @example
    * ```ts
-   * await posthog.flushLogs()
+   * await insights.flushLogs()
    * ```
    *
    * @see flush
@@ -717,15 +717,15 @@ export class Insights extends InsightsCore {
 
   /**
    * Convenience per-level logger. Each method is shorthand for
-   * `posthog.captureLog({ body, level, attributes })`. Lazily constructed
+   * `insights.captureLog({ body, level, attributes })`. Lazily constructed
    * on first access, then reused.
    *
    * {@label Capture}
    *
    * @example
    * ```ts
-   * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
-   * posthog.logger.error('payment failed', { code: 'E001' })
+   * insights.logger.info('checkout completed', { order_id: 'ord_789' })
+   * insights.logger.error('payment failed', { code: 'E001' })
    * ```
    *
    * @public
@@ -999,12 +999,12 @@ export class Insights extends InsightsCore {
    * @returns The device ID, or an empty string if not yet initialized
    */
   getDeviceId(): string {
-    const deviceId = this.getPersistedProperty<string>(PostHogPersistedProperty.DeviceId)
+    const deviceId = this.getPersistedProperty<string>(InsightsPersistedProperty.DeviceId)
     if (!deviceId) {
       // Lazy init for upgrades: existing installs won't have a device_id yet
       const anonId = this.getAnonymousId()
       if (anonId) {
-        this.setPersistedProperty(PostHogPersistedProperty.DeviceId, anonId)
+        this.setPersistedProperty(InsightsPersistedProperty.DeviceId, anonId)
         return anonId
       }
       return ''

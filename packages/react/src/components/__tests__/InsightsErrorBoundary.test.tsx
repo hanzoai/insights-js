@@ -61,11 +61,11 @@ describe('InsightsErrorBoundary component', () => {
 
 describe('captureException processing', () => {
     beforeEach(() => {
-        setDefaultPostHogInstance(posthog)
+        setDefaultInsightsInstance(insights)
     })
 
     afterEach(() => {
-        setDefaultPostHogInstance(undefined)
+        setDefaultInsightsInstance(undefined)
     })
 
     mockFunction(console, 'error')

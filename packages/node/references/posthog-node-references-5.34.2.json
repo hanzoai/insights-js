@@ -1,18 +1,18 @@
 {
-  "id": "posthog-node",
+  "id": "insights-node",
   "hogRef": "0.3",
   "info": {
     "version": "5.34.2",
-    "id": "posthog-node",
-    "title": "PostHog Node.js SDK",
-    "description": "PostHog Node.js SDK allows you to capture events and send them to PostHog from your Node.js applications.",
-    "slugPrefix": "posthog-node",
-    "specUrl": "https://github.com/PostHog/posthog-js"
+    "id": "insights-node",
+    "title": "Insights Node.js SDK",
+    "description": "Insights Node.js SDK allows you to capture events and send them to Insights from your Node.js applications.",
+    "slugPrefix": "insights-node",
+    "specUrl": "https://github.com/Insights/insights-js"
   },
   "classes": [
     {
-      "id": "PostHog",
-      "title": "PostHog",
+      "id": "Insights",
+      "title": "Insights",
       "functions": [
         {
           "category": "",
@@ -24,7 +24,7 @@
             {
               "id": "getlibraryid",
               "name": "Generated example for getLibraryId",
-              "code": "// Generated example for getLibraryId\nposthog.getLibraryId();"
+              "code": "// Generated example for getLibraryId\ninsights.getLibraryId();"
             }
           ],
           "releaseTag": "public",
@@ -37,27 +37,27 @@
         },
         {
           "category": "Initialization",
-          "description": "Initialize a new PostHog client instance.",
+          "description": "Initialize a new Insights client instance.",
           "details": null,
-          "id": "PostHog",
+          "id": "Insights",
           "showDocs": true,
-          "title": "PostHog",
+          "title": "Insights",
           "examples": [
             {
               "id": "basic_initialization",
               "name": "Basic initialization",
-              "code": "\n\n// Basic initialization\nconst client = new PostHogBackendClient(\n  'your-api-key',\n  { host: 'https://app.posthog.com' }\n)\n\n\n"
+              "code": "\n\n// Basic initialization\nconst client = new InsightsBackendClient(\n  'your-api-key',\n  { host: 'https://insights.hanzo.ai' }\n)\n\n\n"
             },
             {
               "id": "with_personal_api_key",
               "name": "With personal API key",
-              "code": "\n\n// With personal API key\nconst client = new PostHogBackendClient(\n  'your-api-key',\n  {\n    host: 'https://app.posthog.com',\n    personalApiKey: 'your-personal-api-key'\n  }\n)\n\n\n\n"
+              "code": "\n\n// With personal API key\nconst client = new InsightsBackendClient(\n  'your-api-key',\n  {\n    host: 'https://insights.hanzo.ai',\n    personalApiKey: 'your-personal-api-key'\n  }\n)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
           "params": [
             {
-              "description": "Your PostHog project API key",
+              "description": "Your Insights project API key",
               "isOptional": false,
               "type": "string",
               "name": "apiKey"
@@ -65,7 +65,7 @@
             {
               "description": "Configuration options for the client",
               "isOptional": true,
-              "type": "PostHogOptions",
+              "type": "InsightsOptions",
               "name": "options"
             }
           ],
@@ -347,7 +347,7 @@
         },
         {
           "category": "Privacy",
-          "description": "Disable the PostHog client (opt-out).",
+          "description": "Disable the Insights client (opt-out).",
           "details": null,
           "id": "disable",
           "showDocs": true,
@@ -369,7 +369,7 @@
         },
         {
           "category": "Privacy",
-          "description": "Enable the PostHog client (opt-in).",
+          "description": "Enable the Insights client (opt-in).",
           "details": null,
           "id": "enable",
           "showDocs": true,
@@ -391,7 +391,7 @@
         },
         {
           "category": "",
-          "description": "Set context without a callback wrapper.\nUses `AsyncLocalStorage.enterWith()` to attach context to the current async execution context. The context lives until that async context ends.\nMust be called in the same async scope that makes PostHog calls. Calling this outside a request-scoped async context will leak context across unrelated work. Prefer `withContext()` when you can wrap code in a callback — it creates an isolated scope that cleans up automatically.",
+          "description": "Set context without a callback wrapper.\nUses `AsyncLocalStorage.enterWith()` to attach context to the current async execution context. The context lives until that async context ends.\nMust be called in the same async scope that makes Insights calls. Calling this outside a request-scoped async context will leak context across unrelated work. Prefer `withContext()` when you can wrap code in a callback — it creates an isolated scope that cleans up automatically.",
           "details": null,
           "id": "enterContext",
           "showDocs": true,
@@ -400,7 +400,7 @@
             {
               "id": "entercontext",
               "name": "Generated example for enterContext",
-              "code": "// Generated example for enterContext\nposthog.enterContext();"
+              "code": "// Generated example for enterContext\ninsights.enterContext();"
             }
           ],
           "releaseTag": "public",
@@ -478,7 +478,7 @@
             {
               "id": "flush",
               "name": "Generated example for flush",
-              "code": "// Generated example for flush\nposthog.flush();"
+              "code": "// Generated example for flush\ninsights.flush();"
             }
           ],
           "releaseTag": "public",
@@ -562,8 +562,8 @@
             }
           ],
           "returnType": {
-            "id": "Promise<PostHogFlagsAndPayloadsResponse>",
-            "name": "Promise<PostHogFlagsAndPayloadsResponse>"
+            "id": "Promise<InsightsFlagsAndPayloadsResponse>",
+            "name": "Promise<InsightsFlagsAndPayloadsResponse>"
           },
           "path": "src/entrypoints/index.node.ts"
         },
@@ -578,7 +578,7 @@
             {
               "id": "get_current_context_within_a_withcontext_block",
               "name": "Get current context within a withContext block",
-              "code": "\n\n// Get current context within a withContext block\nposthog.withContext({ distinctId: 'user_123' }, () => {\n  const context = posthog.getContext()\n  console.log(context?.distinctId) // 'user_123'\n})\n\n\n\n"
+              "code": "\n\n// Get current context within a withContext block\ninsights.withContext({ distinctId: 'user_123' }, () => {\n  const context = insights.getContext()\n  console.log(context?.distinctId) // 'user_123'\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -600,7 +600,7 @@
             {
               "id": "get_user_agent",
               "name": "Get user agent",
-              "code": "\n\n// Get user agent\nconst userAgent = client.getCustomUserAgent()\n// Returns: \"posthog-node/5.7.0\"\n\n\n\n"
+              "code": "\n\n// Get user agent\nconst userAgent = client.getCustomUserAgent()\n// Returns: \"insights-node/5.7.0\"\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -770,7 +770,7 @@
             {
               "id": "get_version",
               "name": "Get version",
-              "code": "\n\n// Get version\nconst version = client.getLibraryVersion()\nconsole.log(`Using PostHog SDK version: ${version}`)\n\n\n\n"
+              "code": "\n\n// Get version\nconst version = client.getLibraryVersion()\nconsole.log(`Using Insights SDK version: ${version}`)\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -805,7 +805,7 @@
             {
               "description": "The property key to retrieve",
               "isOptional": false,
-              "type": "PostHogPersistedProperty",
+              "type": "InsightsPersistedProperty",
               "name": "key"
             }
           ],
@@ -1048,7 +1048,7 @@
             {
               "id": "prepareeventmessage",
               "name": "Generated example for prepareEventMessage",
-              "code": "// Generated example for prepareEventMessage\nposthog.prepareEventMessage();"
+              "code": "// Generated example for prepareEventMessage\ninsights.prepareEventMessage();"
             }
           ],
           "releaseTag": "public",
@@ -1061,8 +1061,8 @@
             }
           ],
           "returnType": {
-            "id": "Promise<{\n        distinctId: string;\n        event: string;\n        properties: PostHogEventProperties;\n        options: PostHogCaptureOptions;\n    }>",
-            "name": "Promise<{\n        distinctId: string;\n        event: string;\n        properties: PostHogEventProperties;\n        options: PostHogCaptureOptions;\n    }>"
+            "id": "Promise<{\n        distinctId: string;\n        event: string;\n        properties: InsightsEventProperties;\n        options: InsightsCaptureOptions;\n    }>",
+            "name": "Promise<{\n        distinctId: string;\n        event: string;\n        properties: InsightsEventProperties;\n        options: InsightsCaptureOptions;\n    }>"
           },
           "path": "src/entrypoints/index.node.ts"
         },
@@ -1117,7 +1117,7 @@
             {
               "description": "The property key to set",
               "isOptional": false,
-              "type": "PostHogPersistedProperty",
+              "type": "InsightsPersistedProperty",
               "name": "key"
             },
             {
@@ -1178,7 +1178,7 @@
             {
               "id": "",
               "name": "",
-              "code": "\n\nposthog.withContext({ distinctId: 'user_123' }, () => {\n  posthog.capture({ event: 'button clicked' })\n})\n\n\n\n"
+              "code": "\n\ninsights.withContext({ distinctId: 'user_123' }, () => {\n  insights.capture({ event: 'button clicked' })\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1218,7 +1218,7 @@
             {
               "id": "fetch",
               "name": "Generated example for fetch",
-              "code": "// Generated example for fetch\nposthog.fetch();"
+              "code": "// Generated example for fetch\ninsights.fetch();"
             }
           ],
           "releaseTag": "public",
@@ -1232,13 +1232,13 @@
             {
               "description": "",
               "isOptional": false,
-              "type": "PostHogFetchOptions",
+              "type": "InsightsFetchOptions",
               "name": "options"
             }
           ],
           "returnType": {
-            "id": "Promise<PostHogFetchResponse>",
-            "name": "Promise<PostHogFetchResponse>"
+            "id": "Promise<InsightsFetchResponse>",
+            "name": "Promise<InsightsFetchResponse>"
           },
           "path": "src/entrypoints/index.node.ts"
         },
@@ -1253,7 +1253,7 @@
             {
               "id": "getsurveysstateless",
               "name": "Generated example for getSurveysStateless",
-              "code": "// Generated example for getSurveysStateless\nposthog.getSurveysStateless();"
+              "code": "// Generated example for getSurveysStateless\ninsights.getSurveysStateless();"
             }
           ],
           "releaseTag": "public",
@@ -1274,7 +1274,7 @@
             {
               "id": "on",
               "name": "Generated example for on",
-              "code": "// Generated example for on\nposthog.on();"
+              "code": "// Generated example for on\ninsights.on();"
             }
           ],
           "releaseTag": "public",
@@ -1308,7 +1308,7 @@
             {
               "id": "optin",
               "name": "Generated example for optIn",
-              "code": "// Generated example for optIn\nposthog.optIn();"
+              "code": "// Generated example for optIn\ninsights.optIn();"
             }
           ],
           "releaseTag": "public",
@@ -1329,7 +1329,7 @@
             {
               "id": "optout",
               "name": "Generated example for optOut",
-              "code": "// Generated example for optOut\nposthog.optOut();"
+              "code": "// Generated example for optOut\ninsights.optOut();"
             }
           ],
           "releaseTag": "public",
@@ -1350,7 +1350,7 @@
             {
               "id": "register",
               "name": "Generated example for register",
-              "code": "// Generated example for register\nposthog.register();"
+              "code": "// Generated example for register\ninsights.register();"
             }
           ],
           "releaseTag": "public",
@@ -1358,7 +1358,7 @@
             {
               "description": "",
               "isOptional": false,
-              "type": "PostHogEventProperties",
+              "type": "InsightsEventProperties",
               "name": "properties"
             }
           ],
@@ -1370,7 +1370,7 @@
         },
         {
           "category": "Initialization",
-          "description": "Shuts down the PostHog instance and ensures all events are sent.\nCall shutdown() once before the process exits to ensure that all events have been sent and all promises have resolved. Do not use this function if you intend to keep using this PostHog instance after calling it. Use flush() for per-request cleanup instead.",
+          "description": "Shuts down the Insights instance and ensures all events are sent.\nCall shutdown() once before the process exits to ensure that all events have been sent and all promises have resolved. Do not use this function if you intend to keep using this Insights instance after calling it. Use flush() for per-request cleanup instead.",
           "details": null,
           "id": "shutdown",
           "showDocs": true,
@@ -1379,7 +1379,7 @@
             {
               "id": "shutdown_before_process_exit",
               "name": "shutdown before process exit",
-              "code": "\n\n// shutdown before process exit\nprocess.on('SIGINT', async () => {\n  await posthog.shutdown()\n  process.exit(0)\n})\n\n\n\n"
+              "code": "\n\n// shutdown before process exit\nprocess.on('SIGINT', async () => {\n  await insights.shutdown()\n  process.exit(0)\n})\n\n\n\n"
             }
           ],
           "releaseTag": "public",
@@ -1407,7 +1407,7 @@
             {
               "id": "unregister",
               "name": "Generated example for unregister",
-              "code": "// Generated example for unregister\nposthog.unregister();"
+              "code": "// Generated example for unregister\ninsights.unregister();"
             }
           ],
           "releaseTag": "public",
@@ -1554,7 +1554,7 @@
       "name": "CaptureEvent",
       "properties": [],
       "path": "../core/src/types.ts",
-      "example": "{\n    uuid?: string;\n    event: string;\n    properties?: PostHogEventProperties;\n    $set?: PostHogEventProperties;\n    $set_once?: PostHogEventProperties;\n    timestamp?: Date;\n}"
+      "example": "{\n    uuid?: string;\n    event: string;\n    properties?: InsightsEventProperties;\n    $set?: InsightsEventProperties;\n    $set_once?: InsightsEventProperties;\n    timestamp?: Date;\n}"
     },
     {
       "id": "ChunkIdMapType",
@@ -1863,7 +1863,7 @@
         },
         {
           "description": "Array of feature flag definitions",
-          "type": "PostHogFeatureFlag[]",
+          "type": "InsightsFeatureFlag[]",
           "name": "flags"
         },
         {
@@ -1906,7 +1906,7 @@
       "name": "GetFlagsResult",
       "properties": [],
       "path": "../core/src/types.ts",
-      "example": "{\n    success: true;\n    response: PostHogFeatureFlagsResponse;\n} | {\n    success: false;\n    error: FeatureFlagRequestError;\n}"
+      "example": "{\n    success: true;\n    response: InsightsFeatureFlagsResponse;\n} | {\n    success: false;\n    error: FeatureFlagRequestError;\n}"
     },
     {
       "id": "GetModuleFn",
@@ -1930,14 +1930,14 @@
       "example": "{\n    distinctId: string;\n    properties?: Record<string | number, any>;\n    disableGeoip?: boolean;\n}"
     },
     {
-      "id": "IPostHog",
-      "name": "IPostHog",
+      "id": "IInsights",
+      "name": "IInsights",
       "properties": [],
       "path": "src/types.ts"
     },
     {
-      "id": "IPostHogContext",
-      "name": "IPostHogContext",
+      "id": "IInsightsContext",
+      "name": "IInsightsContext",
       "properties": [],
       "path": "src/extensions/context/types.ts"
     },
@@ -2100,15 +2100,15 @@
       "path": "../core/src/error-tracking/types.ts"
     },
     {
-      "id": "PostHogCaptureOptions",
-      "name": "PostHogCaptureOptions",
+      "id": "InsightsCaptureOptions",
+      "name": "InsightsCaptureOptions",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "{\n    uuid?: string;\n    timestamp?: Date;\n    disableGeoip?: boolean;\n    _originatedFromCaptureException?: boolean;\n}"
     },
     {
-      "id": "PostHogCookieState",
-      "name": "PostHogCookieState",
+      "id": "InsightsCookieState",
+      "name": "InsightsCookieState",
       "properties": [
         {
           "type": "string",
@@ -2130,78 +2130,78 @@
       "path": "../core/src/cookie.ts"
     },
     {
-      "id": "PostHogCoreOptions",
-      "name": "PostHogCoreOptions",
+      "id": "InsightsCoreOptions",
+      "name": "InsightsCoreOptions",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "{\n    host?: string;\n    flushAt?: number;\n    flushInterval?: number;\n    maxBatchSize?: number;\n    maxQueueSize?: number;\n    disabled?: boolean;\n    defaultOptIn?: boolean;\n    sendFeatureFlagEvent?: boolean;\n    preloadFeatureFlags?: boolean;\n    disableRemoteConfig?: boolean;\n    disableSurveys?: boolean;\n    bootstrap?: {\n        distinctId?: string;\n        isIdentifiedId?: boolean;\n        featureFlags?: Record<string, FeatureFlagValue>;\n        featureFlagPayloads?: Record<string, JsonType>;\n    };\n    fetchRetryCount?: number;\n    fetchRetryDelay?: number;\n    requestTimeout?: number;\n    featureFlagsRequestTimeoutMs?: number;\n    remoteConfigRequestTimeoutMs?: number;\n    sessionExpirationTimeSeconds?: number;\n    disableCompression?: boolean;\n    disableGeoip?: boolean;\n    historicalMigration?: boolean;\n    evaluationContexts?: readonly string[];\n    evaluationEnvironments?: readonly string[];\n    personProfiles?: 'always' | 'identified_only' | 'never';\n    before_send?: BeforeSendFn | BeforeSendFn[];\n    addTracingHeaders?: string[];\n}"
     },
     {
-      "id": "PostHogEventProperties",
-      "name": "PostHogEventProperties",
+      "id": "InsightsEventProperties",
+      "name": "InsightsEventProperties",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "{\n    [key: string]: JsonType;\n}"
     },
     {
-      "id": "PostHogFeatureFlag",
-      "name": "PostHogFeatureFlag",
+      "id": "InsightsFeatureFlag",
+      "name": "InsightsFeatureFlag",
       "properties": [],
       "path": "src/types.ts",
       "example": "{\n    id: number;\n    name: string;\n    key: string;\n    bucketing_identifier?: FeatureFlagBucketingIdentifier;\n    filters?: {\n        aggregation_group_type_index?: number;\n        groups?: FeatureFlagCondition[];\n        multivariate?: {\n            variants: {\n                key: string;\n                rollout_percentage: number;\n            }[];\n        };\n        payloads?: Record<string, string>;\n    };\n    deleted: boolean;\n    active: boolean;\n    rollout_percentage: null | number;\n    ensure_experience_continuity: boolean;\n    experiment_set: number[];\n}"
     },
     {
-      "id": "PostHogFeatureFlagDetails",
-      "name": "PostHogFeatureFlagDetails",
+      "id": "InsightsFeatureFlagDetails",
+      "name": "InsightsFeatureFlagDetails",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "\"flags\" | \"featureFlags\" | \"featureFlagPayloads\" | \"requestId\""
     },
     {
-      "id": "PostHogFeatureFlagsResponse",
-      "name": "PostHogFeatureFlagsResponse",
+      "id": "InsightsFeatureFlagsResponse",
+      "name": "InsightsFeatureFlagsResponse",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "\"flags\" | \"featureFlags\" | \"featureFlagPayloads\" | \"requestId\""
     },
     {
-      "id": "PostHogFetchOptions",
-      "name": "PostHogFetchOptions",
+      "id": "InsightsFetchOptions",
+      "name": "InsightsFetchOptions",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "{\n    method: 'GET' | 'POST' | 'PUT' | 'PATCH';\n    mode?: 'no-cors';\n    credentials?: 'omit';\n    headers: {\n        [key: string]: string;\n    };\n    body?: string | Blob;\n    signal?: AbortSignal;\n}"
     },
     {
-      "id": "PostHogFetchResponse",
-      "name": "PostHogFetchResponse",
+      "id": "InsightsFetchResponse",
+      "name": "InsightsFetchResponse",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "{\n    status: number;\n    text: () => Promise<string>;\n    json: () => Promise<any>;\n    headers?: {\n        get(name: string): string | null;\n    };\n    body?: ReadableStream<Uint8Array> | null;\n}"
     },
     {
-      "id": "PostHogFlagsAndPayloadsResponse",
-      "name": "PostHogFlagsAndPayloadsResponse",
+      "id": "InsightsFlagsAndPayloadsResponse",
+      "name": "InsightsFlagsAndPayloadsResponse",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "\"featureFlags\" | \"featureFlagPayloads\""
     },
     {
-      "id": "PostHogFlagsResponse",
-      "name": "PostHogFlagsResponse",
+      "id": "InsightsFlagsResponse",
+      "name": "InsightsFlagsResponse",
       "properties": [],
       "path": "../core/src/types.ts",
-      "example": "Omit<PostHogRemoteConfig, 'hasFeatureFlags'> & {\n    featureFlags: {\n        [key: string]: FeatureFlagValue;\n    };\n    featureFlagPayloads: {\n        [key: string]: JsonType;\n    };\n    flags: {\n        [key: string]: FeatureFlagDetail;\n    };\n    errorsWhileComputingFlags: boolean;\n    sessionRecording?: boolean | {\n        [key: string]: JsonType;\n    };\n    quotaLimited?: string[];\n    requestId?: string;\n    evaluatedAt?: number;\n}"
+      "example": "Omit<InsightsRemoteConfig, 'hasFeatureFlags'> & {\n    featureFlags: {\n        [key: string]: FeatureFlagValue;\n    };\n    featureFlagPayloads: {\n        [key: string]: JsonType;\n    };\n    flags: {\n        [key: string]: FeatureFlagDetail;\n    };\n    errorsWhileComputingFlags: boolean;\n    sessionRecording?: boolean | {\n        [key: string]: JsonType;\n    };\n    quotaLimited?: string[];\n    requestId?: string;\n    evaluatedAt?: number;\n}"
     },
     {
-      "id": "PostHogOptions",
-      "name": "PostHogOptions",
+      "id": "InsightsOptions",
+      "name": "InsightsOptions",
       "properties": [],
       "path": "src/types.ts",
-      "example": "Omit<PostHogCoreOptions, 'before_send'> & {\n    persistence?: 'memory';\n    personalApiKey?: string;\n    privacyMode?: boolean;\n    enableExceptionAutocapture?: boolean;\n    featureFlagsPollingInterval?: number;\n    maxCacheSize?: number;\n    fetch?: (url: string, options: PostHogFetchOptions) => Promise<PostHogFetchResponse>;\n    enableLocalEvaluation?: boolean;\n    flagDefinitionCacheProvider?: FlagDefinitionCacheProvider;\n    before_send?: BeforeSendFn | BeforeSendFn[];\n    evaluationContexts?: readonly string[];\n    evaluationEnvironments?: readonly string[];\n    custom_blocked_useragents?: string[];\n    __preview_capture_bot_pageviews?: boolean;\n    strictLocalEvaluation?: boolean;\n    featureFlagsLogWarnings?: boolean;\n    waitUntil?: (promise: Promise<unknown>) => void;\n    waitUntilDebounceMs?: number;\n    waitUntilMaxWaitMs?: number;\n}"
+      "example": "Omit<InsightsCoreOptions, 'before_send'> & {\n    persistence?: 'memory';\n    personalApiKey?: string;\n    privacyMode?: boolean;\n    enableExceptionAutocapture?: boolean;\n    featureFlagsPollingInterval?: number;\n    maxCacheSize?: number;\n    fetch?: (url: string, options: InsightsFetchOptions) => Promise<InsightsFetchResponse>;\n    enableLocalEvaluation?: boolean;\n    flagDefinitionCacheProvider?: FlagDefinitionCacheProvider;\n    before_send?: BeforeSendFn | BeforeSendFn[];\n    evaluationContexts?: readonly string[];\n    evaluationEnvironments?: readonly string[];\n    custom_blocked_useragents?: string[];\n    __preview_capture_bot_pageviews?: boolean;\n    strictLocalEvaluation?: boolean;\n    featureFlagsLogWarnings?: boolean;\n    waitUntil?: (promise: Promise<unknown>) => void;\n    waitUntilDebounceMs?: number;\n    waitUntilMaxWaitMs?: number;\n}"
     },
     {
-      "id": "PostHogPersistedProperty",
-      "name": "PostHogPersistedProperty",
+      "id": "InsightsPersistedProperty",
+      "name": "InsightsPersistedProperty",
       "properties": [
         {
           "type": "\"anonymous_id\"",
@@ -2323,8 +2323,8 @@
       "path": "../core/src/types.ts"
     },
     {
-      "id": "PostHogRemoteConfig",
-      "name": "PostHogRemoteConfig",
+      "id": "InsightsRemoteConfig",
+      "name": "InsightsRemoteConfig",
       "properties": [],
       "path": "../core/src/types.ts",
       "example": "{\n    sessionRecording?: boolean | {\n        [key: string]: JsonType;\n    };\n    supportedCompression?: Compression[];\n    surveys?: boolean | Survey[];\n    hasFeatureFlags?: boolean;\n    errorTracking?: boolean | {\n        [key: string]: JsonType;\n    };\n    capturePerformance?: boolean | {\n        [key: string]: JsonType;\n    };\n    logs?: boolean | {\n        [key: string]: JsonType;\n    };\n}"
@@ -2335,7 +2335,7 @@
       "properties": [
         {
           "type": "boolean",
-          "name": "__posthog_previously_captured_error"
+          "name": "__insights_previously_captured_error"
         }
       ],
       "path": "../core/src/error-tracking/types.ts"
@@ -2405,7 +2405,7 @@
       "id": "SendLogsBatchOutcome",
       "name": "SendLogsBatchOutcome",
       "properties": [],
-      "path": "../core/src/posthog-core-stateless.ts",
+      "path": "../core/src/insights-core-stateless.ts",
       "example": "{\n    kind: 'ok';\n} | {\n    kind: 'too-large';\n} | {\n    kind: 'retry-later';\n    error: unknown;\n} | {\n    kind: 'fatal';\n    error: unknown;\n}"
     },
     {
@@ -2413,7 +2413,7 @@
       "name": "SentryIntegrationOptions",
       "properties": [],
       "path": "src/extensions/sentry-integration.ts",
-      "example": "{\n    organization?: string;\n    projectId?: number;\n    prefix?: string;\n    severityAllowList?: CoreErrorTracking.SeverityLevel[] | '*';\n    sendExceptionsToPostHog?: boolean;\n}"
+      "example": "{\n    organization?: string;\n    projectId?: number;\n    prefix?: string;\n    severityAllowList?: CoreErrorTracking.SeverityLevel[] | '*';\n    sendExceptionsToInsights?: boolean;\n}"
     },
     {
       "id": "SeverityLevel",

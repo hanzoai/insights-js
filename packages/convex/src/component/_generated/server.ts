@@ -34,10 +34,10 @@ import type { DataModel } from "./dataModel.js";
  * Typesafe environment variables declared in `convex.config.ts`.
  */
 type Env = {
-  readonly POSTHOG_FLAGS_POLLING_INTERVAL_SECONDS: string | undefined;
-  readonly POSTHOG_HOST: string | undefined;
-  readonly POSTHOG_PERSONAL_API_KEY: string | undefined;
-  readonly POSTHOG_PROJECT_TOKEN: string;
+  readonly INSIGHTS_FLAGS_POLLING_INTERVAL_SECONDS: string | undefined;
+  readonly INSIGHTS_HOST: string | undefined;
+  readonly INSIGHTS_PERSONAL_API_KEY: string | undefined;
+  readonly INSIGHTS_PROJECT_TOKEN: string;
 };
 
 /**

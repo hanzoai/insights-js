@@ -1,11 +1,11 @@
 import React from 'react'
 import { render } from '@testing-library/react'
-import { PostHogPageView } from '../src/client/PostHogPageView'
+import { InsightsPageView } from '../src/client/InsightsPageView'
 
 const mockCapture = jest.fn()
-const mockUsePostHog = jest.fn(() => ({ capture: mockCapture }))
+const mockUseInsights = jest.fn(() => ({ capture: mockCapture }))
 jest.mock('@hanzo/insights-react', () => ({
-    usePostHog: () => mockUsePostHog(),
+    useInsights: () => mockUseInsights(),
 }))
 
 let mockPathname = '/initial'
@@ -15,16 +15,16 @@ jest.mock('next/navigation.js', () => ({
     useSearchParams: () => mockSearchParams,
 }))
 
-describe('PostHogPageView', () => {
+describe('InsightsPageView', () => {
     beforeEach(() => {
         mockCapture.mockClear()
-        mockUsePostHog.mockClear()
+        mockUseInsights.mockClear()
         mockPathname = '/initial'
         mockSearchParams = new URLSearchParams()
     })
 
     it('captures a $pageview event on mount', () => {
-        render(<PostHogPageView />)
+        render(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledWith('$pageview', {
             $current_url: 'http://localhost/initial',
         })
@@ -32,27 +32,27 @@ describe('PostHogPageView', () => {
 
     it('includes search params in the captured URL', () => {
         mockSearchParams = new URLSearchParams('q=hello&page=2')
-        render(<PostHogPageView />)
+        render(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledWith('$pageview', {
             $current_url: 'http://localhost/initial?q=hello&page=2',
         })
     })
 
     it('captures a new $pageview when pathname changes', () => {
-        const { rerender } = render(<PostHogPageView />)
+        const { rerender } = render(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledTimes(1)
 
         mockPathname = '/new-page'
-        rerender(<PostHogPageView />)
+        rerender(<InsightsPageView />)
         expect(mockCapture).toHaveBeenCalledTimes(2)
         expect(mockCapture).toHaveBeenLastCalledWith('$pageview', {
             $current_url: 'http://localhost/new-page',
         })
     })
 
-    it('does not capture if posthog client is not available', () => {
-        mockUsePostHog.mockReturnValueOnce(null)
-        render(<PostHogPageView />)
+    it('does not capture if insights client is not available', () => {
+        mockUseInsights.mockReturnValueOnce(null)
+        render(<InsightsPageView />)
         expect(mockCapture).not.toHaveBeenCalled()
     })
 })

@@ -478,7 +478,7 @@
             {
               "id": "flush",
               "name": "Generated example for flush",
-              "code": "// Generated example for flush\nposthog.flush();"
+              "code": "// Generated example for flush\ninsights.flush();"
             }
           ],
           "releaseTag": "public",
@@ -2441,7 +2441,7 @@
       "id": "SendLogsBatchOutcome",
       "name": "SendLogsBatchOutcome",
       "properties": [],
-      "path": "../core/src/posthog-core-stateless.ts",
+      "path": "../core/src/insights-core-stateless.ts",
       "example": "{\n    kind: 'ok';\n} | {\n    kind: 'too-large';\n} | {\n    kind: 'retry-later';\n    error: unknown;\n} | {\n    kind: 'fatal';\n    error: unknown;\n}"
     },
     {

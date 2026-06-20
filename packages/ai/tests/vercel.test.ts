@@ -238,12 +238,12 @@ describe('Vercel AI SDK - Dual Version Support', () => {
         doStream: jest.fn(),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
       })
 
       await expect(model.doGenerate({ prompt: [] } as any)).resolves.not.toThrow()
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
     })
 
     it('should track time to first token in V3 streaming', async () => {
@@ -403,9 +403,9 @@ describe('Vercel AI SDK - Dual Version Support', () => {
         doStream: jest.fn(),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
-        posthogTraceId: 'test-v3-tool-input',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
+        insightsTraceId: 'test-v3-tool-input',
       })
 
       const callOptions: LanguageModelV3CallOptions = {
@@ -413,8 +413,8 @@ describe('Vercel AI SDK - Dual Version Support', () => {
       }
       await model.doGenerate(callOptions)
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
       expect(captureCall[0].properties.$ai_output_choices).toEqual([
         {
@@ -642,9 +642,9 @@ describe('Vercel AI SDK - Dual Version Support', () => {
       'should trim oversized prompts and prepend a removal placeholder in %s models',
       async (_version, createModel) => {
         const baseModel = createModel('gpt-4')
-        const model = withTracing(baseModel, mockPostHogClient, {
-          posthogDistinctId: 'test-user',
-          posthogTraceId: 'test-trim',
+        const model = withTracing(baseModel, mockInsightsClient, {
+          insightsDistinctId: 'test-user',
+          insightsTraceId: 'test-trim',
         })
 
         // Build a prompt whose serialized JSON well exceeds MAX_OUTPUT_SIZE (200kb).
@@ -656,12 +656,12 @@ describe('Vercel AI SDK - Dual Version Support', () => {
 
         await model.doGenerate({ prompt: oversizedPrompt as any })
 
-        expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-        const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+        expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+        const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
         const input = captureCall[0].properties.$ai_input as Array<{ role: string; content: unknown }>
         expect(input.length).toBeGreaterThan(0)
-        expect(input[0].role).toBe('posthog')
+        expect(input[0].role).toBe('insights')
         expect(input[0].content).toMatch(/^\[\d+ messages? removed due to size limit\]$/)
         // Trimmed payload sits just above the 200kb cap because the placeholder
         // (~100 bytes) is unshifted after the byte-budget loop runs.
@@ -957,15 +957,15 @@ describe('Vercel AI SDK - Dual Version Support', () => {
           doStream: jest.fn(),
         }
 
-        const model = withTracing(baseModel, mockPostHogClient, {
-          posthogDistinctId: 'test-user',
-          posthogTraceId: `test-${provider}-${modelId}`,
+        const model = withTracing(baseModel, mockInsightsClient, {
+          insightsDistinctId: 'test-user',
+          insightsTraceId: `test-${provider}-${modelId}`,
         })
 
         await simulateGenerateText({ model, prompt: 'Test non-anthropic-provider Claude cache' })
 
-        expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-        const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+        expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+        const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
         const properties = captureCall[0].properties
 
         expect(properties['$ai_input_tokens']).toBe(expectedInputTokens)
@@ -1015,9 +1015,9 @@ describe('Vercel AI SDK - Dual Version Support', () => {
         }),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
-        posthogTraceId: 'test-bedrock-claude-v3-stream-cache',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
+        insightsTraceId: 'test-bedrock-claude-v3-stream-cache',
       })
 
       const result = await model.doStream({
@@ -1031,8 +1031,8 @@ describe('Vercel AI SDK - Dual Version Support', () => {
 
       await flushPromises()
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureCall] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureCall] = (mockInsightsClient.capture as jest.Mock).mock.calls
 
       // 1120 - 1000 - 20 = 100
       expect(captureCall[0].properties['$ai_input_tokens']).toBe(100)

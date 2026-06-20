@@ -3,7 +3,7 @@ import { window } from '../../../utils/globals'
 
 const logger = createLogger('[ConversationsManager]')
 
-export const RESTORE_QUERY_PARAM = 'ph_conv_restore'
+export const RESTORE_QUERY_PARAM = 'hi_conv_restore'
 
 /**
  * Extract hostname from a domain string (handles URLs and plain hostnames)

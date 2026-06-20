@@ -22,11 +22,11 @@ interface ConversationsStorageData {
 
 /**
  * Dedicated localStorage key scoped to the Insights project token.
- * Format: `ph_conv_<token>`
+ * Format: `hi_conv_<token>`
  */
 function storageKey(insights: Insights): string | null {
     const token = insights.config?.token
-    return token ? 'ph_conv_' + token : null
+    return token ? 'hi_conv_' + token : null
 }
 
 /**
@@ -243,8 +243,8 @@ export class ConversationsPersistence {
                 return null
             }
             const key = (this._insights.config as any).persistence_name
-                ? 'ph_' + (this._insights.config as any).persistence_name
-                : 'ph_' + token + '_insights'
+                ? 'hi_' + (this._insights.config as any).persistence_name
+                : 'hi_' + token + '_insights'
 
             const raw = window?.localStorage?.getItem(key)
             if (!raw) {

@@ -241,7 +241,7 @@ test.describe('product tours - customization', () => {
             await expect(tooltip).not.toBeVisible()
 
             expect(
-                await page.evaluate(() => localStorage.getItem('ph_product_tour_dismissed_dismiss-button'))
+                await page.evaluate(() => localStorage.getItem('hi_product_tour_dismissed_dismiss-button'))
             ).toBeTruthy()
         })
 

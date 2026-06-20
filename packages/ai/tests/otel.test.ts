@@ -38,7 +38,7 @@ function getSuperForceFlush(): jest.Mock {
   return OTLPTraceExporter.prototype.forceFlush as jest.Mock
 }
 
-describe('PostHogTraceExporter', () => {
+describe('InsightsTraceExporter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockInsightsClient = new (Insights as any)()
@@ -239,9 +239,9 @@ describe('PostHogTraceExporter', () => {
   })
 
   it('accepts deprecated apiKey', () => {
-    new PostHogTraceExporter({ apiKey: DEFAULT_TOKEN })
+    new InsightsTraceExporter({ apiKey: DEFAULT_TOKEN })
     expect(OTLPTraceExporter).toHaveBeenCalledWith({
-      url: 'https://us.i.posthog.com/i/v0/ai/otel',
+      url: 'https://us.i.insights.hanzo.ai/i/v0/ai/otel',
       headers: { Authorization: `Bearer ${DEFAULT_TOKEN}` },
     })
 
@@ -279,7 +279,7 @@ describe('PostHogTraceExporter', () => {
     ['blank', { projectToken: '  \n\t ' }],
   ])('disables and no-ops when projectToken is %s', (_case, options) => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
-    const exporter = new PostHogTraceExporter(options as any)
+    const exporter = new InsightsTraceExporter(options as any)
     const callback = jest.fn()
 
     const spanProcessor = createInsightsSpanProcessor(mockInsightsClient, {
@@ -289,7 +289,7 @@ describe('PostHogTraceExporter', () => {
     expect(getSuperExport()).not.toHaveBeenCalled()
     expect(callback).toHaveBeenCalledWith({ code: 0 })
     expect(warnSpy).toHaveBeenCalledWith(
-      '[PostHogTraceExporter] projectToken is missing or blank; the exporter will be disabled.'
+      '[InsightsTraceExporter] projectToken is missing or blank; the exporter will be disabled.'
     )
     warnSpy.mockRestore()
   })

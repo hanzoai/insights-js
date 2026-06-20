@@ -90,8 +90,8 @@ export class Insights {
 
   /**
    * Trigger a one-off refresh of the cached feature flag definitions. Named for parity with
-   * `posthog-node`'s `reloadFeatureFlags()`. The component already refreshes on a cron when
-   * `POSTHOG_PERSONAL_API_KEY` is set, so call this only when you need an immediate refresh
+   * `insights-node`'s `reloadFeatureFlags()`. The component already refreshes on a cron when
+   * `INSIGHTS_PERSONAL_API_KEY` is set, so call this only when you need an immediate refresh
    * (e.g. after creating a flag in development). Requires an action context.
    */
   async reloadFeatureFlags(ctx: RunActionCtx): Promise<unknown> {
@@ -130,11 +130,11 @@ export class Insights {
     }
     if (!row.localEvalConfigured) {
       // Loud failure rather than silent `undefined`: a caller invoking a local-eval method
-      // without `POSTHOG_PERSONAL_API_KEY` configured almost certainly meant to use a remote
+      // without `INSIGHTS_PERSONAL_API_KEY` configured almost certainly meant to use a remote
       // `evaluate*` method instead. Throwing tells them exactly what to do.
       throw new Error(
-        'PostHog: local feature flag evaluation is not configured. ' +
-          'Set POSTHOG_PERSONAL_API_KEY on your Convex deployment, or call the remote ' +
+        'Insights: local feature flag evaluation is not configured. ' +
+          'Set INSIGHTS_PERSONAL_API_KEY on your Convex deployment, or call the remote ' +
           '`evaluateFlag` / `evaluateFlagPayload` / `evaluateAllFlags` methods instead ' +
           '(action context only).'
       )
@@ -146,7 +146,7 @@ export class Insights {
     try {
       parsed = JSON.parse(row.data) as FlagDefinitions
     } catch (e) {
-      console.warn('[PostHog] Failed to parse cached flag definitions; treating as unavailable.', e)
+      console.warn('[Insights] Failed to parse cached flag definitions; treating as unavailable.', e)
       return null
     }
     return new LocalFeatureFlagEvaluator(parsed)
@@ -302,7 +302,7 @@ export class Insights {
   //
   // All feature flag methods evaluate flags locally against the definitions cached by the
   // component's cron. `undefined` signals that the eval couldn't reach a verdict — either
-  // definitions haven't been fetched yet (POSTHOG_PERSONAL_API_KEY missing, or the cron hasn't
+  // definitions haven't been fetched yet (INSIGHTS_PERSONAL_API_KEY missing, or the cron hasn't
   // run for the first time), or the flag uses features incompatible with local evaluation
   // (experience continuity, static cohorts, properties not provided). For payload methods,
   // `null` is reserved for the case where the flag was evaluated but matched no payload — so
@@ -433,11 +433,11 @@ export class Insights {
   //
   // For flags that can't be evaluated locally — experience continuity, static cohorts,
   // properties you can't pass in — or when you haven't configured a personal API key. These
-  // hit PostHog's `/flags` endpoint via a component action, so they require an action ctx and
+  // hit Insights's `/flags` endpoint via a component action, so they require an action ctx and
   // incur a per-call network round trip.
 
   /**
-   * Evaluate a single flag remotely against PostHog's `/flags` endpoint. Action context only.
+   * Evaluate a single flag remotely against Insights's `/flags` endpoint. Action context only.
    * Returns the flag value, or `null` if the flag doesn't exist.
    */
   async evaluateFlag(
@@ -456,7 +456,7 @@ export class Insights {
   }
 
   /**
-   * Evaluate a single flag's payload remotely against PostHog's `/flags` endpoint. Action context
+   * Evaluate a single flag's payload remotely against Insights's `/flags` endpoint. Action context
    * only. Returns the payload, or `null` if the flag doesn't match or has no payload configured.
    */
   async evaluateFlagPayload(

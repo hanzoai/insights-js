@@ -57,8 +57,8 @@ function InsightsNavigationHook({
  *
  * export function MyApp() {
  *     return (
- *         <InsightsProvider apiKey="<ph_project_api_key>" options={{
- *             host: '<ph_client_api_host>',
+ *         <InsightsProvider apiKey="<hi_project_api_key>" options={{
+ *             host: '<hi_client_api_host>',
  *         }}>
  *             <MyComponent />
  *         </InsightsProvider>
@@ -83,8 +83,8 @@ function InsightsNavigationHook({
  * // Using with existing client
  * import { Insights } from 'insights-react-native'
  *
- * const insights = new Insights('<ph_project_api_key>', {
- *     host: '<ph_client_api_host>'
+ * const insights = new Insights('<hi_project_api_key>', {
+ *     host: '<hi_client_api_host>'
  * })
  *
  * export function MyApp() {

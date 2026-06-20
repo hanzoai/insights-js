@@ -18,13 +18,13 @@ import type { SessionRecording } from './extensions/replay/session-recording'
 import type { Heatmaps } from './heatmaps'
 import type { InsightsProductTours } from './insights-product-tours'
 import type { SiteApps } from './site-apps'
-import type { PostHogSurveys } from './posthog-surveys'
+import type { InsightsSurveys } from './insights-surveys'
 import type { Toolbar } from './extensions/toolbar'
-import type { PostHogExceptions } from './posthog-exceptions'
+import type { InsightsExceptions } from './insights-exceptions'
 import type { WebExperiments } from './web-experiments'
-import type { PostHogConversations } from './extensions/conversations/posthog-conversations'
-import type { PostHogFeatureFlags } from './posthog-featureflags'
-import type { PostHogLogs } from './posthog-logs'
+import type { InsightsConversations } from './extensions/conversations/insights-conversations'
+import type { InsightsFeatureFlags } from './insights-featureflags'
+import type { InsightsLogs } from './insights-logs'
 
 // ============================================================================
 // Re-export public types from @insights/types

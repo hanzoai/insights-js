@@ -4,7 +4,7 @@ import { assignableWindow } from './utils/globals'
 import { createLogger } from './utils/logger'
 
 const logger = createLogger('[SiteApps]')
-const APP_INIT_ERROR = 'Error while initializing PostHog app with config id '
+const APP_INIT_ERROR = 'Error while initializing Insights app with config id '
 
 export class SiteApps implements Extension {
     apps: Record<string, SiteApp>
@@ -198,7 +198,7 @@ export class SiteApps implements Extension {
         }
 
         for (const { id, url } of response['siteApps']) {
-            assignableWindow[`__$$ph_site_app_${id}`] = this._instance
+            assignableWindow[`__$$hi_site_app_${id}`] = this._instance
             assignableWindow.__InsightsExtensions__?.loadSiteApp?.(this._instance, url, (err) => {
                 if (err) {
                     return logger.error(`Error while initializing Insights app with config id ${id}`, err)

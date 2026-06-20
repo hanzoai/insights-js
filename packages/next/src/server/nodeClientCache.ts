@@ -1,7 +1,7 @@
-import { PostHog } from '@hanzo/insights-node'
-import type { PostHogOptions } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
+import type { InsightsOptions } from '@hanzo/insights-node'
 
-const cache = new Map<string, PostHog>()
+const cache = new Map<string, Insights>()
 
 // Auto-detect waitUntil from @vercel/functions at module load.
 // Fails gracefully in environments where it's not available.
@@ -12,7 +12,7 @@ const autoDetectedWaitUntil: Promise<((p: Promise<unknown>) => void) | undefined
     .catch(() => undefined)
 
 /**
- * Returns a cached PostHog node client, creating one if needed.
+ * Returns a cached Insights node client, creating one if needed.
  *
  * Clients are cached by project key + host. Only the options from the first
  * call for a given key+host pair take effect; subsequent calls with different
@@ -21,16 +21,16 @@ const autoDetectedWaitUntil: Promise<((p: Promise<unknown>) => void) | undefined
  * On first call, awaits auto-detection of @vercel/functions waitUntil
  * and merges it into options. Explicit options.waitUntil takes priority.
  */
-export async function getOrCreateNodeClient(apiKey: string, options?: Partial<PostHogOptions>): Promise<PostHog> {
+export async function getOrCreateNodeClient(apiKey: string, options?: Partial<InsightsOptions>): Promise<Insights> {
     const key = `${apiKey}:${options?.host ?? ''}`
     let client = cache.get(key)
     if (!client) {
         const waitUntil = options?.waitUntil ?? (await autoDetectedWaitUntil)
-        const mergedOptions: Partial<PostHogOptions> = {
+        const mergedOptions: Partial<InsightsOptions> = {
             ...(waitUntil ? { waitUntil } : {}),
             ...options,
         }
-        client = new PostHog(apiKey, mergedOptions)
+        client = new Insights(apiKey, mergedOptions)
         cache.set(key, client)
     }
     return client

@@ -96,7 +96,7 @@ describe('persistence', () => {
 
             // Initially, custom_prop should NOT be in cookies (only default properties)
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     distinct_id: 'test',
                 })}`
             )
@@ -112,7 +112,7 @@ describe('persistence', () => {
 
             // After update, custom_prop should now be in cookies
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     distinct_id: 'test',
                     custom_prop: 'custom_value',
                 })}`
@@ -120,7 +120,7 @@ describe('persistence', () => {
 
             // Properties should still be the same
             expect(lib.props).toEqual(expectedProps())
-            expect(localStorage.getItem('ph__insights')).toEqual(JSON.stringify(expectedProps()))
+            expect(localStorage.getItem('hi__insights')).toEqual(JSON.stringify(expectedProps()))
         })
 
         it('should set direct referrer', () => {
@@ -363,21 +363,21 @@ describe('persistence', () => {
             it.each([
                 {
                     label: 'expire_days change',
-                    mutate: (lib: PostHogPersistence) => ((lib as any)._expire_days = 90),
+                    mutate: (lib: InsightsPersistence) => ((lib as any)._expire_days = 90),
                 },
                 {
                     label: 'cross_subdomain change',
-                    mutate: (lib: PostHogPersistence) => ((lib as any)._cross_subdomain = true),
+                    mutate: (lib: InsightsPersistence) => ((lib as any)._cross_subdomain = true),
                 },
                 {
                     label: 'secure change',
-                    mutate: (lib: PostHogPersistence) => ((lib as any)._secure = true),
+                    mutate: (lib: InsightsPersistence) => ((lib as any)._secure = true),
                 },
             ])('writes through when $label invalidates the storage args, even with unchanged props', ({ mutate }) => {
                 // The no-op fingerprint must cover all four arguments to
                 // `_storage._set` — serialized props plus expire_days,
                 // cross_subdomain, secure. Otherwise a customer who calls
-                // `posthog.set_config({ cookie_expiration: 90 })` would
+                // `insights.set_config({ cookie_expiration: 90 })` would
                 // mutate `_expire_days` but the no-op check (which only
                 // saw props) would short-circuit, and the cookie keeps
                 // its old `Expires` header until some other prop changes.
@@ -472,8 +472,8 @@ describe('persistence', () => {
             })
 
             it('writes immediately when debounce is 0 (default)', () => {
-                const config = makePostHogConfig('test-debounce-off', persistenceMode)
-                const debounced = new PostHogPersistence(config)
+                const config = makeInsightsConfig('test-debounce-off', persistenceMode)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
                 spy.mockClear()
 
@@ -486,10 +486,10 @@ describe('persistence', () => {
 
             it('coalesces multiple saves within the debounce window into one write', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-on', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-on', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
                 spy.mockClear()
 
@@ -508,10 +508,10 @@ describe('persistence', () => {
 
             it('in-memory props update synchronously even before the debounced write lands', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-sync', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-sync', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
 
                 debounced.register({ distinct_id: 'live' })
                 expect(debounced.props.distinct_id).toBe('live')
@@ -520,10 +520,10 @@ describe('persistence', () => {
 
             it('flush() writes pending state immediately', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-flush', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-flush', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
                 spy.mockClear()
 
@@ -540,10 +540,10 @@ describe('persistence', () => {
 
             it('remove() cancels any pending debounced write', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-remove', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-remove', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 const setSpy = jest.spyOn(debounced['_storage'], '_set')
                 const removeSpy = jest.spyOn(debounced['_storage'], '_remove')
 
@@ -559,7 +559,7 @@ describe('persistence', () => {
             })
 
             it('flush() does NOT resurrect storage after remove() (the reset bug)', () => {
-                // Sequence: posthog.reset() → clear() → remove() cancels
+                // Sequence: insights.reset() → clear() → remove() cancels
                 // the timer, clears _lastSavedSerialized, deletes storage.
                 // Then the unload listener fires flush(). Without the
                 // pending-timer guard, flush() would call _writeNow() with
@@ -568,10 +568,10 @@ describe('persistence', () => {
                 // deleted. The guard means flush() is a no-op once there
                 // is no pending timer.
                 const config = {
-                    ...makePostHogConfig('test-flush-after-remove', persistenceMode),
+                    ...makeInsightsConfig('test-flush-after-remove', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 debounced.register({ distinct_id: 'before-reset' })
 
                 // Simulate reset
@@ -587,15 +587,15 @@ describe('persistence', () => {
             })
 
             it('writes through on flush() when debounce is enabled at runtime via set_config (late-enable)', () => {
-                // Customer constructs PostHog with debounce=0 (no listener
+                // Customer constructs Insights with debounce=0 (no listener
                 // would be installed under the old logic), then later does
-                // `posthog.set_config({ persistence_save_debounce_ms: 250 })`.
+                // `insights.set_config({ persistence_save_debounce_ms: 250 })`.
                 // The mutable config is read every save() via _saveDebounceMs(),
                 // so save() correctly starts debouncing. But we must ALSO
                 // have installed unload listeners at construction so the
                 // pending write isn't lost on page close.
-                const config: any = makePostHogConfig('test-late-debounce', persistenceMode)
-                const debounced = new PostHogPersistence(config)
+                const config: any = makeInsightsConfig('test-late-debounce', persistenceMode)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
 
                 // Enable debounce after construction.
@@ -623,15 +623,15 @@ describe('persistence', () => {
             const lib = new InsightsPersistence(makeInsightsConfig('bla', 'cookie'))
             lib.register_once({ distinct_id: 'testy', test_prop: 'test_value' }, undefined, undefined)
             expect(document.cookie).toContain(
-                'ph__insights=%7B%22distinct_id%22%3A%22testy%22%2C%22test_prop%22%3A%22test_value%22%7D'
+                'hi__insights=%7B%22distinct_id%22%3A%22testy%22%2C%22test_prop%22%3A%22test_value%22%7D'
             )
             const lib2 = new InsightsPersistence(makeInsightsConfig('bla', 'localStorage+cookie'))
-            expect(document.cookie).toContain('ph__insights=%7B%22distinct_id%22%3A%22testy%22%7D')
+            expect(document.cookie).toContain('hi__insights=%7B%22distinct_id%22%3A%22testy%22%7D')
             lib2.register({ test_prop2: 'test_val', distinct_id: 'test2' })
-            expect(document.cookie).toContain('ph__insights=%7B%22distinct_id%22%3A%22test2%22%7D')
+            expect(document.cookie).toContain('hi__insights=%7B%22distinct_id%22%3A%22test2%22%7D')
             expect(lib2.props).toEqual({ distinct_id: 'test2', test_prop: 'test_value', test_prop2: 'test_val' })
             lib2.remove()
-            expect(localStorage.getItem('ph__insights')).toEqual(null)
+            expect(localStorage.getItem('hi__insights')).toEqual(null)
             expect(document.cookie).toEqual('')
         })
 
@@ -641,7 +641,7 @@ describe('persistence', () => {
             const lib = new InsightsPersistence(makeInsightsConfig('test', 'localStorage+cookie'))
             lib.register({ distinct_id: 'test', test_prop: 'test_val', [DEVICE_ID]: 'device-123' })
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     $device_id: 'device-123',
                     distinct_id: 'test',
                 })}`
@@ -650,7 +650,7 @@ describe('persistence', () => {
 
             lib.register({ otherProp: 'prop' })
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     $device_id: 'device-123',
                     distinct_id: 'test',
                 })}`
@@ -658,7 +658,7 @@ describe('persistence', () => {
 
             lib.register({ [SESSION_ID]: [1000, 'sid', 2000] })
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     $device_id: 'device-123',
                     distinct_id: 'test',
                     $sesid: [1000, 'sid', 2000],
@@ -667,7 +667,7 @@ describe('persistence', () => {
 
             lib.register({ [INITIAL_PERSON_INFO]: { u: 'https://www.example.com', r: 'https://www.referrer.com' } })
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     $device_id: 'device-123',
                     distinct_id: 'test',
                     $sesid: [1000, 'sid', 2000],
@@ -677,7 +677,7 @@ describe('persistence', () => {
 
             lib.set_property(USER_STATE, 'identified')
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     $device_id: 'device-123',
                     distinct_id: 'test',
                     $sesid: [1000, 'sid', 2000],
@@ -746,12 +746,12 @@ describe('persistence', () => {
 
             expect(lib.properties()).toEqual(expectedProps())
             expect(document.cookie).toContain(
-                `ph__insights=${encode({
+                `hi__insights=${encode({
                     distinct_id: 'test',
                 })}`
             )
             expect(document.cookie).not.toContain('test_prop')
-            expect(localStorage.getItem('ph__insights')).toEqual(JSON.stringify(expectedProps()))
+            expect(localStorage.getItem('hi__insights')).toEqual(JSON.stringify(expectedProps()))
 
             // Swap to memory
             let newConfig = makeInsightsConfig('test', 'memory')
@@ -760,7 +760,7 @@ describe('persistence', () => {
 
             // Check stores were cleared but properties are the same
             expect(document.cookie).toEqual('')
-            expect(localStorage.getItem('ph__insights')).toEqual(null)
+            expect(localStorage.getItem('hi__insights')).toEqual(null)
             expect(lib.properties()).toEqual(expectedProps())
 
             // Swap to localStorage
@@ -770,7 +770,7 @@ describe('persistence', () => {
 
             // Check store contains data and props are the same
             expect(document.cookie).toEqual('')
-            expect(localStorage.getItem('ph__insights')).toEqual(JSON.stringify(expectedProps()))
+            expect(localStorage.getItem('hi__insights')).toEqual(JSON.stringify(expectedProps()))
             expect(lib.properties()).toEqual(expectedProps())
         })
     })
@@ -778,7 +778,7 @@ describe('persistence', () => {
     describe('insights', () => {
         it('should not store anything in localstorage, or cookies when in sessionStorage mode', () => {
             const token = uuidv7()
-            const persistenceKey = `ph_${token}_insights`
+            const persistenceKey = `hi_${token}_insights`
             const insights = new Insights().init(token, {
                 persistence: 'sessionStorage',
             })
@@ -791,7 +791,7 @@ describe('persistence', () => {
 
         it('should not store anything in localstorage, sessionstorage, or cookies when in memory mode', () => {
             const token = uuidv7()
-            const persistenceKey = `ph_${token}_insights`
+            const persistenceKey = `hi_${token}_insights`
             const insights = new Insights().init(token, {
                 persistence: 'memory',
             })
@@ -804,7 +804,7 @@ describe('persistence', () => {
 
         it('should not store anything in cookies when in localstorage mode', () => {
             const token = uuidv7()
-            const persistenceKey = `ph_${token}_insights`
+            const persistenceKey = `hi_${token}_insights`
             const insights = new Insights().init(token, {
                 persistence: 'localStorage',
             })

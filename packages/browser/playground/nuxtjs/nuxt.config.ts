@@ -2,8 +2,8 @@
 export default defineNuxtConfig({
     runtimeConfig: {
         public: {
-            insightsPublicKey: process.env.NUXT_PUBLIC_INSIGHTS_KEY || '<ph_project_api_key>',
-            insightsHost: process.env.NUXT_PUBLIC_INSIGHTS_HOST || '<ph_client_api_host>',
+            insightsPublicKey: process.env.NUXT_PUBLIC_INSIGHTS_KEY || '<hi_project_api_key>',
+            insightsHost: process.env.NUXT_PUBLIC_INSIGHTS_HOST || '<hi_client_api_host>',
         },
     },
 

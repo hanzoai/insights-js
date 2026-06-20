@@ -86,28 +86,28 @@ describe('request-router', () => {
         it.each([
             [
                 'keeps exact semver asset paths on the normal US asset host when enabled as a boolean',
-                'https://app.posthog.com',
+                'https://insights.hanzo.ai',
                 true,
                 '/static/1.370.0/recorder.js',
-                'https://us-assets.i.posthog.com/static/1.370.0/recorder.js',
+                'https://us-assets.i.insights.hanzo.ai/static/1.370.0/recorder.js',
             ],
             [
                 'keeps exact semver asset paths on the normal EU asset host when enabled as a boolean',
-                'https://eu.posthog.com',
+                'https://insights.hanzo.ai',
                 true,
                 '/static/1.370.0/recorder.js',
-                'https://eu-assets.i.posthog.com/static/1.370.0/recorder.js',
+                'https://eu-assets.i.insights.hanzo.ai/static/1.370.0/recorder.js',
             ],
             [
                 'accepts a string asset host override for exact semver asset paths',
-                'https://app.posthog.com',
+                'https://insights.hanzo.ai',
                 'https://cdn-preview.example.com/',
                 '/static/1.370.0/recorder.js',
                 'https://cdn-preview.example.com/static/1.370.0/recorder.js',
             ],
             [
                 'accepts a string asset host override for compatibility asset paths',
-                'https://app.posthog.com',
+                'https://insights.hanzo.ai',
                 'https://cdn-preview.example.com/',
                 '/static/recorder.js?v=1.370.0',
                 'https://cdn-preview.example.com/static/recorder.js?v=1.370.0',
@@ -135,12 +135,12 @@ describe('request-router', () => {
         })
 
         it('keeps non-static asset paths on the normal asset host even when a preview override is configured', () => {
-            const previewRouter = router('https://app.posthog.com', undefined, {
+            const previewRouter = router('https://insights.hanzo.ai', undefined, {
                 __preview_external_dependency_versioned_paths: 'https://cdn-preview.example.com/',
             })
 
             expect(previewRouter.endpointFor('assets', '/array/test-token/config.js')).toEqual(
-                'https://us-assets.i.posthog.com/array/test-token/config.js'
+                'https://us-assets.i.insights.hanzo.ai/array/test-token/config.js'
             )
         })
     })

@@ -3,24 +3,24 @@ import React, { useEffect } from 'react'
 import { render, cleanup } from '@testing-library/react'
 import { AppState, Linking } from 'react-native'
 
-import { PostHogProvider } from '../src/PostHogProvider'
-import { usePostHog } from '../src/hooks/usePostHog'
-import type { PostHog } from '../src/posthog-rn'
+import { InsightsProvider } from '../src/InsightsProvider'
+import { useInsights } from '../src/hooks/useInsights'
+import type { Insights } from '../src/insights-rn'
 
 Linking.getInitialURL = jest.fn(() => Promise.resolve(null))
 AppState.addEventListener = jest.fn()
 
-const CaptureClient = ({ onClient }: { onClient: (client: PostHog) => void }) => {
-  const posthog = usePostHog()
+const CaptureClient = ({ onClient }: { onClient: (client: Insights) => void }) => {
+  const insights = useInsights()
 
   useEffect(() => {
-    onClient(posthog)
-  }, [onClient, posthog])
+    onClient(insights)
+  }, [onClient, insights])
 
   return null
 }
 
-describe('PostHogProvider', () => {
+describe('InsightsProvider', () => {
   beforeEach(() => {
     ;(globalThis as any).window.fetch = jest.fn(async () => ({
       status: 200,
@@ -44,17 +44,17 @@ describe('PostHogProvider', () => {
       expect(() => {
         render(
           React.createElement(
-            PostHogProvider,
+            InsightsProvider,
             { apiKey, autocapture: false, options: { persistence: 'memory' } },
             React.createElement(CaptureClient, { onClient })
           )
         )
       }).not.toThrow()
 
-      const posthog = onClient.mock.calls[0][0] as PostHog
-      expect(posthog.isDisabled).toEqual(true)
+      const insights = onClient.mock.calls[0][0] as Insights
+      expect(insights.isDisabled).toEqual(true)
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "You must pass your PostHog project's api key. The client will be disabled."
+        "You must pass your Insights project's api key. The client will be disabled."
       )
     } finally {
       consoleErrorSpy.mockRestore()

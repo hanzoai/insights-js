@@ -106,7 +106,7 @@ function isInsightsFetchContentTooLargeError(err: unknown): err is InsightsFetch
 /**
  * Outcome of a logs batch send. Keeps HTTP error classification inside core
  * (single source of truth — same policy events already use in `_flush()`) so
- * PostHogLogs doesn't need to know about specific error types.
+ * InsightsLogs doesn't need to know about specific error types.
  *
  *   - ok            → records are accepted; drop them from the queue
  *   - too-large     → 413; caller should halve batch size and retry same records
@@ -1034,7 +1034,7 @@ export abstract class InsightsCoreStateless {
       const response = await this.fetchWithRetry(url, fetchOptions)
       // Consume the response body to prevent cross-request promise warnings
       // in runtimes like Cloudflare Workers that enforce body consumption.
-      // See: https://github.com/PostHog/posthog-js/issues/3173
+      // See: https://github.com/Insights/insights-js/issues/3173
       await response.body?.cancel()?.catch(() => {})
     } catch (err) {
       this._events.emit('error', err)
@@ -1217,7 +1217,7 @@ export abstract class InsightsCoreStateless {
         const response = await this.fetchWithRetry(url, fetchOptions, retryOptions)
         // Consume the response body to prevent cross-request promise warnings
         // in runtimes like Cloudflare Workers that enforce body consumption.
-        // See: https://github.com/PostHog/posthog-js/issues/3173
+        // See: https://github.com/Insights/insights-js/issues/3173
         await response.body?.cancel()?.catch(() => {})
       } catch (err) {
         if (isInsightsFetchContentTooLargeError(err) && batchMessages.length > 1) {
@@ -1249,7 +1249,7 @@ export abstract class InsightsCoreStateless {
 
   /**
    * Sends a pre-built OTLP logs payload to `/i/v1/logs`. Returns a tagged
-   * outcome instead of throwing so PostHogLogs doesn't have to know about the
+   * outcome instead of throwing so InsightsLogs doesn't have to know about the
    * core's error class hierarchy. Error classification lives here (single
    * source of truth, same policy the events `_flush()` uses for its own
    * 413 / network / fatal handling).

@@ -4,7 +4,7 @@ import type { Insights } from '@hanzo/insights-node'
 import type { CachedPrompt, GetPromptOptions, PromptApiResponse, PromptVariables, PromptsDirectOptions } from './types'
 
 const DEFAULT_CACHE_TTL_SECONDS = 300 // 5 minutes
-const DEFAULT_PROMPTS_HOST = 'https://us.posthog.com'
+const DEFAULT_PROMPTS_HOST = 'https://insights.hanzo.ai'
 type PromptVersionCache = Map<number | undefined, CachedPrompt>
 
 function normalizeApiKey(value?: unknown): string {

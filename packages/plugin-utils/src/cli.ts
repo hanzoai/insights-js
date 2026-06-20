@@ -2,7 +2,7 @@ import { ResolvedPluginConfig } from './config'
 import { spawnLocal } from './spawn-local'
 
 /**
- * Build CLI arguments for `posthog-cli sourcemap process`.
+ * Build CLI arguments for `insights-cli sourcemap process`.
  */
 export function buildSourcemapCliArgs(
     config: ResolvedPluginConfig,
@@ -46,15 +46,15 @@ export function buildSourcemapCliArgs(
 export function buildCliEnv(config: ResolvedPluginConfig): NodeJS.ProcessEnv {
     return {
         ...process.env,
-        RUST_LOG: `posthog_cli=${config.logLevel}`,
-        POSTHOG_CLI_HOST: config.host,
-        POSTHOG_CLI_API_KEY: config.personalApiKey,
-        POSTHOG_CLI_PROJECT_ID: config.projectId,
+        RUST_LOG: `insights_cli=${config.logLevel}`,
+        INSIGHTS_CLI_HOST: config.host,
+        INSIGHTS_CLI_API_KEY: config.personalApiKey,
+        INSIGHTS_CLI_PROJECT_ID: config.projectId,
     }
 }
 
 /**
- * Spawn the PostHog CLI for sourcemap processing via stdin (file list).
+ * Spawn the Insights CLI for sourcemap processing via stdin (file list).
  */
 export async function runSourcemapCli(
     config: ResolvedPluginConfig,
