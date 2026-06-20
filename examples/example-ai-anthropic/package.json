@@ -8,7 +8,7 @@
     "chat:stream": "tsx streaming.ts"
   },
   "dependencies": {
-    "@posthog/ai": "*",
+    "@hanzo/insights-ai": "*",
     "@anthropic-ai/sdk": "^0.78.0",
     "@opentelemetry/sdk-node": "^0.200.0",
     "@opentelemetry/resources": "^2.0.0",

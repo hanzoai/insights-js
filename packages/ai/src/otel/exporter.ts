@@ -21,14 +21,14 @@ function normalizeHost(value?: unknown): string {
  *
  * @example
  * ```ts
- * import { PostHogTraceExporter } from '@posthog/ai/otel'
+ * import { PostHogTraceExporter } from '@hanzo/insights-ai/otel'
  *
  * new PostHogTraceExporter({ projectToken: 'phc_...' })
  * ```
  *
  * @example
  * ```ts
- * import { PostHogTraceExporter } from '@posthog/ai/otel'
+ * import { PostHogTraceExporter } from '@hanzo/insights-ai/otel'
  *
  * new PostHogTraceExporter({ projectToken: 'phc_...', host: 'https://eu.i.posthog.com' })
  * ```
@@ -61,7 +61,7 @@ export type PostHogTraceExporterOptions =
  *
  * @example
  * ```ts
- * import { PostHogTraceExporter } from '@posthog/ai/otel'
+ * import { PostHogTraceExporter } from '@hanzo/insights-ai/otel'
  * import { registerOTel } from '@vercel/otel'
  *
  * registerOTel({

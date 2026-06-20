@@ -6,8 +6,8 @@ import {
   mutationBuffers,
 } from '../../src/record/observer';
 import { IframeManager } from '../../src/record/iframe-manager';
-import type { eventWithTime } from '@posthog/rrweb-types';
-import { createMirror } from '@posthog/rrweb-snapshot';
+import type { eventWithTime } from '@hanzo/rrweb-types';
+import { createMirror } from '@hanzo/rrweb-snapshot';
 
 describe('memory leak prevention', () => {
   let dom: JSDOM;

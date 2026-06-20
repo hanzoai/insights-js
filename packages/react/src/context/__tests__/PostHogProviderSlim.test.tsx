@@ -2,7 +2,7 @@ import * as React from 'react'
 import { render } from '@testing-library/react'
 import { PostHogProvider } from '../PostHogProviderSlim'
 import { PostHogContext } from '../PostHogContext'
-import type { PostHog } from 'posthog-js'
+import type { PostHog } from '@hanzo/insights'
 
 // Do NOT call setDefaultPostHogInstance — this simulates the slim bundle
 // where no default instance exists.

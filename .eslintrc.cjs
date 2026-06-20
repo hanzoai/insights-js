@@ -96,7 +96,7 @@ module.exports = {
             },
         },
         {
-            // @posthog/core is shared by browser and React Native — Web API globals
+            // @hanzo/insights-core is shared by browser and React Native — Web API globals
             // like Event, ErrorEvent, etc. don't exist in Hermes/JSC and referencing
             // them as values throws a ReferenceError at runtime.
             files: ['packages/core/src/**'],
@@ -120,7 +120,7 @@ module.exports = {
                         selector:
                             "CallExpression[callee.object.name='Promise'][callee.property.name='allSettled']",
                         message:
-                            'Use `allSettled` from @posthog/core (packages/core/src/utils) instead of Promise.allSettled — Promise.allSettled can be broken by runtime Promise patching on some RN environments.',
+                            'Use `allSettled` from @hanzo/insights-core (packages/core/src/utils) instead of Promise.allSettled — Promise.allSettled can be broken by runtime Promise patching on some RN environments.',
                     },
                 ],
             },

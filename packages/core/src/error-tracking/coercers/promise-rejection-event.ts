@@ -3,7 +3,7 @@ import { CoercingContext, ErrorTrackingCoercer, ExceptionLike } from '../types'
 
 // Structural subsets of the DOM `PromiseRejectionEvent` / `Event`. Avoids leaking
 // DOM-only globals into the public type surface so non-DOM consumers (e.g. React
-// Native, whose tsconfig lib excludes DOM) can still consume `@posthog/core`
+// Native, whose tsconfig lib excludes DOM) can still consume `@hanzo/insights-core`
 // types via tools like api-extractor that resolve symbols transitively.
 interface PromiseRejectionEventLike {
   reason: unknown
