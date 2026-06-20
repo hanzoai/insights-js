@@ -19,7 +19,7 @@ concurrency:
 jobs:
   warn-on-generated-file-edits:
     name: Warn on edits to auto-generated files
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
     # Bots that legitimately update these files (release bot, the
     # generate-references App, dependabot, etc.) don't need the notice.
     if: ${{ !endsWith(github.event.pull_request.user.login, '[bot]') }}

@@ -20,7 +20,7 @@ permissions:
 jobs:
     insights-com-upgrade:
         name: Upgrade Insights.com Package
-        runs-on: ubuntu-latest
+        runs-on: hanzo-build-linux-amd64
 
         steps:
             - name: Get upgrader token

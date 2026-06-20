@@ -16,7 +16,7 @@ concurrency:
 jobs:
   browsers:
     name: Test on ${{ matrix.tests.name }}
-    runs-on: ubuntu-22.04
+    runs-on: hanzo-build-linux-amd64
 
     strategy:
       fail-fast: false
