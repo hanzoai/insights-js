@@ -1,3 +1,5 @@
+<p align="center"><img src=".github/hero.svg" alt="insights-js" width="880"></p>
+
 # Hanzo Insights JS
 
 Hanzo Insights JS SDK — fork of [@hanzo/insights](https://github.com/hanzoai/@hanzo/insights).
