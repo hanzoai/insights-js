@@ -46,11 +46,11 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
             LazyLoadedSessionRecording,
         } = require('../../../extensions/replay/external/lazy-loaded-session-recorder')
         const { assignableWindow } = require('../../../utils/globals')
-        const { PostHogPersistence } = require('../../../posthog-persistence')
+        const { InsightsPersistence } = require('../../../insights-persistence')
         const { SessionIdManager } = require('../../../sessionid')
         const { RequestRouter } = require('../../../utils/request-router')
         const { SimpleEventEmitter } = require('../../../utils/simple-event-emitter')
-        const { createMockConfig, createMockPostHog } = require('../../helpers/posthog-instance')
+        const { createMockConfig, createMockInsights } = require('../../helpers/insights-instance')
         const { SESSION_RECORDING_REMOTE_CONFIG, SESSION_RECORDING_IS_SAMPLED } = require('../../../constants')
 
         const config = createMockConfig({
@@ -66,7 +66,7 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
             persistence: 'memory',
         })
 
-        const persistence = new PostHogPersistence(config)
+        const persistence = new InsightsPersistence(config)
         persistence.clear()
         persistence.register({
             [SESSION_RECORDING_REMOTE_CONFIG]: { endpoint: '/s/', enabled: true, sampleRate: 1 },
@@ -74,13 +74,13 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
         })
 
         const sessionManager = new SessionIdManager(
-            createMockPostHog({ config, persistence, register: jest.fn() }),
+            createMockInsights({ config, persistence, register: jest.fn() }),
             jest.fn(() => 'sessionId'),
             jest.fn(() => 'windowId')
         )
 
         const simpleEventEmitter = new SimpleEventEmitter()
-        const posthog = {
+        const insights = {
             get_property: (propertyKey: string) => persistence.props[propertyKey],
             config,
             capture: jest.fn(),
@@ -95,7 +95,7 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
 
         let emit: (event: any) => void = () => {}
         const stopRrweb = jest.fn()
-        assignableWindow.__PosthogExtensions__ = {
+        assignableWindow.__InsightsExtensions__ = {
             rrweb: {
                 record: jest.fn(({ emit: rrwebEmit }) => {
                     emit = rrwebEmit
@@ -110,14 +110,14 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
                 getRecordNetworkPlugin: undefined,
             },
         }
-        assignableWindow.__PosthogExtensions__.rrweb.record.takeFullSnapshot = jest.fn()
-        assignableWindow.__PosthogExtensions__.rrweb.record.addCustomEvent = jest.fn()
+        assignableWindow.__InsightsExtensions__.rrweb.record.takeFullSnapshot = jest.fn()
+        assignableWindow.__InsightsExtensions__.rrweb.record.addCustomEvent = jest.fn()
 
-        const lazyLoadedSessionRecording = new LazyLoadedSessionRecording(posthog)
+        const lazyLoadedSessionRecording = new LazyLoadedSessionRecording(insights)
         lazyLoadedSessionRecording.start()
 
         context.emit = emit
-        context.posthog = posthog
+        context.insights = insights
         context.lazyLoadedSessionRecording = lazyLoadedSessionRecording
         context.stopRrweb = stopRrweb
     })
@@ -125,7 +125,7 @@ async function setupLazyLoadedSessionRecording({ gzipSupported, gzipCompress }: 
     return {
         gzipCompress: gzipCompressMock,
         emit: context.emit as (event: any) => void,
-        posthog: context.posthog,
+        insights: context.insights,
         lazyLoadedSessionRecording: context.lazyLoadedSessionRecording,
         stopRrweb: context.stopRrweb as jest.Mock,
     }
@@ -162,7 +162,7 @@ describe('LazyLoadedSessionRecording compression paths', () => {
             return new Blob([gzipSync(strToU8(input))])
         })
 
-        const { emit, posthog, lazyLoadedSessionRecording } = await setupLazyLoadedSessionRecording({
+        const { emit, insights, lazyLoadedSessionRecording } = await setupLazyLoadedSessionRecording({
             gzipSupported: testCase.gzipSupported,
             gzipCompress,
         })
@@ -170,7 +170,7 @@ describe('LazyLoadedSessionRecording compression paths', () => {
         emit(createFullSnapshot({ content: testCase.content }))
         if (testCase.shouldQueueCustomEvent) {
             emit(createCustomSnapshot())
-            expect(posthog.capture).not.toHaveBeenCalled()
+            expect(insights.capture).not.toHaveBeenCalled()
         }
 
         if (testCase.shouldCallGzipCompress) {
@@ -194,7 +194,7 @@ describe('LazyLoadedSessionRecording compression paths', () => {
             expectedSnapshotData.push(createCustomSnapshot() as any)
         }
 
-        expect(posthog.capture).toHaveBeenCalledWith(
+        expect(insights.capture).toHaveBeenCalledWith(
             '$snapshot',
             expect.objectContaining({
                 $snapshot_data: expectedSnapshotData,
@@ -213,7 +213,7 @@ describe('LazyLoadedSessionRecording compression paths', () => {
             return new Blob([gzipSync(strToU8(input))])
         })
 
-        const { emit, posthog, lazyLoadedSessionRecording, stopRrweb } = await setupLazyLoadedSessionRecording({
+        const { emit, insights, lazyLoadedSessionRecording, stopRrweb } = await setupLazyLoadedSessionRecording({
             gzipSupported: true,
             gzipCompress,
         })
@@ -222,13 +222,13 @@ describe('LazyLoadedSessionRecording compression paths', () => {
         lazyLoadedSessionRecording.stop()
 
         expect(stopRrweb).toHaveBeenCalled()
-        expect(posthog.capture).not.toHaveBeenCalled()
+        expect(insights.capture).not.toHaveBeenCalled()
 
         releaseCompression()
         await lazyLoadedSessionRecording['_compressionQueue']
         await Promise.resolve()
 
-        expect(posthog.capture).toHaveBeenCalledWith(
+        expect(insights.capture).toHaveBeenCalledWith(
             '$snapshot',
             expect.objectContaining({
                 $snapshot_data: [expect.objectContaining({ type: 2, cv: '2024-10', data: expect.any(String) })],
@@ -247,7 +247,7 @@ describe('LazyLoadedSessionRecording compression paths', () => {
             return new Blob([gzipSync(strToU8(input))])
         })
 
-        const { emit, posthog, lazyLoadedSessionRecording } = await setupLazyLoadedSessionRecording({
+        const { emit, insights, lazyLoadedSessionRecording } = await setupLazyLoadedSessionRecording({
             gzipSupported: true,
             gzipCompress,
         })
@@ -255,7 +255,7 @@ describe('LazyLoadedSessionRecording compression paths', () => {
         emit(createFullSnapshot({ content: 'beforeunload sync drain' }))
         lazyLoadedSessionRecording['_onBeforeUnload']()
 
-        expect(posthog.capture).toHaveBeenCalledWith(
+        expect(insights.capture).toHaveBeenCalledWith(
             '$snapshot',
             expect.objectContaining({
                 $snapshot_data: [expect.objectContaining({ type: 2, cv: '2024-10', data: expect.any(String) })],
@@ -265,6 +265,6 @@ describe('LazyLoadedSessionRecording compression paths', () => {
 
         releaseCompression()
         await lazyLoadedSessionRecording['_compressionQueue']
-        expect(posthog.capture).toHaveBeenCalledTimes(1)
+        expect(insights.capture).toHaveBeenCalledTimes(1)
     })
 })

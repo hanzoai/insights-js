@@ -16,7 +16,7 @@ export type ExceptionStep = {
   [key: string]: unknown
 }
 
-/** NOTE: This type is also defined in `@hanzo/insights-types` (posthog-config.ts). Keep both in sync. */
+/** NOTE: This type is also defined in `@hanzo/insights-types` (insights-config.ts). Keep both in sync. */
 export type ExceptionStepsConfig = {
   enabled?: boolean
   max_bytes?: number

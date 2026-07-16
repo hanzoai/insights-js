@@ -1,14 +1,14 @@
 /* eslint-disable compat/compat */
-import { PostHogConversations, ConversationsManager } from '../../../extensions/conversations/posthog-conversations'
-import { ConversationsRemoteConfig } from '../../../posthog-conversations-types'
-import { PostHog } from '../../../posthog-core'
+import { InsightsConversations, ConversationsManager } from '../../../extensions/conversations/insights-conversations'
+import { ConversationsRemoteConfig } from '../../../insights-conversations-types'
+import { Insights } from '../../../insights-core'
 import { RemoteConfig } from '../../../types'
 import { assignableWindow } from '../../../utils/globals'
-import { createMockPostHog, createMockConfig, createMockPersistence } from '../../helpers/posthog-instance'
+import { createMockInsights, createMockConfig, createMockPersistence } from '../../helpers/insights-instance'
 
 describe('Conversations Identity Verification', () => {
-    let conversations: PostHogConversations
-    let mockPostHog: PostHog
+    let conversations: InsightsConversations
+    let mockInsights: Insights
     let mockManager: ConversationsManager
 
     const remoteConfig: Partial<RemoteConfig> = {
@@ -41,18 +41,18 @@ describe('Conversations Identity Verification', () => {
         } as unknown as ConversationsManager
 
         const config = createMockConfig({
-            api_host: 'https://test.posthog.com',
+            api_host: 'https://test.example.com',
             token: 'test-token',
             disable_conversations: false,
         })
 
-        mockPostHog = createMockPostHog({
+        mockInsights = createMockInsights({
             config,
             persistence: createMockPersistence({
                 props: {},
             }),
             requestRouter: {
-                endpointFor: jest.fn().mockReturnValue('https://test.posthog.com/api/test'),
+                endpointFor: jest.fn().mockReturnValue('https://test.example.com/api/test'),
             } as any,
             consent: {
                 isOptedOut: jest.fn().mockReturnValue(false),
@@ -60,86 +60,86 @@ describe('Conversations Identity Verification', () => {
             get_distinct_id: jest.fn().mockReturnValue('test-distinct-id'),
             on: jest.fn().mockReturnValue(jest.fn()),
             setIdentity: jest.fn((distinctId: string, hash: string) => {
-                mockPostHog.config.identity_distinct_id = distinctId
-                mockPostHog.config.identity_hash = hash
-                ;(mockPostHog as any).conversations?._onIdentityChanged()
+                mockInsights.config.identity_distinct_id = distinctId
+                mockInsights.config.identity_hash = hash
+                ;(mockInsights as any).conversations?._onIdentityChanged()
             }),
             clearIdentity: jest.fn(() => {
-                delete mockPostHog.config.identity_distinct_id
-                delete mockPostHog.config.identity_hash
-                ;(mockPostHog as any).conversations?._onIdentityCleared()
+                delete mockInsights.config.identity_distinct_id
+                delete mockInsights.config.identity_hash
+                ;(mockInsights as any).conversations?._onIdentityCleared()
             }),
         })
 
-        assignableWindow.__PosthogExtensions__ = {
+        assignableWindow.__InsightsExtensions__ = {
             initConversations: undefined,
             loadExternalDependency: jest.fn((_instance, _path, callback) => {
-                assignableWindow.__PosthogExtensions__!.initConversations = jest.fn().mockReturnValue(mockManager)
+                assignableWindow.__InsightsExtensions__!.initConversations = jest.fn().mockReturnValue(mockManager)
                 callback(null)
             }),
         }
 
-        conversations = new PostHogConversations(mockPostHog)
-        ;(mockPostHog as any).conversations = conversations
+        conversations = new InsightsConversations(mockInsights)
+        ;(mockInsights as any).conversations = conversations
     })
 
     function loadConversations() {
         conversations.onRemoteConfig(remoteConfig as RemoteConfig)
     }
 
-    describe('posthog.setIdentity', () => {
+    describe('insights.setIdentity', () => {
         it('should store identity on top-level config', () => {
-            mockPostHog.setIdentity('user_123', 'a1b2c3d4')
+            mockInsights.setIdentity('user_123', 'a1b2c3d4')
 
-            expect(mockPostHog.config.identity_distinct_id).toBe('user_123')
-            expect(mockPostHog.config.identity_hash).toBe('a1b2c3d4')
+            expect(mockInsights.config.identity_distinct_id).toBe('user_123')
+            expect(mockInsights.config.identity_hash).toBe('a1b2c3d4')
         })
 
         it('should forward to manager via _onIdentityChanged when manager is loaded', () => {
             loadConversations()
-            mockPostHog.setIdentity('user_123', 'a1b2c3d4')
+            mockInsights.setIdentity('user_123', 'a1b2c3d4')
 
             expect(mockManager.setIdentity).toHaveBeenCalled()
         })
 
         it('should store on config even when manager is not loaded yet', () => {
-            mockPostHog.setIdentity('user_123', 'a1b2c3d4')
+            mockInsights.setIdentity('user_123', 'a1b2c3d4')
 
-            expect(mockPostHog.config.identity_distinct_id).toBe('user_123')
-            expect(mockPostHog.config.identity_hash).toBe('a1b2c3d4')
+            expect(mockInsights.config.identity_distinct_id).toBe('user_123')
+            expect(mockInsights.config.identity_hash).toBe('a1b2c3d4')
             expect(mockManager.setIdentity).not.toHaveBeenCalled()
         })
 
         it('should be read by manager when it loads later', () => {
-            mockPostHog.setIdentity('user_123', 'a1b2c3d4')
+            mockInsights.setIdentity('user_123', 'a1b2c3d4')
 
-            expect(mockPostHog.config.identity_distinct_id).toBe('user_123')
+            expect(mockInsights.config.identity_distinct_id).toBe('user_123')
 
             loadConversations()
 
-            expect(assignableWindow.__PosthogExtensions__!.initConversations).toHaveBeenCalled()
+            expect(assignableWindow.__InsightsExtensions__!.initConversations).toHaveBeenCalled()
         })
     })
 
-    describe('posthog.clearIdentity', () => {
-        it('should remove identity from posthog.config', () => {
-            mockPostHog.config.identity_distinct_id = 'user_123'
-            mockPostHog.config.identity_hash = 'a1b2c3d4'
-            mockPostHog.clearIdentity()
+    describe('insights.clearIdentity', () => {
+        it('should remove identity from insights.config', () => {
+            mockInsights.config.identity_distinct_id = 'user_123'
+            mockInsights.config.identity_hash = 'a1b2c3d4'
+            mockInsights.clearIdentity()
 
-            expect(mockPostHog.config.identity_distinct_id).toBeUndefined()
-            expect(mockPostHog.config.identity_hash).toBeUndefined()
+            expect(mockInsights.config.identity_distinct_id).toBeUndefined()
+            expect(mockInsights.config.identity_hash).toBeUndefined()
         })
 
         it('should forward to manager via _onIdentityCleared when manager is loaded', () => {
             loadConversations()
-            mockPostHog.clearIdentity()
+            mockInsights.clearIdentity()
 
             expect(mockManager.clearIdentity).toHaveBeenCalled()
         })
 
         it('should not throw when manager is not loaded', () => {
-            expect(() => mockPostHog.clearIdentity()).not.toThrow()
+            expect(() => mockInsights.clearIdentity()).not.toThrow()
         })
     })
 
@@ -154,22 +154,22 @@ describe('Conversations Identity Verification', () => {
 
     describe('init-time identity config', () => {
         it('should pass through init config to manager construction', () => {
-            mockPostHog.config.identity_distinct_id = 'user_123'
-            mockPostHog.config.identity_hash = 'a1b2c3d4'
+            mockInsights.config.identity_distinct_id = 'user_123'
+            mockInsights.config.identity_hash = 'a1b2c3d4'
 
             loadConversations()
 
-            expect(assignableWindow.__PosthogExtensions__!.initConversations).toHaveBeenCalled()
-            expect(mockPostHog.config.identity_distinct_id).toBe('user_123')
+            expect(assignableWindow.__InsightsExtensions__!.initConversations).toHaveBeenCalled()
+            expect(mockInsights.config.identity_distinct_id).toBe('user_123')
         })
 
         it('should not interfere when no identity config is set', () => {
-            expect(mockPostHog.config.identity_distinct_id).toBeUndefined()
+            expect(mockInsights.config.identity_distinct_id).toBeUndefined()
 
             loadConversations()
 
-            expect(assignableWindow.__PosthogExtensions__!.initConversations).toHaveBeenCalled()
-            expect(mockPostHog.config.identity_distinct_id).toBeUndefined()
+            expect(assignableWindow.__InsightsExtensions__!.initConversations).toHaveBeenCalled()
+            expect(mockInsights.config.identity_distinct_id).toBeUndefined()
         })
     })
 })

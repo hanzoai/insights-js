@@ -269,14 +269,22 @@ export class SurveyManager {
     private _handleWidget = (survey: Survey): void => {
         const { survey: translatedSurvey, language: surveyLanguage } = this._translateSurveyForRendering(survey)
         // Ensure widget container exists if it doesn't
-        const { shadow, isNewlyCreated } = retrieveSurveyShadow(survey, this._insights)
+        const { shadow, isNewlyCreated } = retrieveSurveyShadow(translatedSurvey, this._insights)
 
         // If the widget is already rendered, do nothing. Otherwise the widget will be re-rendered every second
         if (!isNewlyCreated) {
             return
         }
 
-        render(<FeedbackWidget insights={this._insights} survey={survey} key={survey.id} />, shadow)
+        render(
+            <FeedbackWidget
+                insights={this._insights}
+                survey={translatedSurvey}
+                surveyLanguage={surveyLanguage}
+                key={survey.id}
+            />,
+            shadow
+        )
     }
 
     private _removeWidgetSelectorListener = (survey: Pick<Survey, 'id' | 'type' | 'appearance'>): void => {
@@ -373,9 +381,15 @@ export class SurveyManager {
     }
 
     public renderPopover = (survey: Survey): void => {
-        const { shadow } = retrieveSurveyShadow(survey, this._insights)
+        const { survey: translatedSurvey, language: surveyLanguage } = this._translateSurveyForRendering(survey)
+        const { shadow } = retrieveSurveyShadow(translatedSurvey, this._insights)
         render(
-            <SurveyPopup insights={this._insights} survey={survey} removeSurveyFromFocus={this._removeSurveyFromFocus} />,
+            <SurveyPopup
+                insights={this._insights}
+                survey={translatedSurvey}
+                removeSurveyFromFocus={this._removeSurveyFromFocus}
+                surveyLanguage={surveyLanguage}
+            />,
             shadow
         )
     }
@@ -384,13 +398,13 @@ export class SurveyManager {
         const { survey: translatedSurvey, language: surveyLanguage } = this._translateSurveyForRendering(survey)
         let isSurveyCompleted = false
         if (this._insights.config?.surveys?.prefillFromUrl) {
-            isSurveyCompleted = this._handleUrlPrefill(survey)
+            isSurveyCompleted = this._handleUrlPrefill(translatedSurvey, surveyLanguage)
         }
 
         render(
             <SurveyPopup
                 insights={this._insights}
-                survey={survey}
+                survey={translatedSurvey}
                 removeSurveyFromFocus={this._removeSurveyFromFocus}
                 isPopup={false}
                 properties={properties}
@@ -404,7 +418,7 @@ export class SurveyManager {
     private _translateSurveyForRendering(survey: Survey): { survey: Survey; language: string | null } {
         // Rendering entry points accept the raw API survey. The translation helper is idempotent,
         // but keeping this central avoids each entry point growing its own language rules.
-        return applySurveyTranslationForUser(survey, this._posthog)
+        return applySurveyTranslationForUser(survey, this._insights)
     }
 
     private _handleUrlPrefill(survey: Survey, surveyLanguage?: string | null): boolean {
@@ -541,12 +555,12 @@ export class SurveyManager {
         if (!flagKey) {
             return true
         }
-        const isFeatureEnabled = !!this._insights.featureFlags.isFeatureEnabled(flagKey, {
+        const isFeatureEnabled = !!this._insights.featureFlags?.isFeatureEnabled(flagKey, {
             send_event: !flagKey.startsWith(SURVEY_TARGETING_FLAG_PREFIX),
         })
         let flagVariantCheck = true
         if (flagVariant) {
-            const flagVariantValue = this._insights.featureFlags.getFeatureFlag(flagKey, { send_event: false })
+            const flagVariantValue = this._insights.featureFlags?.getFeatureFlag(flagKey, { send_event: false })
             flagVariantCheck = flagVariantValue === flagVariant || flagVariant === 'any'
         }
         return isFeatureEnabled && flagVariantCheck
@@ -632,7 +646,7 @@ export class SurveyManager {
             return true
         }
         const surveysActivatedByEventsOrActions: string[] | undefined =
-            this._insights.surveys._surveyEventReceiver?.getSurveys()
+            this._insights.surveys?._surveyEventReceiver?.getSurveys()
         return !!surveysActivatedByEventsOrActions?.includes(survey.id)
     }
 
@@ -650,7 +664,7 @@ export class SurveyManager {
     }
 
     public getActiveMatchingSurveys = (callback: SurveyCallback, forceReload = false): void => {
-        this._insights?.surveys.getSurveys((surveys) => {
+        this._insights?.surveys?.getSurveys((surveys) => {
             const targetingMatchedSurveys = surveys.filter((survey) => {
                 const eligibility = this.checkSurveyEligibility(survey)
                 return (
@@ -1034,6 +1048,7 @@ export function usePopupVisibility(
                     [SurveyEventProperties.SURVEY_ID]: survey.id,
                     [SurveyEventProperties.SURVEY_ITERATION]: survey.current_iteration,
                     [SurveyEventProperties.SURVEY_ITERATION_START_DATE]: survey.current_iteration_start_date,
+                    ...(surveyLanguage && { [SurveyEventProperties.SURVEY_LANGUAGE]: surveyLanguage }),
                     sessionRecordingUrl: insights.get_session_replay_url?.(),
                 })
             }
@@ -1163,7 +1178,11 @@ export function SurveyPopup({
             isPreviewMode,
             previewPageIndex: previewPageIndex,
             onPopupSurveyDismissed: () => {
-                dismissedSurveyEvent(survey, insights, isPreviewMode)
+                if (surveyLanguage) {
+                    dismissedSurveyEvent(survey, insights, isPreviewMode, surveyLanguage)
+                } else {
+                    dismissedSurveyEvent(survey, insights, isPreviewMode)
+                }
                 onPopupSurveyDismissed()
             },
             isPopup: isPopup || false,
@@ -1173,7 +1192,17 @@ export function SurveyPopup({
             properties,
             surveyLanguage,
         }
-    }, [isPreviewMode, previewPageIndex, isPopup, insights, survey, onPopupSurveyDismissed, onPreviewSubmit, properties])
+    }, [
+        isPreviewMode,
+        previewPageIndex,
+        isPopup,
+        insights,
+        survey,
+        onPopupSurveyDismissed,
+        onPreviewSubmit,
+        properties,
+        surveyLanguage,
+    ])
 
     if (!isPopupVisible) {
         return null

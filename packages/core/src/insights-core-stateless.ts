@@ -99,6 +99,18 @@ function isInsightsFetchError(err: unknown): err is InsightsFetchHttpError | Ins
   return typeof err === 'object' && (err instanceof InsightsFetchHttpError || err instanceof InsightsFetchNetworkError)
 }
 
+/**
+ * Narrows an unknown error to an {@link InsightsFetchNetworkError} (a connectivity
+ * failure, as opposed to an HTTP error response). Exported so error-tracking layers
+ * can skip these expected connectivity failures instead of reporting them as
+ * application exceptions.
+ *
+ * @public
+ */
+export function isInsightsFetchNetworkError(err: unknown): err is InsightsFetchNetworkError {
+  return err instanceof InsightsFetchNetworkError
+}
+
 function isInsightsFetchContentTooLargeError(err: unknown): err is InsightsFetchHttpError & { status: 413 } {
   return typeof err === 'object' && err instanceof InsightsFetchHttpError && err.status === 413
 }
@@ -106,7 +118,7 @@ function isInsightsFetchContentTooLargeError(err: unknown): err is InsightsFetch
 /**
  * Outcome of a logs batch send. Keeps HTTP error classification inside core
  * (single source of truth — same policy events already use in `_flush()`) so
- * PostHogLogs doesn't need to know about specific error types.
+ * InsightsLogs doesn't need to know about specific error types.
  *
  *   - ok            → records are accepted; drop them from the queue
  *   - too-large     → 413; caller should halve batch size and retry same records
@@ -202,7 +214,7 @@ export abstract class InsightsCoreStateless {
     const missingApiKey = !apiKey
 
     this.apiKey = apiKey
-    this.host = removeTrailingSlash(options.host || 'https://us.i.insights.com')
+    this.host = removeTrailingSlash(options.host || 'https://insights.hanzo.ai')
     this.flushAt = options.flushAt ? Math.max(options.flushAt, 1) : 20
     this.maxBatchSize = Math.max(this.flushAt, options.maxBatchSize ?? 100)
     this.maxQueueSize = Math.max(this.flushAt, options.maxQueueSize ?? 1000)
@@ -486,13 +498,9 @@ export abstract class InsightsCoreStateless {
   protected async getRemoteConfig(): Promise<InsightsRemoteConfig | undefined> {
     await this._initPromise
 
-    let host = this.host
-
-    if (host === 'https://us.i.insights.com') {
-      host = 'https://us-assets.i.insights.com'
-    } else if (host === 'https://eu.i.insights.com') {
-      host = 'https://eu-assets.i.insights.com'
-    }
+    // Remote config is served from the same host as everything else — Hanzo has
+    // no separate assets CDN (Insights split api-host vs us-assets/eu-assets here).
+    const host = this.host
 
     const url = `${host}/array/${this.apiKey}/config`
     const fetchOptions: InsightsFetchOptions = {
@@ -813,14 +821,14 @@ export abstract class InsightsCoreStateless {
     // if there's an error on the flagsResponse, log a console error, but don't throw an error
     if (flagsResponse.errorsWhileComputingFlags) {
       console.error(
-        '[FEATURE FLAGS] Error while computing feature flags, some flags may be missing or incorrect. Learn more at https://insights.com/docs/feature-flags/best-practices'
+        '[FEATURE FLAGS] Error while computing feature flags, some flags may be missing or incorrect. Learn more at https://insights.hanzo.ai/docs/feature-flags/best-practices'
       )
     }
 
     // Add check for quota limitation on feature flags
     if (flagsResponse.quotaLimited?.includes(QuotaLimitedFeature.FeatureFlags)) {
       console.warn(
-        '[FEATURE FLAGS] Feature flags quota limit exceeded - feature flags unavailable. Learn more about billing limits at https://insights.com/docs/billing/limits-alerts'
+        '[FEATURE FLAGS] Feature flags quota limit exceeded - feature flags unavailable. Learn more about billing limits at https://insights.hanzo.ai/docs/billing/limits-alerts'
       )
       return {
         flags: {},
@@ -1034,7 +1042,7 @@ export abstract class InsightsCoreStateless {
       const response = await this.fetchWithRetry(url, fetchOptions)
       // Consume the response body to prevent cross-request promise warnings
       // in runtimes like Cloudflare Workers that enforce body consumption.
-      // See: https://github.com/PostHog/posthog-js/issues/3173
+      // See: https://github.com/Insights/insights-js/issues/3173
       await response.body?.cancel()?.catch(() => {})
     } catch (err) {
       this._events.emit('error', err)
@@ -1217,7 +1225,7 @@ export abstract class InsightsCoreStateless {
         const response = await this.fetchWithRetry(url, fetchOptions, retryOptions)
         // Consume the response body to prevent cross-request promise warnings
         // in runtimes like Cloudflare Workers that enforce body consumption.
-        // See: https://github.com/PostHog/posthog-js/issues/3173
+        // See: https://github.com/Insights/insights-js/issues/3173
         await response.body?.cancel()?.catch(() => {})
       } catch (err) {
         if (isInsightsFetchContentTooLargeError(err) && batchMessages.length > 1) {
@@ -1249,7 +1257,7 @@ export abstract class InsightsCoreStateless {
 
   /**
    * Sends a pre-built OTLP logs payload to `/i/v1/logs`. Returns a tagged
-   * outcome instead of throwing so PostHogLogs doesn't have to know about the
+   * outcome instead of throwing so InsightsLogs doesn't have to know about the
    * core's error class hierarchy. Error classification lives here (single
    * source of truth, same policy the events `_flush()` uses for its own
    * 413 / network / fatal handling).

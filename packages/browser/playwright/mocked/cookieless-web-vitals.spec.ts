@@ -1,4 +1,4 @@
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start } from './utils/setup'
 import { pollUntilEventCaptured } from './utils/event-capture-utils'
 
@@ -33,7 +33,7 @@ test.describe('Web Vitals in cookieless mode', () => {
 
         expect(webVitalsEvent.properties.$session_id).toBeUndefined()
         expect(webVitalsEvent.properties.$window_id).toBeUndefined()
-        expect(webVitalsEvent.properties.distinct_id).toBe('$posthog_cookieless')
+        expect(webVitalsEvent.properties.distinct_id).toBe('$insights_cookieless')
 
         expect(webVitalsEvent.properties.$web_vitals_FCP_event).toMatchObject({
             name: 'FCP',

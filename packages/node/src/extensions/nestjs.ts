@@ -3,8 +3,8 @@ import { Observable, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
 
 import ErrorTracking from './error-tracking'
-import { addProperty, getFirstHeaderValue, getPostHogTracingHeaderValues } from './tracing-headers'
-import { PostHogBackendClient } from '../client'
+import { addProperty, getFirstHeaderValue, getInsightsTracingHeaderValues } from './tracing-headers'
+import { InsightsBackendClient } from '../client'
 
 // Local interfaces to avoid runtime dependency on @nestjs/common
 interface HttpArgumentsHost {
@@ -29,7 +29,7 @@ export interface ExceptionCaptureOptions {
   minStatusToCapture?: number
 }
 
-export interface PostHogInterceptorOptions {
+export interface InsightsInterceptorOptions {
   /** Enable exception capture. Pass `true` for defaults or an object to configure. @default false */
   captureExceptions?: boolean | ExceptionCaptureOptions
 }
@@ -56,13 +56,13 @@ function getExceptionStatus(exception: unknown): number | undefined {
   return undefined
 }
 
-export class PostHogInterceptor implements NestInterceptor {
-  private posthog: PostHogBackendClient
+export class InsightsInterceptor implements NestInterceptor {
+  private insights: InsightsBackendClient
   private captureExceptions: boolean
   private minStatusToCapture: number
 
-  constructor(posthog: PostHogBackendClient, options?: PostHogInterceptorOptions) {
-    this.posthog = posthog
+  constructor(insights: InsightsBackendClient, options?: InsightsInterceptorOptions) {
+    this.insights = insights
     const capture = options?.captureExceptions
     this.captureExceptions = !!capture
     this.minStatusToCapture = (typeof capture === 'object' ? capture.minStatusToCapture : undefined) ?? 500
@@ -74,7 +74,7 @@ export class PostHogInterceptor implements NestInterceptor {
     const response = httpHost.getResponse()
 
     const headers = (request?.headers ?? {}) as IncomingHttpHeaders
-    const { sessionId, distinctId } = getPostHogTracingHeaderValues(headers)
+    const { sessionId, distinctId } = getInsightsTracingHeaderValues(headers)
 
     const properties: Record<string, any> = {}
     addProperty(properties, '$current_url', request?.url)
@@ -91,7 +91,7 @@ export class PostHogInterceptor implements NestInterceptor {
 
     // Use enterContext so the context propagates through RxJS Observable
     // subscription and catchError handlers, not just the synchronous callback.
-    this.posthog.enterContext(contextData)
+    this.insights.enterContext(contextData)
 
     let source = next.handle()
 
@@ -108,7 +108,7 @@ export class PostHogInterceptor implements NestInterceptor {
           const responseStatus = status ?? response?.statusCode
           const additionalProperties: Record<string, any> | undefined =
             responseStatus !== undefined ? { $response_status_code: responseStatus } : undefined
-          this.posthog.captureException(exception, distinctId, additionalProperties)
+          this.insights.captureException(exception, distinctId, additionalProperties)
           return throwError(() => exception)
         })
       )

@@ -1,7 +1,7 @@
-import { PostHog } from '@hanzo/insights-node'
-import PostHogOpenAI from '../src/openai'
-import PostHogAnthropic from '../src/anthropic'
-import PostHogGemini from '../src/gemini'
+import { Insights } from '@hanzo/insights-node'
+import InsightsOpenAI from '../src/openai'
+import InsightsAnthropic from '../src/anthropic'
+import InsightsGemini from '../src/gemini'
 import { LangChainCallbackHandler } from '../src/langchain/callbacks'
 import { withTracing } from '../src/index'
 import { flushPromises } from './test-utils'
@@ -19,7 +19,7 @@ import type {
 // --- Mocks ---
 
 jest.mock('@hanzo/insights-node', () => ({
-  PostHog: jest.fn().mockImplementation(() => ({
+  Insights: jest.fn().mockImplementation(() => ({
     capture: jest.fn(),
     captureImmediate: jest.fn(),
     privacy_mode: false,
@@ -135,7 +135,7 @@ const createMockAsyncIterator = <T>(chunks: T[]): MockAsyncIterator<T> => {
   }
 }
 
-const getCapturedProperties = (client: PostHog): Record<string, any> => {
+const getCapturedProperties = (client: Insights): Record<string, any> => {
   const captureMock = client.capture as jest.Mock
   expect(captureMock).toHaveBeenCalledTimes(1)
   return captureMock.mock.calls[0][0].properties
@@ -144,20 +144,20 @@ const getCapturedProperties = (client: PostHog): Record<string, any> => {
 // --- Tests ---
 
 describe('$ai_stop_reason extraction', () => {
-  let mockPostHogClient: PostHog
+  let mockInsightsClient: Insights
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockPostHogClient = new (PostHog as any)()
+    mockInsightsClient = new (Insights as any)()
   })
 
   describe('OpenAI Chat Completions', () => {
-    let client: PostHogOpenAI
+    let client: InsightsOpenAI
 
     beforeEach(() => {
-      client = new PostHogOpenAI({
+      client = new InsightsOpenAI({
         apiKey: 'test-key',
-        posthog: mockPostHogClient as any,
+        insights: mockInsightsClient as any,
       })
     })
 
@@ -184,10 +184,10 @@ describe('$ai_stop_reason extraction', () => {
       await client.chat.completions.create({
         model: 'gpt-4',
         messages: [{ role: 'user', content: 'Hi' }],
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
 
@@ -214,10 +214,10 @@ describe('$ai_stop_reason extraction', () => {
       await client.chat.completions.create({
         model: 'gpt-4',
         messages: [{ role: 'user', content: 'Write a long essay' }],
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('length')
     })
 
@@ -252,7 +252,7 @@ describe('$ai_stop_reason extraction', () => {
         model: 'gpt-4',
         messages: [{ role: 'user', content: 'Hi' }],
         stream: true,
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
       // Consume the stream
@@ -262,18 +262,18 @@ describe('$ai_stop_reason extraction', () => {
 
       await flushPromises()
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
   })
 
   describe('OpenAI Responses API', () => {
-    let client: PostHogOpenAI
+    let client: InsightsOpenAI
 
     beforeEach(() => {
-      client = new PostHogOpenAI({
+      client = new InsightsOpenAI({
         apiKey: 'test-key',
-        posthog: mockPostHogClient as any,
+        insights: mockInsightsClient as any,
       })
     })
 
@@ -306,10 +306,10 @@ describe('$ai_stop_reason extraction', () => {
       await client.responses.create({
         model: 'gpt-4o',
         input: 'Hi',
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('completed')
     })
 
@@ -358,7 +358,7 @@ describe('$ai_stop_reason extraction', () => {
         model: 'gpt-4o',
         input: 'Hi',
         stream: true,
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
       for await (const _chunk of stream as any) {
@@ -367,18 +367,18 @@ describe('$ai_stop_reason extraction', () => {
 
       await flushPromises()
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('completed')
     })
   })
 
   describe('Anthropic', () => {
-    let client: PostHogAnthropic
+    let client: InsightsAnthropic
 
     beforeEach(() => {
-      client = new PostHogAnthropic({
+      client = new InsightsAnthropic({
         apiKey: 'test-key',
-        posthog: mockPostHogClient as any,
+        insights: mockInsightsClient as any,
       })
     })
 
@@ -401,10 +401,10 @@ describe('$ai_stop_reason extraction', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Hi' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('end_turn')
     })
 
@@ -427,10 +427,10 @@ describe('$ai_stop_reason extraction', () => {
         model: 'claude-3-opus-20240229',
         messages: [{ role: 'user', content: 'Write a long essay' }],
         max_tokens: 100,
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('max_tokens')
     })
 
@@ -478,7 +478,7 @@ describe('$ai_stop_reason extraction', () => {
         messages: [{ role: 'user', content: 'Hi' }],
         max_tokens: 100,
         stream: true,
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
       for await (const _chunk of stream as any) {
@@ -487,18 +487,18 @@ describe('$ai_stop_reason extraction', () => {
 
       await new Promise(process.nextTick)
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('end_turn')
     })
   })
 
   describe('Gemini', () => {
-    let client: PostHogGemini
+    let client: InsightsGemini
 
     beforeEach(() => {
-      client = new PostHogGemini({
+      client = new InsightsGemini({
         apiKey: 'test-key',
-        posthog: mockPostHogClient as any,
+        insights: mockInsightsClient as any,
       })
     })
 
@@ -523,10 +523,10 @@ describe('$ai_stop_reason extraction', () => {
       await client.models.generateContent({
         model: 'gemini-2.0-flash-001',
         contents: 'Hello',
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('STOP')
     })
 
@@ -551,10 +551,10 @@ describe('$ai_stop_reason extraction', () => {
       await client.models.generateContent({
         model: 'gemini-2.0-flash-001',
         contents: 'Write a long essay',
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('MAX_TOKENS')
     })
 
@@ -588,14 +588,14 @@ describe('$ai_stop_reason extraction', () => {
       const stream = client.models.generateContentStream({
         model: 'gemini-2.0-flash-001',
         contents: 'Hello',
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
       for await (const _chunk of stream) {
         // consume
       }
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('STOP')
     })
   })
@@ -619,15 +619,15 @@ describe('$ai_stop_reason extraction', () => {
         doStream: jest.fn(),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
       })
 
       await model.doGenerate({
         prompt: [{ role: 'user', content: [{ type: 'text', text: 'Hi' }] }],
       } as any)
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
 
@@ -652,15 +652,15 @@ describe('$ai_stop_reason extraction', () => {
         doStream: jest.fn(),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
       })
 
       await model.doGenerate({
         prompt: [{ role: 'user', content: [{ type: 'text', text: 'Hi' }] }],
       } as any)
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
 
@@ -693,9 +693,9 @@ describe('$ai_stop_reason extraction', () => {
         }),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
-        posthogTraceId: 'test-trace',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
+        insightsTraceId: 'test-trace',
       })
 
       const result = await model.doStream({
@@ -709,7 +709,7 @@ describe('$ai_stop_reason extraction', () => {
 
       await flushPromises()
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
 
@@ -745,9 +745,9 @@ describe('$ai_stop_reason extraction', () => {
         }),
       }
 
-      const model = withTracing(baseModel, mockPostHogClient, {
-        posthogDistinctId: 'test-user',
-        posthogTraceId: 'test-trace',
+      const model = withTracing(baseModel, mockInsightsClient, {
+        insightsDistinctId: 'test-user',
+        insightsTraceId: 'test-trace',
       })
 
       const result = await model.doStream({
@@ -761,7 +761,7 @@ describe('$ai_stop_reason extraction', () => {
 
       await flushPromises()
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
   })
@@ -769,7 +769,7 @@ describe('$ai_stop_reason extraction', () => {
   describe('LangChain', () => {
     test('extracts finish_reason from generationInfo (OpenAI format)', () => {
       const handler = new LangChainCallbackHandler({
-        client: mockPostHogClient,
+        client: mockInsightsClient,
       })
 
       const serialized = {
@@ -809,13 +809,13 @@ describe('$ai_stop_reason extraction', () => {
         'run-1'
       )
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('stop')
     })
 
     test('extracts stop_reason from generationInfo (Anthropic format)', () => {
       const handler = new LangChainCallbackHandler({
-        client: mockPostHogClient,
+        client: mockInsightsClient,
       })
 
       const serialized = {
@@ -855,13 +855,13 @@ describe('$ai_stop_reason extraction', () => {
         'run-2'
       )
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBe('end_turn')
     })
 
     test('does not include $ai_stop_reason when not available', () => {
       const handler = new LangChainCallbackHandler({
-        client: mockPostHogClient,
+        client: mockInsightsClient,
       })
 
       const serialized = {
@@ -899,7 +899,7 @@ describe('$ai_stop_reason extraction', () => {
         'run-3'
       )
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBeUndefined()
     })
   })
@@ -922,9 +922,9 @@ describe('$ai_stop_reason extraction', () => {
         usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
       }
 
-      const client = new PostHogOpenAI({
+      const client = new InsightsOpenAI({
         apiKey: 'test-key',
-        posthog: mockPostHogClient as any,
+        insights: mockInsightsClient as any,
       })
 
       const ChatMock: any = openaiModule.Chat
@@ -933,10 +933,10 @@ describe('$ai_stop_reason extraction', () => {
       await client.chat.completions.create({
         model: 'gpt-4',
         messages: [{ role: 'user', content: 'Hi' }],
-        posthogDistinctId: 'test-user',
+        insightsDistinctId: 'test-user',
       })
 
-      const properties = getCapturedProperties(mockPostHogClient)
+      const properties = getCapturedProperties(mockInsightsClient)
       expect(properties['$ai_stop_reason']).toBeUndefined()
     })
   })

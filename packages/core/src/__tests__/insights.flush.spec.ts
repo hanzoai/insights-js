@@ -64,9 +64,9 @@ describe('Insights Core', () => {
         })
       })
 
-      posthog.capture('test-event-1')
+      insights.capture('test-event-1')
       jest.useRealTimers()
-      await expect(posthog.flush()).resolves.not.toThrow()
+      await expect(insights.flush()).resolves.not.toThrow()
 
       if (expectCancel) {
         expect(cancelFn).toHaveBeenCalledTimes(1)

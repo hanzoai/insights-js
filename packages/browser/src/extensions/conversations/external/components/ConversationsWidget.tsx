@@ -119,6 +119,11 @@ export class ConversationsWidget extends Component<WidgetProps, WidgetState> {
         isUserIdentified?: boolean,
         isIdentityMode?: boolean
     ): boolean {
+        // Server-verified identity mode -- identity is already established
+        if (isIdentityMode) {
+            return false
+        }
+
         // If user is already identified via Insights, no form needed
         // They've called insights.identify() so we have their identity
         if (isUserIdentified) {

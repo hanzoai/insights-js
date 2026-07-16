@@ -185,7 +185,7 @@ describe('surveys', () => {
 
         config = createMockConfig({
             token: 'testtoken',
-            api_host: 'https://app.insights.com',
+            api_host: 'https://insights.hanzo.ai',
             persistence: 'memory',
             surveys_request_timeout_ms: SURVEYS_REQUEST_TIMEOUT_MS,
         })
@@ -256,7 +256,7 @@ describe('surveys', () => {
             expect(data).toEqual(firstSurveys)
         })
         expect(instance._send_request).toHaveBeenCalledWith({
-            url: 'https://us.i.insights.com/api/surveys/?token=testtoken',
+            url: 'https://insights.hanzo.ai/api/surveys/?token=testtoken',
             timeout: SURVEYS_REQUEST_TIMEOUT_MS,
             method: 'GET',
             callback: expect.any(Function),
@@ -302,7 +302,7 @@ describe('surveys', () => {
             expect(data).toEqual(firstSurveys)
         })
         expect(instance._send_request).toHaveBeenCalledWith({
-            url: 'https://us.i.insights.com/api/surveys/?token=testtoken',
+            url: 'https://insights.hanzo.ai/api/surveys/?token=testtoken',
             timeout: SURVEYS_REQUEST_TIMEOUT_MS,
             method: 'GET',
             callback: expect.any(Function),
@@ -577,7 +577,7 @@ describe('surveys', () => {
                 surveys: [surveyWithUrl, surveyWithSelector, surveyWithUrlAndSelector],
             }
             // eslint-disable-next-line compat/compat
-            assignableWindow.location = new URL('https://insights.com') as unknown as Location
+            assignableWindow.location = new URL('https://insights.hanzo.ai') as unknown as Location
             surveys.getActiveMatchingSurveys((data) => {
                 expect(data).toEqual([surveyWithUrl])
             })
@@ -695,7 +695,7 @@ describe('surveys', () => {
             }
 
             // eslint-disable-next-line compat/compat
-            assignableWindow.location = new URL('https://insights.com') as unknown as Location
+            assignableWindow.location = new URL('https://insights.hanzo.ai') as unknown as Location
             surveys.getActiveMatchingSurveys((data) => {
                 // returns surveyWithIsNotUrlMatch and surveyWithUrlDoesNotContainRegex because they don't contain insights.com
                 expect(data).toEqual([surveyWithIsNotUrlMatch, surveyWithUrlDoesNotContainRegex])

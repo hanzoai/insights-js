@@ -25,8 +25,9 @@ import { isBoolean, isFunction, isNull, isObject } from '@hanzo/insights-core'
 import { createLogger } from './utils/logger'
 import { document, window } from './utils/globals'
 import { convertToURL } from './utils/request-utils'
-import { isDocumentFragment, isElementNode, isTag, isTextNode } from './utils/element-utils'
+import { isElementNode, isShadowRoot, isTag, isTextNode } from './utils/element-utils'
 import { includes } from '@hanzo/insights-core'
+import type { Extension } from './extensions/types'
 
 const COPY_AUTOCAPTURE_EVENT = '$copy_autocapture'
 
@@ -239,7 +240,7 @@ export function autocapturePropertiesForElement(
     return { props }
 }
 
-export class Autocapture {
+export class Autocapture implements Extension {
     instance: Insights
     _initialized: boolean = false
     _isDisabledServerSide: boolean | null = null

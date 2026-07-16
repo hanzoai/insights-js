@@ -110,7 +110,7 @@ export interface Insights {
     addExceptionStep(message: string, properties?: Properties): void
 
     /**
-     * Capture a log entry and send it to the PostHog logs endpoint.
+     * Capture a log entry and send it to the Insights logs endpoint.
      *
      * @param options - The log entry options (body, level, attributes, etc.)
      */
@@ -121,8 +121,8 @@ export interface Insights {
      *
      * @example
      * ```js
-     * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
-     * posthog.logger.error('payment failed', { error_code: 'E001' })
+     * insights.logger.info('checkout completed', { order_id: 'ord_789' })
+     * insights.logger.error('payment failed', { error_code: 'E001' })
      * ```
      */
     logger: Logger
@@ -193,7 +193,7 @@ export interface Insights {
      * This also enables person processing for the current user.
      *
      * This is useful for using in a cohort your internal/test filters for your insights org.
-     * @see https://insights.com/tutorials/filter-internal-users
+     * @see https://insights.hanzo.ai/tutorials/filter-internal-users
      * Create a cohort with `$internal_or_test_user` IS SET, and set your internal test filters to be NOT IN that cohort.
      *
      * {@label Identification}
@@ -258,7 +258,7 @@ export interface Insights {
          *     flags: {'beta-feature': 'variant'},
          *     payloads: { 'beta-feature': { someData: true } }
          * })
-         * posthog.featureFlags.overrideFeatureFlags({ // only override payloads
+         * insights.featureFlags.overrideFeatureFlags({ // only override payloads
          *     payloads: { 'beta-feature': { someData: true } }
          * })
          * ```

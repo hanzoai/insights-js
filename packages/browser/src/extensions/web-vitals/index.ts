@@ -1,5 +1,5 @@
 import { Insights } from '../../insights-core'
-import { RemoteConfig, SupportedWebVitalsMetrics } from '../../types'
+import { InsightsConfig, RemoteConfig, SupportedWebVitalsMetrics } from '../../types'
 import { createLogger } from '../../utils/logger'
 import { isBoolean, isNullish, isNumber, isUndefined, isObject } from '@hanzo/insights-core'
 import { WEB_VITALS_ALLOWED_METRICS, WEB_VITALS_ENABLED_SERVER_SIDE } from '../../constants'
@@ -30,7 +30,7 @@ export class WebVitalsAutocapture {
         this.startIfEnabled()
     }
 
-    private get _perfConfig(): PostHogConfig['capture_performance'] {
+    private get _perfConfig(): InsightsConfig['capture_performance'] {
         return this._instance.config.capture_performance
     }
 

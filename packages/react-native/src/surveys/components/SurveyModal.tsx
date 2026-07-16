@@ -3,10 +3,8 @@ import { Keyboard, KeyboardAvoidingView, Modal, Platform, StyleSheet, View, useW
 
 import { Cancel } from './Cancel'
 import { ConfirmationMessage } from './ConfirmationMessage'
-import { Questions } from './Surveys'
-
-import { SurveyAppearanceTheme } from '../surveys-utils'
-import { Survey, SurveyQuestionDescriptionContentType } from '@hanzo/insights-core'
+import { SurveyAppearanceTheme, resolveSurveyAlignment } from '../surveys-utils'
+import { Survey, type SurveyResponses } from '@hanzo/insights-core'
 import { useOptionalSafeAreaInsets } from '../../optional/OptionalReactNativeSafeArea'
 import { Questions } from './Surveys'
 

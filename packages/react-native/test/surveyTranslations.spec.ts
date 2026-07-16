@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals'
 import { Survey, SurveyQuestionType, SurveyType } from '@hanzo/insights-core'
 import { applySurveyTranslationForUser, detectUserLanguage } from '../src/surveys/survey-translations'
-import { PostHog } from '../src/posthog-rn'
+import { Insights } from '../src/insights-rn'
 
 const createBaseSurvey = (): Survey => ({
   id: 'test-survey',
@@ -22,7 +22,7 @@ const createBaseSurvey = (): Survey => ({
   },
 })
 
-const createMockPostHog = ({
+const createMockInsights = ({
   overrideLanguage,
   storedPersonProperties,
   locale,
@@ -30,28 +30,28 @@ const createMockPostHog = ({
   overrideLanguage?: string | null
   storedPersonProperties?: unknown
   locale?: string | null
-}): PostHog =>
+}): Insights =>
   ({
     getSurveyDisplayLanguageOverride: () => overrideLanguage ?? null,
     getPersistedProperty: jest.fn(() => storedPersonProperties),
     getCommonEventProperties: jest.fn(() => ({ $locale: locale ?? null })),
-  }) as unknown as PostHog
+  }) as unknown as Insights
 
 describe('react native survey translations', () => {
   it('prioritizes overrideDisplayLanguage over person properties and locale', () => {
-    const posthog = createMockPostHog({
+    const insights = createMockInsights({
       overrideLanguage: 'de',
       storedPersonProperties: { language: 'es' },
       locale: 'fr',
     })
 
-    expect(detectUserLanguage(posthog)).toBe('de')
+    expect(detectUserLanguage(insights)).toBe('de')
   })
 
   it('falls back to person properties and then locale', () => {
     expect(
       detectUserLanguage(
-        createMockPostHog({
+        createMockInsights({
           storedPersonProperties: { language: 'es' },
           locale: 'fr',
         })
@@ -60,7 +60,7 @@ describe('react native survey translations', () => {
 
     expect(
       detectUserLanguage(
-        createMockPostHog({
+        createMockInsights({
           storedPersonProperties: { some_other_property: 'value' },
           locale: 'pt-BR',
         })
@@ -69,7 +69,7 @@ describe('react native survey translations', () => {
   })
 
   it('applies translated survey copy for the detected user language', () => {
-    const posthog = createMockPostHog({ locale: 'pt-BR' })
+    const insights = createMockInsights({ locale: 'pt-BR' })
     const survey = createBaseSurvey()
     survey.translations = {
       pt: {
@@ -83,7 +83,7 @@ describe('react native survey translations', () => {
       },
     }
 
-    const result = applySurveyTranslationForUser(survey, posthog)
+    const result = applySurveyTranslationForUser(survey, insights)
 
     expect(result.survey.name).toBe('Pesquisa Teste')
     expect(result.survey.questions[0].question).toBe('O que voce acha?')

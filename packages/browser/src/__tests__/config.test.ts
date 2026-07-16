@@ -33,9 +33,9 @@ describe('config', () => {
             ['2026-01-30', '2026-01-30' as const, 0],
             ['2026-05-30', '2026-05-30' as const, 250],
         ])('persistence_save_debounce_ms with defaults %s', (_label, defaults, expected) => {
-            const posthog = new PostHog()
-            posthog._init('test-token', defaults ? { defaults } : undefined)
-            expect(posthog.config.persistence_save_debounce_ms).toBe(expected)
+            const insights = new Insights()
+            insights._init('test-token', defaults ? { defaults } : undefined)
+            expect(insights.config.persistence_save_debounce_ms).toBe(expected)
         })
 
         it('should preserve other default config values when setting defaults', () => {

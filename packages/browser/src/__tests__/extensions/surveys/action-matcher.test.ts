@@ -14,7 +14,7 @@ describe('action-matcher', () => {
     beforeEach(() => {
         config = createMockConfig({
             token: 'testtoken',
-            api_host: 'https://app.insights.com',
+            api_host: 'https://insights.hanzo.ai',
             persistence: 'memory',
         })
 
@@ -94,7 +94,7 @@ describe('action-matcher', () => {
     })
 
     it('can match action on current_url exact', () => {
-        const pageViewAction = createAction(2, '$autocapture', 'https://us.insights.com')
+        const pageViewAction = createAction(2, '$autocapture', 'https://insights.hanzo.ai')
         const actionMatcher = new ActionMatcher(instance)
         actionMatcher.register([pageViewAction])
 
@@ -107,10 +107,10 @@ describe('action-matcher', () => {
         }
 
         actionMatcher._addActionHook(onAction)
-        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://eu.insights.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://insights.hanzo.ai'))
         expect(pageViewActionMatched).toBeFalsy()
 
-        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://us.insights.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$autocapture', 'https://insights.hanzo.ai'))
         expect(pageViewActionMatched).toBeTruthy()
     })
 
@@ -128,11 +128,11 @@ describe('action-matcher', () => {
         }
 
         actionMatcher._addActionHook(onAction)
-        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://eu.insights.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://insights.hanzo.ai'))
         expect(pageViewActionMatched).toBeTruthy()
         pageViewActionMatched = false
 
-        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://us.insights.com'))
+        actionMatcher.on('$autocapture', createCaptureResult('$current_url_regexp', 'https://insights.hanzo.ai'))
         expect(pageViewActionMatched).toBeTruthy()
     })
 
@@ -153,7 +153,7 @@ describe('action-matcher', () => {
         }
         actionMatcher._addActionHook(onAction)
 
-        const result = createCaptureResult('$autocapture', 'https://eu.insights.com')
+        const result = createCaptureResult('$autocapture', 'https://insights.hanzo.ai')
         result.properties.$element_selectors = []
         actionMatcher.on('$autocapture', result)
         expect(buttonClickedActionMatched).toBeFalsy()

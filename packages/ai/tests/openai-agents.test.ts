@@ -1,4 +1,4 @@
-import { PostHogTracingProcessor } from '../src/openai-agents/processor'
+import { InsightsTracingProcessor } from '../src/openai-agents/processor'
 
 // Mock types matching @openai/agents-core interfaces
 interface MockTrace {
@@ -58,13 +58,13 @@ function createMockSpan(overrides: Partial<MockSpan> = {}): MockSpan {
   }
 }
 
-describe('PostHogTracingProcessor', () => {
+describe('InsightsTracingProcessor', () => {
   let mockClient: ReturnType<typeof createMockClient>
-  let processor: PostHogTracingProcessor
+  let processor: InsightsTracingProcessor
 
   beforeEach(() => {
     mockClient = createMockClient()
-    processor = new PostHogTracingProcessor({
+    processor = new InsightsTracingProcessor({
       client: mockClient,
       distinctId: 'test-user',
       privacyMode: false,
@@ -73,7 +73,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('initialization', () => {
     it('initializes correctly with all options', () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'user@example.com',
         privacyMode: true,
@@ -81,15 +81,15 @@ describe('PostHogTracingProcessor', () => {
         properties: { env: 'test' },
       })
 
-      expect(proc).toBeInstanceOf(PostHogTracingProcessor)
+      expect(proc).toBeInstanceOf(InsightsTracingProcessor)
     })
 
     it('initializes with minimal options', () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
       })
 
-      expect(proc).toBeInstanceOf(PostHogTracingProcessor)
+      expect(proc).toBeInstanceOf(InsightsTracingProcessor)
     })
   })
 
@@ -139,7 +139,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('personless mode', () => {
     it('uses personless mode when no distinct_id is provided', async () => {
-      const proc = new PostHogTracingProcessor({ client: mockClient })
+      const proc = new InsightsTracingProcessor({ client: mockClient })
       const trace = createMockTrace()
 
       await proc.onTraceStart(trace as any)
@@ -151,7 +151,7 @@ describe('PostHogTracingProcessor', () => {
     })
 
     it('uses personless mode for spans when no distinct_id is provided', async () => {
-      const proc = new PostHogTracingProcessor({ client: mockClient })
+      const proc = new InsightsTracingProcessor({ client: mockClient })
       const trace = createMockTrace()
       const span = createMockSpan({
         spanData: { type: 'generation', model: 'gpt-4o' },
@@ -169,7 +169,7 @@ describe('PostHogTracingProcessor', () => {
     })
 
     it('uses personless mode when callable distinct_id returns null', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: () => null,
       })
@@ -201,7 +201,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('distinct_id resolution', () => {
     it('supports callable distinct_id', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: (trace: any) => `user-${trace.name}`,
       })
@@ -215,7 +215,7 @@ describe('PostHogTracingProcessor', () => {
     })
 
     it('spans use distinct_id resolved at trace start', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: (trace: any) => `user-${trace.name}`,
       })
@@ -743,7 +743,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('privacy mode', () => {
     it('redacts input/output content when privacy mode is enabled', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
         privacyMode: true,
@@ -772,7 +772,7 @@ describe('PostHogTracingProcessor', () => {
     })
 
     it('redacts function span input/output in privacy mode', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
         privacyMode: true,
@@ -798,7 +798,7 @@ describe('PostHogTracingProcessor', () => {
     })
 
     it('redacts custom span data in privacy mode', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
         privacyMode: true,
@@ -895,7 +895,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('groups and properties', () => {
     it('includes groups in captured events', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
         groups: { company: 'acme', team: 'engineering' },
@@ -910,7 +910,7 @@ describe('PostHogTracingProcessor', () => {
     })
 
     it('includes additional properties in events', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
         properties: { environment: 'production', version: '1.0' },
@@ -928,7 +928,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('shutdown and flush', () => {
     it('clears internal state on shutdown', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
       })
@@ -954,7 +954,7 @@ describe('PostHogTracingProcessor', () => {
 
   describe('memory management', () => {
     it('evicts stale entries when exceeding max tracked entries', async () => {
-      const proc = new PostHogTracingProcessor({
+      const proc = new InsightsTracingProcessor({
         client: mockClient,
         distinctId: 'test-user',
       })
@@ -1012,7 +1012,7 @@ describe('instrument()', () => {
       distinctId: 'test-user',
     })
 
-    expect(processor).toBeInstanceOf(PostHogTracingProcessor)
+    expect(processor).toBeInstanceOf(InsightsTracingProcessor)
     expect(mockAddTraceProcessor).toHaveBeenCalledWith(processor)
   })
 

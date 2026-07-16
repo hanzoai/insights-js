@@ -21,7 +21,8 @@ import {
     setSurveySeenOnLocalStorage,
     SURVEY_IN_PROGRESS_PREFIX,
 } from '../../utils/survey-utils'
-import { isArray, isNullish } from '@hanzo/insights-core'
+import { isNullish, type SurveyResponses } from '@hanzo/insights-core'
+import { buildSurveyResponseProperties, getSurveyResponseKey, surveyHasResponses } from '@hanzo/insights-core/surveys'
 
 import { propertyComparisons } from '../../utils/property-utils'
 import { localStore } from '../../storage'
@@ -432,8 +433,9 @@ export const sendSurveyEvent = ({
         [SurveyEventProperties.SURVEY_ITERATION_START_DATE]: survey.current_iteration_start_date,
         [SurveyEventProperties.SURVEY_SUBMISSION_ID]: surveySubmissionId,
         [SurveyEventProperties.SURVEY_COMPLETED]: isSurveyCompleted,
+        ...(surveyLanguage && { [SurveyEventProperties.SURVEY_LANGUAGE]: surveyLanguage }),
         sessionRecordingUrl: insights.get_session_replay_url?.(),
-        ...responses,
+        ...buildSurveyResponseProperties(responses, survey),
         ...properties,
         $set: {
             [getSurveyInteractionProperty(survey, 'responded')]: true,
@@ -455,14 +457,21 @@ const _buildSurveyEventProperties = (
     [SurveyEventProperties.SURVEY_ID]: survey.id,
     [SurveyEventProperties.SURVEY_ITERATION]: survey.current_iteration,
     [SurveyEventProperties.SURVEY_ITERATION_START_DATE]: survey.current_iteration_start_date,
-    [SurveyEventProperties.SURVEY_PARTIALLY_COMPLETED]: _surveyHasResponses(inProgressSurvey),
+    [SurveyEventProperties.SURVEY_PARTIALLY_COMPLETED]: surveyHasResponses(inProgressSurvey?.responses),
+    ...(inProgressSurvey?.surveyLanguage && {
+        [SurveyEventProperties.SURVEY_LANGUAGE]: inProgressSurvey.surveyLanguage,
+    }),
     sessionRecordingUrl: insights.get_session_replay_url?.(),
-    ...inProgressSurvey?.responses,
     [SurveyEventProperties.SURVEY_SUBMISSION_ID]: inProgressSurvey?.surveySubmissionId,
     ...buildSurveyResponseProperties(inProgressSurvey?.responses, survey),
 })
 
-export const dismissedSurveyEvent = (survey: Survey, insights?: Insights, readOnly?: boolean) => {
+export const dismissedSurveyEvent = (
+    survey: Survey,
+    insights?: Insights,
+    readOnly?: boolean,
+    surveyLanguage?: string | null
+) => {
     if (!insights) {
         logger.error('[survey dismissed] event not captured, Insights instance not found.')
         return
@@ -474,6 +483,7 @@ export const dismissedSurveyEvent = (survey: Survey, insights?: Insights, readOn
     const inProgressSurvey = getInProgressSurveyState(survey)
     insights.capture(SurveyEventName.DISMISSED, {
         ..._buildSurveyEventProperties(survey, inProgressSurvey, insights),
+        ...(surveyLanguage && { [SurveyEventProperties.SURVEY_LANGUAGE]: surveyLanguage }),
         $set: {
             [getSurveyInteractionProperty(survey, 'dismissed')]: true,
         },

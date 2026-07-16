@@ -630,7 +630,7 @@ describe('InsightsGemini - Jest test suite', () => {
               groundingChunks: [
                 {
                   web: {
-                    uri: 'https://insights.com',
+                    uri: 'https://insights.hanzo.ai',
                     title: 'Insights',
                   },
                 },
@@ -940,14 +940,14 @@ describe('InsightsGemini - Jest test suite', () => {
       const response = await client.models.embedContent({
         model: 'gemini-embedding-001',
         contents: 'Hello world',
-        posthogDistinctId: 'test-id',
-        posthogProperties: { foo: 'bar' },
+        insightsDistinctId: 'test-id',
+        insightsProperties: { foo: 'bar' },
       })
 
       expect(response).toEqual(mockEmbedResponse)
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       const { distinctId, event, properties } = captureArgs[0]
 
       expect(distinctId).toBe('test-id')
@@ -973,10 +973,10 @@ describe('InsightsGemini - Jest test suite', () => {
       await client.models.embedContent({
         model: 'gemini-embedding-001',
         contents: ['Hello', 'World'],
-        posthogDistinctId: 'test-id',
+        insightsDistinctId: 'test-id',
       })
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       expect(captureArgs[0].properties['$ai_input_tokens']).toBe(13) // 5 + 8
     })
 
@@ -986,10 +986,10 @@ describe('InsightsGemini - Jest test suite', () => {
       await client.models.embedContent({
         model: 'gemini-embedding-001',
         contents: 'Hello',
-        posthogDistinctId: 'test-id',
+        insightsDistinctId: 'test-id',
       })
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       expect(captureArgs[0].properties['$ai_input_tokens']).toBe(0)
     })
 
@@ -999,11 +999,11 @@ describe('InsightsGemini - Jest test suite', () => {
       await client.models.embedContent({
         model: 'gemini-embedding-001',
         contents: 'Secret text',
-        posthogDistinctId: 'test-id',
-        posthogPrivacyMode: true,
+        insightsDistinctId: 'test-id',
+        insightsPrivacyMode: true,
       })
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       expect(captureArgs[0].properties['$ai_input']).toBeNull()
     })
 
@@ -1015,12 +1015,12 @@ describe('InsightsGemini - Jest test suite', () => {
         client.models.embedContent({
           model: 'gemini-embedding-001',
           contents: 'Hello',
-          posthogDistinctId: 'test-id',
+          insightsDistinctId: 'test-id',
         })
       ).rejects.toThrow()
 
-      expect(mockPostHogClient.capture).toHaveBeenCalledTimes(1)
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      expect(mockInsightsClient.capture).toHaveBeenCalledTimes(1)
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       expect(captureArgs[0].event).toBe('$ai_embedding')
       expect(captureArgs[0].properties['$ai_is_error']).toBe(true)
       expect(captureArgs[0].properties['$ai_input_tokens']).toBe(0)
@@ -1032,7 +1032,7 @@ describe('InsightsGemini - Jest test suite', () => {
       await client.models.embedContent({
         model: 'gemini-embedding-001',
         contents: 'Hello',
-        posthogDistinctId: 'test-id',
+        insightsDistinctId: 'test-id',
         config: { outputDimensionality: 64 },
       })
 
@@ -1048,7 +1048,7 @@ describe('InsightsGemini - Jest test suite', () => {
         contents: 'Hello',
       })
 
-      const [captureArgs] = (mockPostHogClient.capture as jest.Mock).mock.calls
+      const [captureArgs] = (mockInsightsClient.capture as jest.Mock).mock.calls
       expect(captureArgs[0].properties['$process_person_profile']).toBe(false)
       // distinctId should fall back to traceId
       expect(captureArgs[0].distinctId).toBe(captureArgs[0].properties['$ai_trace_id'])
