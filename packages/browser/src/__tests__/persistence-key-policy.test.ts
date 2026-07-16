@@ -117,7 +117,7 @@ const isRegisterForSessionReceiver = (expression: ts.Expression | undefined): bo
     return (
         !!expression &&
         (ts.isThis(expression) ||
-            isIdentifierNamed(expression, 'posthog') ||
+            isIdentifierNamed(expression, 'insights') ||
             hasPropertyName(expression, ['_instance', 'instance']))
     )
 }
@@ -363,9 +363,9 @@ const isThisPropsElementAccess = (expression: ts.Expression): boolean => {
     )
 }
 
-const collectPostHogPersistenceMutationBoundaryIssues = (): string[] => {
+const collectInsightsPersistenceMutationBoundaryIssues = (): string[] => {
     const issues: string[] = []
-    const filePath = path.resolve(__dirname, '../posthog-persistence.ts')
+    const filePath = path.resolve(__dirname, '../insights-persistence.ts')
     const sourceText = fs.readFileSync(filePath, 'utf8')
     const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true)
     const allowedDirectMutationMethods = new Set(['_setProp', '_deleteProp'])
@@ -390,7 +390,7 @@ const collectPostHogPersistenceMutationBoundaryIssues = (): string[] => {
             const enclosingMethodName = getEnclosingClassMethodName(node)
             if (!enclosingMethodName || !allowedDirectMutationMethods.has(enclosingMethodName)) {
                 issues.push(
-                    `posthog-persistence.ts:${getLine(sourceFile, node)} direct this.props assignment must be contained in _setProp`
+                    `insights-persistence.ts:${getLine(sourceFile, node)} direct this.props assignment must be contained in _setProp`
                 )
             }
         }
@@ -399,7 +399,7 @@ const collectPostHogPersistenceMutationBoundaryIssues = (): string[] => {
             const enclosingMethodName = getEnclosingClassMethodName(node)
             if (!enclosingMethodName || !allowedDirectMutationMethods.has(enclosingMethodName)) {
                 issues.push(
-                    `posthog-persistence.ts:${getLine(sourceFile, node)} direct this.props deletion must be contained in _deleteProp`
+                    `insights-persistence.ts:${getLine(sourceFile, node)} direct this.props deletion must be contained in _deleteProp`
                 )
             }
         }
@@ -414,7 +414,7 @@ const collectPostHogPersistenceMutationBoundaryIssues = (): string[] => {
                 const enclosingMethodName = getEnclosingClassMethodName(node)
                 if (!enclosingMethodName || !allowedSinkCallerMethods.has(enclosingMethodName)) {
                     issues.push(
-                        `posthog-persistence.ts:${getLine(sourceFile, node)} ${methodName}() is called from unexpected method ${enclosingMethodName ?? '<unknown>'}`
+                        `insights-persistence.ts:${getLine(sourceFile, node)} ${methodName}() is called from unexpected method ${enclosingMethodName ?? '<unknown>'}`
                     )
                 }
             }
@@ -460,8 +460,8 @@ describe('persistence key policy', () => {
         ).toMatchObject({ exposure: 'hidden' })
     })
 
-    it('keeps direct persistence mutations behind the PostHogPersistence sink helpers', () => {
-        expect(collectPostHogPersistenceMutationBoundaryIssues()).toEqual([])
+    it('keeps direct persistence mutations behind the InsightsPersistence sink helpers', () => {
+        expect(collectInsightsPersistenceMutationBoundaryIssues()).toEqual([])
     })
 
     it('classifies SDK-owned persistence keys and forbids raw literal keys at persistence write sites', () => {

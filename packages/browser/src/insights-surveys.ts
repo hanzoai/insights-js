@@ -3,6 +3,7 @@ import { LOAD_EXT_NOT_FOUND, SURVEYS } from './constants'
 const SURVEY_NOT_LOADED = 'SDK is not enabled or survey functionality is not yet loaded'
 const SURVEY_DISABLED = 'Disabled. Not loading surveys.'
 import { SurveyManager } from './extensions/surveys'
+import type { Extension } from './extensions/types'
 import { Insights } from './insights-core'
 import {
     DisplaySurveyOptions,
@@ -25,7 +26,7 @@ import {
 } from './utils/survey-utils'
 import { isNullish, isUndefined, isArray } from '@hanzo/insights-core'
 
-export class InsightsSurveys {
+export class InsightsSurveys implements Extension {
     // this is set to undefined until the remote config is loaded
     // then it's set to true if there are surveys to load
     // or false if there are no surveys to load
@@ -40,6 +41,10 @@ export class InsightsSurveys {
         surveys: Survey[]
         context: { isLoaded: boolean; error?: string }
     }> | null = null
+
+    private get _config() {
+        return this._instance.config
+    }
 
     constructor(private readonly _instance: Insights) {
         // we set this to undefined here because we need the persistence storage for this type
@@ -126,7 +131,7 @@ export class InsightsSurveys {
             const loadExternalDependency = phExtensions.loadExternalDependency
             if (!loadExternalDependency) {
                 // Cannot load surveys code
-                this._handleSurveyLoadError('Insights loadExternalDependency extension not found.')
+                this._handleSurveyLoadError(LOAD_EXT_NOT_FOUND)
                 return
             }
 

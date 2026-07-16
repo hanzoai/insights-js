@@ -15,7 +15,7 @@
     "type": "module",
     "license": "MIT",
     "keywords": [
-        "posthog",
+        "insights",
         "nextjs",
         "analytics",
         "feature-flags"

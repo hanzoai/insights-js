@@ -17,6 +17,7 @@ import {
     OverrideFeatureFlagsOptions,
 } from './types'
 import { InsightsPersistence } from './insights-persistence'
+import type { Extension } from './extensions/types'
 
 import {
     PERSISTENCE_EARLY_ACCESS_FEATURES,
@@ -201,7 +202,7 @@ export const QuotaLimitedResource = {
 } as const
 export type QuotaLimitedResource = (typeof QuotaLimitedResource)[keyof typeof QuotaLimitedResource]
 
-export class InsightsFeatureFlags {
+export class InsightsFeatureFlags implements Extension {
     _override_warning: boolean = false
     featureFlagEventHandlers: FeatureFlagsCallback[]
     $anon_distinct_id: string | undefined
@@ -653,7 +654,7 @@ export class InsightsFeatureFlags {
                 if (isQuotaLimited) {
                     // log a warning and then early return
                     logger.warn(
-                        'You have hit your feature flags quota limit, and will not be able to load feature flags until the quota is reset.  Please visit https://insights.com/docs/billing/limits-alerts to learn more.'
+                        'You have hit your feature flags quota limit, and will not be able to load feature flags until the quota is reset.  Please visit https://insights.hanzo.ai/docs/billing/limits-alerts to learn more.'
                     )
                     return
                 }
@@ -885,7 +886,7 @@ export class InsightsFeatureFlags {
      * Fetches the payload for a remote config feature flag. This method will bypass any cached values and fetch the latest
      * value from the Insights API.
      *
-     * Note: Because the @hanzo/insights SDK is primarily used with public project API keys, encrypted remote config payloads will
+     * Note: Because the insights-js SDK is primarily used with public project API keys, encrypted remote config payloads will
      * be redacted, never decrypted in the response.
      *
      * ### Usage:
@@ -1010,6 +1011,8 @@ export class InsightsFeatureFlags {
      *     - insights.featureFlags.overrideFeatureFlags(false) // clear all overrides
      *     - insights.featureFlags.overrideFeatureFlags(['beta-feature']) // enable flags
      *     - insights.featureFlags.overrideFeatureFlags({'beta-feature': 'variant'}) // set variants
+     *     - insights.featureFlags.overrideFeatureFlags({ flags: ['beta-feature'] }) // enable flags
+     *     - insights.featureFlags.overrideFeatureFlags({ flags: {'beta-feature': 'variant'} }) // set variants
      *     - insights.featureFlags.overrideFeatureFlags({ // set both flags and payloads
      *         flags: {'beta-feature': 'variant'},
      *         payloads: { 'beta-feature': { someData: true } }
@@ -1019,7 +1022,7 @@ export class InsightsFeatureFlags {
      *       })
      */
     overrideFeatureFlags(overrideOptions: OverrideFeatureFlagsOptions): void {
-        if (!this._instance.__loaded || !this._instance.persistence) {
+        if (!this._instance.__loaded || !this._persistence) {
             return logger.uninitializedWarning('insights.featureFlags.overrideFeatureFlags')
         }
 

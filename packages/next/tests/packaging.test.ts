@@ -8,9 +8,9 @@
  *      condition (`browser`, `edge-light`/`edge`/`worker`, `react-server`,
  *      `default`).
  *   2. The transitive import closure of each built barrel never reaches
- *      `'server-only'` or `posthog-node` from a runtime that can't handle
+ *      `'server-only'` or `insights-node` from a runtime that can't handle
  *      them — Next.js rejects `'server-only'` in client bundles, and
- *      `posthog-node` uses Node-only APIs that don't exist in the Edge
+ *      `insights-node` uses Node-only APIs that don't exist in the Edge
  *      runtime or the browser.
  */
 
@@ -125,13 +125,13 @@ describeIfBuilt('Transitive import closure of each built barrel', () => {
     it.each([
         ['pages.client.js', 'browser → ./pages'],
         ['index.client.js', 'browser/default → .'],
-    ])('client barrel %s (%s) never reaches server-only or posthog-node', (file) => {
+    ])('client barrel %s (%s) never reaches server-only or insights-node', (file) => {
         const imports = bareImportsReachableFrom(path.join(DIST_DIR, file))
         expect(imports.has('server-only')).toBe(false)
         expect(imports.has('@hanzo/insights-node')).toBe(false)
     })
 
-    it('index.react-server.js never reaches server-only (posthog-node is allowed)', () => {
+    it('index.react-server.js never reaches server-only (insights-node is allowed)', () => {
         const imports = bareImportsReachableFrom(path.join(DIST_DIR, 'index.react-server.js'))
         expect(imports.has('server-only')).toBe(false)
     })

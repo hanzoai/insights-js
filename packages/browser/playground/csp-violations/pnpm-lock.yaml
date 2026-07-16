@@ -26,7 +26,7 @@ importers:
       express:
         specifier: ^4.18.2
         version: 4.21.2
-      posthog-js:
+      insights-js:
         specifier: ^1.242.2
         version: 1.242.2
       uuid:
@@ -462,7 +462,7 @@ packages:
     resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
     engines: {node: '>=12'}
 
-  posthog-js@1.242.2:
+  insights-js@1.242.2:
     resolution: {integrity: sha512-bj5Bq9Z/TE24k0fbt/VoD13xsqCybuoLp7KkWmfknEiO63+1Ln/PnX/1CjppikE9yM7toQIWY3vY7hT/RTT57Q==}
     peerDependencies:
       '@rrweb/types': 2.0.0-alpha.17
@@ -1057,7 +1057,7 @@ snapshots:
 
   picomatch@4.0.2: {}
 
-  posthog-js@1.242.2:
+  insights-js@1.242.2:
     dependencies:
       core-js: 3.42.0
       fflate: 0.4.8

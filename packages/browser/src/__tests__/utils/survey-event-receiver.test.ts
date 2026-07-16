@@ -80,7 +80,7 @@ describe('survey-event-receiver', () => {
             mockAddCaptureHook = jest.fn()
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.insights.com',
+                api_host: 'https://insights.hanzo.ai',
                 persistence: 'memory',
             })
 
@@ -213,7 +213,7 @@ describe('survey-event-receiver', () => {
             mockAddCaptureHook = jest.fn()
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.insights.com',
+                api_host: 'https://insights.hanzo.ai',
                 persistence: 'memory',
             })
 
@@ -402,7 +402,7 @@ describe('survey-event-receiver', () => {
         beforeEach(() => {
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.insights.com',
+                api_host: 'https://insights.hanzo.ai',
                 persistence: 'memory',
             })
 
@@ -501,16 +501,16 @@ describe('survey-event-receiver', () => {
         })
 
         it('can match action on current_url exact', () => {
-            autoCaptureSurvey.conditions.actions.values = [createAction(2, '$autocapture', 'https://us.insights.com')]
+            autoCaptureSurvey.conditions.actions.values = [createAction(2, '$autocapture', 'https://insights.hanzo.ai')]
             const surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$autocapture', 'https://eu.insights.com'))
+                .on('$autocapture', createCaptureResult('$autocapture', 'https://insights.hanzo.ai'))
             expect(surveyEventReceiver.getSurveys()).not.toEqual(['first-survey'])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$autocapture', 'https://us.insights.com'))
+                .on('$autocapture', createCaptureResult('$autocapture', 'https://insights.hanzo.ai'))
             expect(surveyEventReceiver.getSurveys()).toEqual(['first-survey'])
         })
 
@@ -522,14 +522,14 @@ describe('survey-event-receiver', () => {
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$current_url_regexp', 'https://eu.insights.com'))
+                .on('$autocapture', createCaptureResult('$current_url_regexp', 'https://insights.hanzo.ai'))
             expect(surveyEventReceiver.getSurveys()).toEqual(['first-survey'])
 
             surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
             surveyEventReceiver
                 ._getActionMatcher()
-                .on('$autocapture', createCaptureResult('$autocapture', 'https://us.insights.com'))
+                .on('$autocapture', createCaptureResult('$autocapture', 'https://insights.hanzo.ai'))
             expect(surveyEventReceiver.getSurveys()).toEqual(['first-survey'])
         })
 
@@ -537,7 +537,7 @@ describe('survey-event-receiver', () => {
             const action = createAction(2, '$autocapture')
             action.steps[0].selector = '* > #__next .flex > button:nth-child(2)'
             autoCaptureSurvey.conditions.actions.values = [action]
-            const result = createCaptureResult('$autocapture', 'https://eu.insights.com')
+            const result = createCaptureResult('$autocapture', 'https://insights.hanzo.ai')
             result.properties.$element_selectors = ['* > #__next .flex > button:nth-child(2)']
             const surveyEventReceiver = new SurveyEventReceiver(instance)
             surveyEventReceiver.register([autoCaptureSurvey, pageViewSurvey])
@@ -570,7 +570,7 @@ describe('survey-event-receiver', () => {
             mockCancelPendingSurvey = jest.fn()
             config = createMockConfig({
                 token: 'testtoken',
-                api_host: 'https://app.insights.com',
+                api_host: 'https://insights.hanzo.ai',
                 persistence: 'memory',
             })
 

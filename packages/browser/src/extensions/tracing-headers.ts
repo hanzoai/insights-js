@@ -2,6 +2,7 @@ import { Insights } from '../insights-core'
 import { assignableWindow } from '../utils/globals'
 import { createLogger } from '../utils/logger'
 import { isUndefined } from '@hanzo/insights-core'
+import type { Extension } from './types'
 
 const logger = createLogger('[TracingHeaders]')
 
@@ -49,15 +50,15 @@ export class TracingHeaders implements Extension {
     private _startCapturing = () => {
         const hostnames = this._getConfiguredHostnames() || []
         if (isUndefined(this._restoreXHRPatch)) {
-            assignableWindow.__InsightsExtensions__?.tracingHeadersPatchFns?._patchXHR(
-                this._instance.config.__add_tracing_headers || [],
+            this._restoreXHRPatch = assignableWindow.__InsightsExtensions__?.tracingHeadersPatchFns?._patchXHR(
+                hostnames,
                 this._instance.get_distinct_id(),
                 this._instance.sessionManager
             )
         }
         if (isUndefined(this._restoreFetchPatch)) {
-            assignableWindow.__InsightsExtensions__?.tracingHeadersPatchFns?._patchFetch(
-                this._instance.config.__add_tracing_headers || [],
+            this._restoreFetchPatch = assignableWindow.__InsightsExtensions__?.tracingHeadersPatchFns?._patchFetch(
+                hostnames,
                 this._instance.get_distinct_id(),
                 this._instance.sessionManager
             )

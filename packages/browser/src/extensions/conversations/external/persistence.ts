@@ -1,3 +1,9 @@
+import {
+    CONVERSATIONS_LEGACY_TICKET_ID,
+    CONVERSATIONS_LEGACY_USER_TRAITS,
+    CONVERSATIONS_LEGACY_WIDGET_SESSION_ID,
+    CONVERSATIONS_LEGACY_WIDGET_STATE,
+} from '../../../constants'
 import { Insights } from '../../../insights-core'
 import { UserProvidedTraits } from '../../../insights-conversations-types'
 import { createLogger } from '../../../utils/logger'
@@ -5,13 +11,6 @@ import { window } from '../../../utils/globals'
 import { uuidv7 } from '../../../uuidv7'
 
 const logger = createLogger('[ConversationsPersistence]')
-
-// Old persistence keys (in Insights's main persistence blob).
-// Kept for one-time migration to dedicated storage.
-const LEGACY_WIDGET_SESSION_ID = '$conversations_widget_session_id'
-const LEGACY_TICKET_ID = '$conversations_ticket_id'
-const LEGACY_WIDGET_STATE = '$conversations_widget_state'
-const LEGACY_USER_TRAITS = '$conversations_user_traits'
 
 interface ConversationsStorageData {
     widgetSessionId?: string
@@ -22,11 +21,11 @@ interface ConversationsStorageData {
 
 /**
  * Dedicated localStorage key scoped to the Insights project token.
- * Format: `ph_conv_<token>`
+ * Format: `hi_conv_<token>`
  */
 function storageKey(insights: Insights): string | null {
     const token = insights.config?.token
-    return token ? 'ph_conv_' + token : null
+    return token ? 'hi_conv_' + token : null
 }
 
 /**
@@ -243,8 +242,8 @@ export class ConversationsPersistence {
                 return null
             }
             const key = (this._insights.config as any).persistence_name
-                ? 'ph_' + (this._insights.config as any).persistence_name
-                : 'ph_' + token + '_insights'
+                ? 'hi_' + (this._insights.config as any).persistence_name
+                : 'hi_' + token + '_insights'
 
             const raw = window?.localStorage?.getItem(key)
             if (!raw) {

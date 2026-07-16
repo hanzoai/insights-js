@@ -74,12 +74,12 @@ describe(`Module-based loader in Node env`, () => {
         expect(insights.init(``, { disable_surveys: true, disable_conversations: true }, 'sdk-2')).toBeInstanceOf(
             Insights
         )
-        const nullTokenInstance = posthog.init(
+        const nullTokenInstance = insights.init(
             null as any,
             { disable_surveys: true, disable_conversations: true },
             'sdk-null'
         )
-        expect(nullTokenInstance).toBeInstanceOf(PostHog)
+        expect(nullTokenInstance).toBeInstanceOf(Insights)
         expect((nullTokenInstance as any).__loaded).toBe(false)
 
         expect(console.error).toHaveBeenCalledWith(
@@ -88,7 +88,7 @@ describe(`Module-based loader in Node env`, () => {
         )
 
         expect(
-            posthog.init(`  trim-me\n`, { disable_surveys: true, disable_conversations: true }, 'sdk-trim').config.token
+            insights.init(`  trim-me\n`, { disable_surveys: true, disable_conversations: true }, 'sdk-trim').config.token
         ).toBe('trim-me')
 
         // Already loaded logged even when not debug

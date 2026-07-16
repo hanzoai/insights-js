@@ -1337,14 +1337,14 @@ describe('Autocapture system', () => {
                 composedPath: () => [button, main_el],
             })
             const autocapture_config = {
-                url_allowlist: ['https://insights.com/test/*'],
+                url_allowlist: ['https://insights.hanzo.ai/test/*'],
             }
 
-            window!.location = new URL('https://insights.com/test/matching') as unknown as string & Location
+            window!.location = new URL('https://insights.hanzo.ai/test/matching') as unknown as string & Location
 
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(true)
 
-            window!.location = new URL('https://insights.com/docs/not-matching') as unknown as string & Location
+            window!.location = new URL('https://insights.hanzo.ai/docs/not-matching') as unknown as string & Location
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(false)
         })
 
@@ -1358,14 +1358,14 @@ describe('Autocapture system', () => {
                 composedPath: () => [button, main_el],
             })
             const autocapture_config = {
-                url_ignorelist: ['https://insights.com/test/*'],
+                url_ignorelist: ['https://insights.hanzo.ai/test/*'],
             }
 
-            window!.location = new URL('https://insights.com/test/matching') as unknown as string & Location
+            window!.location = new URL('https://insights.hanzo.ai/test/matching') as unknown as string & Location
 
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(false)
 
-            window!.location = new URL('https://insights.com/docs/not-matching') as unknown as string & Location
+            window!.location = new URL('https://insights.hanzo.ai/docs/not-matching') as unknown as string & Location
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(true)
         })
 
@@ -1382,7 +1382,7 @@ describe('Autocapture system', () => {
                 url_allowlist: [],
             }
 
-            window!.location = new URL('https://insights.com/test/captured') as unknown as string & Location
+            window!.location = new URL('https://insights.hanzo.ai/test/captured') as unknown as string & Location
 
             expect(shouldCaptureDomEvent(button, e, autocapture_config)).toBe(false)
         })

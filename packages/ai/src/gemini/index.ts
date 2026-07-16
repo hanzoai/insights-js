@@ -18,6 +18,9 @@ import {
   extractInsightsParams,
   toContentString,
   sendEventWithErrorToInsights,
+  getModelParams,
+  withPrivacyMode,
+  buildInlineDataBlock,
 } from '../utils'
 import { captureAiGeneration } from '../captureAiGeneration'
 import { sanitizeGemini } from '../sanitization'
@@ -61,6 +64,7 @@ export class WrappedModels {
       const availableTools = extractAvailableToolCalls('gemini', geminiParams)
 
       const metadata = response.usageMetadata
+      const finishReason = response.candidates?.[0]?.finishReason
       await sendEventToInsights({
         client: this.phClient,
         ...insightsParams,
@@ -254,7 +258,7 @@ export class WrappedModels {
   }
 
   public async embedContent(params: EmbedContentParameters & MonitoringParams): Promise<EmbedContentResponse> {
-    const { providerParams: geminiParams, posthogParams } = extractPosthogParams(params)
+    const { providerParams: geminiParams, insightsParams } = extractInsightsParams(params)
     const startTime = Date.now()
 
     try {
@@ -264,11 +268,11 @@ export class WrappedModels {
       const inputTokens = extractEmbeddingTokenCount(response)
 
       await captureAiGeneration(this.phClient, {
-        ...posthogParams,
+        ...insightsParams,
         eventType: AIEvent.Embedding,
         model: geminiParams.model,
         provider: 'gemini',
-        input: withPrivacyMode(this.phClient, posthogParams.privacyMode ?? false, geminiParams.contents),
+        input: withPrivacyMode(this.phClient, insightsParams.privacyMode ?? false, geminiParams.contents),
         output: null,
         latency,
         baseURL: 'https://generativelanguage.googleapis.com',
@@ -283,11 +287,11 @@ export class WrappedModels {
     } catch (error: unknown) {
       const latency = (Date.now() - startTime) / 1000
       await captureAiGeneration(this.phClient, {
-        ...posthogParams,
+        ...insightsParams,
         eventType: AIEvent.Embedding,
         model: geminiParams.model,
         provider: 'gemini',
-        input: withPrivacyMode(this.phClient, posthogParams.privacyMode ?? false, geminiParams.contents),
+        input: withPrivacyMode(this.phClient, insightsParams.privacyMode ?? false, geminiParams.contents),
         output: null,
         latency,
         baseURL: 'https://generativelanguage.googleapis.com',

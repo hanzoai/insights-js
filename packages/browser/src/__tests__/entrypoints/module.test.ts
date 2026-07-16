@@ -41,8 +41,8 @@ describe('Full no-external bundles', () => {
     ])(
         '%s full no-external bundle should eagerly bootstrap session recording',
         (_name, fullNoExternalBundle, noExternalBundle) => {
-            expect(fullNoExternalBundle).toMatch(/__PosthogExtensions__\.initSessionRecording\s*=/)
-            expect(noExternalBundle).not.toMatch(/__PosthogExtensions__\.initSessionRecording\s*=/)
+            expect(fullNoExternalBundle).toMatch(/__InsightsExtensions__\.initSessionRecording\s*=/)
+            expect(noExternalBundle).not.toMatch(/__InsightsExtensions__\.initSessionRecording\s*=/)
         }
     )
 })

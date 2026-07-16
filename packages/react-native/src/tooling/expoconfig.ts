@@ -54,15 +54,18 @@ const INSIGHTS_REACT_NATIVE_XCODE_PATH =
   "`\"$NODE_BINARY\" --print \"require('path').join(require('path').dirname(require.resolve('insights-react-native')), '..', 'tooling', 'insights-xcode.sh')\"`"
 
 export function addInsightsWithBundledScriptsToBundleShellScript(script: string): string {
+  // Capture only the RN script path (group 1), stripping any leading shell/interpreter
+  // token (e.g. "/bin/sh") that may prefix it in Expo SDK 53+ bundle phase scripts.
+  // Without this, $1 inside insights-xcode.sh resolves to "/bin/sh" instead of the
+  // react-native-xcode.sh path, silently breaking the PACKAGER_SOURCEMAP_FILE patch.
   return script.replace(
-    /^.*?(packager|scripts)\/react-native-xcode\.sh\s*(\\'\\\\")?/m,
-    // eslint-disable-next-line no-useless-escape
-    (match: string) => `/bin/sh ${INSIGHTS_REACT_NATIVE_XCODE_PATH} ${match}`
+    /^(?:.*\s)?((?:[^\s]*(?:packager|scripts)\/react-native-xcode\.sh)\s*(?:\'\\\")?)/m,
+    (_match: string, rnPath: string) => `/bin/sh ${INSIGHTS_REACT_NATIVE_XCODE_PATH} ${rnPath}`
   )
 }
 
 export function disableUserScriptSandboxing(xcodeProject: any): void {
-  // posthog-cli needs to read .git/ for release auto-detection, which the
+  // insights-cli needs to read .git/ for release auto-detection, which the
   // Xcode 14+ user script sandbox blocks.
   //
   // Scope: withXcodeProject only exposes the main app's .xcodeproj (the Pods
@@ -79,11 +82,11 @@ export function disableUserScriptSandboxing(xcodeProject: any): void {
   }
 }
 
-type PostHogPluginProps = {
+type InsightsPluginProps = {
   /**
    * Whether to disable Xcode's user script sandboxing (ENABLE_USER_SCRIPT_SANDBOXING=NO).
    *
-   * posthog-cli reads .git/ during sourcemap uploads for release auto-detection;
+   * insights-cli reads .git/ during sourcemap uploads for release auto-detection;
    * sandboxing (on by default in Xcode 14+) blocks that, so uploads lose git info
    * or fail silently.
    *
@@ -97,7 +100,7 @@ type PostHogPluginProps = {
   disableSandboxing?: boolean
 }
 
-const withIosPlugin = (config: any, props: PostHogPluginProps = {}) => {
+const withIosPlugin = (config: any, props: InsightsPluginProps = {}) => {
   return withXcodeProject(config, (config: any) => {
     const xcodeProject = config.modResults
 
@@ -111,7 +114,7 @@ const withIosPlugin = (config: any, props: PostHogPluginProps = {}) => {
     if (props.disableSandboxing !== false) {
       disableUserScriptSandboxing(xcodeProject)
       console.warn(
-        '[posthog-react-native] Setting ENABLE_USER_SCRIPT_SANDBOXING=NO on all Xcode ' +
+        '[insights-react-native] Setting ENABLE_USER_SCRIPT_SANDBOXING=NO on all Xcode ' +
           'build configurations so sourcemap uploads can resolve git metadata. ' +
           "If your org requires sandboxing to stay enabled, set `{ disableSandboxing: false }` " +
           'on the plugin in app.json — note that stock Expo projects may fail to build under ' +
@@ -123,18 +126,18 @@ const withIosPlugin = (config: any, props: PostHogPluginProps = {}) => {
   })
 }
 
-const withInsightsPlugin = (config: any) => {
+const withInsightsPlugin = (config: any, props: InsightsPluginProps = {}) => {
   config = withAndroidPlugin(config)
   return withIosPlugin(config, props)
 }
 
-module.exports = (config: any) => {
-  return withInsightsPlugin(config)
+const insightsPlugin = (config: any, props: InsightsPluginProps = {}): any => {
+  return withInsightsPlugin(config, props)
 }
 
 // Re-export the plugin function as the default export while keeping the
 // named exports above callable from tests.
-module.exports = postHogPlugin
+module.exports = insightsPlugin
 module.exports.modifyExistingXcodeBuildScript = modifyExistingXcodeBuildScript
-module.exports.addPostHogWithBundledScriptsToBundleShellScript = addPostHogWithBundledScriptsToBundleShellScript
+module.exports.addInsightsWithBundledScriptsToBundleShellScript = addInsightsWithBundledScriptsToBundleShellScript
 module.exports.disableUserScriptSandboxing = disableUserScriptSandboxing

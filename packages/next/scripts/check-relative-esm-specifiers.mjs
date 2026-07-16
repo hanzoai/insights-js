@@ -9,7 +9,7 @@ const forbiddenBareSpecifiers = new Set([
     'next/router',
     'next/headers',
     'next/server',
-    'posthog-js/react',
+    'insights-js/react',
 ])
 const specifierPattern = /\b(?:import|export)\s+(?:[^'"\n]*?\sfrom\s+)?['"]([^'"]+)['"]|\bimport\(\s*['"]([^'"]+)['"]\s*\)/g
 

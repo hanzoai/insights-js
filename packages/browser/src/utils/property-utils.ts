@@ -1,7 +1,7 @@
-import { isNull, isUndefined } from '@hanzo/insights-core'
+import { isArray, isNull, isUndefined } from '@hanzo/insights-core'
 import { jsonStringify } from '../request'
 import { PropertyFilters, PropertyOperator } from '../insights-surveys-types'
-import type { Properties } from '../types'
+import type { Properties, SessionRecordingTriggerPropertyFilter } from '../types'
 import { isMatchingRegex } from './regex-utils'
 
 export function getPersonPropertiesHash(
@@ -37,8 +37,8 @@ const toLowerCase = (v: string): string => v.toLowerCase()
 
 // Operators whose semantics mean "property is not X". When the property being
 // filtered on is missing or null, these match — absence of the property
-// satisfies a "not equal to X" check. This aligns with how PostHog's feature
-// flag matchers (posthog/queries/base.py, rust/feature-flags) treat missing
+// satisfies a "not equal to X" check. This aligns with how Insights's feature
+// flag matchers (insights/queries/base.py, rust/feature-flags) treat missing
 // properties for negative operators.
 const NEGATIVE_OPERATORS: ReadonlySet<string> = new Set(['is_not', 'not_icontains', 'not_regex'])
 

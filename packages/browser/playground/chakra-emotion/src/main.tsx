@@ -2,10 +2,10 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import App from './app'
-import { posthog } from '@hanzo/insights'
+import { insights } from '@hanzo/insights'
 
-posthog.init(import.meta.env.VITE_POSTHOG_KEY || 'phc_local', {
-    api_host: import.meta.env.VITE_POSTHOG_HOST || 'http://localhost:8010',
+insights.init(import.meta.env.VITE_INSIGHTS_KEY || 'phc_local', {
+    api_host: import.meta.env.VITE_INSIGHTS_HOST || 'http://localhost:8010',
     autocapture: false,
     capture_pageview: false,
     session_recording: {
@@ -14,7 +14,7 @@ posthog.init(import.meta.env.VITE_POSTHOG_KEY || 'phc_local', {
     },
     loaded: (ph) => {
         // expose for in-browser debugging
-        ;(window as any).posthog = ph
+        ;(window as any).insights = ph
     },
 })
 

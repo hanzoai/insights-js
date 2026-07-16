@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { isString } from './typeGuards'
 import { uuidv7, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
 import { redactBase64DataUrl } from './sanitization'
+import { captureAiGeneration, type CaptureAiGenerationOptions } from './captureAiGeneration'
 
 type ChatCompletionCreateParamsBase = OpenAIOrignal.Chat.Completions.ChatCompletionCreateParams
 type MessageCreateParams = AnthropicOriginal.Messages.MessageCreateParams
@@ -576,36 +577,14 @@ export enum AIEvent {
   Embedding = '$ai_embedding',
 }
 
-export type SendEventToInsightsParams = {
-  client: Insights
-  eventType?: AIEvent
-  distinctId?: string
-  traceId: string
-  model?: string
-  provider: string
-  input: any
-  output: any
-  latency: number
-  timeToFirstToken?: number
-  baseURL: string
-  httpStatus: number
-  usage?: TokenUsage
-  params: (
-    | ChatCompletionCreateParamsBase
-    | MessageCreateParams
-    | ResponseCreateParams
-    | ResponseCreateParamsWithTools
-    | EmbeddingCreateParams
-    | TranscriptionCreateParams
-  ) &
-    MonitoringParams
-  error?: unknown
-  exceptionId?: string
-  tools?: ChatCompletionTool[] | AnthropicTool[] | GeminiTool[] | null
-  captureImmediate?: boolean
-}
+/**
+ * Parameters for the SDK-wrapper capture helpers. These thread the wrapper's
+ * detected fields straight into the canonical `captureAiGeneration` primitive,
+ * so the shape is exactly `captureAiGeneration`'s options plus the `client`.
+ */
+export type SendEventToInsightsParams = { client: Insights } & CaptureAiGenerationOptions
 
-function sanitizeValues(obj: any): any {
+export function sanitizeValues(obj: any): any {
   if (obj === undefined || obj === null) {
     return obj
   }
@@ -664,126 +643,29 @@ function addDefaults(params: MonitoringEventProperties): MonitoringEventProperti
   }
 }
 
-export const sendEventWithErrorToInsights = async ({
-  client,
-  traceId,
-  error,
-  ...args
-}: Omit<SendEventToInsightsParams, 'error' | 'httpStatus'> &
-  Required<Pick<SendEventToInsightsParams, 'error'>>): Promise<unknown> => {
-  const httpStatus =
-    error && typeof error === 'object' && 'status' in error ? ((error as { status?: number }).status ?? 500) : 500
-
-  const properties = { client, traceId, httpStatus, error: JSON.stringify(error), ...args }
-  const enrichedError = error as CoreErrorTracking.PreviouslyCapturedError
-
-  if (client.options?.enableExceptionAutocapture) {
-    // assign a uuid that can be used to link the trace and exception events
-    const exceptionId = uuidv7()
-    client.captureException(error, undefined, { $ai_trace_id: traceId }, exceptionId)
-    enrichedError.__insights_previously_captured_error = true
-    properties.exceptionId = exceptionId
-  }
-
-  await sendEventToInsights(properties)
-
-  return enrichedError
+/**
+ * Capture an `$ai_generation` event for a wrapped SDK call. Thin adapter over the
+ * canonical `captureAiGeneration` primitive so every wrapper funnels through one
+ * code path (event shape, privacy mode, token/cost handling all live there).
+ */
+export const sendEventToInsights = async ({ client, ...options }: SendEventToInsightsParams): Promise<void> => {
+  await captureAiGeneration(client, options)
 }
 
-export const sendEventToInsights = async ({
+/**
+ * Capture an `$ai_generation` error event for a wrapped SDK call and return the
+ * (possibly exception-autocapture–enriched) error so the caller can re-throw it.
+ * `captureAiGeneration` performs the exception autocapture and httpStatus
+ * inference internally, so this just forwards the error and hands it back.
+ */
+export const sendEventWithErrorToInsights = async ({
   client,
-  eventType = AIEvent.Generation,
-  distinctId,
-  traceId,
-  model,
-  provider,
-  input,
-  output,
-  latency,
-  timeToFirstToken,
-  baseURL,
-  params,
-  httpStatus = 200,
-  usage = {},
   error,
-  exceptionId,
-  tools,
-  captureImmediate = false,
-}: SendEventToInsightsParams): Promise<void> => {
-  if (!client.capture) {
-    return Promise.resolve()
-  }
-  // sanitize input and output for UTF-8 validity
-  const safeInput = sanitizeValues(input)
-  const safeOutput = sanitizeValues(output)
-  const safeError = sanitizeValues(error)
-
-  let errorData = {}
-  if (error) {
-    errorData = {
-      $ai_is_error: true,
-      $ai_error: safeError,
-      $exception_event_id: exceptionId,
-    }
-  }
-  let costOverrideData = {}
-  if (params.insightsCostOverride) {
-    const inputCostUSD = (params.insightsCostOverride.inputCost ?? 0) * (usage.inputTokens ?? 0)
-    const outputCostUSD = (params.insightsCostOverride.outputCost ?? 0) * (usage.outputTokens ?? 0)
-    costOverrideData = {
-      $ai_input_cost_usd: inputCostUSD,
-      $ai_output_cost_usd: outputCostUSD,
-      $ai_total_cost_usd: inputCostUSD + outputCostUSD,
-    }
-  }
-
-  const additionalTokenValues = {
-    ...(usage.reasoningTokens ? { $ai_reasoning_tokens: usage.reasoningTokens } : {}),
-    ...(usage.cacheReadInputTokens ? { $ai_cache_read_input_tokens: usage.cacheReadInputTokens } : {}),
-    ...(usage.cacheCreationInputTokens ? { $ai_cache_creation_input_tokens: usage.cacheCreationInputTokens } : {}),
-    ...(usage.webSearchCount ? { $ai_web_search_count: usage.webSearchCount } : {}),
-    ...(usage.rawUsage ? { $ai_usage: usage.rawUsage } : {}),
-  }
-
-  const properties = {
-    $ai_lib: 'insights-ai',
-    $ai_lib_version: version,
-    $ai_provider: params.insightsProviderOverride ?? provider,
-    $ai_model: params.insightsModelOverride ?? model,
-    $ai_model_parameters: getModelParams(params),
-    $ai_input: withPrivacyMode(client, params.insightsPrivacyMode ?? false, safeInput),
-    $ai_output_choices: withPrivacyMode(client, params.insightsPrivacyMode ?? false, safeOutput),
-    $ai_http_status: httpStatus,
-    $ai_input_tokens: usage.inputTokens ?? 0,
-    ...(usage.outputTokens !== undefined ? { $ai_output_tokens: usage.outputTokens } : {}),
-    ...additionalTokenValues,
-    $ai_latency: latency,
-    ...(timeToFirstToken !== undefined ? { $ai_time_to_first_token: timeToFirstToken } : {}),
-    $ai_trace_id: traceId,
-    $ai_base_url: baseURL,
-    ...params.insightsProperties,
-    $ai_tokens_source: getTokensSource(params.insightsProperties),
-    ...(distinctId ? {} : { $process_person_profile: false }),
-    ...(tools ? { $ai_tools: tools } : {}),
-    ...errorData,
-    ...costOverrideData,
-  }
-
-  const event: EventMessage = {
-    distinctId: distinctId ?? traceId,
-    event: eventType,
-    properties,
-    groups: params.insightsGroups,
-  }
-
-  if (captureImmediate) {
-    // await capture promise to send single event in serverless environments
-    await client.captureImmediate(event)
-  } else {
-    client.capture(event)
-  }
-
-  return Promise.resolve()
+  ...args
+}: Omit<SendEventToInsightsParams, 'httpStatus'> &
+  Required<Pick<SendEventToInsightsParams, 'error'>>): Promise<unknown> => {
+  await captureAiGeneration(client, { ...args, error })
+  return error
 }
 
 export function formatOpenAIResponsesInput(input: unknown, instructions?: string | null): FormattedMessage[] {

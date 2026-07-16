@@ -6,6 +6,8 @@ type NextFuncConfig = (phase: string, { defaultConfig }: { defaultConfig: NextCo
 type NextAsyncConfig = (phase: string, { defaultConfig }: { defaultConfig: NextConfig }) => Promise<NextConfig>
 type UserProvidedConfig = NextConfig | NextFuncConfig | NextAsyncConfig
 
+const INVOCATION_TIMEOUT_MS = 5000
+
 export function withInsightsConfig(userNextConfig: UserProvidedConfig, insightsConfig: PluginConfig): NextConfig {
   const resolvedConfig = resolveConfig(insightsConfig)
   const sourceMapEnabled = resolvedConfig.sourcemaps.enabled
@@ -15,13 +17,13 @@ export function withInsightsConfig(userNextConfig: UserProvidedConfig, insightsC
     console.warn('[@insights/nextjs-config] Turbopack support is only available with next version >= 15.4.1')
   }
 
-  // `withPostHogConfig` returns an async function that Next.js calls during
+  // `withInsightsConfig` returns an async function that Next.js calls during
   // build init. If a downstream config wrapper (e.g. `withNextIntl`) consumes
   // this function and produces its own plain-object config without delegating,
   // our webpack/compiler hooks never run and source maps silently fail to
   // upload. Detect that by checking on the next tick whether Next.js (or any
   // outer wrapper) actually invoked our returned function. If not, warn so the
-  // user knows to move `withPostHogConfig` to be the outermost wrapper.
+  // user knows to move `withInsightsConfig` to be the outermost wrapper.
   //
   // Known false-positive: if `next.config.js` is imported outside the Next.js
   // build pipeline (e.g. a Jest/Vitest test that imports the config for
@@ -29,7 +31,7 @@ export function withInsightsConfig(userNextConfig: UserProvidedConfig, insightsC
   // never invoked and this warning will fire after the timeout. That's
   // acceptable here — the warning is informational, not fatal — and the
   // alternative (an opt-out flag) adds API surface for an edge case.
-  // See https://github.com/PostHog/posthog-js/issues/3572
+  // See https://github.com/hanzoinsights/insights-js/issues/3572
   let invoked = false
   const nextConfigFn = async (phase: string, { defaultConfig }: { defaultConfig: NextConfig }) => {
     invoked = true
@@ -55,11 +57,11 @@ export function withInsightsConfig(userNextConfig: UserProvidedConfig, insightsC
     const timer = setTimeout(() => {
       if (!invoked) {
         console.warn(
-          '[@hanzo/insights-nextjs] withPostHogConfig was loaded but Next.js never invoked the config function it returns. ' +
-            'This usually means another config wrapper (e.g. withNextIntl, withSentryConfig) is wrapping withPostHogConfig ' +
-            'and producing a plain object that drops the PostHog hooks. Move withPostHogConfig(...) to be the OUTERMOST ' +
+          '[@hanzo/insights-nextjs] withInsightsConfig was loaded but Next.js never invoked the config function it returns. ' +
+            'This usually means another config wrapper (e.g. withNextIntl, withSentryConfig) is wrapping withInsightsConfig ' +
+            'and producing a plain object that drops the Insights hooks. Move withInsightsConfig(...) to be the OUTERMOST ' +
             'wrapper in next.config.js so source maps upload and other build hooks run. ' +
-            'See https://github.com/PostHog/posthog-js/issues/3572'
+            'See https://github.com/hanzoinsights/insights-js/issues/3572'
         )
       }
     }, INVOCATION_TIMEOUT_MS)

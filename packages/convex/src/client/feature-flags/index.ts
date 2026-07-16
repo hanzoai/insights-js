@@ -10,6 +10,6 @@ export type {
   FlagProperty,
   FlagPropertyValue,
   JsonType,
-  PostHogFeatureFlag,
+  InsightsFeatureFlag,
   PropertyGroup,
 } from './types.js'

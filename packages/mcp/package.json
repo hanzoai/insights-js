@@ -55,7 +55,7 @@
     "@modelcontextprotocol/sdk": ">=1.26.0"
   },
   "keywords": [
-    "posthog",
+    "insights",
     "mcp",
     "model-context-protocol",
     "analytics",

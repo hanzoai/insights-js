@@ -1,5 +1,5 @@
 export type InsightsCoreOptions = {
-  /** Insights API host, usually 'https://us.i.insights.com' or 'https://eu.i.insights.com' */
+  /** Insights API host, usually 'https://insights.hanzo.ai' or 'https://insights.hanzo.ai' */
   host?: string
   /** The number of events to queue before sending to Insights (flushing) */
   flushAt?: number
@@ -183,15 +183,15 @@ export type InsightsCoreOptions = {
   before_send?: BeforeSendFn | BeforeSendFn[]
 
   /**
-   * A list of hostnames for which to inject PostHog tracing headers
-   * (X-POSTHOG-DISTINCT-ID, X-POSTHOG-SESSION-ID) on outgoing `fetch` requests.
+   * A list of hostnames for which to inject Insights tracing headers
+   * (X-INSIGHTS-DISTINCT-ID, X-INSIGHTS-SESSION-ID) on outgoing `fetch` requests.
    *
    * Use this to link requests made from your app to session replays and LLM traces
-   * in PostHog. When set, the global `fetch` is patched on initialization and the
+   * in Insights. When set, the global `fetch` is patched on initialization and the
    * headers are added to requests whose hostname matches one of the entries.
    *
    * Requires the SDK to wire up `patchFetchForTracingHeaders` against this option
-   * (currently supported in posthog-react-native).
+   * (currently supported in insights-react-native).
    */
   addTracingHeaders?: string[]
 }
@@ -339,7 +339,7 @@ export type InsightsRemoteConfig = {
   /**
    * Logs feature remote config. When a map, `captureConsoleLogs` (boolean)
    * is the local opt-in flag for `console.*` autocapture (read by the JS
-   * SDK's `PostHogLogs` extension to decide whether to load the autocapture
+   * SDK's `InsightsLogs` extension to decide whether to load the autocapture
    * bundle).
    */
   logs?:

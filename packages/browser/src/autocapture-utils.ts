@@ -4,7 +4,7 @@ import { each, entries } from './utils'
 import { isNullish, isString, isUndefined, isArray, isBoolean } from '@hanzo/insights-core'
 import { logger } from './utils/logger'
 import { window } from './utils/globals'
-import { isDocumentFragment, isElementNode, isTag, isTextNode } from './utils/element-utils'
+import { isElementNode, isShadowRoot, isTag, isTextNode } from './utils/element-utils'
 import { includes, trim } from '@hanzo/insights-core'
 
 export function splitClassString(s: string): string[] {
@@ -190,7 +190,7 @@ function shouldIgnoreByContent(
 // dead click capture does not run through autocapture's ph-no-capture check,
 // so we include it here so that ph-no-capture also suppresses dead click capture
 const DEFAULT_DEAD_CLICK_IGNORE_LIST = ['.ph-no-deadclick', '.ph-no-capture']
-export function shouldCaptureDeadClick(el: Element | null, _config: PostHogConfig['capture_dead_clicks']) {
+export function shouldCaptureDeadClick(el: Element | null, _config: InsightsConfig['capture_dead_clicks']) {
     if (!window || cannotCheckForAutocapture(el)) {
         return false
     }
@@ -401,7 +401,7 @@ export function shouldCaptureElement(el: Element): boolean {
 
     // filter out data from fields that look like sensitive fields
     const name = (el as HTMLInputElement).name || el.id || ''
-    // See https://github.com/insights/@hanzo/insights/issues/165
+    // See https://github.com/insights/insights-js/issues/165
     // Under specific circumstances a bug caused .replace to be called on a DOM element
     // instead of a string, removing the element from the page. Ensure this issue is mitigated.
     if (isString(name)) {

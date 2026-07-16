@@ -34,7 +34,7 @@ export type FlagCalledEventParams = {
 }
 
 /**
- * Thin interface the evaluations object uses to talk back to the PostHog client.
+ * Thin interface the evaluations object uses to talk back to the Insights client.
  * Keeps the class decoupled from the full client surface area.
  *
  * @internal
@@ -47,18 +47,18 @@ export interface FeatureFlagEvaluationsHost {
 /**
  * A snapshot of feature flag evaluations for a single distinctId at a point in time.
  *
- * Returned by {@link IPostHog.evaluateFlags} — branch on `isEnabled()` / `getFlag()`
+ * Returned by {@link IInsights.evaluateFlags} — branch on `isEnabled()` / `getFlag()`
  * and pass the same object to `capture()` via the `flags` option so the captured event
  * carries the exact flag values the code branched on.
  *
  * ```ts
- * const flags = await posthog.evaluateFlags(distinctId, { personProperties: { plan: 'enterprise' } })
+ * const flags = await insights.evaluateFlags(distinctId, { personProperties: { plan: 'enterprise' } })
  *
  * if (flags.isEnabled('new-dashboard')) {
  *   renderNewDashboard()
  * }
  *
- * posthog.capture({ distinctId, event: 'page_viewed', flags })
+ * insights.capture({ distinctId, event: 'page_viewed', flags })
  * ```
  *
  * To narrow the set of flags that get attached to a captured event, use the in-memory
@@ -82,7 +82,7 @@ export class FeatureFlagEvaluations {
   private readonly _isSlice: boolean
 
   /**
-   * @internal — instances are created by the SDK via `posthog.evaluateFlags()`.
+   * @internal — instances are created by the SDK via `insights.evaluateFlags()`.
    */
   constructor(init: {
     host: FeatureFlagEvaluationsHost
@@ -265,7 +265,7 @@ export class FeatureFlagEvaluations {
     }
 
     // On filtered slices (returned by `only()` / `onlyAccessed()`), a key absent from
-    // the slice doesn't mean the flag is missing from PostHog — it was filtered out.
+    // the slice doesn't mean the flag is missing from Insights — it was filtered out.
     // Don't fire a misleading `flag_missing` event; slices are intended for `capture()`,
     // not for further branching.
     if (this._isSlice && !(key in this._flags)) {
