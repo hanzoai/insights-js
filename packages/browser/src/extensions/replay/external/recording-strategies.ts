@@ -1,4 +1,4 @@
-import { PostHog } from '../../../posthog-core'
+import { Insights } from '../../../insights-core'
 import {
     CaptureResult,
     SessionRecordingPersistedConfig,
@@ -45,7 +45,7 @@ const logger = createLogger('[SessionRecording]')
  * Shared context that strategies need to access from the recorder
  */
 export interface RecordingStrategyContext {
-    instance: PostHog
+    instance: Insights
     sessionId: string
     isSampled: boolean | null
     rrwebError: boolean
@@ -135,7 +135,7 @@ export class V1RecordingStrategy implements RecordingStrategy {
     private _recordingStatusFunction: typeof anyMatchSessionRecordingStatus = allMatchSessionRecordingStatus
 
     constructor(
-        private readonly _instance: PostHog,
+        private readonly _instance: Insights,
         private readonly _urlTriggerMatching: URLTriggerMatching,
         private readonly _eventTriggerMatching: EventTriggerMatching,
         private readonly _linkedFlagMatching: LinkedFlagMatching,
@@ -297,7 +297,7 @@ export class V2TriggerGroupStrategy implements RecordingStrategy {
     private _removeEventTriggerCaptureHook: (() => void) | undefined
 
     constructor(
-        private readonly _instance: PostHog,
+        private readonly _instance: Insights,
         private readonly _urlTriggerMatching: URLTriggerMatching,
         private readonly _reportStarted: (reason: SessionStartReason, payload?: Record<string, any>) => void,
         private readonly _tryAddCustomEvent: (tag: string, payload: any) => void

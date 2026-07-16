@@ -1,11 +1,11 @@
 import { Insights } from './insights-core'
-import { find } from './utils'
+import { COOKIELESS_ALWAYS, COOKIELESS_ON_REJECT } from './constants'
 import { assignableWindow, navigator } from './utils/globals'
 import { cookieStore, localStore } from './storage'
 import { PersistentStore } from './types'
 import { isNoLike, isYesLike } from '@hanzo/insights-core'
 
-const OPT_OUT_PREFIX = '__ph_opt_in_out_'
+const OPT_OUT_PREFIX = '__hi_opt_in_out_'
 
 export const ConsentStatus = {
     PENDING: -1,

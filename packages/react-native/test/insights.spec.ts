@@ -141,30 +141,30 @@ describe('Insights React Native', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
     try {
-      posthog = new PostHog(apiKey, {
+      insights = new Insights(apiKey, {
         persistence: 'memory',
         flushInterval: 0,
       })
 
-      await posthog.ready()
+      await insights.ready()
 
-      expect(posthog.isDisabled).toEqual(true)
+      expect(insights.isDisabled).toEqual(true)
 
-      posthog.reloadFeatureFlags()
-      await posthog.reloadFeatureFlagsAsync()
-      await posthog.reloadRemoteConfigAsync()
-      await posthog.getSurveysStateless()
+      insights.reloadFeatureFlags()
+      await insights.reloadFeatureFlagsAsync()
+      await insights.reloadRemoteConfigAsync()
+      await insights.getSurveysStateless()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.Queue, [{ message: { event: 'queued' } }] as any)
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, [{ record: { body: 'queued' } }] as any)
-      posthog.capture('event')
-      posthog.captureLog({ body: 'log' })
-      await posthog.flush()
-      await posthog.flushLogs()
+      insights.setPersistedProperty(InsightsPersistedProperty.Queue, [{ message: { event: 'queued' } }] as any)
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, [{ record: { body: 'queued' } }] as any)
+      insights.capture('event')
+      insights.captureLog({ body: 'log' })
+      await insights.flush()
+      await insights.flushLogs()
 
       expect((globalThis as any).window.fetch).not.toHaveBeenCalled()
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "You must pass your PostHog project's api key. The client will be disabled."
+        "You must pass your Insights project's api key. The client will be disabled."
       )
     } finally {
       consoleErrorSpy.mockRestore()
@@ -305,7 +305,7 @@ describe('Insights React Native', () => {
       // The first instance's app-version write is debounced; drain it so the
       // second instance reads it on preload and detects an update (not a fresh
       // install).
-      await (posthog as any)._eventsStorage.waitForPersist()
+      await (insights as any)._eventsStorage.waitForPersist()
       // act
       insights = new Insights('1', {
         customStorage: mockStorage,
@@ -520,29 +520,29 @@ describe('Insights React Native', () => {
     })
 
     it('drains debounced storage writes on shutdown', async () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
       ;(storage.setItem as jest.Mock).mockClear()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.DistinctId, 'persisted-on-shutdown')
+      insights.setPersistedProperty(InsightsPersistedProperty.DistinctId, 'persisted-on-shutdown')
       // Debounced — nothing written to the backend yet.
       expect(storage.setItem).not.toHaveBeenCalled()
 
-      await posthog.shutdown()
+      await insights.shutdown()
 
       // _shutdown drains pending writes, so the value reaches the backend even
       // though no flush/background transition forced it.
       const written = (storage.setItem as jest.Mock).mock.calls
         .map((call) => JSON.parse(call[1] as string))
-        .find((blob) => blob.content[PostHogPersistedProperty.DistinctId] === 'persisted-on-shutdown')
+        .find((blob) => blob.content[InsightsPersistedProperty.DistinctId] === 'persisted-on-shutdown')
       expect(written).toBeDefined()
     })
 
     it('drains debounced storage writes when the app backgrounds', () => {
       ;(AppState.addEventListener as jest.Mock).mockClear()
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
@@ -551,7 +551,7 @@ describe('Insights React Native', () => {
       const onAppStateChange = (AppState.addEventListener as jest.Mock).mock.calls[0][1]
 
       ;(storage.setItem as jest.Mock).mockClear()
-      posthog.setPersistedProperty(PostHogPersistedProperty.DistinctId, 'persisted-on-background')
+      insights.setPersistedProperty(InsightsPersistedProperty.DistinctId, 'persisted-on-background')
       // Debounced — nothing on disk yet.
       expect(storage.setItem).not.toHaveBeenCalled()
 
@@ -560,60 +560,60 @@ describe('Insights React Native', () => {
 
       expect(storage.setItem).toHaveBeenCalled()
       const written = JSON.parse((storage.setItem as jest.Mock).mock.calls.at(-1)![1] as string)
-      expect(written.content[PostHogPersistedProperty.DistinctId]).toEqual('persisted-on-background')
+      expect(written.content[InsightsPersistedProperty.DistinctId]).toEqual('persisted-on-background')
     })
 
     it('persists reset() to disk synchronously so logout cannot leak across sessions', async () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
-      posthog.setPersistedProperty(PostHogPersistedProperty.DistinctId, 'previous-user')
-      await (posthog as any)._eventsStorage.waitForPersist()
+      insights.setPersistedProperty(InsightsPersistedProperty.DistinctId, 'previous-user')
+      await (insights as any)._eventsStorage.waitForPersist()
 
       // Sanity: the previous user is on disk.
       let written = JSON.parse((storage.setItem as jest.Mock).mock.calls.at(-1)![1] as string)
-      expect(written.content[PostHogPersistedProperty.DistinctId]).toEqual('previous-user')
+      expect(written.content[InsightsPersistedProperty.DistinctId]).toEqual('previous-user')
       ;(storage.setItem as jest.Mock).mockClear()
 
       // Logout. The clear must reach disk synchronously (drained), NOT wait out
       // the debounce — otherwise a crash in the window would resurface the
       // previous user's identity on next launch.
-      posthog.reset()
+      insights.reset()
 
       expect(storage.setItem).toHaveBeenCalled()
       written = JSON.parse((storage.setItem as jest.Mock).mock.calls.at(-1)![1] as string)
-      expect(written.content[PostHogPersistedProperty.DistinctId]).toBeUndefined()
+      expect(written.content[InsightsPersistedProperty.DistinctId]).toBeUndefined()
     })
 
     it('persists identify() to disk synchronously (account-switch safety)', async () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
-      posthog.identify('user-a')
-      await (posthog as any)._eventsStorage.waitForPersist()
+      insights.identify('user-a')
+      await (insights as any)._eventsStorage.waitForPersist()
       ;(storage.setItem as jest.Mock).mockClear()
 
       // Switch accounts. The new identity must reach disk synchronously, not on
       // the debounce — a crash in the window must not leave user-a on disk.
-      posthog.identify('user-b')
+      insights.identify('user-b')
 
       expect(storage.setItem).toHaveBeenCalled()
       const written = JSON.parse((storage.setItem as jest.Mock).mock.calls.at(-1)![1] as string)
-      expect(written.content[PostHogPersistedProperty.DistinctId]).toEqual('user-b')
+      expect(written.content[InsightsPersistedProperty.DistinctId]).toEqual('user-b')
     })
 
     it('flushes both pipelines to disk synchronously on a fatal exception', () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
       // Seed a log so the logs pipeline has something to flush.
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, [{ message: 'log' }])
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, [{ message: 'log' }])
       ;(storage.setItem as jest.Mock).mockClear()
 
-      posthog.captureException(new Error('boom'), { $exception_level: 'fatal' })
+      insights.captureException(new Error('boom'), { $exception_level: 'fatal' })
 
       // A fatal exception can crash the app within the debounce window, so both
       // pipelines reach disk synchronously: the events file (holding the
@@ -626,52 +626,52 @@ describe('Insights React Native', () => {
       // Assert on the parsed queue, not a substring — the actual exception event
       // must be in the persisted queue, not just the $exception_level tag.
       const queue =
-        (JSON.parse(eventsWrite![1] as string).content[PostHogPersistedProperty.Queue] as Array<{
+        (JSON.parse(eventsWrite![1] as string).content[InsightsPersistedProperty.Queue] as Array<{
           message?: { event?: string }
         }>) ?? []
       expect(queue.some((item) => item.message?.event === '$exception')).toBe(true)
     })
 
     it('does not flush synchronously on a non-fatal exception (uses the debounce)', () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
       ;(storage.setItem as jest.Mock).mockClear()
 
-      posthog.captureException(new Error('boom'))
+      insights.captureException(new Error('boom'))
 
       expect(storage.setItem).not.toHaveBeenCalled()
     })
 
     it('persists optOut() to disk synchronously (consent durability)', () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
       ;(storage.setItem as jest.Mock).mockClear()
 
-      posthog.optOut()
+      insights.optOut()
 
       // A hard kill within the debounce window must not lose the opt-out and
       // resurface as "capture allowed" on next launch.
       expect(storage.setItem).toHaveBeenCalled()
       const written = JSON.parse((storage.setItem as jest.Mock).mock.calls.at(-1)![1] as string)
-      expect(written.content[PostHogPersistedProperty.OptedOut]).toBe(true)
+      expect(written.content[InsightsPersistedProperty.OptedOut]).toBe(true)
     })
 
     it('persists optIn() to disk synchronously (consent durability)', () => {
-      posthog = new PostHog('1', {
+      insights = new Insights('1', {
         customStorage: storage,
         captureAppLifecycleEvents: false,
       })
       ;(storage.setItem as jest.Mock).mockClear()
 
-      posthog.optIn()
+      insights.optIn()
 
       expect(storage.setItem).toHaveBeenCalled()
       const written = JSON.parse((storage.setItem as jest.Mock).mock.calls.at(-1)![1] as string)
-      expect(written.content[PostHogPersistedProperty.OptedOut]).toBe(false)
+      expect(written.content[InsightsPersistedProperty.OptedOut]).toBe(false)
     })
 
     it('do not rotate session id on restart', async () => {
@@ -1083,10 +1083,10 @@ describe('Insights React Native', () => {
       it.each(typePreservationCases)(
         'preserves $name in group properties (no String() coercion)',
         ({ value, buggyString }) => {
-          posthog.group('company', 'acme-inc', { prop: value })
+          insights.group('company', 'acme-inc', { prop: value })
 
-          const cachedProps = posthog.getPersistedProperty<Record<string, Record<string, JsonType>>>(
-            PostHogPersistedProperty.GroupProperties
+          const cachedProps = insights.getPersistedProperty<Record<string, Record<string, JsonType>>>(
+            InsightsPersistedProperty.GroupProperties
           )
           expect(cachedProps?.company.prop).toEqual(value)
           expect(cachedProps?.company.prop).not.toBe(buggyString)
@@ -1311,102 +1311,102 @@ describe('Insights React Native', () => {
 
   describe('device bucketing', () => {
     it('should initialize device_id on first init', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
 
-      await posthog.ready()
+      await insights.ready()
 
-      const deviceId = posthog.getDeviceId()
+      const deviceId = insights.getDeviceId()
       expect(deviceId).toBeTruthy()
-      expect(deviceId).toEqual(posthog.getAnonymousId())
+      expect(deviceId).toEqual(insights.getAnonymousId())
     })
 
     it('should persist device_id across SDK restarts', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const originalDeviceId = posthog.getDeviceId()
-      await posthog.shutdown()
+      const originalDeviceId = insights.getDeviceId()
+      await insights.shutdown()
 
       // Re-init with same storage
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      expect(posthog.getDeviceId()).toEqual(originalDeviceId)
+      expect(insights.getDeviceId()).toEqual(originalDeviceId)
     })
 
     it('should preserve device_id across identify()', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const originalDeviceId = posthog.getDeviceId()
-      posthog.identify('user-123')
+      const originalDeviceId = insights.getDeviceId()
+      insights.identify('user-123')
 
-      expect(posthog.getDeviceId()).toEqual(originalDeviceId)
-      expect(posthog.getDistinctId()).toEqual('user-123')
+      expect(insights.getDeviceId()).toEqual(originalDeviceId)
+      expect(insights.getDistinctId()).toEqual('user-123')
     })
 
     it('should preserve device_id across reset()', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const originalDeviceId = posthog.getDeviceId()
-      posthog.identify('user-123')
-      posthog.reset()
+      const originalDeviceId = insights.getDeviceId()
+      insights.identify('user-123')
+      insights.reset()
 
-      expect(posthog.getDeviceId()).toEqual(originalDeviceId)
+      expect(insights.getDeviceId()).toEqual(originalDeviceId)
       // distinct_id should have changed
-      expect(posthog.getDistinctId()).not.toEqual('user-123')
+      expect(insights.getDistinctId()).not.toEqual('user-123')
     })
 
     it('should regenerate device_id when reset is called with explicit propertiesToKeep omitting DeviceId', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const originalDeviceId = posthog.getDeviceId()
+      const originalDeviceId = insights.getDeviceId()
       // Passing an explicit list without DeviceId causes it to be cleared
-      posthog.reset([])
+      insights.reset([])
 
       await waitForExpect(200, () => {
-        const newDeviceId = posthog.getDeviceId()
+        const newDeviceId = insights.getDeviceId()
         expect(newDeviceId).toBeTruthy()
         expect(newDeviceId).not.toEqual(originalDeviceId)
       })
     })
 
     it('should send $device_id in feature flag requests', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const deviceId = posthog.getDeviceId()
-      await posthog.reloadFeatureFlagsAsync()
+      const deviceId = insights.getDeviceId()
+      await insights.reloadFeatureFlagsAsync()
 
       expect((globalThis as any).window.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/flags/'),
@@ -1418,16 +1418,16 @@ describe('Insights React Native', () => {
     })
 
     it('should send the same $device_id after identify()', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const deviceId = posthog.getDeviceId()
-      posthog.identify('user-123')
-      await posthog.reloadFeatureFlagsAsync()
+      const deviceId = insights.getDeviceId()
+      insights.identify('user-123')
+      await insights.reloadFeatureFlagsAsync()
 
       expect((globalThis as any).window.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/flags/'),
@@ -1440,192 +1440,192 @@ describe('Insights React Native', () => {
 
     it('should lazy-init device_id for upgrades via getDeviceId()', async () => {
       // Simulate an upgrade: existing install has anonymous_id persisted but no device_id.
-      // PostHogRNStorage stores all properties in a single JSON blob under '.posthog-rn.json'.
+      // InsightsRNStorage stores all properties in a single JSON blob under '.insights-rn.json'.
       const upgradeData = JSON.stringify({
         version: 'v1',
-        content: { [PostHogPersistedProperty.AnonymousId]: 'existing-anon-id' },
+        content: { [InsightsPersistedProperty.AnonymousId]: 'existing-anon-id' },
       })
-      cache['.posthog-rn.json'] = upgradeData
+      cache['.insights-rn.json'] = upgradeData
 
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
       // device_id should be set to the existing anonymous_id during initAfterStorage
-      expect(posthog.getDeviceId()).toEqual('existing-anon-id')
-      expect(posthog.getAnonymousId()).toEqual('existing-anon-id')
+      expect(insights.getDeviceId()).toEqual('existing-anon-id')
+      expect(insights.getAnonymousId()).toEqual('existing-anon-id')
     })
   })
 
-  // Hybrid storage routing: `PostHogPersistedProperty.LogsQueue` routes to
-  // a dedicated `_logsStorage` instance backed by `.posthog-rn-logs.json`,
+  // Hybrid storage routing: `InsightsPersistedProperty.LogsQueue` routes to
+  // a dedicated `_logsStorage` instance backed by `.insights-rn-logs.json`,
   // while every other enum key stays in `_eventsStorage` backed by
-  // `.posthog-rn.json`. These tests lock in the routing invariants.
+  // `.insights-rn.json`. These tests lock in the routing invariants.
   describe('logs storage routing', () => {
     it('routes LogsQueue to _logsStorage and other keys to _eventsStorage (bidirectional)', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.Queue, ['event1'])
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, ['log1'])
+      insights.setPersistedProperty(InsightsPersistedProperty.Queue, ['event1'])
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, ['log1'])
 
       // Reads via the instance API
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.Queue)).toEqual(['event1'])
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue)).toEqual(['log1'])
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.Queue)).toEqual(['event1'])
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue)).toEqual(['log1'])
 
       // Verify each value landed in its expected storage's memoryCache
-      const eventsMemoryCache = (posthog as any)._eventsStorage.memoryCache
-      const logsMemoryCache = (posthog as any)._logsStorage.memoryCache
+      const eventsMemoryCache = (insights as any)._eventsStorage.memoryCache
+      const logsMemoryCache = (insights as any)._logsStorage.memoryCache
 
-      expect(eventsMemoryCache[PostHogPersistedProperty.Queue]).toEqual(['event1'])
-      expect(logsMemoryCache[PostHogPersistedProperty.LogsQueue]).toEqual(['log1'])
+      expect(eventsMemoryCache[InsightsPersistedProperty.Queue]).toEqual(['event1'])
+      expect(logsMemoryCache[InsightsPersistedProperty.LogsQueue]).toEqual(['log1'])
 
       // Cross-contamination check
-      expect(eventsMemoryCache[PostHogPersistedProperty.LogsQueue]).toBeUndefined()
-      expect(logsMemoryCache[PostHogPersistedProperty.Queue]).toBeUndefined()
+      expect(eventsMemoryCache[InsightsPersistedProperty.LogsQueue]).toBeUndefined()
+      expect(logsMemoryCache[InsightsPersistedProperty.Queue]).toBeUndefined()
     })
 
     it('routes non-LogsQueue keys to _eventsStorage, not _logsStorage', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.DistinctId, 'user-abc')
-      posthog.setPersistedProperty(PostHogPersistedProperty.SessionId, 'sess-xyz')
+      insights.setPersistedProperty(InsightsPersistedProperty.DistinctId, 'user-abc')
+      insights.setPersistedProperty(InsightsPersistedProperty.SessionId, 'sess-xyz')
 
-      const eventsMemoryCache = (posthog as any)._eventsStorage.memoryCache
-      const logsMemoryCache = (posthog as any)._logsStorage.memoryCache
+      const eventsMemoryCache = (insights as any)._eventsStorage.memoryCache
+      const logsMemoryCache = (insights as any)._logsStorage.memoryCache
 
       // Non-queue keys land in events storage
-      expect(eventsMemoryCache[PostHogPersistedProperty.DistinctId]).toBe('user-abc')
-      expect(eventsMemoryCache[PostHogPersistedProperty.SessionId]).toBe('sess-xyz')
+      expect(eventsMemoryCache[InsightsPersistedProperty.DistinctId]).toBe('user-abc')
+      expect(eventsMemoryCache[InsightsPersistedProperty.SessionId]).toBe('sess-xyz')
 
       // Logs storage stays untouched by non-logs keys
-      expect(logsMemoryCache[PostHogPersistedProperty.DistinctId]).toBeUndefined()
-      expect(logsMemoryCache[PostHogPersistedProperty.SessionId]).toBeUndefined()
+      expect(logsMemoryCache[InsightsPersistedProperty.DistinctId]).toBeUndefined()
+      expect(logsMemoryCache[InsightsPersistedProperty.SessionId]).toBeUndefined()
     })
 
-    it('writes LogsQueue to .posthog-rn-logs.json and not to .posthog-rn.json', async () => {
-      posthog = new PostHog('test-token', {
+    it('writes LogsQueue to .insights-rn-logs.json and not to .insights-rn.json', async () => {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, [{ record: { body: { stringValue: 'test' } } }])
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, [{ record: { body: { stringValue: 'test' } } }])
 
       // Let async persist complete on the logs storage
-      await (posthog as any)._logsStorage.waitForPersist()
+      await (insights as any)._logsStorage.waitForPersist()
 
-      const logsFile = cache['.posthog-rn-logs.json']
-      const mainFile = cache['.posthog-rn.json']
+      const logsFile = cache['.insights-rn-logs.json']
+      const mainFile = cache['.insights-rn.json']
 
       expect(logsFile).toBeDefined()
       const logsParsed = JSON.parse(logsFile)
-      expect(logsParsed.content[PostHogPersistedProperty.LogsQueue]).toHaveLength(1)
-      expect(logsParsed.content[PostHogPersistedProperty.LogsQueue][0].record.body.stringValue).toBe('test')
+      expect(logsParsed.content[InsightsPersistedProperty.LogsQueue]).toHaveLength(1)
+      expect(logsParsed.content[InsightsPersistedProperty.LogsQueue][0].record.body.stringValue).toBe('test')
 
       // Main file should not contain the logs queue — either the key isn't there
       // or the main file wasn't written at all (depends on whether init wrote anything else)
       if (mainFile) {
         const mainParsed = JSON.parse(mainFile)
-        expect(mainParsed.content[PostHogPersistedProperty.LogsQueue]).toBeUndefined()
+        expect(mainParsed.content[InsightsPersistedProperty.LogsQueue]).toBeUndefined()
       }
     })
 
     it('reset() preserves both Queue and LogsQueue', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.Queue, ['event1'])
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, ['log1'])
+      insights.setPersistedProperty(InsightsPersistedProperty.Queue, ['event1'])
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, ['log1'])
       // Also set something that SHOULD be cleared by reset
-      posthog.setPersistedProperty(PostHogPersistedProperty.DistinctId, 'user-123')
+      insights.setPersistedProperty(InsightsPersistedProperty.DistinctId, 'user-123')
 
-      posthog.reset()
+      insights.reset()
 
       // In-flight events and logs survive reset
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.Queue)).toEqual(['event1'])
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue)).toEqual(['log1'])
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.Queue)).toEqual(['event1'])
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue)).toEqual(['log1'])
       // Regular state is cleared
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.DistinctId)).toBeUndefined()
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.DistinctId)).toBeUndefined()
     })
 
     it('setPersistedProperty(LogsQueue, null) removes from logs storage, not main storage', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, ['log1'])
-      posthog.setPersistedProperty(PostHogPersistedProperty.DistinctId, 'user-123')
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, ['log1'])
+      insights.setPersistedProperty(InsightsPersistedProperty.DistinctId, 'user-123')
 
       // Null routes to removeItem on the correct storage
-      posthog.setPersistedProperty(PostHogPersistedProperty.LogsQueue, null)
+      insights.setPersistedProperty(InsightsPersistedProperty.LogsQueue, null)
 
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue)).toBeUndefined()
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue)).toBeUndefined()
       // DistinctId in main storage is untouched
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.DistinctId)).toBe('user-123')
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.DistinctId)).toBe('user-123')
     })
 
-    // End-to-end: real PostHog instance → real _logs module → real routing → real storage.
+    // End-to-end: real Insights instance → real _logs module → real routing → real storage.
     // Unit tests use a mock instance; routing tests don't use _logs. This covers the seam.
     it('captureLog via _logs module lands in logs storage through real routing', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
       // Ensure logs storage preload completes before calling captureLog so
       // the capture goes through the direct read-mutate-write path, not the
       // pending-buffer path (which is tested separately in logs.spec.ts).
-      await (posthog as any)._logsStorage.preloadPromise
-      ;(posthog as any)._logs.captureLog({ body: 'hello' })
+      await (insights as any)._logsStorage.preloadPromise
+      ;(insights as any)._logs.captureLog({ body: 'hello' })
 
-      const logsQueue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as
+      const logsQueue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as
         | Array<{ record: { body: { stringValue: string } } }>
         | undefined
       expect(logsQueue).toHaveLength(1)
       expect(logsQueue?.[0].record.body.stringValue).toBe('hello')
 
       // Main storage's events queue should be untouched by captureLog
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.Queue)).toBeUndefined()
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.Queue)).toBeUndefined()
     })
 
     it('AppState change drains both events and logs pipelines in parallel', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      const flushSpy = jest.spyOn(posthog, 'flush').mockResolvedValue(undefined)
-      const logsFlushSpy = jest.spyOn((posthog as any)._logs, 'flush').mockResolvedValue(undefined)
+      const flushSpy = jest.spyOn(insights, 'flush').mockResolvedValue(undefined)
+      const logsFlushSpy = jest.spyOn((insights as any)._logs, 'flush').mockResolvedValue(undefined)
       const waitForPersistSpy = jest
-        .spyOn((posthog as any)._logsStorage, 'waitForPersist')
+        .spyOn((insights as any)._logsStorage, 'waitForPersist')
         .mockResolvedValue(undefined as never)
 
       // AppState.addEventListener is globally mocked; grab the callback that
-      // was passed to it during PostHog construction and invoke it manually.
+      // was passed to it during Insights construction and invoke it manually.
       const calls = (AppState.addEventListener as jest.Mock).mock.calls
       const changeCall = calls.find((c) => c[0] === 'change')
       expect(changeCall).toBeDefined()
@@ -1643,18 +1643,18 @@ describe('Insights React Native', () => {
     })
 
     it('AppState surfaces a failing logs flush via logFlushError (console visibility)', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
       // Suppress console.error noise from the assertion itself; the spy still
       // records the call for verification.
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
-      jest.spyOn(posthog, 'flush').mockResolvedValue(undefined)
-      jest.spyOn((posthog as any)._logs, 'flush').mockRejectedValue(new Error('logs transport down'))
+      jest.spyOn(insights, 'flush').mockResolvedValue(undefined)
+      jest.spyOn((insights as any)._logs, 'flush').mockRejectedValue(new Error('logs transport down'))
 
       const calls = (AppState.addEventListener as jest.Mock).mock.calls
       const callback = calls.find((c) => c[0] === 'change')![1]
@@ -1671,46 +1671,46 @@ describe('Insights React Native', () => {
     })
 
     it('captureLog → flush() posts OTLP payload to /i/v1/logs via _sendLogsBatch', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      const sendSpy = jest.spyOn(posthog as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
+      const sendSpy = jest.spyOn(insights as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
 
-      ;(posthog as any)._logs.captureLog({ body: 'integration-test' })
-      await (posthog as any)._logs.flush()
+      ;(insights as any)._logs.captureLog({ body: 'integration-test' })
+      await (insights as any)._logs.flush()
 
       expect(sendSpy).toHaveBeenCalledTimes(1)
       const payload = sendSpy.mock.calls[0][0] as any
       const bodies = payload.resourceLogs[0].scopeLogs[0].logRecords.map((r: any) => r.body.stringValue)
       expect(bodies).toEqual(['integration-test'])
       // Successful send should drain the queue.
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue)).toEqual([])
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue)).toEqual([])
 
       sendSpy.mockRestore()
     })
 
     it('shutdown() drains both events and logs and clears the logs flush timer', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      const logsShutdownSpy = jest.spyOn((posthog as any)._logs, 'shutdown')
-      const sendLogsSpy = jest.spyOn(posthog as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
+      const logsShutdownSpy = jest.spyOn((insights as any)._logs, 'shutdown')
+      const sendLogsSpy = jest.spyOn(insights as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
 
       // Queue a log and fire a single capture so both pipelines have work.
-      ;(posthog as any)._logs.captureLog({ body: 'terminal' })
-      posthog.capture('terminal-event', {})
+      ;(insights as any)._logs.captureLog({ body: 'terminal' })
+      insights.capture('terminal-event', {})
 
-      await posthog.shutdown(5000)
+      await insights.shutdown(5000)
 
       // Both pipelines drained through the shared shutdown path. Logs use
       // the smaller of the caller's shutdown budget and the configured
@@ -1723,7 +1723,7 @@ describe('Insights React Native', () => {
     })
 
     it('pre-init captureLog is drained on flush once init completes', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
@@ -1731,14 +1731,14 @@ describe('Insights React Native', () => {
 
       // Capture BEFORE ready() resolves — this exercises the wrap()/onReady
       // init-gating path: the enqueue defers until _initPromise resolves.
-      ;(posthog as any)._logs.captureLog({ body: 'pre-init' })
+      ;(insights as any)._logs.captureLog({ body: 'pre-init' })
 
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      const sendSpy = jest.spyOn(posthog as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
+      const sendSpy = jest.spyOn(insights as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
 
-      await (posthog as any)._logs.flush()
+      await (insights as any)._logs.flush()
 
       expect(sendSpy).toHaveBeenCalledTimes(1)
       const bodies = (sendSpy.mock.calls[0][0] as any).resourceLogs[0].scopeLogs[0].logRecords.map(
@@ -1749,21 +1749,21 @@ describe('Insights React Native', () => {
       sendSpy.mockRestore()
     })
 
-    // Public API — user-facing surface on PostHog: `captureLog` + `logger` +
+    // Public API — user-facing surface on Insights: `captureLog` + `logger` +
     // `options.logs`. These tests verify the seam that replaced the internal
     // `_logs.captureLog` reach-ins above.
-    it('posthog.captureLog() delegates to the internal logs module', async () => {
-      posthog = new PostHog('test-token', {
+    it('insights.captureLog() delegates to the internal logs module', async () => {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      posthog.captureLog({ body: 'public-api', level: 'warn', attributes: { foo: 'bar' } })
+      insights.captureLog({ body: 'public-api', level: 'warn', attributes: { foo: 'bar' } })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       expect(queue).toHaveLength(1)
       expect(queue[0].record.body.stringValue).toBe('public-api')
       expect(queue[0].record.severityText).toBe('WARN')
@@ -1771,40 +1771,40 @@ describe('Insights React Native', () => {
       expect(attrs['foo']).toEqual({ stringValue: 'bar' })
     })
 
-    it('posthog.logger maps each method to the correct severity level', async () => {
-      posthog = new PostHog('test-token', {
+    it('insights.logger maps each method to the correct severity level', async () => {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      posthog.logger.trace('t')
-      posthog.logger.debug('d')
-      posthog.logger.info('i')
-      posthog.logger.warn('w')
-      posthog.logger.error('e')
-      posthog.logger.fatal('f')
+      insights.logger.trace('t')
+      insights.logger.debug('d')
+      insights.logger.info('i')
+      insights.logger.warn('w')
+      insights.logger.error('e')
+      insights.logger.fatal('f')
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       expect(queue).toHaveLength(6)
       expect(queue.map((e) => e.record.severityText)).toEqual(['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'])
     })
 
-    it('posthog.logger returns the same instance on repeated access (lazy + memoized)', async () => {
-      posthog = new PostHog('test-token', {
+    it('insights.logger returns the same instance on repeated access (lazy + memoized)', async () => {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
+      await insights.ready()
 
-      expect(posthog.logger).toBe(posthog.logger)
+      expect(insights.logger).toBe(insights.logger)
     })
 
     it('options.logs.beforeSend is honored through the public captureLog path', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
@@ -1812,73 +1812,73 @@ describe('Insights React Native', () => {
           beforeSend: (r) => (r.body.includes('secret') ? null : { ...r, body: `${r.body}!` }),
         },
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      posthog.captureLog({ body: 'hello' })
-      posthog.captureLog({ body: 'this has secret info' }) // dropped
-      posthog.captureLog({ body: 'world' })
+      insights.captureLog({ body: 'hello' })
+      insights.captureLog({ body: 'this has secret info' }) // dropped
+      insights.captureLog({ body: 'world' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       expect(queue).toHaveLength(2)
       expect(queue.map((e) => e.record.body.stringValue)).toEqual(['hello!', 'world!'])
     })
 
     it('options.logs.maxLogsPerInterval enforces the rate cap end-to-end', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
         logs: { rateCap: { maxLogs: 3, windowMs: 10000 } },
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
       for (let i = 0; i < 10; i++) {
-        posthog.captureLog({ body: `msg-${i}` })
+        insights.captureLog({ body: `msg-${i}` })
       }
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       expect(queue).toHaveLength(3)
     })
 
-    it('posthog.flushLogs() drains the logs queue (and only the logs queue)', async () => {
-      posthog = new PostHog('test-token', {
+    it('insights.flushLogs() drains the logs queue (and only the logs queue)', async () => {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      const sendLogsSpy = jest.spyOn(posthog as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
+      const sendLogsSpy = jest.spyOn(insights as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
 
-      posthog.captureLog({ body: 'manual-flush-target' })
-      await posthog.flushLogs()
+      insights.captureLog({ body: 'manual-flush-target' })
+      await insights.flushLogs()
 
       expect(sendLogsSpy).toHaveBeenCalledTimes(1)
       const bodies = (sendLogsSpy.mock.calls[0][0] as any).resourceLogs[0].scopeLogs[0].logRecords.map(
         (r: any) => r.body.stringValue
       )
       expect(bodies).toEqual(['manual-flush-target'])
-      expect(posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue)).toEqual([])
+      expect(insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue)).toEqual([])
 
       sendLogsSpy.mockRestore()
     })
 
     it('flush emits os.* and telemetry.sdk.* resource attrs', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      const sendSpy = jest.spyOn(posthog as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
+      const sendSpy = jest.spyOn(insights as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
 
-      posthog.captureLog({ body: 'platform-tagged' })
-      await posthog.flushLogs()
+      insights.captureLog({ body: 'platform-tagged' })
+      await insights.flushLogs()
 
       const resourceAttrs = Object.fromEntries(
         (sendSpy.mock.calls[0][0] as any).resourceLogs[0].resource.attributes.map((a: any) => [a.key, a.value])
@@ -1889,26 +1889,26 @@ describe('Insights React Native', () => {
       expect(typeof resourceAttrs['os.name'].stringValue).toBe('string')
       expect(resourceAttrs['os.version']).toBeDefined()
       expect(typeof resourceAttrs['os.version'].stringValue).toBe('string')
-      expect(resourceAttrs['telemetry.sdk.name']).toEqual({ stringValue: 'posthog-react-native' })
+      expect(resourceAttrs['telemetry.sdk.name']).toEqual({ stringValue: 'insights-react-native' })
       expect(resourceAttrs['telemetry.sdk.version']).toBeDefined()
 
       sendSpy.mockRestore()
     })
 
     it('user-supplied options.logs.resourceAttributes overrides os.* defaults', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
         logs: { resourceAttributes: { 'os.name': 'overridden-os' } },
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      const sendSpy = jest.spyOn(posthog as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
+      const sendSpy = jest.spyOn(insights as any, '_sendLogsBatch').mockResolvedValue({ kind: 'ok' } as never)
 
-      posthog.captureLog({ body: 'overridden' })
-      await posthog.flushLogs()
+      insights.captureLog({ body: 'overridden' })
+      await insights.flushLogs()
 
       const resourceAttrs = Object.fromEntries(
         (sendSpy.mock.calls[0][0] as any).resourceLogs[0].resource.attributes.map((a: any) => [a.key, a.value])
@@ -1921,22 +1921,22 @@ describe('Insights React Native', () => {
       sendSpy.mockRestore()
     })
 
-    it('captureLog tags records with screen.name from posthog.screen()', async () => {
-      posthog = new PostHog('test-token', {
+    it('captureLog tags records with screen.name from insights.screen()', async () => {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      // posthog.screen() registers $screen_name as a session-scoped property;
+      // insights.screen() registers $screen_name as a session-scoped property;
       // the logs context-builder reads it at capture time.
-      await posthog.screen('checkout')
-      posthog.captureLog({ body: 'on-checkout-screen' })
+      await insights.screen('checkout')
+      insights.captureLog({ body: 'on-checkout-screen' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
-      // posthog.screen() emits a $screen event which goes to events queue.
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
+      // insights.screen() emits a $screen event which goes to events queue.
       // The captureLog goes to logs queue. Find ours by body.
       const target = queue.find((e) => e.record.body.stringValue === 'on-checkout-screen')
       expect(target).toBeDefined()
@@ -1945,24 +1945,24 @@ describe('Insights React Native', () => {
     })
 
     it('captureLog tags records with feature_flags from getFeatureFlags()', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
       // Stub the flag store directly — `getFeatureFlags()` is the same
       // primitive logs reads at capture time.
-      jest.spyOn(posthog, 'getFeatureFlags').mockReturnValue({
+      jest.spyOn(insights, 'getFeatureFlags').mockReturnValue({
         'new-checkout': true,
         'experiment-ab': 'variant-a',
       } as any)
 
-      posthog.captureLog({ body: 'flagged-capture' })
+      insights.captureLog({ body: 'flagged-capture' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       const target = queue.find((e) => e.record.body.stringValue === 'flagged-capture')
       const attrs = Object.fromEntries(target!.record.attributes.map((a: any) => [a.key, a.value]))
       // OTLP serializes a string[] as arrayValue with stringValue children.
@@ -1974,19 +1974,19 @@ describe('Insights React Native', () => {
     })
 
     it('captureLog omits feature_flags when flags have not loaded yet (undefined state)', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      jest.spyOn(posthog, 'getFeatureFlags').mockReturnValue(undefined)
+      jest.spyOn(insights, 'getFeatureFlags').mockReturnValue(undefined)
 
-      posthog.captureLog({ body: 'no-flags' })
+      insights.captureLog({ body: 'no-flags' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       const target = queue.find((e) => e.record.body.stringValue === 'no-flags')
       const attrs = Object.fromEntries(target!.record.attributes.map((a: any) => [a.key, a.value]))
       // `undefined` flags → "we don't know yet" → attribute omitted.
@@ -1994,36 +1994,36 @@ describe('Insights React Native', () => {
     })
 
     it('captureLog omits feature_flags when flags loaded but none are active (empty state)', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
       // Logs gates `[]` to save bytes — same as browser logs. Distinct from
       // events, which emit `$active_feature_flags: []` for back-compat (the
       // shared helper preserves the empty array; only the caller's gate
       // differs).
-      jest.spyOn(posthog, 'getFeatureFlags').mockReturnValue({} as any)
+      jest.spyOn(insights, 'getFeatureFlags').mockReturnValue({} as any)
 
-      posthog.captureLog({ body: 'empty-flags' })
+      insights.captureLog({ body: 'empty-flags' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       const target = queue.find((e) => e.record.body.stringValue === 'empty-flags')
       const attrs = Object.fromEntries(target!.record.attributes.map((a: any) => [a.key, a.value]))
       expect(attrs['feature_flags']).toBeUndefined()
     })
 
     it('captureLog tags records with app.state, flipping with AppState changes', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
       // The harness mocks `AppState.addEventListener` but not
       // `AppState.currentState`, so the constructor's seed is undefined and
@@ -2034,12 +2034,12 @@ describe('Insights React Native', () => {
       const callback = calls.find((c) => c[0] === 'change')![1]
 
       callback('active' as AppStateStatus)
-      posthog.captureLog({ body: 'fg' })
+      insights.captureLog({ body: 'fg' })
 
       callback('background' as AppStateStatus)
-      posthog.captureLog({ body: 'bg' })
+      insights.captureLog({ body: 'bg' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       const fg = queue.find((e) => e.record.body.stringValue === 'fg')
       const bg = queue.find((e) => e.record.body.stringValue === 'bg')
       const fgAttrs = Object.fromEntries(fg!.record.attributes.map((a: any) => [a.key, a.value]))
@@ -2049,50 +2049,50 @@ describe('Insights React Native', () => {
     })
 
     it('captures across identify/reset boundaries keep their capture-time identity', async () => {
-      // PostHogLogs builds the OTLP record at capture time, so distinctId/sessionId are
+      // InsightsLogs builds the OTLP record at capture time, so distinctId/sessionId are
       // baked into `attributes` synchronously. reset() preserves the LogsQueue
       // so a record captured by alice keeps alice's identity even after reset()
       // and a subsequent identify(bob).
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      posthog.identify('alice')
-      posthog.captureLog({ body: 'A-as-alice' })
+      insights.identify('alice')
+      insights.captureLog({ body: 'A-as-alice' })
 
-      posthog.reset()
-      posthog.identify('bob')
-      posthog.captureLog({ body: 'B-as-bob' })
+      insights.reset()
+      insights.identify('bob')
+      insights.captureLog({ body: 'B-as-bob' })
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       const recordA = queue.find((e) => e.record.body.stringValue === 'A-as-alice')!
       const recordB = queue.find((e) => e.record.body.stringValue === 'B-as-bob')!
       const attrsA = Object.fromEntries(recordA.record.attributes.map((a: any) => [a.key, a.value]))
       const attrsB = Object.fromEntries(recordB.record.attributes.map((a: any) => [a.key, a.value]))
 
-      expect(attrsA['posthogDistinctId']).toEqual({ stringValue: 'alice' })
-      expect(attrsB['posthogDistinctId']).toEqual({ stringValue: 'bob' })
+      expect(attrsA['insightsDistinctId']).toEqual({ stringValue: 'alice' })
+      expect(attrsB['insightsDistinctId']).toEqual({ stringValue: 'bob' })
       // Both records should still be present — reset() must NOT drop the queue.
       expect(queue).toHaveLength(2)
     })
 
     it('manual capture is unconditional — remote config cannot block it', async () => {
-      posthog = new PostHog('test-token', {
+      insights = new Insights('test-token', {
         customStorage: mockStorage,
         captureAppLifecycleEvents: false,
         preloadFeatureFlags: false,
       })
-      await posthog.ready()
-      await (posthog as any)._logsStorage.preloadPromise
+      await insights.ready()
+      await (insights as any)._logsStorage.preloadPromise
 
-      posthog.captureLog({ body: 'manual-1' })
-      posthog.logger.error('manual-2')
+      insights.captureLog({ body: 'manual-1' })
+      insights.logger.error('manual-2')
 
-      const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as any[]
+      const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as any[]
       expect(queue).toHaveLength(2)
     })
   })
@@ -2105,7 +2105,7 @@ describe('Feature flag error tracking', () => {
     ;(globalThis as any).window.fetch = jest.fn()
     insights = new Insights('test-api-key', {
       flushAt: 1,
-      host: 'https://app.insights.com',
+      host: 'https://insights.hanzo.ai',
       fetchRetryCount: 0,
       preloadFeatureFlags: false,
       sendFeatureFlagEvent: true,

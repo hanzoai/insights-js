@@ -1,5 +1,28 @@
 import { createTestClient, waitForPromises, InsightsCoreTestClient, InsightsCoreTestClientMocks } from '@/testing'
 
+// Force constructor-time logger calls through so they can be asserted in tests.
+class InsightsCoreLoggingTestClient extends InsightsCoreTestClient {
+  protected logMsgIfDebug(fn: () => void): void {
+    fn()
+  }
+}
+
+const createLoggingTestClient = (apiKey: string): [InsightsCoreTestClient, InsightsCoreTestClientMocks] => {
+  const mocks: InsightsCoreTestClientMocks = {
+    fetch: jest.fn(async () => ({
+      status: 200,
+      text: () => Promise.resolve('ok'),
+      json: () => Promise.resolve({ status: 'ok' }),
+    })),
+    storage: {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+    },
+  }
+
+  return [new InsightsCoreLoggingTestClient(mocks, apiKey, { disableCompression: true }), mocks]
+}
+
 describe('Insights Core', () => {
   let insights: InsightsCoreTestClient
   let mocks: InsightsCoreTestClientMocks
@@ -13,24 +36,44 @@ describe('Insights Core', () => {
       expect(insights.optedOut).toEqual(false)
     })
 
-    it('should throw if missing api key', () => {
-      expect(() => createTestClient(undefined as unknown as string)).toThrowError(
-        "You must pass your Insights project's api key."
-      )
+    it.each([
+      ['missing', undefined as unknown as string],
+      ['empty', '   '],
+      ['non string', {} as string],
+    ])('should disable if %s api key', (_case, apiKey) => {
+      const [client, clientMocks] = createTestClient(apiKey)
+
+      expect(client.isDisabled).toEqual(true)
+      expect((client as any).apiKey).toEqual('')
+
+      client.capture('test')
+
+      expect(clientMocks.fetch).not.toHaveBeenCalled()
     })
 
-    it('should throw if empty api key', () => {
-      expect(() => createTestClient('   ')).toThrowError("You must pass your Insights project's api key.")
-    })
+    it.each([
+      ['missing', undefined as unknown as string],
+      ['empty', '   '],
+      ['non string', {} as string],
+    ])('should log when %s api key disables the client', (_case, apiKey) => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
 
-    it('should throw if non string api key', () => {
-      expect(() => createTestClient({} as string)).toThrowError("You must pass your Insights project's api key.")
+      try {
+        createLoggingTestClient(apiKey)
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          '[Insights]',
+          "You must pass your Insights project's api key. The client will be disabled."
+        )
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
 
     it('should initialise default options', () => {
       expect(insights as any).toMatchObject({
         apiKey: 'TEST_API_KEY',
-        host: 'https://us.i.insights.com',
+        host: 'https://insights.hanzo.ai',
         flushAt: 20,
         flushInterval: 10000,
       })
@@ -56,10 +99,26 @@ describe('Insights Core', () => {
       expect((insights as any).flushAt).toEqual(1)
     })
 
-    it('should remove trailing slashes from `host`', () => {
-      ;[insights, mocks] = createTestClient('TEST_API_KEY', { host: 'http://my-insights.com///' })
+    it.each([
+      {
+        name: 'trims whitespace from the api key and host',
+        apiKey: '  TEST_API_KEY\n',
+        host: '  http://my-insights.example.com///\t ',
+        expectedApiKey: 'TEST_API_KEY',
+        expectedHost: 'http://my-insights.example.com',
+      },
+      {
+        name: 'defaults a blank host after trimming whitespace',
+        apiKey: 'TEST_API_KEY',
+        host: ' \n\t ',
+        expectedApiKey: 'TEST_API_KEY',
+        expectedHost: 'https://insights.hanzo.ai',
+      },
+    ])('should $name', ({ apiKey, host, expectedApiKey, expectedHost }) => {
+      ;[insights, mocks] = createTestClient(apiKey, { host })
 
-      expect((insights as any).host).toEqual('http://my-insights.com')
+      expect((insights as any).apiKey).toEqual(expectedApiKey)
+      expect((insights as any).host).toEqual(expectedHost)
     })
 
     it('should use bootstrapped distinct ID when present', async () => {

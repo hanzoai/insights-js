@@ -7,10 +7,11 @@ import { useSurveyStorage } from './useSurveyStorage'
 import { useActivatedSurveys } from './useActivatedSurveys'
 import { SurveyModal } from './components/SurveyModal'
 import { defaultSurveyAppearance, getContrastingTextColor, SurveyAppearanceTheme } from './surveys-utils'
-import { Survey, SurveyAppearance, SurveyType } from '@hanzo/insights-core'
+import { Survey, SurveyAppearance, SurveyType, type SurveyResponses } from '@hanzo/insights-core'
 import { useInsights } from '../hooks/useInsights'
 import { useFeatureFlags } from '../hooks/useFeatureFlags'
 import { Insights } from '../insights-rn'
+import { applySurveyTranslationForUser } from './survey-translations'
 
 type ActiveSurveyContextType =
   | {
@@ -130,8 +131,8 @@ export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.
   }, [activeSurvey, flags, surveys, seenSurveys, activatedSurveys])
 
   const translatedActiveSurvey = useMemo(() => {
-    return activeSurvey ? applySurveyTranslationForUser(activeSurvey, posthog) : undefined
-  }, [activeSurvey, posthog])
+    return activeSurvey ? applySurveyTranslationForUser(activeSurvey, insights) : undefined
+  }, [activeSurvey, insights])
 
   // Merge survey appearance so that components and hooks can use a consistent model
   const surveyAppearance = useMemo<SurveyAppearanceTheme>(() => {
@@ -144,9 +145,9 @@ export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.
     return {
       ...defaultSurveyAppearance,
       ...(props.defaultSurveyAppearance ?? {}),
-      ...(activeSurvey.appearance ?? {}),
+      ...(translatedActiveSurvey.survey.appearance ?? {}),
       // If submitButtonColor is set by Insights, ensure submitButtonTextColor is also set to contrast
-      ...(activeSurvey.appearance?.submitButtonColor
+      ...(translatedActiveSurvey.survey.appearance?.submitButtonColor
         ? {
             submitButtonTextColor:
               translatedActiveSurvey.survey.appearance.submitButtonTextColor ??
@@ -164,18 +165,18 @@ export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.
       survey: translatedActiveSurvey.survey,
       surveyLanguage: translatedActiveSurvey.language,
       onShow: () => {
-        sendSurveyShownEvent(activeSurvey, insights)
+        sendSurveyShownEvent(translatedActiveSurvey.survey, insights, translatedActiveSurvey.language)
         setLastSeenSurveyDate(new Date())
       },
       onClose: (submitted: boolean, responses: SurveyResponses) => {
         setSeenSurvey(activeSurvey.id)
         setActiveSurvey(undefined)
         if (!submitted) {
-          dismissedSurveyEvent(activeSurvey, insights)
+          dismissedSurveyEvent(translatedActiveSurvey.survey, responses, insights, translatedActiveSurvey.language)
         }
       },
     }
-  }, [activeSurvey, insights, setLastSeenSurveyDate, setSeenSurvey])
+  }, [activeSurvey, insights, setLastSeenSurveyDate, setSeenSurvey, translatedActiveSurvey])
 
   // Modal is shown for PopOver surveys or if automaticSurveyModal is true, and for all widget surveys
   // because these would have been invoked by the useFeedbackSurvey hook's showSurveyModal() method

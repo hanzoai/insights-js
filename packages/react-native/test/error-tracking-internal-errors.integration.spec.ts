@@ -1,9 +1,9 @@
-import { PostHog } from '../src'
-import { isPostHogFetchNetworkError } from '@hanzo/insights-core'
+import { Insights } from '../src'
+import { isInsightsFetchNetworkError } from '@hanzo/insights-core'
 
-// Proves the exported instanceof guard recognizes a genuine PostHogFetchNetworkError
+// Proves the exported instanceof guard recognizes a genuine InsightsFetchNetworkError
 // produced by core's real fetch path.
-describe('isPostHogFetchNetworkError recognizes real core errors', () => {
+describe('isInsightsFetchNetworkError recognizes real core errors', () => {
   const originalFetch = (globalThis as any).window.fetch
 
   beforeAll(() => {
@@ -22,25 +22,25 @@ describe('isPostHogFetchNetworkError recognizes real core errors', () => {
       throw new Error('offline')
     })
 
-    const posthog = new PostHog('test-token', {
+    const insights = new Insights('test-token', {
       persistence: 'memory',
       flushInterval: 0,
       fetchRetryCount: 0,
     })
-    await posthog.ready()
-    posthog.capture('event')
+    await insights.ready()
+    insights.capture('event')
 
     let caught: unknown
     try {
-      await posthog.flush()
+      await insights.flush()
     } catch (err) {
       caught = err
     }
-    await posthog.shutdown()
+    await insights.shutdown()
 
     expect(caught).toBeDefined()
-    expect(isPostHogFetchNetworkError(caught)).toBe(true)
+    expect(isInsightsFetchNetworkError(caught)).toBe(true)
     // ordinary errors must not be mistaken for network errors
-    expect(isPostHogFetchNetworkError(new Error('boom'))).toBe(false)
+    expect(isInsightsFetchNetworkError(new Error('boom'))).toBe(false)
   }, 15000)
 })

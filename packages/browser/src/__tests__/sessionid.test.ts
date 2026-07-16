@@ -945,11 +945,11 @@ describe('Session ID manager', () => {
             // (e.g. a race during cross-tab restoration) must not cause
             // this tab to spuriously time out — in-memory has the freshest
             // local view.
-            const realPersistence = new PostHogPersistence(memoryConfig)
+            const realPersistence = new InsightsPersistence(memoryConfig)
             const testTimestamp = 1603107479471
 
             const sessionIdManager = new SessionIdManager(
-                createMockPostHog({
+                createMockInsights({
                     config: memoryConfig,
                     persistence: realPersistence,
                     register: jest.fn(),

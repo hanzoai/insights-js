@@ -1,4 +1,4 @@
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { captureAiGeneration } from '../src/captureAiGeneration'
 import { AIEvent } from '../src/utils'
 import { version } from '../package.json'
@@ -19,9 +19,9 @@ const buildClient = (overrides: Partial<{ enableExceptionAutocapture: boolean; p
     captureException: jest.fn(),
     options: { enableExceptionAutocapture: overrides.enableExceptionAutocapture ?? false },
     privacy_mode: overrides.privacy_mode ?? false,
-  }) as unknown as jest.Mocked<PostHog>
+  }) as unknown as jest.Mocked<Insights>
 
-const lastCaptureProperties = (client: jest.Mocked<PostHog>) =>
+const lastCaptureProperties = (client: jest.Mocked<Insights>) =>
   (client.capture as jest.Mock).mock.calls[0][0].properties as Record<string, any>
 
 describe('captureAiGeneration', () => {
@@ -55,7 +55,7 @@ describe('captureAiGeneration', () => {
     expect(event.groups).toEqual({ company: 'acme' })
 
     expect(event.properties).toMatchObject({
-      $ai_lib: 'posthog-ai',
+      $ai_lib: 'insights-ai',
       $ai_lib_version: version,
       $ai_provider: 'cloudflare-workers-ai',
       $ai_model: '@cf/zai-org/glm-4.7-flash',
@@ -175,7 +175,7 @@ describe('captureAiGeneration', () => {
 
     await captureAiGeneration(client, { ...baseRequiredOptions, error })
 
-    expect((error as any).__posthog_previously_captured_error).toBe(true)
+    expect((error as any).__insights_previously_captured_error).toBe(true)
   })
 
   it('runs exception autocapture and tags the trace when enabled', async () => {
@@ -191,7 +191,7 @@ describe('captureAiGeneration', () => {
     expect(typeof exceptionId).toBe('string')
 
     expect(lastCaptureProperties(client).$exception_event_id).toBe(exceptionId)
-    expect((error as any).__posthog_previously_captured_error).toBe(true)
+    expect((error as any).__insights_previously_captured_error).toBe(true)
   })
 
   it.each([
@@ -261,7 +261,7 @@ describe('captureAiGeneration', () => {
   })
 
   it('skips emission when client.capture is unavailable', async () => {
-    const client = { options: {} } as unknown as jest.Mocked<PostHog>
+    const client = { options: {} } as unknown as jest.Mocked<Insights>
 
     await expect(captureAiGeneration(client, baseRequiredOptions)).resolves.toBeUndefined()
   })

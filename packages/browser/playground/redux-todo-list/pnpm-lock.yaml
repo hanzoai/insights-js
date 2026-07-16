@@ -22,9 +22,9 @@ importers:
       next:
         specifier: ^15.5.7
         version: 15.5.7(@babel/core@7.28.5)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      posthog-js:
-        specifier: file:../../../../target/posthog-js.tgz
-        version: file:../../../../target/posthog-js.tgz
+      insights-js:
+        specifier: file:../../../../target/insights-js.tgz
+        version: file:../../../../target/insights-js.tgz
       react:
         specifier: ^19.2.1
         version: 19.2.1
@@ -886,8 +886,8 @@ packages:
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
-  '@posthog/core@file:../../../../target/posthog-core.tgz':
-    resolution: {integrity: sha512-9Qowpawtz7QcjMy8DX4WPrz073+f7qoNJ5piKst/hXYc64+5PVt6ObXe/uVMFip7lKsDN+ilxFAPDtoHQSMfZg==, tarball: file:../../../../target/posthog-core.tgz}
+  '@insights/core@file:../../../../target/insights-core.tgz':
+    resolution: {integrity: sha512-9Qowpawtz7QcjMy8DX4WPrz073+f7qoNJ5piKst/hXYc64+5PVt6ObXe/uVMFip7lKsDN+ilxFAPDtoHQSMfZg==, tarball: file:../../../../target/insights-core.tgz}
     version: 1.7.0
 
   '@reduxjs/toolkit@2.11.0':
@@ -2030,8 +2030,8 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@file:../../../../target/posthog-js.tgz:
-    resolution: {integrity: sha512-sylMcKVZkSL4+o5nUAOa/VVYy3EF264vrO4LZt89Z8xCD0RU2ugmA91sK+qTkVnA2nd73F9tenCo2cz+qI0S7g==, tarball: file:../../../../target/posthog-js.tgz}
+  insights-js@file:../../../../target/insights-js.tgz:
+    resolution: {integrity: sha512-sylMcKVZkSL4+o5nUAOa/VVYy3EF264vrO4LZt89Z8xCD0RU2ugmA91sK+qTkVnA2nd73F9tenCo2cz+qI0S7g==, tarball: file:../../../../target/insights-js.tgz}
     version: 1.301.0
 
   preact@10.28.0:
@@ -3376,7 +3376,7 @@ snapshots:
 
   '@pkgr/core@0.2.9': {}
 
-  '@posthog/core@file:../../../../target/posthog-core.tgz':
+  '@insights/core@file:../../../../target/insights-core.tgz':
     dependencies:
       cross-spawn: 7.0.6
 
@@ -4681,9 +4681,9 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  posthog-js@file:../../../../target/posthog-js.tgz:
+  insights-js@file:../../../../target/insights-js.tgz:
     dependencies:
-      '@posthog/core': file:../../../../target/posthog-core.tgz
+      '@insights/core': file:../../../../target/insights-core.tgz
       core-js: 3.47.0
       fflate: 0.4.8
       preact: 10.28.0

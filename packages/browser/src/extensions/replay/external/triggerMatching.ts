@@ -9,7 +9,7 @@ import {
 } from '../../../constants'
 import { Insights } from '../../../insights-core'
 import { FlagVariant, RemoteConfig, SessionRecordingPersistedConfig, SessionRecordingUrlTrigger } from '../../../types'
-import { isNullish, isBoolean, isString, isObject } from '@hanzo/insights-core'
+import { isNullish, isBoolean, isString, isObject, isUndefined } from '@hanzo/insights-core'
 import { window } from '../../../utils/globals'
 import { logger } from '../../../utils/logger'
 
@@ -190,7 +190,12 @@ export class URLTriggerMatching implements TriggerStatusMatching {
 
     urlBlocked: boolean = false
 
-    constructor(private readonly _instance: Insights) {}
+    constructor(
+        private readonly _instance: Insights,
+        groupId?: string
+    ) {
+        this._groupId = groupId
+    }
 
     onConfig(config: ReplayConfigType | TriggerMatchingConfig) {
         this._urlTriggers =
@@ -422,7 +427,12 @@ export class EventTriggerMatching implements TriggerStatusMatching {
     _eventTriggers: string[] = []
     private _groupId?: string // Optional group ID for V2 per-group persistence
 
-    constructor(private readonly _instance: Insights) {}
+    constructor(
+        private readonly _instance: Insights,
+        groupId?: string
+    ) {
+        this._groupId = groupId
+    }
 
     onConfig(config: ReplayConfigType | TriggerMatchingConfig) {
         // Handle both RemoteConfig (nested) and SessionRecordingPersistedConfig (flattened) structures
@@ -501,7 +511,7 @@ export class TriggerGroupMatching implements TriggerStatusMatching {
     public readonly group: import('../../../types').SessionRecordingTriggerGroup
 
     constructor(
-        private readonly _instance: PostHog,
+        private readonly _instance: Insights,
         group: import('../../../types').SessionRecordingTriggerGroup,
         onFlagStarted: (flag: string, variant: string | null) => void
     ) {

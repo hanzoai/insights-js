@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
-import insightsJs, { InsightsConfig as InsightsConfig } from '@hanzo/insights'
+import type { InsightsConfig } from '@hanzo/insights'
 
 import React, { useEffect, useMemo, useRef } from 'react'
 import { Insights, InsightsContext } from './InsightsContext'
+import { getDefaultInsightsInstance } from './insights-default'
 import { isDeepEqual } from '../utils/object-utils'
 
 interface PreviousInitialization {
@@ -32,8 +33,17 @@ type InsightsProviderProps =
  *
  * These initialization methods are mutually exclusive - you must use one or the other,
  * but not both simultaneously.
+ *
+ * We strongly suggest you memoize the `options` object to ensure that you don't
+ * accidentally trigger unnecessary re-renders. We'll properly detect if the options
+ * have changed and only call `insights.set_config` if they have, but it's better to
+ * avoid unnecessary re-renders in the first place.
  */
 export function InsightsProvider({ children, client, apiKey, options }: WithOptionalChildren<InsightsProviderProps>) {
+    // Used to detect if the client was already initialized
+    // This is used to prevent double initialization when running under React.StrictMode
+    // We're not storing a simple boolean here because we want to be able to detect if the
+    // apiKey or options have changed.
     const previousInitializationRef = useRef<PreviousInitialization | null>(null)
 
     const insights = useMemo(() => {
@@ -51,52 +61,79 @@ export function InsightsProvider({ children, client, apiKey, options }: WithOpti
             return client
         }
 
+        // Indirection so the slim bundle can omit the @hanzo/insights runtime import.
+        // Always defined here: the full entrypoint (index.ts) calls
+        // setDefaultInsightsInstance(insightsJs) before any component renders.
+        const defaultInstance = getDefaultInsightsInstance() as Insights
+
         if (apiKey) {
-            return insightsJs
+            // return the global client, we'll initialize it in the useEffect
+            return defaultInstance
         }
 
         console.warn(
-            '[Insights] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global instance. You must initialize it manually. This is not recommended behavior.'
+            '[Insights] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global `window.insights` instance. You must initialize it manually. This is not recommended behavior.'
         )
-        return insightsJs
+        return defaultInstance
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [client, apiKey, JSON.stringify(options)])
+    }, [client, apiKey, JSON.stringify(options)]) // Stringify options to be a stable reference
 
+    // TRICKY: The init needs to happen in a useEffect rather than useMemo, as useEffect does not happen during SSR. Otherwise
+    // we'd end up trying to call insights.init() on the server, which can cause issues around hydration and double-init.
     useEffect(() => {
-        if (client) {
+        if (client || !apiKey) {
+            // if the user has passed their own client, assume they will also handle calling init().
+            // if no apiKey was provided, assume the user will initialize the default instance manually.
             return
         }
+        // See comment in useMemo above for why this indirection exists.
+        const defaultInstance = getDefaultInsightsInstance() as Insights
         const previousInitialization = previousInitializationRef.current
 
         if (!previousInitialization) {
-            if (insightsJs.__loaded) {
+            // If it's the first time running this, but it has been loaded elsewhere, warn the user about it.
+            if (defaultInstance.__loaded) {
                 console.warn('[Insights] `insights` was already loaded elsewhere. This may cause issues.')
             }
 
-            insightsJs.init(apiKey, options)
+            // Init global client
+            defaultInstance.init(apiKey, options)
 
+            // Keep track of whether the client was already initialized
+            // This is used to prevent double initialization when running under React.StrictMode, and to know when options change
             previousInitializationRef.current = {
                 apiKey: apiKey,
                 options: options ?? {},
             }
         } else {
+            // If the client was already initialized, we might still end up running the effect again for a few reasons:
+            // * someone is developing locally under `React.StrictMode`
+            // * the config has changed
+            // * the apiKey has changed (not supported!)
+            //
+            // Changing the apiKey isn't well supported and we'll simply log a message suggesting them
+            // to take control of the `client` initialization themselves. This is tricky to handle
+            // ourselves because we wouldn't know if we should call `.reset()` or not, for example.
             if (apiKey !== previousInitialization.apiKey) {
                 console.warn(
                     "[Insights] You have provided a different `apiKey` to `InsightsProvider` than the one that was already initialized. This is not supported by our provider and we'll keep using the previous key. If you need to toggle between API Keys you need to control the `client` yourself and pass it in as a prop rather than an `apiKey` prop."
                 )
             }
 
+            // Changing options is better supported because we can just call `defaultInstance.set_config(options)`
+            // and they'll be good to go with their new config. The SDK will know how to handle the changes.
             if (options && !isDeepEqual(options, previousInitialization.options)) {
-                insightsJs.set_config(options)
+                defaultInstance.set_config(options)
             }
 
+            // Keep track of the possibly-new set of apiKey and options
             previousInitializationRef.current = {
                 apiKey: apiKey,
                 options: options ?? {},
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [client, apiKey, JSON.stringify(options)])
+    }, [client, apiKey, JSON.stringify(options)]) // Stringify options to be a stable reference
 
     return (
         <InsightsContext.Provider

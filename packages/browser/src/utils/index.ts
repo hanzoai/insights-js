@@ -1,7 +1,6 @@
-import { Breaker, InsightsConfig, Properties } from '../types'
-import { nativeForEach, nativeIndexOf } from './globals'
+import { InsightsConfig, Properties } from '../types'
 import { logger } from './logger'
-import { isFormData, isNull, isNullish, isNumber, isString, hasOwnProperty, isArray } from '@hanzo/insights-core'
+import { isFormData, isNullish, isNumber, isString, hasOwnProperty, isArray } from '@hanzo/insights-core'
 
 export function find<T>(value: T[], predicate: (value: T) => boolean): T | undefined {
     for (let i = 0; i < value.length; i++) {
@@ -79,7 +78,7 @@ export const safewrap = function <F extends (...args: any[]) => any = (...args: 
             return f.apply(this, args)
         } catch (e) {
             logger.critical(
-                'Implementation error. Please turn on debug mode and open a ticket on https://app.insights.com/home#panel=support%3Asupport%3A.'
+                'Implementation error. Please turn on debug mode and open a ticket on https://insights.hanzo.ai/home#panel=support%3Asupport%3A.'
             )
             logger.critical(e)
         }
@@ -232,7 +231,7 @@ export function migrateConfigField<T>(
     return defaultValue
 }
 
-const TOOLBAR_INTERNAL_INSTANCE_NAME = 'ph_toolbar_internal'
+const TOOLBAR_INTERNAL_INSTANCE_NAME = 'hi_toolbar_internal'
 
 export function isToolbarInstance(config: Pick<InsightsConfig, 'name'>): boolean {
     return config.name === TOOLBAR_INTERNAL_INSTANCE_NAME

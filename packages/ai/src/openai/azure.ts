@@ -18,7 +18,7 @@ import type { ResponseCreateParamsWithTools, ExtractParsedContentFromParams } fr
 import type { FormattedMessage, FormattedContent, FormattedFunctionCall } from '../types'
 import { sanitizeOpenAI } from '../sanitization'
 import { extractInsightsParams } from '../utils'
-import { isResponseTokenChunk } from './utils'
+import { isResponseTokenChunk, buildProviderMetadata, extractRequestId } from './utils'
 
 type ChatCompletion = OpenAIOrignal.ChatCompletion
 type ChatCompletionChunk = OpenAIOrignal.ChatCompletionChunk

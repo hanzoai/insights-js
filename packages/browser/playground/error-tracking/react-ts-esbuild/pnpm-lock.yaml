@@ -8,7 +8,7 @@ importers:
 
   .:
     dependencies:
-      posthog-js:
+      insights-js:
         specifier: link:../../..
         version: link:../../..
       react:

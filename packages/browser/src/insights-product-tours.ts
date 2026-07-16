@@ -1,6 +1,6 @@
 import { Insights } from './insights-core'
 import { ProductTour, ProductTourCallback } from './insights-product-tours-types'
-import { PRODUCT_TOURS_ENABLED_SERVER_SIDE } from './constants'
+import { PRODUCT_TOURS, PRODUCT_TOURS_ENABLED_SERVER_SIDE } from './constants'
 import { RemoteConfig } from './types'
 import { createLogger } from './utils/logger'
 import { isArray, isNullish } from '@hanzo/insights-core'
@@ -30,10 +30,14 @@ const isProductToursEnabled = (instance: Insights): boolean => {
     return !!instance.persistence?.get_property(PRODUCT_TOURS_ENABLED_SERVER_SIDE)
 }
 
-export class InsightsProductTours {
+export class InsightsProductTours implements Extension {
     private _instance: Insights
     private _productTourManager: ProductTourManagerInterface | null = null
     private _cachedTours: ProductTour[] | null = null
+
+    private get _persistence() {
+        return this._instance.persistence
+    }
 
     constructor(instance: Insights) {
         this._instance = instance

@@ -1,22 +1,29 @@
 import * as React from 'react'
 import { render } from '@testing-library/react'
-import { InsightsProvider, Insights } from '..'
+import { InsightsProvider, InsightsContext, Insights } from '..'
+import { setDefaultInsightsInstance } from '../insights-default'
+import insightsJs from '@hanzo/insights'
 
 describe('InsightsContext component', () => {
     const insights = {} as unknown as Insights
 
     beforeEach(() => {
-        setDefaultPostHogInstance(posthogJs)
+        setDefaultInsightsInstance(insightsJs)
     })
 
     afterEach(() => {
-        setDefaultPostHogInstance(undefined)
+        setDefaultInsightsInstance(undefined)
     })
 
+    function ClientConsumer({ expected }: { expected: Insights }) {
+        const { client } = React.useContext(InsightsContext)
+        return <div data-testid="client">{client === expected ? 'match' : 'no-match'}</div>
+    }
+
     it('should return a client instance from the context if available', () => {
-        render(
+        const { getByTestId } = render(
             <InsightsProvider client={insights}>
-                <div>Hello</div>
+                <ClientConsumer expected={insights} />
             </InsightsProvider>
         )
         expect(getByTestId('client').textContent).toBe('match')
@@ -38,7 +45,7 @@ describe('InsightsContext component', () => {
 
         // eslint-disable-next-line no-console
         expect(console.warn).toHaveBeenCalledWith(
-            '[Insights] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global instance. You must initialize it manually. This is not recommended behavior.'
+            '[Insights] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global `window.insights` instance. You must initialize it manually. This is not recommended behavior.'
         )
     })
 })

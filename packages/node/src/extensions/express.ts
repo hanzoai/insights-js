@@ -1,6 +1,7 @@
 import ErrorTracking from './error-tracking'
 import { InsightsBackendClient } from '../client'
 import { ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
+import { addProperty, getFirstHeaderValue, getInsightsTracingHeaderValues } from './tracing-headers'
 import type { Request, Response } from 'express'
 import type { ContextData } from './context/types'
 
@@ -32,7 +33,7 @@ function getClientIp(req: Request): string | undefined {
 }
 
 function buildRequestContextData(req: Request): Partial<ContextData> {
-  const { sessionId, distinctId } = getPostHogTracingHeaderValues(req.headers)
+  const { sessionId, distinctId } = getInsightsTracingHeaderValues(req.headers)
   const properties: Record<string, any> = {}
 
   addProperty(properties, '$current_url', req.originalUrl || req.url)
@@ -49,17 +50,17 @@ function buildRequestContextData(req: Request): Partial<ContextData> {
 }
 
 export function setupExpressRequestContext(
-  _posthog: PostHogBackendClient,
+  _insights: InsightsBackendClient,
   app: {
     use: (middleware: ExpressMiddleware) => unknown
   }
 ): void {
-  app.use(posthogRequestContext(_posthog))
+  app.use(insightsRequestContext(_insights))
 }
 
-function posthogRequestContext(posthog: PostHogBackendClient): ExpressMiddleware {
+function insightsRequestContext(insights: InsightsBackendClient): ExpressMiddleware {
   return (req, _res, next): void => {
-    posthog.withContext(buildRequestContextData(req), () => next())
+    insights.withContext(buildRequestContextData(req), () => next())
   }
 }
 
@@ -79,8 +80,7 @@ function insightsErrorHandler(insights: InsightsBackendClient): ExpressErrorMidd
       return
     }
 
-    const sessionId: string | undefined = req.headers['x-insights-session-id'] as string | undefined
-    const distinctId: string | undefined = req.headers['x-insights-distinct-id'] as string | undefined
+    const contextData = buildRequestContextData(req)
     const syntheticException = new Error('Synthetic exception')
     const hint: CoreErrorTracking.EventHint = { mechanism: { type: 'middleware', handled: false }, syntheticException }
     const additionalProperties: Record<string, any> = {
@@ -90,15 +90,13 @@ function insightsErrorHandler(insights: InsightsBackendClient): ExpressErrorMidd
     }
 
     insights.addPendingPromise(
-      ErrorTracking.buildEventMessage(error, hint, distinctId, {
-        $session_id: sessionId,
-        $current_url: req.url,
-        $request_method: req.method,
-        $request_path: req.path,
-        $user_agent: req.headers['user-agent'],
-        $response_status_code: res.statusCode,
-        $ip: req.headers['x-forwarded-for'] || req?.socket?.remoteAddress,
-      }).then((msg) => {
+      ErrorTracking.buildEventMessage(
+        insights.getErrorPropertiesBuilder(),
+        error,
+        hint,
+        contextData.distinctId,
+        additionalProperties
+      ).then((msg) => {
         insights.capture(msg)
       })
     )

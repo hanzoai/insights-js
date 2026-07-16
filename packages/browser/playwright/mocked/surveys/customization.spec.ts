@@ -28,7 +28,7 @@ const questionWithLargeHtmlContent = {
 const linkQuestionWithHTMLContentType = {
     type: 'link',
     question: 'Book an interview with us',
-    link: 'https://insights.com',
+    link: 'https://insights.hanzo.ai',
     description: '<h2>html description</h2>',
     descriptionContentType: 'html',
     id: 'link_html_1',
@@ -37,7 +37,7 @@ const linkQuestionWithHTMLContentType = {
 const linkQuestionWithNoContentType = {
     type: 'link',
     question: 'Book an interview with us',
-    link: 'https://insights.com',
+    link: 'https://insights.hanzo.ai',
     description: '<h2>html description</h2>',
     id: 'link_no_content_1',
 }
@@ -45,7 +45,7 @@ const linkQuestionWithNoContentType = {
 const linkQuestionWithTextContentType = {
     type: 'link',
     question: 'Book an interview with us',
-    link: 'https://insights.com',
+    link: 'https://insights.hanzo.ai',
     description: '<h2>html description</h2>',
     descriptionContentType: 'text',
     id: 'link_text_1',

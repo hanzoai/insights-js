@@ -30,7 +30,7 @@ describe('InsightsConversations', () => {
         // Setup mock Insights instance
         mockInsights = createMockInsights({
             config: createMockConfig({
-                api_host: 'https://test.insights.com',
+                api_host: 'https://test.example.com',
                 token: 'test-token',
                 disable_conversations: false,
             }),
@@ -41,7 +41,7 @@ describe('InsightsConversations', () => {
                 },
             }),
             requestRouter: {
-                endpointFor: jest.fn().mockReturnValue('https://test.insights.com/api/test'),
+                endpointFor: jest.fn().mockReturnValue('https://test.example.com/api/test'),
             } as any,
             consent: {
                 isOptedOut: jest.fn().mockReturnValue(false),
@@ -464,7 +464,7 @@ describe('InsightsConversations', () => {
             // Create a Insights instance where _isIdentified returns true
             const identifiedInsights = createMockInsights({
                 config: createMockConfig({
-                    api_host: 'https://test.insights.com',
+                    api_host: 'https://test.example.com',
                     token: 'test-token',
                     disable_conversations: false,
                 }),
@@ -472,7 +472,7 @@ describe('InsightsConversations', () => {
                     props: {},
                 }),
                 requestRouter: {
-                    endpointFor: jest.fn().mockReturnValue('https://test.insights.com/api/test'),
+                    endpointFor: jest.fn().mockReturnValue('https://test.example.com/api/test'),
                 } as any,
                 consent: {
                     isOptedOut: jest.fn().mockReturnValue(false),

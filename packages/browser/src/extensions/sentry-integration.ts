@@ -142,7 +142,7 @@ export function createEventProcessor(
         }
 
         if (sendExceptionsToInsights) {
-            _insights.exceptions.sendExceptionEvent(data)
+            _insights.exceptions?.sendExceptionEvent(data)
         }
 
         return event

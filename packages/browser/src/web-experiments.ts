@@ -35,6 +35,10 @@ export const webExperimentUrlValidationMap: Record<
 export class WebExperiments implements Extension {
     private _flagToExperiments?: Map<string, WebExperiment>
 
+    private get _config() {
+        return this._instance.config
+    }
+
     constructor(private _instance: Insights) {
         this._instance.onFeatureFlags((flags: string[]) => {
             this.onFeatureFlags(flags)

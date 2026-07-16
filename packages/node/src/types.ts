@@ -29,14 +29,14 @@ export type EventMessage = Omit<IdentifyMessage, 'distinctId'> & {
   event: string
   groups?: Record<string, string | number> // Mapping of group type to group id
   /**
-   * Attach feature flag values evaluated via `posthog.evaluateFlags()` to this event.
+   * Attach feature flag values evaluated via `insights.evaluateFlags()` to this event.
    * Prefer this over `sendFeatureFlags` — it guarantees the event carries the exact
    * values the code branched on and avoids a hidden `/flags` request on every capture.
    */
   flags?: FeatureFlagEvaluations
   /**
    * @deprecated Use the `flags` option with a `FeatureFlagEvaluations` object obtained
-   * from `posthog.evaluateFlags()` instead. `sendFeatureFlags` fires a separate `/flags`
+   * from `insights.evaluateFlags()` instead. `sendFeatureFlags` fires a separate `/flags`
    * request on capture and may return different values than the ones the code branched on.
    */
   sendFeatureFlags?: boolean | SendFeatureFlagsOptions
@@ -244,7 +244,7 @@ export type InsightsOptions = Omit<InsightsCoreOptions, 'before_send'> & {
    * @example
    * // Vercel
    * import { waitUntil } from '@vercel/functions'
-   * new PostHog('key', { waitUntil })
+   * new Insights('key', { waitUntil })
    */
   waitUntil?: (promise: Promise<unknown>) => void
   /**
@@ -385,7 +385,7 @@ export interface IInsights {
   aliasImmediate(data: { distinctId: string; alias: string }): Promise<void>
 
   /**
-   * @description Insights feature flags (https://insights.com/docs/features/feature-flags)
+   * @description Insights feature flags (https://insights.hanzo.ai/docs/features/feature-flags)
    * allow you to safely deploy and roll back new features. Once you've created a feature flag in Insights,
    * you can use this method to check if the flag is on for a given user, allowing you to create logic to turn
    * features on and off for different user groups or individual users.
@@ -400,7 +400,7 @@ export interface IInsights {
    *
    * @returns true if the flag is on, false if the flag is off, undefined if there was an error.
    *
-   * @deprecated Use {@link IPostHog.evaluateFlags} and call `flags.isEnabled(key)` on the
+   * @deprecated Use {@link IInsights.evaluateFlags} and call `flags.isEnabled(key)` on the
    *   returned snapshot. Will be removed in the next major version.
    */
   isFeatureEnabled(
@@ -416,7 +416,7 @@ export interface IInsights {
   ): Promise<boolean | undefined>
 
   /**
-   * @description Insights feature flags (https://insights.com/docs/features/feature-flags)
+   * @description Insights feature flags (https://insights.hanzo.ai/docs/features/feature-flags)
    * allow you to safely deploy and roll back new features. Once you've created a feature flag in Insights,
    * you can use this method to check if the flag is on for a given user, allowing you to create logic to turn
    * features on and off for different user groups or individual users.
@@ -431,7 +431,7 @@ export interface IInsights {
    *
    * @returns true or string(for multivariates) if the flag is on, false if the flag is off, undefined if there was an error.
    *
-   * @deprecated Use {@link IPostHog.evaluateFlags} and call `flags.getFlag(key)` on the
+   * @deprecated Use {@link IInsights.evaluateFlags} and call `flags.getFlag(key)` on the
    *   returned snapshot. Will be removed in the next major version.
    */
   getFeatureFlag(
@@ -472,7 +472,7 @@ export interface IInsights {
    *
    * @returns payload of a json type object
    *
-   * @deprecated Use {@link IPostHog.evaluateFlags} and call `flags.getFlagPayload(key)` on
+   * @deprecated Use {@link IInsights.evaluateFlags} and call `flags.getFlagPayload(key)` on
    *   the returned snapshot. Will be removed in the next major version.
    */
   getFeatureFlagPayload(
@@ -554,11 +554,11 @@ export interface IInsights {
    *
    * @example
    * ```ts
-   * const flags = await posthog.evaluateFlags('user_123', { personProperties: { plan: 'enterprise' } })
+   * const flags = await insights.evaluateFlags('user_123', { personProperties: { plan: 'enterprise' } })
    * if (flags.isEnabled('new-dashboard')) {
    *   renderNewDashboard()
    * }
-   * posthog.capture({ distinctId: 'user_123', event: 'page_viewed', flags })
+   * insights.capture({ distinctId: 'user_123', event: 'page_viewed', flags })
    * ```
    *
    * @param options - Optional configuration for flag evaluation. Pass `flagKeys` to scope the underlying `/flags` request to a subset of flags.

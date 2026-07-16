@@ -27,7 +27,7 @@ describe('InsightsProvider component', () => {
     describe('when using apiKey initialization', () => {
         const apiKey = 'test-api-key'
         const initialOptions = { api_host: 'https://app.insights.hanzo.ai' }
-        const updatedOptions = { api_host: 'https://eu.insights.com' }
+        const updatedOptions = { api_host: 'https://insights.hanzo.ai' }
 
         beforeEach(() => {
             jest.clearAllMocks()
@@ -37,14 +37,14 @@ describe('InsightsProvider component', () => {
             const consoleSpy = jest.spyOn(console, 'warn').mockImplementation()
 
             render(
-                <PostHogProvider apiKey={undefined as any} options={initialOptions}>
+                <InsightsProvider apiKey={undefined as any} options={initialOptions}>
                     <div>Test</div>
-                </PostHogProvider>
+                </InsightsProvider>
             )
 
-            expect(posthogJs.init).not.toHaveBeenCalled()
+            expect(insightsJs.init).not.toHaveBeenCalled()
             expect(consoleSpy).toHaveBeenCalledWith(
-                '[PostHog.js] No `apiKey` or `client` were provided to `PostHogProvider`. Using default global `window.posthog` instance. You must initialize it manually. This is not recommended behavior.'
+                '[Insights] No `apiKey` or `client` were provided to `InsightsProvider`. Using default global `window.insights` instance. You must initialize it manually. This is not recommended behavior.'
             )
 
             consoleSpy.mockRestore()

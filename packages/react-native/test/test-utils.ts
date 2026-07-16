@@ -2,7 +2,7 @@ export const wait = async (t: number): Promise<void> => {
   await new Promise<void>((r) => setTimeout(r, t))
 }
 
-export const createMockPostHog = (): any => ({
+export const createMockInsights = (): any => ({
   capture: jest.fn(),
   captureException: jest.fn(),
   flush: jest.fn(() => Promise.resolve()),
