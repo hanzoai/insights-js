@@ -3,6 +3,7 @@
 import { each, extend, stripEmptyProperties, addEventListener } from './utils'
 import { cookieStore, createLocalPlusCookieStore, localStore, memoryStore, sessionStore } from './storage'
 import { PersistentStore, InsightsConfig, Properties } from './types'
+import { window } from './utils/globals'
 import {
     ENABLED_FEATURE_FLAGS,
     EVENT_TIMERS_KEY,
@@ -13,7 +14,7 @@ import {
 } from './constants'
 import { getPersistenceKeyPolicy } from './persistence-key-policy'
 
-import { isUndefined } from '@hanzo/insights-core'
+import { isNumber, isUndefined } from '@hanzo/insights-core'
 import {
     getCampaignParams,
     getInitialPersonPropsFromInfo,
@@ -39,9 +40,9 @@ const parseName = (config: InsightsConfig): string => {
     }
 
     if (config['persistence_name']) {
-        return 'ph_' + config['persistence_name']
+        return 'hi_' + config['persistence_name']
     } else {
-        return 'ph_' + token + '_insights'
+        return 'hi_' + token + '_insights'
     }
 }
 
@@ -103,7 +104,7 @@ export class InsightsPersistence {
         // Install unload flush listeners unconditionally. They are a no-op
         // when no debounced write is pending (see `flush()`), so it is safe
         // to install even when `persistence_save_debounce_ms` is 0 at
-        // construction. Crucially this also handles `posthog.set_config({
+        // construction. Crucially this also handles `insights.set_config({
         // persistence_save_debounce_ms: 250 })` enabling debounce later —
         // we'd otherwise miss the listener install and lose pending writes
         // on close.
@@ -278,7 +279,7 @@ export class InsightsPersistence {
      * cannot accidentally resurrect a storage entry that `remove()` or
      * `clear()` just deleted. Without this guard, the listener would
      * call `_writeNow()` and write the in-memory `props` (now `{}`) back
-     * to storage, breaking `posthog.reset()` / opt-out flows.
+     * to storage, breaking `insights.reset()` / opt-out flows.
      */
     flush(): void {
         if (isUndefined(this._pendingSaveTimer)) {

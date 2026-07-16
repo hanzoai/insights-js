@@ -47,9 +47,9 @@ export const SESSION_RECORDING_PAST_MINIMUM_DURATION = '$session_past_minimum_du
 export const SESSION_RECORDING_URL_TRIGGER_ACTIVATED_SESSION = '$session_recording_url_trigger_activated_session'
 export const SESSION_RECORDING_EVENT_TRIGGER_ACTIVATED_SESSION = '$session_recording_event_trigger_activated_session'
 // V2 Trigger Groups: Per-group persistence key prefixes (suffix with group ID)
-export const SESSION_RECORDING_TRIGGER_V2_GROUP_EVENT_PREFIX = '$posthog_sr_group_event_trigger_'
-export const SESSION_RECORDING_TRIGGER_V2_GROUP_URL_PREFIX = '$posthog_sr_group_url_trigger_'
-export const SESSION_RECORDING_TRIGGER_V2_GROUP_SAMPLING_PREFIX = '$posthog_sr_group_sampling_'
+export const SESSION_RECORDING_TRIGGER_V2_GROUP_EVENT_PREFIX = '$insights_sr_group_event_trigger_'
+export const SESSION_RECORDING_TRIGGER_V2_GROUP_URL_PREFIX = '$insights_sr_group_url_trigger_'
+export const SESSION_RECORDING_TRIGGER_V2_GROUP_SAMPLING_PREFIX = '$insights_sr_group_sampling_'
 export const SESSION_RECORDING_FIRST_FULL_SNAPSHOT_TIMESTAMP = '$debug_first_full_snapshot_timestamp'
 export const ENABLED_FEATURE_FLAGS = '$enabled_feature_flags'
 export const PERSISTENCE_ACTIVE_FEATURE_FLAGS = '$active_feature_flags'
@@ -63,7 +63,7 @@ export const STORED_PERSON_PROPERTIES_KEY = '$stored_person_properties'
 export const STORED_GROUP_PROPERTIES_KEY = '$stored_group_properties'
 export const SURVEYS = '$surveys'
 export const SURVEYS_ACTIVATED = '$surveys_activated'
-export const PRODUCT_TOURS = 'ph_product_tours'
+export const PRODUCT_TOURS = 'hi_product_tours'
 export const PRODUCT_TOURS_ACTIVATED = '$product_tours_activated'
 export const CONVERSATIONS = '$conversations'
 export const CONVERSATIONS_LEGACY_WIDGET_SESSION_ID = '$conversations_widget_session_id'
@@ -110,7 +110,7 @@ export const SDK_DEBUG_REPLAY_RRWEB_START_ATTEMPTED = '$sdk_debug_rrweb_start_at
 export const SESSION_RECORDING_START_REASON = '$session_recording_start_reason'
 
 export const SURVEYS_REQUEST_TIMEOUT_MS = 10000
-export const LOAD_EXT_NOT_FOUND = 'PostHog loadExternalDependency extension not found.'
+export const LOAD_EXT_NOT_FOUND = 'Insights loadExternalDependency extension not found.'
 
 /* EVENT NAMES - interned to reduce bundle size */
 /* COOKIELESS MODE VALUES */

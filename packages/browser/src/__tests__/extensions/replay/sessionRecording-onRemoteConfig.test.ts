@@ -345,7 +345,7 @@ describe('SessionRecording', () => {
 
         it('discards recording when server disables it after starting from cached config', () => {
             // Fresh cached config from previous page load
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -368,7 +368,7 @@ describe('SessionRecording', () => {
             expect(discardSpy).toHaveBeenCalled()
             expect(flushSpy).not.toHaveBeenCalled()
             expect(sessionRecording['_persistFlagsOnSessionListener']).toBeUndefined()
-            expect(posthog.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(false)
+            expect(insights.get_property(SESSION_RECORDING_REMOTE_CONFIG).enabled).toBe(false)
         })
 
         it('stores sample rate', () => {
@@ -482,7 +482,7 @@ describe('SessionRecording', () => {
         })
 
         it('does not start recording when config fetch fails and no persisted config exists', () => {
-            posthog.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
+            insights.persistence?.register({ [SESSION_RECORDING_REMOTE_CONFIG]: undefined })
 
             // Remote config fetch fails
             sessionRecording.onRemoteConfig(makeFlagsResponse({}))
@@ -493,7 +493,7 @@ describe('SessionRecording', () => {
         })
 
         it('awaits config when config fetch fails and persisted config is stale', () => {
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',
@@ -510,7 +510,7 @@ describe('SessionRecording', () => {
         })
 
         it('transitions to missing_config when config refresh fails', () => {
-            posthog.persistence?.register({
+            insights.persistence?.register({
                 [SESSION_RECORDING_REMOTE_CONFIG]: {
                     enabled: true,
                     endpoint: '/s/',

@@ -306,8 +306,8 @@ describe('consentManager', () => {
         it('should write consent to cookie when opt_out_capturing_persistence_type is cookie, even if consent was accessed before init', async () => {
             // Simulate the bug: the primary instance's consent._storage is accessed
             // before init() is called (this happens in bundled apps where _dom_loaded()
-            // fires during module load, before the user calls posthog.init()).
-            const ph = new PostHog()
+            // fires during module load, before the user calls insights.init()).
+            const ph = new Insights()
 
             // At this point, ph.config = defaultConfig() which has
             // opt_out_capturing_persistence_type: 'localStorage'.
@@ -316,7 +316,7 @@ describe('consentManager', () => {
             ph.consent.isOptedOut()
 
             // Now init on the SAME instance (no name = primary instance),
-            // which is what users do: posthog.init(token, config)
+            // which is what users do: insights.init(token, config)
             const token = uuidv7()
             await new Promise<void>((resolve) =>
                 ph.init(token, {

@@ -1,7 +1,7 @@
 /* eslint-disable compat/compat */
 import { ConversationsManager } from '../../../extensions/conversations/external'
-import { ConversationsRemoteConfig } from '../../../posthog-conversations-types'
-import { PostHog } from '../../../posthog-core'
+import { ConversationsRemoteConfig } from '../../../insights-conversations-types'
+import { Insights } from '../../../insights-core'
 import '@testing-library/jest-dom'
 import { act } from '@testing-library/preact'
 
@@ -34,7 +34,7 @@ jest.mock('../../../extensions/conversations/external/persistence', () => {
 
 describe('ConversationsManager Identity Verification', () => {
     let manager: ConversationsManager
-    let mockPosthog: PostHog
+    let mockInsights: Insights
     let mockConfig: ConversationsRemoteConfig
 
     const createMockGetTicketsResponse = () => ({
@@ -57,10 +57,10 @@ describe('ConversationsManager Identity Verification', () => {
             token: 'test-token',
         }
 
-        mockPosthog = {
+        mockInsights = {
             config: {
                 token: 'test-token',
-                api_host: 'https://test.posthog.com',
+                api_host: 'https://test.example.com',
             },
             _send_request: jest.fn((options) => {
                 const url = options.url as string
@@ -100,7 +100,7 @@ describe('ConversationsManager Identity Verification', () => {
                 }
             }),
             requestRouter: {
-                endpointFor: jest.fn((_type: string, path: string) => `https://test.posthog.com${path}`),
+                endpointFor: jest.fn((_type: string, path: string) => `https://test.example.com${path}`),
             },
             get_distinct_id: jest.fn().mockReturnValue('test-distinct-id'),
             get_property: jest.fn().mockReturnValue(undefined),
@@ -116,7 +116,7 @@ describe('ConversationsManager Identity Verification', () => {
             capture: jest.fn(),
             on: jest.fn().mockReturnValue(jest.fn()),
             _isIdentified: jest.fn().mockReturnValue(false),
-        } as unknown as PostHog
+        } as unknown as Insights
     })
 
     afterEach(() => {
@@ -134,18 +134,18 @@ describe('ConversationsManager Identity Verification', () => {
     }
 
     describe('init-time identity from config', () => {
-        it('should use identity from top-level posthog.config during construction', async () => {
-            ;(mockPosthog as any).config.identity_distinct_id = 'user_123'
-            ;(mockPosthog as any).config.identity_hash = 'abc123hash'
+        it('should use identity from top-level insights.config during construction', async () => {
+            ;(mockInsights as any).config.identity_distinct_id = 'user_123'
+            ;(mockInsights as any).config.identity_hash = 'abc123hash'
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             jest.clearAllMocks()
 
             await act(async () => {
                 await manager.getTickets()
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/tickets') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()
@@ -157,14 +157,14 @@ describe('ConversationsManager Identity Verification', () => {
 
         it('should skip restore token when identity config is set', async () => {
             window.history.replaceState({}, '', '/?ph_conv_restore=restore-token-1')
-            ;(mockPosthog as any).config.identity_distinct_id = 'user_123'
-            ;(mockPosthog as any).config.identity_hash = 'abc123hash'
+            ;(mockInsights as any).config.identity_distinct_id = 'user_123'
+            ;(mockInsights as any).config.identity_hash = 'abc123hash'
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             await flushPromises()
 
             // Should NOT call the restore endpoint
-            const calls = (mockPosthog._send_request as jest.Mock).mock.calls
+            const calls = (mockInsights._send_request as jest.Mock).mock.calls
             const restoreCalls = calls.filter(
                 (c: any) => c[0].url?.includes('/widget/restore') && c[0].method === 'POST'
             )
@@ -172,14 +172,14 @@ describe('ConversationsManager Identity Verification', () => {
         })
 
         it('should use widget_session_id when config fields are undefined', async () => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             jest.clearAllMocks()
 
             await act(async () => {
                 await manager.getTickets()
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/tickets') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()
@@ -189,16 +189,16 @@ describe('ConversationsManager Identity Verification', () => {
         })
 
         it('should use widget_session_id when only one config field is set', async () => {
-            ;(mockPosthog as any).config.identity_distinct_id = 'user_123'
+            ;(mockInsights as any).config.identity_distinct_id = 'user_123'
 
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             jest.clearAllMocks()
 
             await act(async () => {
                 await manager.getTickets()
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/tickets') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()
@@ -210,29 +210,29 @@ describe('ConversationsManager Identity Verification', () => {
 
     describe('setIdentity / clearIdentity', () => {
         beforeEach(() => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
         })
 
         it('should trigger ticket reload on setIdentity', () => {
-            ;(mockPosthog as any).config.identity_distinct_id = 'user_456'
-            ;(mockPosthog as any).config.identity_hash = 'def456hash'
+            ;(mockInsights as any).config.identity_distinct_id = 'user_456'
+            ;(mockInsights as any).config.identity_hash = 'def456hash'
             jest.clearAllMocks()
 
             manager.setIdentity()
 
-            const calls = (mockPosthog._send_request as jest.Mock).mock.calls
+            const calls = (mockInsights._send_request as jest.Mock).mock.calls
             const ticketCalls = calls.filter((c: any) => c[0].url?.includes('/widget/tickets'))
             expect(ticketCalls.length).toBeGreaterThan(0)
         })
 
         it('should use widget_session_id after clearIdentity', async () => {
-            ;(mockPosthog as any).config.identity_distinct_id = 'user_456'
-            ;(mockPosthog as any).config.identity_hash = 'def456hash'
+            ;(mockInsights as any).config.identity_distinct_id = 'user_456'
+            ;(mockInsights as any).config.identity_hash = 'def456hash'
 
             manager.setIdentity()
 
-            delete (mockPosthog as any).config.identity_distinct_id
-            delete (mockPosthog as any).config.identity_hash
+            delete (mockInsights as any).config.identity_distinct_id
+            delete (mockInsights as any).config.identity_hash
             manager.clearIdentity()
             jest.clearAllMocks()
 
@@ -240,7 +240,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.getTickets()
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/tickets') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()
@@ -252,9 +252,9 @@ describe('ConversationsManager Identity Verification', () => {
 
     describe('API calls in identity mode', () => {
         beforeEach(() => {
-            ;(mockPosthog as any).config.identity_distinct_id = 'user_123'
-            ;(mockPosthog as any).config.identity_hash = 'abc123hash'
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            ;(mockInsights as any).config.identity_distinct_id = 'user_123'
+            ;(mockInsights as any).config.identity_hash = 'abc123hash'
+            manager = new ConversationsManager(mockConfig, mockInsights)
             jest.clearAllMocks()
         })
 
@@ -263,7 +263,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.sendMessage('Hello!')
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/message') && c[0].method === 'POST'
             )
             expect(call).toBeDefined()
@@ -279,7 +279,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.getMessages('ticket-123')
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/messages/ticket-123') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()
@@ -294,7 +294,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.markAsRead('ticket-123')
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/read') && c[0].method === 'POST'
             )
             expect(call).toBeDefined()
@@ -309,7 +309,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.getTickets()
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/tickets') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()
@@ -322,7 +322,7 @@ describe('ConversationsManager Identity Verification', () => {
 
     describe('API calls in legacy mode (no identity)', () => {
         beforeEach(() => {
-            manager = new ConversationsManager(mockConfig, mockPosthog)
+            manager = new ConversationsManager(mockConfig, mockInsights)
             jest.clearAllMocks()
         })
 
@@ -331,7 +331,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.sendMessage('Hello!')
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/message') && c[0].method === 'POST'
             )
             expect(call).toBeDefined()
@@ -347,7 +347,7 @@ describe('ConversationsManager Identity Verification', () => {
                 await manager.getTickets()
             })
 
-            const call = (mockPosthog._send_request as jest.Mock).mock.calls.find(
+            const call = (mockInsights._send_request as jest.Mock).mock.calls.find(
                 (c: any) => c[0].url?.includes('/widget/tickets') && c[0].method === 'GET'
             )
             expect(call).toBeDefined()

@@ -1,7 +1,7 @@
-import posthogJs from '@hanzo/insights'
-import { setDefaultPostHogInstance } from './context/posthog-default'
+import insightsJs from '@hanzo/insights'
+import { setDefaultInsightsInstance } from './context/insights-default'
 
-setDefaultPostHogInstance(posthogJs)
+setDefaultInsightsInstance(insightsJs)
 
 export * from './context'
 export * from './hooks'

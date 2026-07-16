@@ -132,7 +132,7 @@ export function ProductTourTooltipInner({
 
             {showInsightsBranding && (
                 <a
-                    href={isInteractive ? 'https://insights.com/docs/product-tours' : undefined}
+                    href={isInteractive ? 'https://insights.hanzo.ai/docs/product-tours' : undefined}
                     target={isInteractive ? '_blank' : undefined}
                     rel={isInteractive ? 'noopener noreferrer' : undefined}
                     class="ph-tour-branding"

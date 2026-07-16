@@ -4,7 +4,14 @@ import { Properties } from '../types'
 import Config from '../config'
 import { each, extend, stripEmptyProperties } from './index'
 import { document, location, userAgent, window } from './globals'
-import { detectBrowser, detectBrowserVersion, detectDevice, detectDeviceType, detectOS } from '@hanzo/insights-core'
+import {
+    BrowserDetectionHints,
+    detectBrowser,
+    detectBrowserVersion,
+    detectDevice,
+    detectDeviceType,
+    detectOS,
+} from '@hanzo/insights-core'
 import { cookieStore } from '../storage'
 
 const URL_REGEX_PREFIX = 'https?://(.*)'
@@ -154,7 +161,7 @@ function _getSearchInfoFromReferrer(referrer: string): Record<string, any> {
 
         const keyword = document ? getQueryParam(document.referrer, param) : ''
         if (keyword.length) {
-            ret['ph_keyword'] = keyword
+            ret['hi_keyword'] = keyword
         }
     }
 

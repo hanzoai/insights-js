@@ -13,10 +13,10 @@ if (!GEMINI_API_KEY) {
   // Dynamic imports to avoid ESM parse failures when @google/genai
   // transitive deps are not configured in transformIgnorePatterns.
   // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-  const { PostHog } = require('@hanzo/insights-node')
+  const { Insights } = require('@hanzo/insights-node')
 
   jest.mock('@hanzo/insights-node', () => ({
-    PostHog: jest.fn().mockImplementation(() => ({
+    Insights: jest.fn().mockImplementation(() => ({
       capture: jest.fn(),
       captureImmediate: jest.fn(),
       privacyMode: false,
@@ -24,17 +24,17 @@ if (!GEMINI_API_KEY) {
   }))
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
-  const PostHogGemini = require('../src/gemini').default
+  const InsightsGemini = require('../src/gemini').default
 
   describe('Gemini Integration Tests', () => {
-    let mockPostHogClient: any
+    let mockInsightsClient: any
     let client: any
 
     beforeEach(() => {
-      mockPostHogClient = new PostHog('test-key')
-      client = new PostHogGemini({
+      mockInsightsClient = new Insights('test-key')
+      client = new InsightsGemini({
         apiKey: GEMINI_API_KEY,
-        posthog: mockPostHogClient,
+        insights: mockInsightsClient,
       })
     })
 
@@ -42,12 +42,12 @@ if (!GEMINI_API_KEY) {
       const response = await client.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: 'Say hi',
-        posthogDistinctId: 'test-id',
+        insightsDistinctId: 'test-id',
       })
 
       expect(response.text).toBeDefined()
 
-      const captureCall = mockPostHogClient.capture.mock.calls.find((call: any[]) => call[0].event === '$ai_generation')
+      const captureCall = mockInsightsClient.capture.mock.calls.find((call: any[]) => call[0].event === '$ai_generation')
       expect(captureCall).toBeDefined()
       const props = captureCall![0].properties
       expect(props.$ai_provider).toBe('gemini')

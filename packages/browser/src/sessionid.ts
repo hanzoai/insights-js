@@ -1,5 +1,5 @@
 import { InsightsPersistence } from './insights-persistence'
-import { SESSION_ID } from './constants'
+import { COOKIELESS_ALWAYS, DOM_EVENT_BEFOREUNLOAD, SESSION_ID } from './constants'
 import { sessionStore } from './storage'
 import { InsightsConfig, SessionIdChangedCallback } from './types'
 import { uuid7ToTimestampMs, uuidv7 } from './uuidv7'
@@ -7,7 +7,7 @@ import { window } from './utils/globals'
 
 import { createLogger } from './utils/logger'
 
-import { isArray, isUndefined, clampToRange, isPositiveNumber } from '@hanzo/insights-core'
+import { isArray, isNull, isUndefined, clampToRange, isPositiveNumber } from '@hanzo/insights-core'
 import { Insights } from './insights-core'
 import { addEventListener } from './utils'
 import { SimpleEventEmitter } from './utils/simple-event-emitter'
@@ -83,8 +83,8 @@ export class SessionIdManager {
         instance.register({ $configured_session_timeout_ms: this._sessionTimeoutMs })
         this._resetIdleTimer()
 
-        this._window_id_storage_key = 'ph_' + persistenceName + '_window_id'
-        this._primary_window_exists_storage_key = 'ph_' + persistenceName + '_primary_window_exists'
+        this._window_id_storage_key = 'hi_' + persistenceName + '_window_id'
+        this._primary_window_exists_storage_key = 'hi_' + persistenceName + '_primary_window_exists'
 
         // primary_window_exists is set when the DOM has been loaded and is cleared on unload
         // if it exists here it means there was no unload which suggests this window is opened as a tab duplication, window.open, etc.

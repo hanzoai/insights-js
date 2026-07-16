@@ -1,8 +1,28 @@
-import { isPromise } from '@hanzo/insights-core'
+import { isPromise, safeSetTimeout } from '@hanzo/insights-core'
 import { InsightsCustomStorage } from './types'
 
-const INSIGHTS_STORAGE_KEY = '.insights-rn.json'
+// Module-local: SDK-internal detail, not part of any public or reachable
+// surface. The factory functions below are the only way to obtain a storage
+// instance bound to one of these files.
+const EVENTS_STORAGE_FILE = '.insights-rn.json'
+const LOGS_STORAGE_FILE = '.insights-rn-logs.json'
 const INSIGHTS_STORAGE_VERSION = 'v1'
+
+// Window over which storage mutations coalesce into one disk write. The
+// single-blob storage shape re-serializes the full cache on every write, so an
+// unbatched burst of N captures costs O(n²) bytes; coalescing collapses a
+// same-tick burst to a single write. The mutation lands in memoryCache
+// synchronously — only the disk write is deferred — and flush / AppState
+// background / shutdown each force a synchronous write via waitForPersist, so
+// the only data-loss window is a hard crash before the next drain.
+//
+// 100ms is chosen from the write-rate curve: at high burst rates the disk-write
+// count is already floored by the events flushAt (a flush drains every 20
+// events), and 100ms is enough to reach that floor while bounding worst-case
+// loss to ~one flush batch. Larger windows don't reduce writes further (the
+// floor is flushAt, not the window) and only widen the loss window when flushes
+// aren't draining.
+const PERSIST_DEBOUNCE_MS = 100
 
 type InsightsStorageContents = { [key: string]: any }
 
@@ -19,11 +39,13 @@ export class InsightsRNStorage {
   // stream of captures.
   private _persistTimer?: ReturnType<typeof setTimeout>
 
-  constructor(storage: InsightsCustomStorage) {
+  // Prefer the `create*Storage` factories below over calling this directly —
+  // they're the only callers that know which file to bind to.
+  constructor(storage: InsightsCustomStorage, storageKey: string) {
     this.storage = storage
     this._storageKey = storageKey
 
-    const preloadResult = this.storage.getItem(INSIGHTS_STORAGE_KEY)
+    const preloadResult = this.storage.getItem(this._storageKey)
 
     if (isPromise(preloadResult)) {
       this.preloadPromise = preloadResult.then((res) => {
@@ -61,7 +83,7 @@ export class InsightsRNStorage {
       content: this.memoryCache,
     }
 
-    const result = this.storage.setItem(INSIGHTS_STORAGE_KEY, JSON.stringify(payload))
+    const result = this.storage.setItem(this._storageKey, JSON.stringify(payload))
 
     // Track async persist operations so we can wait for them if needed
     if (isPromise(result)) {
@@ -88,7 +110,7 @@ export class InsightsRNStorage {
       try {
         this.persist()
       } catch (err) {
-        console.warn('PostHog storage scheduled persist threw:', err)
+        console.warn('Insights storage scheduled persist threw:', err)
       }
     }, PERSIST_DEBOUNCE_MS)
   }
@@ -103,7 +125,7 @@ export class InsightsRNStorage {
     try {
       this.persist()
     } catch (err) {
-      console.warn('PostHog storage drain persist threw:', err)
+      console.warn('Insights storage drain persist threw:', err)
     }
   }
 
@@ -145,7 +167,7 @@ export class InsightsRNStorage {
 }
 
 export class InsightsRNSyncMemoryStorage extends InsightsRNStorage {
-  constructor() {
+  constructor(storageKey: string) {
     const cache: { [key: string]: any | undefined } = {}
     const storage = {
       getItem: (key: string) => cache[key],
@@ -161,18 +183,18 @@ export class InsightsRNSyncMemoryStorage extends InsightsRNStorage {
 // Factory functions that bind the storage instance to the correct SDK-internal
 // file. The file names never leave this module — callers (including tests)
 // reach storages only through these helpers.
-export function createEventsStorage(customStorage: PostHogCustomStorage): PostHogRNStorage {
-  return new PostHogRNStorage(customStorage, EVENTS_STORAGE_FILE)
+export function createEventsStorage(customStorage: InsightsCustomStorage): InsightsRNStorage {
+  return new InsightsRNStorage(customStorage, EVENTS_STORAGE_FILE)
 }
 
-export function createLogsStorage(customStorage: PostHogCustomStorage): PostHogRNStorage {
-  return new PostHogRNStorage(customStorage, LOGS_STORAGE_FILE)
+export function createLogsStorage(customStorage: InsightsCustomStorage): InsightsRNStorage {
+  return new InsightsRNStorage(customStorage, LOGS_STORAGE_FILE)
 }
 
-export function createEventsMemoryStorage(): PostHogRNStorage {
-  return new PostHogRNSyncMemoryStorage(EVENTS_STORAGE_FILE)
+export function createEventsMemoryStorage(): InsightsRNStorage {
+  return new InsightsRNSyncMemoryStorage(EVENTS_STORAGE_FILE)
 }
 
-export function createLogsMemoryStorage(): PostHogRNStorage {
-  return new PostHogRNSyncMemoryStorage(LOGS_STORAGE_FILE)
+export function createLogsMemoryStorage(): InsightsRNStorage {
+  return new InsightsRNSyncMemoryStorage(LOGS_STORAGE_FILE)
 }

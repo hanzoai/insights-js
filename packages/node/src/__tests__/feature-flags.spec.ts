@@ -2480,17 +2480,17 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // Key absent → property is_not_set is true → flag matches.
-    expect(await posthog.getFeatureFlag('only-anon', 'some-distinct-id', { personProperties: {} })).toEqual(true)
+    expect(await insights.getFeatureFlag('only-anon', 'some-distinct-id', { personProperties: {} })).toEqual(true)
     // Key present → property IS set → flag does not match.
     expect(
-      await posthog.getFeatureFlag('only-anon', 'some-distinct-id', { personProperties: { email: 'a@b.com' } })
+      await insights.getFeatureFlag('only-anon', 'some-distinct-id', { personProperties: { email: 'a@b.com' } })
     ).toEqual(false)
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
@@ -2516,13 +2516,13 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getFeatureFlag('off-continuity', 'some-distinct-id')).toEqual(false)
+    expect(await insights.getFeatureFlag('off-continuity', 'some-distinct-id')).toEqual(false)
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
 
@@ -2560,14 +2560,14 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('cohort-flag-dep', 'some-distinct-id', {
+      await insights.getFeatureFlag('cohort-flag-dep', 'some-distinct-id', {
         personProperties: { plan: 'pro' },
         onlyEvaluateLocally: true,
       })
@@ -2621,21 +2621,21 @@ describe('local evaluation', () => {
     }
     mockedFetch.mockImplementation(apiImplementation({ localFlags: flags }))
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     expect(
-      await posthog.getFeatureFlag('cohort-flag-dep', 'some-distinct-id', {
+      await insights.getFeatureFlag('cohort-flag-dep', 'some-distinct-id', {
         personProperties: { plan: 'pro' },
         onlyEvaluateLocally: true,
       })
     ).toBe(true)
 
     expect(
-      await posthog.getFeatureFlag('cohort-flag-dep', 'some-distinct-id', {
+      await insights.getFeatureFlag('cohort-flag-dep', 'some-distinct-id', {
         personProperties: { plan: 'free' },
         onlyEvaluateLocally: true,
       })
@@ -3124,11 +3124,11 @@ describe('match properties', () => {
     expect(matchProperty(property_b, { key: undefined })).toBe(true)
     expect(matchProperty(property_b, { key: 'null' })).toBe(true)
 
-    const property_c = { key: 'key', value: 'app.insights.com', operator: 'icontains' }
+    const property_c = { key: 'key', value: 'insights.hanzo.ai', operator: 'icontains' }
     expect(matchProperty(property_c, { key: null })).toBe(false)
     expect(matchProperty(property_c, { key: undefined })).toBe(false)
     expect(matchProperty(property_c, { key: 'lol' })).toBe(false)
-    expect(matchProperty(property_c, { key: 'https://app.insights.com' })).toBe(true)
+    expect(matchProperty(property_c, { key: 'https://insights.hanzo.ai' })).toBe(true)
 
     const property_d = { key: 'key', value: '.+', operator: 'regex' }
     expect(matchProperty(property_d, { key: null })).toBe(false)
@@ -5912,7 +5912,7 @@ describe('quota limiting', () => {
     expect(res.featureFlags).toEqual({})
     expect(res.featureFlagPayloads).toEqual({})
     expect(consoleSpy).toHaveBeenCalledWith(
-      '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://insights.com/docs/billing/limits-alerts'
+      '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://insights.hanzo.ai/docs/billing/limits-alerts'
     )
 
     consoleSpy.mockRestore()
@@ -7005,12 +7005,12 @@ describe('strictLocalEvaluation option', () => {
 })
 
 describe('mixed targeting local evaluation', () => {
-  let posthog: PostHog
+  let insights: Insights
 
   jest.useFakeTimers()
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   const mixedFlag = {
@@ -7102,13 +7102,13 @@ describe('mixed targeting local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
-    expect(await posthog.getFeatureFlag(flagKey, distinctId, options)).toEqual(expected)
+    expect(await insights.getFeatureFlag(flagKey, distinctId, options)).toEqual(expected)
     // No fallback to /flags — mixed targeting must resolve locally.
     expect(mockedFetch).not.toHaveBeenCalledWith(...anyFlagsCall)
   })
@@ -7138,16 +7138,16 @@ describe('mixed targeting local evaluation', () => {
       })
     )
 
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       personalApiKey: 'TEST_PERSONAL_API_KEY',
-      ...posthogImmediateResolveOptions,
+      ...insightsImmediateResolveOptions,
     })
 
     // With rollout 100%, matches deterministically regardless of hashing — but calling with the group
     // passed should resolve locally, proving the group bucketing path is taken.
     expect(
-      await posthog.getFeatureFlag('rollout-flag', 'any-distinct-id', {
+      await insights.getFeatureFlag('rollout-flag', 'any-distinct-id', {
         groups: { company: 'acme' },
         groupProperties: { company: {} },
       })

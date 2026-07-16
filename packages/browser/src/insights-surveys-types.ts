@@ -1,16 +1,17 @@
 /**
  * Having Survey types in types.ts was confusing tsc
  * and generating an invalid module.d.ts
- * See https://github.com/Insights/@hanzo/insights/issues/698
+ * See https://github.com/Insights/insights-js/issues/698
  */
 
 import type { Properties, PropertyMatchType } from './types'
-import type { SurveyAppearance as CoreSurveyAppearance, SurveyValidationRule } from '@hanzo/insights-core'
-
-export enum SurveyEventType {
-    Activation = 'events',
-    Cancellation = 'cancelEvents',
-}
+import type {
+    SurveyAppearance as CoreSurveyAppearance,
+    SurveyQuestionTranslation,
+    SurveyResponseValue as CoreSurveyResponseValue,
+    SurveyTranslation,
+    SurveyValidationRule,
+} from '@hanzo/insights-core'
 
 // Extended operator type to include numeric operators not in PropertyMatchType
 export type PropertyOperator = PropertyMatchType | 'gt' | 'lt'
@@ -127,7 +128,7 @@ export interface SurveyElement {
     group_id?: number
 }
 
-// Re-export from @insights/types to avoid duplication
+// Re-export from @hanzo/insights-types to avoid duplication
 export type { SurveyRenderReason } from '@hanzo/insights-types'
 
 export interface Survey {

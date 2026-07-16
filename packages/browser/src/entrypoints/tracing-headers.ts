@@ -2,7 +2,123 @@ import { SessionIdManager } from '../sessionid'
 import { patch } from '../extensions/replay/rrweb-plugins/patch'
 import { assignableWindow, window } from '../utils/globals'
 import { COOKIELESS_SENTINEL_VALUE } from '../constants'
-import { isArray } from '@hanzo/insights-core'
+import { isArray, isFunction, isNull, isUndefined } from '@hanzo/insights-core'
+
+const SESSION_ID_HEADER = 'X-INSIGHTS-SESSION-ID'
+const WINDOW_ID_HEADER = 'X-INSIGHTS-WINDOW-ID'
+const DISTINCT_ID_HEADER = 'X-INSIGHTS-DISTINCT-ID'
+const TRACING_HEADERS = [SESSION_ID_HEADER, WINDOW_ID_HEADER, DISTINCT_ID_HEADER]
+const REQUEST_INIT_KEYS = [
+    'attributionReporting',
+    'body',
+    'browsingTopics',
+    'cache',
+    'credentials',
+    'dispatcher',
+    'duplex',
+    'integrity',
+    'keepalive',
+    'method',
+    'mode',
+    'priority',
+    'redirect',
+    'referrer',
+    'referrerPolicy',
+    'signal',
+    'window',
+]
+
+const hasOwnProperty = (value: object, property: PropertyKey): boolean =>
+    Object.prototype.hasOwnProperty.call(value, property)
+
+const isObjectLike = (value: unknown): value is object =>
+    (typeof value === 'object' && !isNull(value)) || isFunction(value)
+
+const isRequest = (value: unknown): value is Request =>
+    typeof Request !== 'undefined' &&
+    (value instanceof Request || Object.prototype.toString.call(value) === '[object Request]')
+
+const getRequestUrl = (url: URL | RequestInfo): string | undefined => {
+    try {
+        if (isRequest(url)) {
+            return url.url
+        }
+
+        // eslint-disable-next-line compat/compat
+        return new URL(url instanceof URL ? url.toString() : String(url), window?.location?.href).toString()
+    } catch {
+        return undefined
+    }
+}
+
+// RequestInit is a WebIDL dictionary: native fetch reads known keys via property access, including inherited
+// and non-enumerable properties. Avoid `{ ...init, headers }`, which can drop body/signal/duplex/etc. Instead,
+// overlay only `headers` while forwarding every other lookup to the caller's original init object.
+const createFetchInitWithHeaders = (init: RequestInit | undefined, headers: Headers): RequestInit | undefined => {
+    if (isUndefined(init) || isNull(init)) {
+        return { headers }
+    }
+    if (!isObjectLike(init)) {
+        return undefined
+    }
+
+    const originalInit = init as RequestInit & Record<PropertyKey, unknown>
+
+    if (typeof Proxy === 'undefined' || typeof Reflect === 'undefined') {
+        // Older browsers without Proxy still get an inherited overlay, which preserves native fetch property lookup.
+        const initWithHeaders = Object.create(originalInit) as RequestInit
+        Object.defineProperty(initWithHeaders, 'headers', {
+            configurable: true,
+            enumerable: true,
+            value: headers,
+            writable: true,
+        })
+        return initWithHeaders
+    }
+
+    const target = { headers } as RequestInit & Record<PropertyKey, unknown>
+
+    return new Proxy(target, {
+        get(target, property) {
+            if (hasOwnProperty(target, property)) {
+                return Reflect.get(target, property)
+            }
+            return Reflect.get(originalInit, property, originalInit)
+        },
+        has(target, property) {
+            return hasOwnProperty(target, property) || property in originalInit
+        },
+        ownKeys(target) {
+            const keys = new Set<string | symbol>(Reflect.ownKeys(target))
+            Reflect.ownKeys(originalInit).forEach((key) => keys.add(key))
+            REQUEST_INIT_KEYS.forEach((key) => {
+                if (key in originalInit) {
+                    keys.add(key)
+                }
+            })
+            return Array.from(keys)
+        },
+        getOwnPropertyDescriptor(target, property) {
+            const targetDescriptor = Reflect.getOwnPropertyDescriptor(target, property)
+            if (targetDescriptor) {
+                return targetDescriptor
+            }
+            if (typeof property === 'string' && REQUEST_INIT_KEYS.includes(property) && property in originalInit) {
+                return {
+                    configurable: true,
+                    enumerable: true,
+                    get: () => Reflect.get(originalInit, property, originalInit),
+                }
+            }
+
+            const descriptor = Reflect.getOwnPropertyDescriptor(originalInit, property)
+            return descriptor ? { ...descriptor, configurable: true } : undefined
+        },
+        getPrototypeOf() {
+            return Object.getPrototypeOf(originalInit)
+        },
+    }) as RequestInit
+}
 
 const addTracingHeaders = (
     hostnames: string[],
@@ -29,11 +145,13 @@ const addTracingHeaders = (
     let hasAddedHeaders = false
     if (sessionManager) {
         const { sessionId, windowId } = sessionManager.checkAndGetSessionAndWindowId(true)
-        req.headers.set('X-INSIGHTS-SESSION-ID', sessionId)
-        req.headers.set('X-INSIGHTS-WINDOW-ID', windowId)
+        headers.set(SESSION_ID_HEADER, sessionId)
+        headers.set(WINDOW_ID_HEADER, windowId)
+        hasAddedHeaders = true
     }
     if (distinctId !== COOKIELESS_SENTINEL_VALUE) {
-        req.headers.set('X-INSIGHTS-DISTINCT-ID', distinctId)
+        headers.set(DISTINCT_ID_HEADER, distinctId)
+        hasAddedHeaders = true
     }
     return hasAddedHeaders
 }

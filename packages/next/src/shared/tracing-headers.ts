@@ -1,17 +1,17 @@
 import { isFunction, isArray } from '@hanzo/insights-core'
-import type { PostHogCookieState } from './cookie.js'
+import type { InsightsCookieState } from './cookie.js'
 import { cookieStateToProperties } from './cookie.js'
 
 /**
- * Header names used by the PostHog browser SDK's tracing headers feature.
+ * Header names used by the Insights browser SDK's tracing headers feature.
  *
  * When `__add_tracing_headers` is enabled in the browser SDK, these headers
  * are added to outgoing fetch/XHR requests so that server-side code can
  * correlate events back to the browser session.
  */
-export const POSTHOG_SESSION_ID_HEADER = 'x-posthog-session-id'
-export const POSTHOG_DISTINCT_ID_HEADER = 'x-posthog-distinct-id'
-export const POSTHOG_WINDOW_ID_HEADER = 'x-posthog-window-id'
+export const INSIGHTS_SESSION_ID_HEADER = 'x-insights-session-id'
+export const INSIGHTS_DISTINCT_ID_HEADER = 'x-insights-distinct-id'
+export const INSIGHTS_WINDOW_ID_HEADER = 'x-insights-window-id'
 
 export interface TracingHeaderValues {
     distinctId?: string
@@ -20,7 +20,7 @@ export interface TracingHeaderValues {
 }
 
 /**
- * Extracts PostHog tracing header values from request headers.
+ * Extracts Insights tracing header values from request headers.
  *
  * Accepts either a Headers-like object with a `.get()` method (e.g. from
  * `next/headers`) or a plain record (e.g. `ctx.req.headers` in Pages Router).
@@ -37,9 +37,9 @@ export function readTracingHeaders(
     }
 
     return {
-        distinctId: getValue(POSTHOG_DISTINCT_ID_HEADER) || undefined,
-        sessionId: getValue(POSTHOG_SESSION_ID_HEADER) || undefined,
-        windowId: getValue(POSTHOG_WINDOW_ID_HEADER) || undefined,
+        distinctId: getValue(INSIGHTS_DISTINCT_ID_HEADER) || undefined,
+        sessionId: getValue(INSIGHTS_SESSION_ID_HEADER) || undefined,
+        windowId: getValue(INSIGHTS_WINDOW_ID_HEADER) || undefined,
     }
 }
 
@@ -52,7 +52,7 @@ export function readTracingHeaders(
  */
 export function buildContextData(
     tracing: TracingHeaderValues,
-    state: PostHogCookieState | null
+    state: InsightsCookieState | null
 ): { distinctId: string | undefined; sessionId: string | undefined; properties: Record<string, string> | undefined } {
     const mergedProperties: Record<string, string> = {
         ...cookieStateToProperties(state),

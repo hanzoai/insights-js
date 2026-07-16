@@ -19,7 +19,7 @@
 import { Insights } from '../insights-core'
 import { createLogger } from '../utils/logger'
 
-import { USER_STATE } from '../constants'
+import { EVENT_IDENTIFY, EVENT_PAGEVIEW, USER_STATE, USER_STATE_IDENTIFIED } from '../constants'
 import { isFunction } from '@hanzo/insights-core'
 import { uuidv7 } from '../uuidv7'
 
@@ -86,7 +86,7 @@ function setupInsightsFromSegment(insights: Insights, done: () => void) {
                 distinct_id: user.id(),
                 $device_id: getSegmentAnonymousId(),
             })
-            insights.persistence!.set_property(USER_STATE, 'identified')
+            insights.persistence!.set_property(USER_STATE, USER_STATE_IDENTIFIED)
         }
 
         done()

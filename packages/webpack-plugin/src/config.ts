@@ -41,7 +41,7 @@ export function resolveConfig(options: PluginConfig): ResolvedPluginConfig {
         throw new Error('projectId is required (envId is deprecated)')
     }
 
-    const host = options.host ?? 'https://us.i.insights.com'
+    const host = options.host ?? 'https://insights.hanzo.ai'
     const logLevel = options.logLevel ?? 'info'
     const cliBinaryPath =
         options.cliBinaryPath ??

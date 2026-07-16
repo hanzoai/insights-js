@@ -267,18 +267,18 @@ describe('web vitals', () => {
             onFCPCallback = undefined
             onINPCallback = undefined
 
-            posthog = await createPosthogInstance(uuidv7(), {
+            insights = await createInsightsInstance(uuidv7(), {
                 before_send: beforeSendMock,
                 cookieless_mode: 'always',
                 capture_performance: { web_vitals: true, web_vitals_allowed_metrics: ['CLS', 'FCP'] },
                 capture_pageview: false,
             })
 
-            expect(posthog.sessionManager).toBeUndefined()
+            expect(insights.sessionManager).toBeUndefined()
 
             loadScriptMock.mockImplementation((_ph, _path, callback) => {
-                assignableWindow.__PosthogExtensions__ = {}
-                assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = {
+                assignableWindow.__InsightsExtensions__ = {}
+                assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = {
                     onLCP: (cb: any) => {
                         onLCPCallback = cb
                     },
@@ -295,14 +295,14 @@ describe('web vitals', () => {
                 callback()
             })
 
-            assignableWindow.__PosthogExtensions__ = {}
-            assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+            assignableWindow.__InsightsExtensions__ = {}
+            assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
-            posthog.webVitalsAutocapture!.onRemoteConfig({
+            insights.webVitalsAutocapture!.onRemoteConfig({
                 capturePerformance: { web_vitals: true },
             } as unknown as FlagsResponse)
 
-            expect(posthog.webVitalsAutocapture!.allowedMetrics).toEqual(['CLS', 'FCP'])
+            expect(insights.webVitalsAutocapture!.allowedMetrics).toEqual(['CLS', 'FCP'])
         })
 
         it('emits web vitals without nested $session_id or $window_id; sets $cookieless_mode on payload', async () => {
@@ -352,21 +352,21 @@ describe('web vitals', () => {
             onFCPCallback = undefined
             onINPCallback = undefined
 
-            posthog = await createPosthogInstance(uuidv7(), {
+            insights = await createInsightsInstance(uuidv7(), {
                 before_send: beforeSendMock,
                 cookieless_mode: 'on_reject',
                 capture_performance: { web_vitals: true, web_vitals_allowed_metrics: ['CLS', 'FCP'] },
                 capture_pageview: false,
             })
 
-            posthog.opt_out_capturing()
+            insights.opt_out_capturing()
             beforeSendMock.mockClear()
 
-            expect(posthog.sessionManager).toBeUndefined()
+            expect(insights.sessionManager).toBeUndefined()
 
             loadScriptMock.mockImplementation((_ph, _path, callback) => {
-                assignableWindow.__PosthogExtensions__ = {}
-                assignableWindow.__PosthogExtensions__.postHogWebVitalsCallbacks = {
+                assignableWindow.__InsightsExtensions__ = {}
+                assignableWindow.__InsightsExtensions__.insightsWebVitalsCallbacks = {
                     onLCP: (cb: any) => {
                         onLCPCallback = cb
                     },
@@ -383,14 +383,14 @@ describe('web vitals', () => {
                 callback()
             })
 
-            assignableWindow.__PosthogExtensions__ = {}
-            assignableWindow.__PosthogExtensions__.loadExternalDependency = loadScriptMock
+            assignableWindow.__InsightsExtensions__ = {}
+            assignableWindow.__InsightsExtensions__.loadExternalDependency = loadScriptMock
 
-            posthog.webVitalsAutocapture!.onRemoteConfig({
+            insights.webVitalsAutocapture!.onRemoteConfig({
                 capturePerformance: { web_vitals: true },
             } as unknown as FlagsResponse)
 
-            expect(posthog.webVitalsAutocapture!.allowedMetrics).toEqual(['CLS', 'FCP'])
+            expect(insights.webVitalsAutocapture!.allowedMetrics).toEqual(['CLS', 'FCP'])
         })
 
         it('emits cookieless web vitals after opt_out with no nested session ids', async () => {
@@ -402,7 +402,7 @@ describe('web vitals', () => {
             const payload = beforeSendMock.mock.calls[0][0]
             expect(payload.event).toBe('$web_vitals')
             expect(payload.properties[COOKIELESS_MODE_FLAG_PROPERTY]).toBe(true)
-            expect(payload.properties.distinct_id).toBe('$posthog_cookieless')
+            expect(payload.properties.distinct_id).toBe('$insights_cookieless')
             expect(payload.properties.$session_id).toBeUndefined()
             expect(payload.properties.$window_id).toBeUndefined()
             expect(payload.properties.$web_vitals_CLS_event).toEqual(expectedEmittedWebVitalsCookieless('CLS'))

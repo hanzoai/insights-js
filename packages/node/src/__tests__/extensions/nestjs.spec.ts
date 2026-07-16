@@ -1,8 +1,8 @@
 import type { IncomingHttpHeaders } from 'node:http'
 import { of, throwError, lastValueFrom } from 'rxjs'
 
-import { PostHog } from '@/entrypoints/index.node'
-import { PostHogInterceptor } from '@/extensions/nestjs'
+import { Insights } from '@/entrypoints/index.node'
+import { InsightsInterceptor } from '@/extensions/nestjs'
 
 jest.mock('../../version', () => ({ version: '1.2.3' }))
 
@@ -12,8 +12,8 @@ const mockedFetch = jest.spyOn(globalThis, 'fetch').mockImplementation()
  * Deterministically drains all pending promises (including async chains like
  * captureException's buildEventMessage) and flushes any remaining queued events.
  */
-const waitForFlushTimer = async (posthog: PostHog): Promise<void> => {
-  await posthog.shutdown()
+const waitForFlushTimer = async (insights: Insights): Promise<void> => {
+  await insights.shutdown()
 }
 
 const getLastBatchEvents = (): any[] | undefined => {
@@ -56,11 +56,11 @@ const createMockCallHandler = (error?: Error) => ({
   handle: () => (error ? throwError(() => error) : of(undefined)),
 })
 
-describe('PostHogInterceptor', () => {
-  let posthog: PostHog
+describe('InsightsInterceptor', () => {
+  let insights: Insights
 
   beforeEach(() => {
-    posthog = new PostHog('TEST_API_KEY', {
+    insights = new Insights('TEST_API_KEY', {
       host: 'http://example.com',
       fetchRetryCount: 0,
       disableCompression: true,
@@ -76,16 +76,16 @@ describe('PostHogInterceptor', () => {
   })
 
   afterEach(async () => {
-    await posthog.shutdown()
+    await insights.shutdown()
   })
 
   describe('context propagation', () => {
     it('should set context from request headers', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const context = createMockContext({
         headers: {
-          'x-posthog-session-id': 'session-123',
-          'x-posthog-distinct-id': 'user-456',
+          'x-insights-session-id': 'session-123',
+          'x-insights-distinct-id': 'user-456',
           'user-agent': 'TestAgent/1.0',
         },
         url: '/api/test',
@@ -97,7 +97,7 @@ describe('PostHogInterceptor', () => {
       let capturedContext: any
       const handler = {
         handle: () => {
-          capturedContext = posthog.getContext()
+          capturedContext = insights.getContext()
           return of({ success: true })
         },
       }
@@ -115,12 +115,12 @@ describe('PostHogInterceptor', () => {
     })
 
     it('should sanitize tracing headers and only include present values', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const longDistinctId = ` ${'u'.repeat(1105)} `
       const context = createMockContext({
         headers: {
-          'x-posthog-session-id': [' \u0000 session-123\t ', 'ignored'],
-          'x-posthog-distinct-id': longDistinctId,
+          'x-insights-session-id': [' \u0000 session-123\t ', 'ignored'],
+          'x-insights-distinct-id': longDistinctId,
           'user-agent': ['Test\u0000Agent/1.0'],
         },
       })
@@ -128,7 +128,7 @@ describe('PostHogInterceptor', () => {
       let capturedContext: any
       const handler = {
         handle: () => {
-          capturedContext = posthog.getContext()
+          capturedContext = insights.getContext()
           return of({ success: true })
         },
       }
@@ -141,18 +141,18 @@ describe('PostHogInterceptor', () => {
     })
 
     it('should omit invalid tracing header values', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const context = createMockContext({
         headers: {
-          'x-posthog-session-id': ' \u0000\t ',
-          'x-posthog-distinct-id': [],
+          'x-insights-session-id': ' \u0000\t ',
+          'x-insights-distinct-id': [],
         },
       })
 
       let capturedContext: any
       const handler = {
         handle: () => {
-          capturedContext = posthog.getContext()
+          capturedContext = insights.getContext()
           return of({ success: true })
         },
       }
@@ -164,23 +164,23 @@ describe('PostHogInterceptor', () => {
     })
 
     it('should propagate context to capture calls in handler', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const context = createMockContext({
         headers: {
-          'x-posthog-session-id': 'session-abc',
-          'x-posthog-distinct-id': 'user-xyz',
+          'x-insights-session-id': 'session-abc',
+          'x-insights-distinct-id': 'user-xyz',
         },
       })
 
       const handler = {
         handle: () => {
-          posthog.capture({ event: 'handler_event' })
+          insights.capture({ event: 'handler_event' })
           return of({ success: true })
         },
       }
 
       await lastValueFrom(interceptor.intercept(context, handler))
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents).toBeDefined()
@@ -192,7 +192,7 @@ describe('PostHogInterceptor', () => {
     })
 
     it('should pass through successful responses', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const context = createMockContext()
       const handler = { handle: () => of({ success: true }) }
 
@@ -201,19 +201,19 @@ describe('PostHogInterceptor', () => {
     })
 
     it('should not capture exceptions by default', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const error = new Error('should not be captured')
       const context = createMockContext()
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchCalls = mockedFetch.mock.calls.filter((c) => (c[0] as string).includes('/batch/'))
       expect(batchCalls.length).toBe(0)
     })
 
     it('should extract first IP from comma-separated x-forwarded-for', async () => {
-      const interceptor = new PostHogInterceptor(posthog)
+      const interceptor = new InsightsInterceptor(insights)
       const context = createMockContext({
         headers: { 'x-forwarded-for': '10.0.0.1, 172.16.0.1, 192.168.1.1' },
       })
@@ -221,7 +221,7 @@ describe('PostHogInterceptor', () => {
       let capturedContext: any
       const handler = {
         handle: () => {
-          capturedContext = posthog.getContext()
+          capturedContext = insights.getContext()
           return of({ success: true })
         },
       }
@@ -232,18 +232,18 @@ describe('PostHogInterceptor', () => {
   })
 
   describe('exception capture (captureExceptions: true)', () => {
-    let interceptor: PostHogInterceptor
+    let interceptor: InsightsInterceptor
 
     beforeEach(() => {
-      interceptor = new PostHogInterceptor(posthog, { captureExceptions: true })
+      interceptor = new InsightsInterceptor(insights, { captureExceptions: true })
     })
 
     it('should capture exception with correct properties', async () => {
       const error = new Error('test NestJS error')
       const context = createMockContext({
         headers: {
-          'x-posthog-session-id': 'session-123',
-          'x-posthog-distinct-id': 'user-456',
+          'x-insights-session-id': 'session-123',
+          'x-insights-distinct-id': 'user-456',
           'user-agent': 'TestAgent/1.0',
         },
         url: '/api/test',
@@ -254,7 +254,7 @@ describe('PostHogInterceptor', () => {
       })
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents).toBeDefined()
@@ -275,11 +275,11 @@ describe('PostHogInterceptor', () => {
 
     it('should skip previously captured errors', async () => {
       const error = new Error('already captured') as any
-      error.__posthog_previously_captured_error = true
+      error.__insights_previously_captured_error = true
       const context = createMockContext()
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchCalls = mockedFetch.mock.calls.filter((c) => (c[0] as string).includes('/batch/'))
       expect(batchCalls.length).toBe(0)
@@ -297,7 +297,7 @@ describe('PostHogInterceptor', () => {
       const context = createMockContext({ headers: {} })
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents).toBeDefined()
@@ -318,7 +318,7 @@ describe('PostHogInterceptor', () => {
       })
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents![0].properties.$ip).toBe('10.0.0.1')
@@ -331,7 +331,7 @@ describe('PostHogInterceptor', () => {
       })
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents![0].properties.$ip).toBe('10.0.0.1')
@@ -343,7 +343,7 @@ describe('PostHogInterceptor', () => {
       const context = createMockContext()
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchCalls = mockedFetch.mock.calls.filter((c) => (c[0] as string).includes('/batch/'))
       expect(batchCalls.length).toBe(0)
@@ -355,7 +355,7 @@ describe('PostHogInterceptor', () => {
       const context = createMockContext()
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents).toBeDefined()
@@ -366,7 +366,7 @@ describe('PostHogInterceptor', () => {
 
   describe('exception capture with custom minStatusToCapture', () => {
     it('should capture 4xx when minStatusToCapture is set to 400', async () => {
-      const interceptor = new PostHogInterceptor(posthog, {
+      const interceptor = new InsightsInterceptor(insights, {
         captureExceptions: { minStatusToCapture: 400 },
       })
       const error: any = new Error('Not Found')
@@ -374,7 +374,7 @@ describe('PostHogInterceptor', () => {
       const context = createMockContext()
 
       await expect(lastValueFrom(interceptor.intercept(context, createMockCallHandler(error)))).rejects.toThrow(error)
-      await waitForFlushTimer(posthog)
+      await waitForFlushTimer(insights)
 
       const batchEvents = getLastBatchEvents()
       expect(batchEvents).toBeDefined()

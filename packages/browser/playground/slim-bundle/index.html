@@ -1,13 +1,13 @@
 <html>
 <head>
-    <title>PostHog Slim Bundle + Extension Bundles Test</title>
+    <title>Insights Slim Bundle + Extension Bundles Test</title>
 </head>
 <body>
     <h1>Slim Bundle Test</h1>
     <div id="status">loading...</div>
 
     <script type="module">
-        import posthog from '/dist/module.slim.js'
+        import insights from '/dist/module.slim.js'
         import {
             AllExtensions,
             FeatureFlagsExtensions,
@@ -24,7 +24,7 @@
             TracingExtensions,
         } from '/dist/extension-bundles.js'
 
-        window.posthog = posthog
+        window.insights = insights
         window.AllExtensions = AllExtensions
         window.FeatureFlagsExtensions = FeatureFlagsExtensions
         window.ErrorTrackingExtensions = ErrorTrackingExtensions

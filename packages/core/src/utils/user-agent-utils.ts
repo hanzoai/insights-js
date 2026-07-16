@@ -147,7 +147,7 @@ export const detectBrowser = function (
   // Oculus Browser (Meta Quest) is Chromium-based, so its UA includes
   // `OculusBrowser` alongside `Chrome` (and sometimes `SamsungBrowser`).
   // We must check for it before those, otherwise it would be misdetected.
-  // See https://github.com/PostHog/posthog-js/issues/3574
+  // See https://github.com/Insights/insights-js/issues/3574
   else if (includes(user_agent, 'OculusBrowser')) {
     return OCULUS_BROWSER
   }

@@ -2,33 +2,33 @@ import {
   cookieStateToProperties,
   cookieStoreFromHeader,
   getConsentCookieName,
-  getPostHogCookieName,
+  getInsightsCookieName,
   isOptedOut,
-  parsePostHogCookie,
-  readPostHogCookie,
-  serializePostHogCookie,
+  parseInsightsCookie,
+  readInsightsCookie,
+  serializeInsightsCookie,
 } from '../cookie'
 
-describe('getPostHogCookieName', () => {
+describe('getInsightsCookieName', () => {
   it.each([
-    ['simple API key', 'phc_abc123', 'ph_phc_abc123_posthog'],
-    ['sanitizes + in token', 'abc+def', 'ph_abcPLdef_posthog'],
-    ['sanitizes / in token', 'abc/def', 'ph_abcSLdef_posthog'],
-    ['sanitizes = in token', 'abc=def', 'ph_abcEQdef_posthog'],
-    ['sanitizes multiple special characters', 'a+b/c=d', 'ph_aPLbSLcEQd_posthog'],
+    ['simple API key', 'phc_abc123', 'ph_phc_abc123_insights'],
+    ['sanitizes + in token', 'abc+def', 'ph_abcPLdef_insights'],
+    ['sanitizes / in token', 'abc/def', 'ph_abcSLdef_insights'],
+    ['sanitizes = in token', 'abc=def', 'ph_abcEQdef_insights'],
+    ['sanitizes multiple special characters', 'a+b/c=d', 'ph_aPLbSLcEQd_insights'],
   ])('%s', (_label, input, expected) => {
-    expect(getPostHogCookieName(input)).toBe(expected)
+    expect(getInsightsCookieName(input)).toBe(expected)
   })
 })
 
-describe('parsePostHogCookie', () => {
+describe('parseInsightsCookie', () => {
   it('parses an identified user cookie', () => {
     const cookieValue = JSON.stringify({
       distinct_id: 'user_123',
       $device_id: 'device_abc',
       $user_state: 'identified',
     })
-    const result = parsePostHogCookie(cookieValue)
+    const result = parseInsightsCookie(cookieValue)
     expect(result).toEqual({
       distinctId: 'user_123',
       isIdentified: true,
@@ -43,7 +43,7 @@ describe('parsePostHogCookie', () => {
       $device_id: 'device_abc',
       $user_state: 'anonymous',
     })
-    const result = parsePostHogCookie(cookieValue)
+    const result = parseInsightsCookie(cookieValue)
     expect(result).toEqual({
       distinctId: 'device_abc',
       isIdentified: false,
@@ -57,7 +57,7 @@ describe('parsePostHogCookie', () => {
       distinct_id: 'user_123',
       $device_id: 'device_abc',
     })
-    const result = parsePostHogCookie(cookieValue)
+    const result = parseInsightsCookie(cookieValue)
     expect(result).toEqual({
       distinctId: 'user_123',
       isIdentified: false,
@@ -72,7 +72,7 @@ describe('parsePostHogCookie', () => {
       $device_id: 'device_abc',
       $sesid: [1708700000000, 'session-uuid-v7', 1708700000000],
     })
-    const result = parsePostHogCookie(cookieValue)
+    const result = parseInsightsCookie(cookieValue)
     expect(result).toEqual({
       distinctId: 'user_123',
       isIdentified: false,
@@ -86,7 +86,7 @@ describe('parsePostHogCookie', () => {
       distinct_id: 'user_123',
       $device_id: 'device_abc',
     })
-    const result = parsePostHogCookie(cookieValue)
+    const result = parseInsightsCookie(cookieValue)
     expect(result?.sessionId).toBeUndefined()
   })
 
@@ -95,7 +95,7 @@ describe('parsePostHogCookie', () => {
       distinct_id: 'user_123',
       $sesid: 'not-an-array',
     })
-    const result = parsePostHogCookie(cookieValue)
+    const result = parseInsightsCookie(cookieValue)
     expect(result?.sessionId).toBeUndefined()
   })
 
@@ -105,7 +105,7 @@ describe('parsePostHogCookie', () => {
     ['JSON without distinct_id', JSON.stringify({ foo: 'bar' })],
     ['null input', null as unknown as string],
   ])('returns null for %s', (_label, input) => {
-    expect(parsePostHogCookie(input)).toBeNull()
+    expect(parseInsightsCookie(input)).toBeNull()
   })
 })
 
@@ -162,9 +162,9 @@ describe('isOptedOut', () => {
   })
 })
 
-describe('serializePostHogCookie', () => {
+describe('serializeInsightsCookie', () => {
   it('produces JSON with distinct_id, $device_id, and $sesid', () => {
-    const result = serializePostHogCookie('abc-123')
+    const result = serializeInsightsCookie('abc-123')
     const parsed = JSON.parse(result)
     expect(parsed.distinct_id).toBe('abc-123')
     expect(parsed.$device_id).toBe('abc-123')
@@ -175,9 +175,9 @@ describe('serializePostHogCookie', () => {
     expect(parsed.$sesid[2]).toBe(parsed.$sesid[0])
   })
 
-  it('roundtrips with parsePostHogCookie as anonymous with sessionId', () => {
-    const serialized = serializePostHogCookie('anon-id')
-    const parsed = parsePostHogCookie(serialized)
+  it('roundtrips with parseInsightsCookie as anonymous with sessionId', () => {
+    const serialized = serializeInsightsCookie('anon-id')
+    const parsed = parseInsightsCookie(serialized)
     expect(parsed?.distinctId).toBe('anon-id')
     expect(parsed?.isIdentified).toBe(false)
     expect(typeof parsed?.sessionId).toBe('string')
@@ -225,22 +225,22 @@ describe('cookieStoreFromHeader', () => {
   })
 })
 
-describe('readPostHogCookie', () => {
-  it('reads and parses a PostHog cookie via the store', () => {
+describe('readInsightsCookie', () => {
+  it('reads and parses a Insights cookie via the store', () => {
     const cookieValue = JSON.stringify({
       distinct_id: 'lambda-user',
       $device_id: 'lambda-user',
       $user_state: 'anonymous',
     })
-    const store = cookieStoreFromHeader(`ph_phc_test_posthog=${encodeURIComponent(cookieValue)}`)
-    const state = readPostHogCookie(store, 'phc_test')
+    const store = cookieStoreFromHeader(`ph_phc_test_insights=${encodeURIComponent(cookieValue)}`)
+    const state = readInsightsCookie(store, 'phc_test')
     expect(state?.distinctId).toBe('lambda-user')
     expect(state?.isIdentified).toBe(false)
   })
 
   it('returns null when the cookie is missing', () => {
     const store = cookieStoreFromHeader('other=value')
-    expect(readPostHogCookie(store, 'phc_test')).toBeNull()
+    expect(readInsightsCookie(store, 'phc_test')).toBeNull()
   })
 })
 

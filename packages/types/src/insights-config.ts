@@ -153,7 +153,7 @@ export interface PerformanceCaptureConfig {
      * Use chrome's web vitals library to wrap fetch and capture web vitals
      *
      * When `cookieless_mode` is active, there is no client-side SessionIdManager; vitals are still
-     * captured. Nested `$web_vitals_*_event` payloads omit `$session_id` / `$window_id`; PostHog ingestion assigns
+     * captured. Nested `$web_vitals_*_event` payloads omit `$session_id` / `$window_id`; Insights ingestion assigns
      * `$session_id` server-side for cookieless traffic when project cookieless settings are enabled (same as other events).
      */
     web_vitals?: boolean
@@ -222,7 +222,7 @@ export interface DeadClickCandidate {
  */
 export type ExceptionStepsConfig = {
     /**
-     * Determines whether PostHog should collect exception steps and attach them to the next captured exception.
+     * Determines whether Insights should collect exception steps and attach them to the next captured exception.
      *
      * @default true
      */
@@ -618,7 +618,7 @@ export interface SurveyConfig {
 }
 
 /**
- * Options for the captureLog API and posthog.logger convenience methods.
+ * Options for the captureLog API and insights.logger convenience methods.
  */
 export interface LogCaptureOptions {
     /**
@@ -681,12 +681,12 @@ type NextOptions = { revalidate: false | 0 | number; tags: string[] }
 
 /**
  * Configuration options for the Insights JavaScript SDK.
- * @see https://insights.com/docs/libraries/js#config
+ * @see https://insights.hanzo.ai/docs/libraries/js#config
  */
 export interface InsightsConfig {
     /** URL of your Insights instance.
      *
-     * @default 'https://us.i.insights.com'
+     * @default 'https://insights.hanzo.ai'
      */
     api_host: string
 
@@ -700,7 +700,7 @@ export interface InsightsConfig {
     flags_api_host?: string | null
 
     /**
-     * If using a reverse proxy for `api_host` then this should be the actual Insights app URL (e.g. https://us.insights.com).
+     * If using a reverse proxy for `api_host` then this should be the actual Insights app URL (e.g. https://insights.hanzo.ai).
      * This ensures that links to Insights point to the correct host.
      *
      * @default null
@@ -760,7 +760,7 @@ export interface InsightsConfig {
     cross_subdomain_cookie: boolean
 
     /**
-     * Determines how Insights stores information about the user. See [persistence](https://insights.com/docs/libraries/js#persistence) for details.
+     * Determines how Insights stores information about the user. See [persistence](https://insights.hanzo.ai/docs/libraries/js#persistence) for details.
      *
      * @default 'localStorage+cookie'
      */
@@ -896,6 +896,23 @@ export interface InsightsConfig {
     disable_cookie?: boolean
 
     /**
+     * Debounce window, in milliseconds, for coalescing persistence writes. Multiple
+     * `register`/`unregister` calls within the window are batched into a single write
+     * to the debounce window.
+     *
+     * Pending writes are flushed on `beforeunload` and `pagehide` so no state is lost
+     * on tab close. The cross-tab visibility delay is bounded by the configured window.
+     *
+     * Defaults to `0` (no debouncing, write synchronously) for backwards compatibility.
+     * On pages that capture many events per second, `250` is a reasonable starting point
+     * to reduce localStorage write pressure and cross-tab IPC traffic. The `2026-05-30`
+     * config default opts into `250` automatically.
+     *
+     * @default 0
+     */
+    persistence_save_debounce_ms?: number
+
+    /**
      * Determines whether Insights should disable all surveys functionality.
      *
      * @default false
@@ -936,6 +953,30 @@ export interface InsightsConfig {
      * @default false
      */
     disable_conversations: boolean
+
+    /**
+     * Verified distinct_id for HMAC-based identity verification.
+     * When both `identity_distinct_id` and `identity_hash` are provided,
+     * products like conversations use server-verified identity instead of
+     * anonymous session identifiers.
+     *
+     * Can be set at init time or later via `insights.setIdentity()`.
+     *
+     * @example
+     * ```js
+     * insights.init('hi_...', {
+     *     identity_distinct_id: 'user_123',
+     *     identity_hash: 'a1b2c3d4e5f6...',
+     * })
+     * ```
+     */
+    identity_distinct_id?: string
+
+    /**
+     * HMAC-SHA256 of `identity_distinct_id` using the project's API secret.
+     * Must be provided together with `identity_distinct_id`.
+     */
+    identity_hash?: string
 
     /**
      * Determines whether Insights should disable web experiments.
@@ -1277,7 +1318,7 @@ export interface InsightsConfig {
     /**
      * List of feature flag keys to remotely evaluate for this SDK instance.
      * When set, only these flags are evaluated by `/flags`; omitted flags are not remotely evaluated.
-     * Dependencies of the requested flags may still be evaluated internally by PostHog.
+     * Dependencies of the requested flags may still be evaluated internally by Insights.
      * If unset, all eligible flags are evaluated.
      *
      * Examples: ['checkout-redesign', 'new-onboarding']
@@ -1448,7 +1489,7 @@ export interface InsightsConfig {
     /**
      * The segment analytics object.
      *
-     * @see https://insights.com/docs/libraries/segment
+     * @see https://insights.hanzo.ai/docs/libraries/segment
      */
     segment?: SegmentAnalytics
 
@@ -1597,9 +1638,9 @@ export interface InsightsConfig {
     override_display_language?: string | null
 
     /**
-     * A list of hostnames for which to inject PostHog tracing headers to all requests
-     * (X-POSTHOG-DISTINCT-ID, X-POSTHOG-SESSION-ID, X-POSTHOG-WINDOW-ID). Used to link
-     * frontend sessions to backend traces (see https://posthog.com/docs/llm-analytics/link-session-replay).
+     * A list of hostnames for which to inject Insights tracing headers to all requests
+     * (X-INSIGHTS-DISTINCT-ID, X-INSIGHTS-SESSION-ID, X-INSIGHTS-WINDOW-ID). Used to link
+     * frontend sessions to backend traces (see https://insights.hanzo.ai/docs/llm-analytics/link-session-replay).
      */
     addTracingHeaders?: string[]
 
@@ -1674,7 +1715,7 @@ export interface InsightsConfig {
 
     /**
      * @deprecated - THIS OPTION HAS NO EFFECT, kept here for backwards compatibility reasons.
-     * Use a custom transformation or "Discard IP data" project setting instead: @see https://insights.com/tutorials/web-redact-properties#hiding-customer-ip-address.
+     * Use a custom transformation or "Discard IP data" project setting instead: @see https://insights.hanzo.ai/tutorials/web-redact-properties#hiding-customer-ip-address.
      */
     ip: boolean
 }

@@ -208,7 +208,7 @@ const xhr = (options: RequestWithOptions) => {
         req.timeout = options.timeout
     }
     if (!options.disableXHRCredentials) {
-        // send the ph_optout cookie
+        // send the hi_optout cookie
         // withCredentials cannot be modified until after calling .open on Android and Mobile Safari
         req.withCredentials = true
     }

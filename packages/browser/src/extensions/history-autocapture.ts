@@ -1,4 +1,5 @@
 import { Insights } from '../insights-core'
+import { EVENT_PAGEVIEW } from '../constants'
 import { window } from '../utils/globals'
 import { addEventListener } from '../utils'
 import { logger } from '../utils/logger'
@@ -12,7 +13,7 @@ import type { Extension } from './types'
  * The behavior is controlled by the `capture_pageview` configuration option:
  * - When set to `'history_change'`, this class will capture pageviews on history API changes
  */
-export class HistoryAutocapture {
+export class HistoryAutocapture implements Extension {
     private _instance: Insights
     private _popstateListener: (() => void) | undefined
     private _lastPathname: string

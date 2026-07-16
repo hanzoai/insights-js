@@ -1,6 +1,6 @@
 import type { eventWithTime, pluginEvent } from '../types/rrweb-types'
 
-import { isObject } from '@hanzo/insights-core'
+import { isArray, isNull, isObject, isUndefined } from '@hanzo/insights-core'
 import { SnapshotBuffer } from './lazy-loaded-session-recorder'
 
 // taken from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Cyclic_object_value#circular_references
