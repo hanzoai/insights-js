@@ -72,7 +72,7 @@ describe('insights core - before send', () => {
             compression: 'best-available',
             data: capturedData,
             method: 'POST',
-            url: 'https://us.i.insights.com/e/',
+            url: 'https://insights.hanzo.ai/e/',
         })
     })
 
@@ -108,7 +108,7 @@ describe('insights core - before send', () => {
             compression: 'best-available',
             data: capturedData[0],
             method: 'POST',
-            url: 'https://us.i.insights.com/e/',
+            url: 'https://insights.hanzo.ai/e/',
         })
     })
 
@@ -130,7 +130,7 @@ describe('insights core - before send', () => {
             compression: 'best-available',
             data: capturedData,
             method: 'POST',
-            url: 'https://us.i.insights.com/e/',
+            url: 'https://insights.hanzo.ai/e/',
         })
     })
 
@@ -152,7 +152,7 @@ describe('insights core - before send', () => {
             compression: 'best-available',
             data: capturedData,
             method: 'POST',
-            url: 'https://us.i.insights.com/e/',
+            url: 'https://insights.hanzo.ai/e/',
         })
         expect(mockLogger.warn).toHaveBeenCalledWith(
             `Event '${eventName}' has no properties after beforeSend function, this is likely an error.`

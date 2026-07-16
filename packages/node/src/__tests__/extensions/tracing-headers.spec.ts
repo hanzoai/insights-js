@@ -1,4 +1,4 @@
-import { getPostHogTracingHeaderValues, sanitizeTracingHeaderValue } from '@/extensions/tracing-headers'
+import { getInsightsTracingHeaderValues, sanitizeTracingHeaderValue } from '@/extensions/tracing-headers'
 
 describe('tracing headers', () => {
   describe('sanitizeTracingHeaderValue', () => {
@@ -16,43 +16,43 @@ describe('tracing headers', () => {
     })
   })
 
-  describe('getPostHogTracingHeaderValues', () => {
+  describe('getInsightsTracingHeaderValues', () => {
     it.each([
       [
         'extracts supported lowercase tracing headers',
         {
-          'x-posthog-session-id': 'session-123',
-          'x-posthog-distinct-id': 'user-456',
+          'x-insights-session-id': 'session-123',
+          'x-insights-distinct-id': 'user-456',
         },
         { sessionId: 'session-123', distinctId: 'user-456' },
       ],
       [
         'sanitizes extracted tracing headers',
         {
-          'x-posthog-session-id': ' session\n-123 ',
-          'x-posthog-distinct-id': ` ${'u'.repeat(1105)} `,
+          'x-insights-session-id': ' session\n-123 ',
+          'x-insights-distinct-id': ` ${'u'.repeat(1105)} `,
         },
         { sessionId: 'session-123', distinctId: 'u'.repeat(1000) },
       ],
       [
         'omits invalid tracing headers',
         {
-          'x-posthog-session-id': ' \x00\t ',
-          'x-posthog-distinct-id': [],
+          'x-insights-session-id': ' \x00\t ',
+          'x-insights-distinct-id': [],
         },
         {},
       ],
       [
         'includes only present valid tracing headers',
         {
-          'x-posthog-session-id': 'session-only',
+          'x-insights-session-id': 'session-only',
           'x-forwarded-for': '10.0.0.1',
         },
         { sessionId: 'session-only' },
       ],
       ['returns empty object for missing headers', undefined, {}],
     ])('%s', (_name, headers, expected) => {
-      expect(getPostHogTracingHeaderValues(headers)).toEqual(expected)
+      expect(getInsightsTracingHeaderValues(headers)).toEqual(expected)
     })
   })
 })

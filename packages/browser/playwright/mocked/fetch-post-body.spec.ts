@@ -1,8 +1,8 @@
 import { BrowserContext, Page, Route } from '@playwright/test'
-import { expect, test } from './utils/posthog-playwright-test-base'
+import { expect, test } from './utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from './utils/setup'
 
-const POST_URL = '/__posthog_fetch_post_body_test'
+const POST_URL = '/__insights_fetch_post_body_test'
 const POST_BODY = 'some string'
 const ORIGINAL_HEADER = 'original-header-value'
 
@@ -68,7 +68,7 @@ async function installRequestBodyForwardingFetchWrapper(page: Page) {
             }
 
             // This mimics fetch wrappers/interceptors that rebuild init from a Request.
-            // If PostHog passes a newly-created Request downstream, this forwards request.body
+            // If Insights passes a newly-created Request downstream, this forwards request.body
             // as a ReadableStream and WebKit throws "ReadableStream uploading is not supported".
             if (url instanceof Request) {
                 return nativeFetch(url, { ...init, body: url.body })
@@ -110,9 +110,9 @@ test.describe('fetch wrappers preserve POST string bodies', () => {
             body: POST_BODY,
             headers: expect.objectContaining({
                 'x-original-header': ORIGINAL_HEADER,
-                'x-posthog-distinct-id': expect.any(String),
-                'x-posthog-session-id': expect.any(String),
-                'x-posthog-window-id': expect.any(String),
+                'x-insights-distinct-id': expect.any(String),
+                'x-insights-session-id': expect.any(String),
+                'x-insights-window-id': expect.any(String),
             }),
         })
     })
@@ -149,7 +149,7 @@ test.describe('fetch wrappers preserve POST string bodies', () => {
         })
         await waitForSessionRecordingToStart(page)
 
-        await expect(page.evaluate(() => (window.fetch as any).__posthog_wrapped__)).resolves.toBe(true)
+        await expect(page.evaluate(() => (window.fetch as any).__insights_wrapped__)).resolves.toBe(true)
 
         const result = await postStringBody(page)
 

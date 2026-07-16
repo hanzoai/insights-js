@@ -54,8 +54,8 @@ describe('patchFetchForTracingHeaders', () => {
     const [, init] = mockFetch.mock.calls[0]
     if (expectHeaders) {
       const headers = init.headers as Headers
-      expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('d-1')
-      expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('s-1')
+      expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-1')
+      expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('s-1')
     } else {
       expect(init).toBeUndefined()
     }
@@ -76,8 +76,8 @@ describe('patchFetchForTracingHeaders', () => {
     const headers = init.headers as Headers
     expect(headers.get('Content-Type')).toBe('application/json')
     expect(headers.get('Authorization')).toBe('Bearer abc')
-    expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('d-1')
-    expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('s-1')
+    expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-1')
+    expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('s-1')
   })
 
   it('preserves caller-provided Headers instance on init.headers', async () => {
@@ -89,8 +89,8 @@ describe('patchFetchForTracingHeaders', () => {
     const [, init] = mockFetch.mock.calls[0]
     const headers = init.headers as Headers
     expect(headers.get('X-Caller')).toBe('c')
-    expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('d-1')
-    expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('s-1')
+    expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-1')
+    expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('s-1')
   })
 
   it('preserves caller-provided headers when fetch is called with a Request', async () => {
@@ -102,8 +102,8 @@ describe('patchFetchForTracingHeaders', () => {
     const [, init] = mockFetch.mock.calls[0]
     const headers = init.headers as Headers
     expect(headers.get('X-Caller')).toBe('c')
-    expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('d-1')
-    expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('s-1')
+    expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-1')
+    expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('s-1')
   })
 
   it('reads the current distinct/session id on every call', async () => {
@@ -123,10 +123,10 @@ describe('patchFetchForTracingHeaders', () => {
 
     const firstHeaders = mockFetch.mock.calls[0][1].headers as Headers
     const secondHeaders = mockFetch.mock.calls[1][1].headers as Headers
-    expect(firstHeaders.get('X-POSTHOG-DISTINCT-ID')).toBe('d-1')
-    expect(firstHeaders.get('X-POSTHOG-SESSION-ID')).toBe('s-1')
-    expect(secondHeaders.get('X-POSTHOG-DISTINCT-ID')).toBe('d-2')
-    expect(secondHeaders.get('X-POSTHOG-SESSION-ID')).toBe('s-2')
+    expect(firstHeaders.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-1')
+    expect(firstHeaders.get('X-INSIGHTS-SESSION-ID')).toBe('s-1')
+    expect(secondHeaders.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-2')
+    expect(secondHeaders.get('X-INSIGHTS-SESSION-ID')).toBe('s-2')
   })
 
   it('ignores invalid URLs without throwing', async () => {
@@ -138,7 +138,7 @@ describe('patchFetchForTracingHeaders', () => {
   })
 
   it('matches the hostnames from issue #3196 (localhost and 127.0.0.1 with ports)', async () => {
-    // Mirrors the user's config in https://github.com/PostHog/posthog-js/issues/3196
+    // Mirrors the user's config in https://github.com/Insights/insights-js/issues/3196
     restore = patchFetchForTracingHeaders(makeClient('d-1', 's-1'), [
       'localhost',
       'localhost:8000',
@@ -151,8 +151,8 @@ describe('patchFetchForTracingHeaders', () => {
 
     for (const call of mockFetch.mock.calls) {
       const headers = call[1].headers as Headers
-      expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('d-1')
-      expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('s-1')
+      expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-1')
+      expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('s-1')
     }
   })
 
@@ -181,7 +181,7 @@ describe('patchFetchForTracingHeaders', () => {
   })
 
   it('does not stack patches when re-initialised (idempotent)', async () => {
-    // Simulate two PostHog instances being created back-to-back (e.g. HMR, tests).
+    // Simulate two Insights instances being created back-to-back (e.g. HMR, tests).
     // The second patch should replace the first, not layer on top of it.
     const firstRestore = patchFetchForTracingHeaders(makeClient('d-old', 's-old'), ['api.example.com'])
     restore = patchFetchForTracingHeaders(makeClient('d-new', 's-new'), ['api.example.com'])
@@ -190,8 +190,8 @@ describe('patchFetchForTracingHeaders', () => {
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
     const headers = mockFetch.mock.calls[0][1].headers as Headers
-    expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('d-new')
-    expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('s-new')
+    expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('d-new')
+    expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('s-new')
 
     // The latest restore should fully unwind back to the original fetch.
     restore()

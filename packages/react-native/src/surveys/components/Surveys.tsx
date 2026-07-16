@@ -9,22 +9,19 @@ import {
   type SurveyResponses,
   maybeAdd,
   SurveyQuestionBranchingType,
-  isUndefined,
 } from '@hanzo/insights-core'
+import {
+  buildSurveyResponseProperties,
+  getSurveyInteractionProperty,
+  getSurveyResponseKey,
+  SURVEY_LANGUAGE_PROPERTY,
+  surveyHasResponses,
+} from '@hanzo/insights-core/surveys'
 import { LinkQuestion, MultipleChoiceQuestion, OpenTextQuestion, RatingQuestion } from './QuestionTypes'
 import { Insights } from '../../insights-rn'
 import { useInsights } from '../../hooks/useInsights'
 
-const getSurveyInteractionProperty = (survey: Survey, action: string): string => {
-  let surveyProperty = `$survey_${action}/${survey.id}`
-  if (survey.current_iteration && survey.current_iteration > 0) {
-    surveyProperty = `$survey_${action}/${survey.id}/${survey.current_iteration}`
-  }
-
-  return surveyProperty
-}
-
-export const sendSurveyShownEvent = (survey: Survey, insights: Insights): void => {
+export const sendSurveyShownEvent = (survey: Survey, insights: Insights, surveyLanguage?: string | null): void => {
   insights.capture('survey shown', {
     $survey_name: survey.name,
     $survey_id: survey.id,
@@ -37,22 +34,9 @@ export const sendSurveyShownEvent = (survey: Survey, insights: Insights): void =
 export const sendSurveyEvent = (
   responses: SurveyResponses = {},
   survey: Survey,
-  insights: Insights
+  insights: Insights,
+  surveyLanguage?: string | null
 ): void => {
-  // map question ids also to the old format for back compatibility
-  const oldFormatResponses: Record<string, string | number | string[] | null> = {}
-  survey.questions.forEach((question: SurveyQuestion) => {
-    const oldResponseKey = getSurveyOldResponseKey(question.originalQuestionIndex)
-    const response = getSurveyResponseValue(responses, question.id)
-    if (!isUndefined(response)) {
-      oldFormatResponses[oldResponseKey] = response
-    }
-  })
-  const allResponses = {
-    ...responses,
-    ...oldFormatResponses,
-  }
-
   insights.capture('survey sent', {
     $survey_name: survey.name,
     $survey_id: survey.id,
@@ -66,7 +50,12 @@ export const sendSurveyEvent = (
   })
 }
 
-export const dismissedSurveyEvent = (survey: Survey, insights: Insights): void => {
+export const dismissedSurveyEvent = (
+  survey: Survey,
+  responses: SurveyResponses = {},
+  insights: Insights,
+  surveyLanguage?: string | null
+): void => {
   insights.capture('survey dismissed', {
     $survey_name: survey.name,
     $survey_id: survey.id,
@@ -126,7 +115,7 @@ export function Questions({
 
     if (nextStep === SurveyQuestionBranchingType.End) {
       // End the survey
-      sendSurveyEvent(allResponses, survey, insights)
+      sendSurveyEvent(allResponses, survey, insights, surveyLanguage)
       onSubmit()
     } else {
       // Move to the next question

@@ -12,7 +12,7 @@ export function warnIfNoClient(client: Insights | undefined, caller: string): vo
   if (!client && !warnedCallers.has(caller)) {
     warnedCallers.add(caller)
     console.error(
-      `${caller} was called without a Insights client. Wrap your app with <InsightsProvider> or pass a client directly. See https://insights.com/docs/libraries/react-native?#with-the-insightsprovider`
+      `${caller} was called without a Insights client. Wrap your app with <InsightsProvider> or pass a client directly. See https://insights.hanzo.ai/docs/libraries/react-native?#with-the-insightsprovider`
     )
   }
 }

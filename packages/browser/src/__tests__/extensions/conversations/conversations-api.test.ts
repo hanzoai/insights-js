@@ -53,7 +53,7 @@ describe('Conversations API Methods', () => {
         // Setup mock Insights instance
         mockInsights = createMockInsights({
             config: createMockConfig({
-                api_host: 'https://test.insights.com',
+                api_host: 'https://test.example.com',
                 token: 'test-token',
                 disable_conversations: false,
             }),
@@ -64,7 +64,7 @@ describe('Conversations API Methods', () => {
                 },
             }),
             requestRouter: {
-                endpointFor: jest.fn().mockReturnValue('https://test.insights.com/api/test'),
+                endpointFor: jest.fn().mockReturnValue('https://test.example.com/api/test'),
             } as any,
             consent: {
                 isOptedOut: jest.fn().mockReturnValue(false),

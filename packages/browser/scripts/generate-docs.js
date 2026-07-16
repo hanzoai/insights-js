@@ -10,7 +10,7 @@ const version = packageJson.version;
 const config = {
     packageDir: path.resolve(__dirname, '..'),  // packages/browser
     apiJsonPath: path.resolve(__dirname, '../docs/@hanzo/insights.api.json'),
-    outputPath: path.resolve(__dirname, `../references/@hanzo/insights-references-${version}.json`),
+    outputPath: path.resolve(__dirname, `../references/insights-references-${version}.json`),
     version: version,
     id: '@hanzo/insights',
     hogRef: HOG_REF,
@@ -38,9 +38,9 @@ if (!fs.existsSync(referencesDir)) {
 const output = generateApiSpecs(config);
 
 // Write versioned file
-const versionedPath = path.resolve(__dirname, `../references/@hanzo/insights-references-${version}.json`);
+const versionedPath = path.resolve(__dirname, `../references/insights-references-${version}.json`);
 fs.writeFileSync(versionedPath, JSON.stringify(output, null, 2));
 
 // Copy to latest file
-const latestPath = path.resolve(__dirname, '../references/@hanzo/insights-references-latest.json');
+const latestPath = path.resolve(__dirname, '../references/insights-references-latest.json');
 fs.writeFileSync(latestPath, JSON.stringify(output, null, 2));

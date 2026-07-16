@@ -1,8 +1,8 @@
 import { isFunction } from './utils/type-utils'
 
-const DISTINCT_ID_HEADER = 'X-POSTHOG-DISTINCT-ID'
-const SESSION_ID_HEADER = 'X-POSTHOG-SESSION-ID'
-const PATCH_MARKER = '__posthog_tracing_headers_patched__'
+const DISTINCT_ID_HEADER = 'X-INSIGHTS-DISTINCT-ID'
+const SESSION_ID_HEADER = 'X-INSIGHTS-SESSION-ID'
+const PATCH_MARKER = '__insights_tracing_headers_patched__'
 
 const parseHostname = (url: string): string | undefined => {
   try {
@@ -21,7 +21,7 @@ const shouldAddHeaders = (url: string, hostnames: string[]): boolean => {
 }
 
 /**
- * Minimal contract the tracing-headers patch needs from a PostHog client:
+ * Minimal contract the tracing-headers patch needs from a Insights client:
  * something that can report the current distinct and session ids.
  */
 export interface TracingHeadersClient {
@@ -33,15 +33,15 @@ type FetchFn = typeof fetch
 type PatchedFetch = FetchFn & { [PATCH_MARKER]?: { original: FetchFn } }
 
 /**
- * Patches `globalThis.fetch` to inject `X-POSTHOG-DISTINCT-ID` and
- * `X-POSTHOG-SESSION-ID` headers on requests whose hostname matches `hostnames`.
+ * Patches `globalThis.fetch` to inject `X-INSIGHTS-DISTINCT-ID` and
+ * `X-INSIGHTS-SESSION-ID` headers on requests whose hostname matches `hostnames`.
  *
- * Used by SDKs that run in environments with a WHATWG `fetch` (posthog-react-native,
- * posthog-web) to link outgoing requests to the PostHog session — e.g. to link LLM
+ * Used by SDKs that run in environments with a WHATWG `fetch` (insights-react-native,
+ * insights-web) to link outgoing requests to the Insights session — e.g. to link LLM
  * traces captured by a backend to a frontend session replay.
  *
  * The wrapped fetch is tagged with a non-enumerable marker so that calling this
- * again (on HMR, tests, or a second PostHog instance) unwraps the previous patch
+ * again (on HMR, tests, or a second Insights instance) unwraps the previous patch
  * before rewrapping — preventing patches from stacking. Returns a function that
  * restores the original fetch when called.
  */
@@ -58,7 +58,7 @@ export const patchFetchForTracingHeaders = (client: TracingHeadersClient, hostna
   // Limitation: we only unwrap our own immediate predecessor. If another library wraps fetch
   // between two patch calls, their wrapper has no PATCH_MARKER, so we treat it as the original —
   // meaning the earlier patch stays live underneath and headers could be written twice.
-  // This is considered out of scope; we rely on PostHog being initialised once per app.
+  // This is considered out of scope; we rely on Insights being initialised once per app.
   const originalFetch: FetchFn = currentFetch[PATCH_MARKER]?.original ?? currentFetch
 
   const wrappedFetch: PatchedFetch = async function (input, init) {

@@ -8,14 +8,14 @@ type CreateLoggerOptions = {
 }
 
 type InsightsJsLogger = Omit<Logger, 'createLogger'> & {
-    _log: (level: 'log' | 'warn' | 'error', ...args: any[]) => void
+    _log: (level: 'debug' | 'log' | 'warn' | 'error', ...args: any[]) => void
     uninitializedWarning: (methodName: string) => void
     createLogger: (prefix: string, options?: CreateLoggerOptions) => InsightsJsLogger
 }
 
 const _createLogger = (prefix: string, { debugEnabled }: CreateLoggerOptions = {}): InsightsJsLogger => {
     const logger: InsightsJsLogger = {
-        _log: (level: 'log' | 'warn' | 'error', ...args: any[]) => {
+        _log: (level: 'debug' | 'log' | 'warn' | 'error', ...args: any[]) => {
             if (
                 window &&
                 (Config.DEBUG || assignableWindow.INSIGHTS_DEBUG || debugEnabled) &&

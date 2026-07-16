@@ -22,7 +22,7 @@ describe('featureflags', () => {
     const config = {
         token: 'random fake token',
         persistence: 'memory',
-        api_host: 'https://app.insights.com',
+        api_host: 'https://insights.hanzo.ai',
     } as InsightsConfig
 
     let mockWarn
@@ -1393,7 +1393,7 @@ describe('featureflags', () => {
             })
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://us.i.insights.com/api/early_access_features/?token=random fake token',
+                url: 'https://insights.hanzo.ai/api/early_access_features/?token=random fake token',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -1423,7 +1423,7 @@ describe('featureflags', () => {
             })
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://us.i.insights.com/api/early_access_features/?token=random fake token',
+                url: 'https://insights.hanzo.ai/api/early_access_features/?token=random fake token',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -1457,7 +1457,7 @@ describe('featureflags', () => {
             )
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://us.i.insights.com/api/early_access_features/?token=random fake token&stage=concept&stage=beta',
+                url: 'https://insights.hanzo.ai/api/early_access_features/?token=random fake token&stage=concept&stage=beta',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -3283,7 +3283,7 @@ describe('getRemoteConfigPayload', () => {
     describe('flags_api_host configuration', () => {
         it('should use flags_api_host when configured', () => {
             const apiConfig = {
-                api_host: 'https://app.insights.com',
+                api_host: 'https://insights.hanzo.ai',
                 flags_api_host: 'https://example.com/feature-flags',
             }
             const customInstance = createMockInsights({
@@ -3312,13 +3312,13 @@ describe('getRemoteConfigPayload', () => {
             const customInstance = createMockInsights({
                 config: {
                     token: 'test-token',
-                    api_host: 'https://app.insights.com',
+                    api_host: 'https://insights.hanzo.ai',
                 } as InsightsConfig,
                 get_distinct_id: () => 'test-distinct-id',
                 _send_request: jest.fn(),
                 requestRouter: new RequestRouter({
                     config: {
-                        api_host: 'https://app.insights.com',
+                        api_host: 'https://insights.hanzo.ai',
                     },
                 } as any),
             })
@@ -3330,7 +3330,7 @@ describe('getRemoteConfigPayload', () => {
             expect(customInstance._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     method: 'POST',
-                    url: 'https://us.i.insights.com/flags/?v=2',
+                    url: 'https://insights.hanzo.ai/flags/?v=2',
                 })
             )
         })
@@ -3564,7 +3564,7 @@ describe('$feature_flag_error tracking', () => {
     const config = {
         token: 'random fake token',
         persistence: 'memory',
-        api_host: 'https://app.insights.com',
+        api_host: 'https://insights.hanzo.ai',
     } as InsightsConfig
 
     beforeEach(() => {

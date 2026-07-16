@@ -50,7 +50,7 @@ const createMockSentryException = (): any => ({
       category: 'console',
       level: 'log',
       message:
-        "Insights Debug error [ClientError: Your personalApiKey is invalid. Are you sure you're not using your Project API key? More information: https://insights.com/docs/api/overview]",
+        "Insights Debug error [ClientError: Your personalApiKey is invalid. Are you sure you're not using your Project API key? More information: https://insights.hanzo.ai/docs/api/overview]",
     },
   ],
   sdkProcessingMetadata: {

@@ -237,7 +237,7 @@ export function ProductTourSurveyStepInner({
 
             {!whiteLabel && (
                 <a
-                    href={isInteractive ? 'https://insights.com/product-tours' : undefined}
+                    href={isInteractive ? 'https://insights.hanzo.ai/product-tours' : undefined}
                     target={isInteractive ? '_blank' : undefined}
                     rel={isInteractive ? 'noopener noreferrer' : undefined}
                     class="ph-tour-branding"

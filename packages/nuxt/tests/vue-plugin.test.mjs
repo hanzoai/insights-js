@@ -6,21 +6,21 @@ const source = readFileSync(new URL('../src/runtime/vue-plugin.ts', import.meta.
 const executableSource = source
   .replace(/^import .*$/gm, '')
   .replace('export default defineNuxtPlugin({', 'return defineNuxtPlugin({')
-  .replace(/ as (PostHogCommon|PostHogClientConfig)/g, '')
-  .replace('function autocaptureEnabled(config: PostHogClientConfig): boolean', 'function autocaptureEnabled(config)')
+  .replace(/ as (InsightsCommon|InsightsClientConfig)/g, '')
+  .replace('function autocaptureEnabled(config: InsightsClientConfig): boolean', 'function autocaptureEnabled(config)')
 
-function loadPlugin({ posthog, useRuntimeConfig }) {
-  return new Function('defineNuxtPlugin', 'useRuntimeConfig', 'posthog', 'window', executableSource)(
+function loadPlugin({ insights, useRuntimeConfig }) {
+  return new Function('defineNuxtPlugin', 'useRuntimeConfig', 'insights', 'window', executableSource)(
     plugin => plugin,
     useRuntimeConfig,
-    posthog,
+    insights,
     {},
   )
 }
 
 function testVueErrorHandlerCapturesInfoString() {
   const captureExceptionCalls = []
-  const posthog = {
+  const insights = {
     __loaded: false,
     init() {},
     debug() {},
@@ -30,17 +30,17 @@ function testVueErrorHandlerCapturesInfoString() {
   }
   const useRuntimeConfig = () => ({
     public: {
-      posthog: {
+      insights: {
         publicKey: 'test-token',
-        host: 'https://us.i.posthog.com',
+        host: 'https://insights.hanzo.ai',
       },
-      posthogClientConfig: {
+      insightsClientConfig: {
         capture_exceptions: true,
       },
     },
   })
   const hookCalls = []
-  const plugin = loadPlugin({ posthog, useRuntimeConfig })
+  const plugin = loadPlugin({ insights, useRuntimeConfig })
 
   plugin.setup({
     hook(name, handler) {

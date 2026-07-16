@@ -66,7 +66,7 @@ describe('insights-logs', () => {
                     props: {},
                 },
                 requestRouter: {
-                    endpointFor: jest.fn(() => 'https://app.insights.com'),
+                    endpointFor: jest.fn(() => 'https://insights.hanzo.ai'),
                 },
                 _send_retriable_request: jest.fn(),
                 get_property: jest.fn(),
@@ -461,12 +461,12 @@ describe('insights-logs', () => {
             })
 
             it('should silently skip when user has opted out of capturing', () => {
-                ;(mockPostHog.is_capturing as jest.Mock).mockReturnValue(false)
+                ;(mockInsights.is_capturing as jest.Mock).mockReturnValue(false)
 
                 logs.captureLog({ body: 'should not be captured' })
 
                 expect((logs as any)._logBuffer).toHaveLength(0)
-                expect(mockPostHog._send_retriable_request).not.toHaveBeenCalled()
+                expect(mockInsights._send_retriable_request).not.toHaveBeenCalled()
             })
 
             it('should warn and skip if no body provided', () => {
@@ -500,7 +500,7 @@ describe('insights-logs', () => {
 
                 jest.advanceTimersByTime(3000)
 
-                expect(mockPostHog._send_retriable_request).toHaveBeenCalledTimes(1)
+                expect(mockInsights._send_retriable_request).toHaveBeenCalledTimes(1)
                 expect((logs as any)._logBuffer).toHaveLength(0)
             })
 
@@ -509,7 +509,7 @@ describe('insights-logs', () => {
                     logs.captureLog({ body: `message ${i}` })
                 }
 
-                expect(mockPostHog._send_retriable_request).toHaveBeenCalledTimes(1)
+                expect(mockInsights._send_retriable_request).toHaveBeenCalledTimes(1)
                 expect((logs as any)._logBuffer).toHaveLength(0)
             })
 
@@ -517,8 +517,8 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                expect(mockPostHog.requestRouter.endpointFor).toHaveBeenCalledWith('api', '/i/v1/logs')
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                expect(mockInsights.requestRouter.endpointFor).toHaveBeenCalledWith('api', '/i/v1/logs')
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 expect(call.url).toContain('token=test-token')
             })
 
@@ -526,7 +526,7 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test', level: 'error' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 expect(call.data.resourceLogs).toBeDefined()
                 expect(call.data.resourceLogs[0].scopeLogs[0].logRecords).toHaveLength(1)
                 expect(call.data.resourceLogs[0].scopeLogs[0].logRecords[0].severityText).toBe('ERROR')
@@ -536,7 +536,7 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 expect(call.batchKey).toBe('logs')
             })
 
@@ -544,7 +544,7 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 expect(call.compression).toBe('best-available')
             })
 
@@ -554,8 +554,8 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'log 3' })
                 jest.advanceTimersByTime(3000)
 
-                expect(mockPostHog._send_retriable_request).toHaveBeenCalledTimes(1)
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                expect(mockInsights._send_retriable_request).toHaveBeenCalledTimes(1)
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 expect(call.data.resourceLogs[0].scopeLogs[0].logRecords).toHaveLength(3)
             })
 
@@ -563,11 +563,11 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 const record = call.data.resourceLogs[0].scopeLogs[0].logRecords[0]
                 const attrs = Object.fromEntries(record.attributes.map((a: any) => [a.key, a.value]))
 
-                expect(attrs['posthogDistinctId']).toEqual({ stringValue: 'distinct-id-123' })
+                expect(attrs['insightsDistinctId']).toEqual({ stringValue: 'distinct-id-123' })
                 expect(attrs['sessionId']).toEqual({ stringValue: 'session-abc' })
                 expect(attrs['feature_flags']).toEqual({
                     arrayValue: { values: [{ stringValue: 'logs-capture-enabled' }] },
@@ -575,8 +575,8 @@ describe('insights-logs', () => {
             })
 
             it('should include named config fields in OTLP resource attributes', () => {
-                ;(mockPostHog.config as any).logs = {
-                    ...mockPostHog.config.logs,
+                ;(mockInsights.config as any).logs = {
+                    ...mockInsights.config.logs,
                     serviceName: 'my-service',
                     serviceVersion: '1.2.3',
                     environment: 'production',
@@ -584,7 +584,7 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 const resourceAttrs = call.data.resourceLogs[0].resource.attributes
                 const attrsMap = Object.fromEntries(resourceAttrs.map((a: any) => [a.key, a.value]))
 
@@ -594,8 +594,8 @@ describe('insights-logs', () => {
             })
 
             it('should allow resourceAttributes to override named fields', () => {
-                ;(mockPostHog.config as any).logs = {
-                    ...mockPostHog.config.logs,
+                ;(mockInsights.config as any).logs = {
+                    ...mockInsights.config.logs,
                     serviceName: 'from-named',
                     resourceAttributes: {
                         'service.name': 'from-resource-attrs',
@@ -604,7 +604,7 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 const resourceAttrs = call.data.resourceLogs[0].resource.attributes
                 const attrsMap = Object.fromEntries(resourceAttrs.map((a: any) => [a.key, a.value]))
 
@@ -612,15 +612,15 @@ describe('insights-logs', () => {
             })
 
             it('should use consistent resource attributes across all logs in a batch', () => {
-                ;(mockPostHog.config as any).logs = {
-                    ...mockPostHog.config.logs,
+                ;(mockInsights.config as any).logs = {
+                    ...mockInsights.config.logs,
                     serviceName: 'my-service',
                 }
                 logs.captureLog({ body: 'log 1' })
                 logs.captureLog({ body: 'log 2' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 const resourceAttrs = call.data.resourceLogs[0].resource.attributes
                 const attrsMap = Object.fromEntries(resourceAttrs.map((a: any) => [a.key, a.value]))
 
@@ -632,7 +632,7 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'test' })
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 const resourceAttrs = call.data.resourceLogs[0].resource.attributes
                 const attrsMap = Object.fromEntries(resourceAttrs.map((a: any) => [a.key, a.value]))
 
@@ -642,12 +642,12 @@ describe('insights-logs', () => {
             it('should not send anything if buffer is empty on flush', () => {
                 logs.flushLogs()
 
-                expect(mockPostHog._send_retriable_request).not.toHaveBeenCalled()
+                expect(mockInsights._send_retriable_request).not.toHaveBeenCalled()
             })
 
             it('should drop logs that exceed maxLogsPerInterval and warn once', () => {
-                ;(mockPostHog.config as any).logs = {
-                    ...mockPostHog.config.logs,
+                ;(mockInsights.config as any).logs = {
+                    ...mockInsights.config.logs,
                     maxLogsPerInterval: 3,
                     maxBufferSize: 1000,
                 }
@@ -662,8 +662,8 @@ describe('insights-logs', () => {
             })
 
             it('should reset the rate-limit window after the interval elapses', () => {
-                ;(mockPostHog.config as any).logs = {
-                    ...mockPostHog.config.logs,
+                ;(mockInsights.config as any).logs = {
+                    ...mockInsights.config.logs,
                     maxLogsPerInterval: 2,
                     flushIntervalMs: 3000,
                     maxBufferSize: 1000,
@@ -686,14 +686,14 @@ describe('insights-logs', () => {
                 logs.captureLog({ body: 'works without autocapture' })
                 jest.advanceTimersByTime(3000)
 
-                expect(mockPostHog._send_retriable_request).toHaveBeenCalledTimes(1)
+                expect(mockInsights._send_retriable_request).toHaveBeenCalledTimes(1)
             })
 
             it('should support transport override for unload', () => {
                 logs.captureLog({ body: 'unload log' })
                 logs.flushLogs('sendBeacon')
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 expect(call.transport).toBe('sendBeacon')
             })
         })
@@ -709,7 +709,7 @@ describe('insights-logs', () => {
                     logs.logger[level]('test message', { key: 'value' })
                     jest.advanceTimersByTime(3000)
 
-                    const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                    const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                     const record = call.data.resourceLogs[0].scopeLogs[0].logRecords[0]
 
                     expect(record.body.stringValue).toBe('test message')
@@ -722,7 +722,7 @@ describe('insights-logs', () => {
                 logs.logger.info('no attrs')
                 jest.advanceTimersByTime(3000)
 
-                const call = (mockPostHog._send_retriable_request as jest.Mock).mock.calls[0][0]
+                const call = (mockInsights._send_retriable_request as jest.Mock).mock.calls[0][0]
                 const record = call.data.resourceLogs[0].scopeLogs[0].logRecords[0]
                 expect(record.body.stringValue).toBe('no attrs')
             })
@@ -750,7 +750,7 @@ describe('insights-logs', () => {
 
                 // Advancing time should not trigger a flush
                 jest.advanceTimersByTime(5000)
-                expect(mockPostHog._send_retriable_request).not.toHaveBeenCalled()
+                expect(mockInsights._send_retriable_request).not.toHaveBeenCalled()
             })
         })
 

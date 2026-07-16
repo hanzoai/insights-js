@@ -18,13 +18,13 @@ import type { SessionRecording } from './extensions/replay/session-recording'
 import type { Heatmaps } from './heatmaps'
 import type { InsightsProductTours } from './insights-product-tours'
 import type { SiteApps } from './site-apps'
-import type { PostHogSurveys } from './posthog-surveys'
+import type { InsightsSurveys } from './insights-surveys'
 import type { Toolbar } from './extensions/toolbar'
-import type { PostHogExceptions } from './posthog-exceptions'
+import type { InsightsExceptions } from './insights-exceptions'
 import type { WebExperiments } from './web-experiments'
-import type { PostHogConversations } from './extensions/conversations/posthog-conversations'
-import type { PostHogFeatureFlags } from './posthog-featureflags'
-import type { PostHogLogs } from './posthog-logs'
+import type { InsightsConversations } from './extensions/conversations/insights-conversations'
+import type { InsightsFeatureFlags } from './insights-featureflags'
+import type { InsightsLogs } from './insights-logs'
 
 // ============================================================================
 // Re-export public types from @insights/types
@@ -94,6 +94,22 @@ export type {
 // Toolbar types
 export type { ToolbarUserIntent, ToolbarSource, ToolbarVersion, ToolbarParams } from '@hanzo/insights-types'
 
+// Log capture types
+export type {
+    LogSeverityLevel,
+    OtlpSeverityText,
+    OtlpSeverityEntry,
+    LogAttributeValue,
+    LogAttributes,
+    CaptureLogOptions,
+    Logger,
+    OtlpAnyValue,
+    OtlpKeyValue,
+    OtlpLogRecord,
+    OtlpLogsPayload,
+} from '@hanzo/insights-types'
+export type { LogSdkContext } from '@hanzo/insights-core'
+
 // Re-export KnownUnsafeEditableEvent from @insights/core for backwards compatibility
 export type { KnownUnsafeEditableEvent } from '@hanzo/insights-core'
 
@@ -139,16 +155,23 @@ export type InsightsConfig = Omit<BaseInsightsConfig, 'loaded'> & {
      * @internal
      */
     __extensionClasses?: {
-        historyAutocapture?: Extension<HistoryAutocapture>
-        tracingHeaders?: Extension<TracingHeaders>
-        siteApps?: Extension<SiteApps>
-        sessionRecording?: Extension<SessionRecording>
-        autocapture?: Extension<Autocapture>
-        productTours?: Extension<InsightsProductTours>
-        heatmaps?: Extension<Heatmaps>
-        webVitalsAutocapture?: Extension<WebVitalsAutocapture>
-        exceptionObserver?: Extension<ExceptionObserver>
-        deadClicksAutocapture?: Extension<DeadClicksAutocapture>
+        exceptions?: ExtensionConstructor<InsightsExceptions>
+        historyAutocapture?: ExtensionConstructor<HistoryAutocapture>
+        tracingHeaders?: ExtensionConstructor<TracingHeaders>
+        siteApps?: ExtensionConstructor<SiteApps>
+        sessionRecording?: ExtensionConstructor<SessionRecording>
+        autocapture?: ExtensionConstructor<Autocapture>
+        productTours?: ExtensionConstructor<InsightsProductTours>
+        heatmaps?: ExtensionConstructor<Heatmaps>
+        webVitalsAutocapture?: ExtensionConstructor<WebVitalsAutocapture>
+        exceptionObserver?: ExtensionConstructor<ExceptionObserver>
+        deadClicksAutocapture?: ExtensionConstructor<DeadClicksAutocapture>
+        surveys?: ExtensionConstructor<InsightsSurveys>
+        toolbar?: ExtensionConstructor<Toolbar>
+        experiments?: ExtensionConstructor<WebExperiments>
+        conversations?: ExtensionConstructor<InsightsConversations>
+        featureFlags?: ExtensionConstructor<InsightsFeatureFlags>
+        logs?: ExtensionConstructor<InsightsLogs>
     }
 }
 

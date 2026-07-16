@@ -1,4 +1,4 @@
-import { expect, test } from '../utils/posthog-playwright-test-base'
+import { expect, test } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 
 const startOptions = {
@@ -60,7 +60,7 @@ test.describe('Session recording captures CSS @layer rules', () => {
 
     test('atomic utilities inside @layer survive the FullSnapshot', async ({ page }) => {
         const responsePromise = page.waitForResponse('**/ses/*')
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await responsePromise
 
         const events = await page.capturedEvents()
@@ -98,7 +98,7 @@ test.describe('Session recording captures CSS @layer rules', () => {
 
     test('shorthand-with-var()-plus-longhand-override does not produce empty longhands', async ({ page }) => {
         const responsePromise = page.waitForResponse('**/ses/*')
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await responsePromise
 
         const events = await page.capturedEvents()
@@ -134,7 +134,7 @@ test.describe('Session recording captures CSS @layer rules', () => {
         // This is the regression check for the corruption-detection branch: it
         // must not over-fire on clean rules and lose insertRule additions.
         const responsePromise = page.waitForResponse('**/ses/*')
-        await page.locator('[data-cy-input]').type('hello posthog!')
+        await page.locator('[data-cy-input]').type('hello insights!')
         await responsePromise
 
         const events = await page.capturedEvents()

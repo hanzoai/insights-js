@@ -1,7 +1,7 @@
 // TypeScript copies package.json into lib/ (due to resolveJsonModule + the import in src/config.ts).
 // The copy retains unresolved workspace:* references which break npm audit fix for consumers.
 // This script strips dependencies and devDependencies from the build artifact.
-// See: https://github.com/PostHog/posthog-js/issues/3290
+// See: https://github.com/Insights/insights-js/issues/3290
 
 const fs = require('fs')
 const path = require('path')

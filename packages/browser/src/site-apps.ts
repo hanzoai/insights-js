@@ -1,10 +1,11 @@
+import type { Extension } from './extensions/types'
 import { Insights } from './insights-core'
 import { CaptureResult, Properties, RemoteConfig, SiteApp, SiteAppGlobals, SiteAppLoader } from './types'
 import { assignableWindow } from './utils/globals'
 import { createLogger } from './utils/logger'
 
 const logger = createLogger('[SiteApps]')
-const APP_INIT_ERROR = 'Error while initializing PostHog app with config id '
+const APP_INIT_ERROR = 'Error while initializing Insights app with config id '
 
 export class SiteApps implements Extension {
     apps: Record<string, SiteApp>
@@ -13,7 +14,7 @@ export class SiteApps implements Extension {
     private _bufferedInvocations: SiteAppGlobals[]
 
     constructor(private _instance: Insights) {
-        // events captured between loading @hanzo/insights and the site app; up to 1000 events
+        // events captured between loading insights-js and the site app; up to 1000 events
         this._bufferedInvocations = []
         this.apps = {}
     }
@@ -121,7 +122,7 @@ export class SiteApps implements Extension {
             }
             hasInitReturned = true
         } catch (e) {
-            logger.error(`Error while initializing Insights app with config id ${loader.id}`, e)
+            logger.error(APP_INIT_ERROR + loader.id, e)
             onLoaded(false)
         }
 
@@ -198,10 +199,10 @@ export class SiteApps implements Extension {
         }
 
         for (const { id, url } of response['siteApps']) {
-            assignableWindow[`__$$ph_site_app_${id}`] = this._instance
+            assignableWindow[`__$$hi_site_app_${id}`] = this._instance
             assignableWindow.__InsightsExtensions__?.loadSiteApp?.(this._instance, url, (err) => {
                 if (err) {
-                    return logger.error(`Error while initializing Insights app with config id ${id}`, err)
+                    return logger.error(APP_INIT_ERROR + id, err)
                 }
             })
         }

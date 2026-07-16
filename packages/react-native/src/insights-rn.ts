@@ -10,6 +10,8 @@ import {
   InsightsEventProperties,
   InsightsFetchOptions,
   InsightsFetchResponse,
+  InsightsLogs,
+  InsightsLogsConfig,
   InsightsPersistedProperty,
   InsightsRemoteConfig,
   Survey,
@@ -20,8 +22,16 @@ import {
   patchFetchForTracingHeaders,
   safeSetTimeout,
   FeatureFlagValue,
+  ErrorTracking as CoreErrorTracking,
 } from '@hanzo/insights-core'
-import { InsightsRNStorage, InsightsRNSyncMemoryStorage } from './storage'
+import {
+  InsightsRNStorage,
+  createEventsStorage,
+  createLogsStorage,
+  createEventsMemoryStorage,
+  createLogsMemoryStorage,
+} from './storage'
+import { resolveLogsConfig } from './logs-defaults'
 import { version } from './version'
 import { buildOptimisticAsyncStorage, getAppProperties } from './native-deps'
 import {
@@ -37,8 +47,26 @@ import { ErrorTracking, ErrorTrackingOptions } from './error-tracking'
 
 export { InsightsPersistedProperty }
 
+/**
+ * Collapses RN's broader AppState status set into the OTLP `app.state`
+ * enum (foreground|background). 'inactive' (iOS transition) and 'extension'
+ * are treated as foreground — the app is still running JS, just not the
+ * primary scene. 'unknown' returns undefined so the attribute is omitted
+ * rather than guessed.
+ */
+function mapAppStateForLogs(state: AppStateStatus | undefined): 'foreground' | 'background' | undefined {
+  if (state === 'background') {
+    return 'background'
+  }
+  if (!state || state === 'unknown') {
+    return undefined
+  }
+  return 'foreground'
+}
+
 export interface InsightsOptions extends InsightsCoreOptions {
-  /** Allows you to provide the storage type. By default 'file'.
+  /**
+   * Allows you to provide the storage type.
    * 'file' will try to load the best available storage, the provided 'customStorage', 'customAsyncStorage' or in-memory storage.
    *
    * @default 'file'
@@ -48,7 +76,8 @@ export interface InsightsOptions extends InsightsCoreOptions {
   customAppProperties?:
     | InsightsCustomAppProperties
     | ((properties: InsightsCustomAppProperties) => InsightsCustomAppProperties)
-  /** Allows you to provide a custom asynchronous storage such as async-storage, expo-file-system or a synchronous storage such as mmkv.
+  /**
+   * Allows you to provide a custom asynchronous storage such as async-storage, expo-file-system or a synchronous storage such as mmkv.
    * If not provided, Insights will attempt to use the best available storage via optional peer dependencies (async-storage, expo-file-system).
    * If `persistence` is set to 'memory', this option will be ignored.
    */
@@ -65,7 +94,8 @@ export interface InsightsOptions extends InsightsCoreOptions {
   /**
    * Enable Recording of Session Replays for Android and iOS
    * Requires Record user sessions to be enabled in the Insights Project Settings
-   * Defaults to false
+   *
+   * @default false
    */
   enableSessionReplay?: boolean
 
@@ -110,8 +140,8 @@ export interface InsightsOptions extends InsightsCoreOptions {
 
   /**
    * Logs feature configuration. Enables structured log capture via
-   * `posthog.captureLog(...)` or `posthog.logger.info(...)`. Records ship to
-   * PostHog's logs product (`/i/v1/logs`) in OTLP format, batched on a timer,
+   * `insights.captureLog(...)` or `insights.logger.info(...)`. Records ship to
+   * Insights's logs product (`/i/v1/logs`) in OTLP format, batched on a timer,
    * AppState change, buffer fill, or manual `flushLogs()`.
    *
    * Capture is **unconditional** — calling the API ships records as long as
@@ -123,14 +153,14 @@ export interface InsightsOptions extends InsightsCoreOptions {
    *
    * @example Minimal — just service tagging, defaults for everything else
    * ```ts
-   * new PostHog(key, {
+   * new Insights(key, {
    *   logs: { serviceName: 'my-app', environment: 'production' }
    * })
    * ```
    *
    * @example Tune for higher-volume logging
    * ```ts
-   * new PostHog(key, {
+   * new Insights(key, {
    *   logs: {
    *     serviceName: 'my-app',
    *     rateCap: { maxLogs: 5000, windowMs: 60000 },
@@ -140,7 +170,7 @@ export interface InsightsOptions extends InsightsCoreOptions {
    * })
    * ```
    */
-  logs?: PostHogLogsConfig
+  logs?: InsightsLogsConfig
 
   /**
    * Overrides the language used when rendering translated survey copy.
@@ -152,7 +182,8 @@ export interface InsightsOptions extends InsightsCoreOptions {
 
 export class Insights extends InsightsCore {
   private _persistence: InsightsOptions['persistence']
-  private _storage: InsightsRNStorage
+  private _eventsStorage: InsightsRNStorage
+  private _logsStorage: InsightsRNStorage
   private _appProperties: InsightsCustomAppProperties = {}
   private _currentSessionId?: string | undefined
   private _enableSessionReplay?: boolean
@@ -161,7 +192,7 @@ export class Insights extends InsightsCore {
   private _disableSurveys: boolean
   private _disableRemoteConfig: boolean
   private _errorTracking: ErrorTracking
-  private _logs: PostHogLogs
+  private _logs: InsightsLogs
   // Resolved logs config — kept around so lifecycle handlers (AppState
   // background, _shutdown) can read the configured flush-time budgets without
   // reaching back into the user's options object.
@@ -177,7 +208,7 @@ export class Insights extends InsightsCore {
   private _overrideDisplayLanguage: string | null
 
   /**
-   * Creates a new Insights instance for React Native. You can find all configuration options in the [React Native SDK docs](https://insights.com/docs/libraries/react-native#configuration-options).
+   * Creates a new Insights instance for React Native. You can find all configuration options in the [React Native SDK docs](https://insights.hanzo.ai/docs/libraries/react-native#configuration-options).
    *
    * If you prefer not to use the InsightsProvider, you can initialize Insights in its own file and import the instance from there.
    *
@@ -188,8 +219,8 @@ export class Insights extends InsightsCore {
    * // insights.ts
    * import Insights from 'insights-react-native'
    *
-   * export const insights = new Insights('<ph_project_api_key>', {
-   *   host: '<ph_client_api_host>'
+   * export const insights = new Insights('<hi_project_api_key>', {
+   *   host: '<hi_client_api_host>'
    * })
    *
    * // Then you can access Insights by importing your instance
@@ -211,7 +242,12 @@ export class Insights extends InsightsCore {
    * @param options - Insights configuration options
    */
   constructor(apiKey: string, options?: InsightsOptions) {
-    super(apiKey, options)
+    const normalizedApiKey = typeof apiKey === 'string' ? apiKey.trim() : ''
+    if (!normalizedApiKey) {
+      console.error("You must pass your Insights project's api key. The client will be disabled.")
+    }
+
+    super(normalizedApiKey, options)
     this._isInitialized = false
     this._persistence = options?.persistence ?? 'file'
     this._disableSurveys = options?.disableSurveys ?? false
@@ -239,15 +275,89 @@ export class Insights extends InsightsCore {
     }
 
     if (theStorage) {
-      this._storage = new InsightsRNStorage(theStorage)
-      storagePromise = this._storage.preloadPromise
+      this._eventsStorage = createEventsStorage(theStorage)
+      this._logsStorage = createLogsStorage(theStorage)
+      // `allSettled` so one pipeline's preload failure doesn't block the other — the failing side
+      // degrades to memory-only via InsightsRNStorage.persist()'s internal catch.
+      const preloads: Array<['events' | 'logs', Promise<void>]> = []
+      if (this._eventsStorage.preloadPromise) {
+        preloads.push(['events', this._eventsStorage.preloadPromise])
+      }
+      if (this._logsStorage.preloadPromise) {
+        preloads.push(['logs', this._logsStorage.preloadPromise])
+      }
+      if (preloads.length > 0) {
+        storagePromise = allSettled(preloads.map(([, p]) => p)).then((results) => {
+          results.forEach((r, i) => {
+            if (r.status === 'rejected') {
+              this._logger.error(`Insights ${preloads[i][0]} storage preload failed:`, r.reason)
+            }
+          })
+        })
+      }
     } else {
-      this._storage = new InsightsRNSyncMemoryStorage()
+      this._eventsStorage = createEventsMemoryStorage()
+      this._logsStorage = createLogsMemoryStorage()
     }
 
-    if (storagePromise) {
-      storagePromise.catch((error) => {
-        console.error('Insights storage initialization failed:', error)
+    // Seed from sync `AppState.currentState` so the very first capture (which
+    // can happen before any 'change' event fires) is already tagged. Maps
+    // RN's broader status set into the OTLP `app.state` enum's
+    // foreground/background dichotomy.
+    this._currentAppState = mapAppStateForLogs(AppState.currentState)
+
+    this._resolvedLogsConfig = resolveLogsConfig(options?.logs)
+    this._logs = new InsightsLogs(
+      this,
+      this._resolvedLogsConfig,
+      this._logger,
+      () => {
+        // Pulled at capture time so each tag reflects state at the moment
+        // the log was fired, not at flush.
+        const flags = this.getFeatureFlags()
+        const flagKeys = flags ? Object.keys(flags) : undefined
+        return {
+          distinctId: this.getDistinctId() || undefined,
+          sessionId: this.getSessionId() || undefined,
+          screenName: (this.sessionProps?.$screen_name as string | undefined) || undefined,
+          appState: this._currentAppState,
+          activeFeatureFlags: flagKeys && flagKeys.length > 0 ? flagKeys : undefined,
+        }
+      },
+      (fn) => this.wrap(fn),
+      // Block between batches on the logs-storage disk write so a crash can't
+      // replay an already-sent batch. Events do the equivalent via
+      // `flushStorage()` (events-storage side). Mirror per-pipeline so one
+      // pipeline's slow disk doesn't stall the other.
+      () => this._logsStorage.waitForPersist()
+    )
+
+    // NOTE: this listener is registered for the lifetime of the Insights
+    // instance and is never explicitly removed. RN apps typically construct
+    // a single long-lived Insights and keep it until process exit, so a leak
+    // doesn't matter in practice; just be aware that constructing many
+    // instances (e.g. in tests without an explicit teardown) would
+    // accumulate listeners.
+    AppState.addEventListener('change', (state) => {
+      // ignore unknown state (usually initial state, the app might not be ready yet)
+      if (state === 'unknown') {
+        return
+      }
+
+      // Update before kicking off the flush — captures that race the flush
+      // (e.g. fired in a `componentWillUnmount` triggered by backgrounding)
+      // should already see the new state.
+      const mapped = mapAppStateForLogs(state)
+      if (mapped) {
+        this._currentAppState = mapped
+      }
+
+      // Flush on every transition, including foreground→active. Foreground
+      // flush is technically redundant (the timer would catch up shortly),
+      // but it's cheap and keeps the lifecycle handler symmetric — no
+      // special-casing of which transitions should drain.
+      void this.flush().catch(async (err) => {
+        await logFlushError(err)
       })
       // Flush buffered logs alongside events — OS may suspend or terminate the
       // process next, and anything left in the queue won't get a second chance
@@ -285,10 +395,10 @@ export class Insights extends InsightsCore {
       // Seed device_id from the anonymous id at init time so existing installs
       // get a stable device-level identifier; once set, it survives identify()
       // and reset() independently of anonymous_id.
-      if (!this.getPersistedProperty(PostHogPersistedProperty.DeviceId)) {
+      if (!this.getPersistedProperty(InsightsPersistedProperty.DeviceId)) {
         const anonId = this.getAnonymousId()
         if (anonId) {
-          this.setPersistedProperty(PostHogPersistedProperty.DeviceId, anonId)
+          this.setPersistedProperty(InsightsPersistedProperty.DeviceId, anonId)
         }
       }
 
@@ -398,12 +508,24 @@ export class Insights extends InsightsCore {
     this._errorTracking.onRemoteConfig(response.errorTracking)
   }
 
+  /**
+   * Resolves the storage instance for a given persisted-property key.
+   * `LogsQueue` routes to `_logsStorage` (dedicated `.insights-rn-logs.json`
+   * file); every other key routes to `_eventsStorage`. Single source of
+   * truth for routing — extending to new logs-scoped keys is a one-line
+   * edit here.
+   */
+  private _storageForKey(key: InsightsPersistedProperty): InsightsRNStorage {
+    return key === InsightsPersistedProperty.LogsQueue ? this._logsStorage : this._eventsStorage
+  }
+
   getPersistedProperty<T>(key: InsightsPersistedProperty): T | undefined {
-    return this._storage.getItem(key) as T | undefined
+    return this._storageForKey(key).getItem(key) as T | undefined
   }
 
   setPersistedProperty<T>(key: InsightsPersistedProperty, value: T | null): void {
-    return value !== null ? this._storage.setItem(key, value) : this._storage.removeItem(key)
+    const storage = this._storageForKey(key)
+    return value !== null ? storage.setItem(key, value) : storage.removeItem(key)
   }
 
   /**
@@ -536,25 +658,29 @@ export class Insights extends InsightsCore {
    * duplicate "Application Installed" events on the next app launch.
    *
    * If you pass `propertiesToKeep` explicitly, only the properties you specify will be preserved.
-   * To keep the default app lifecycle behavior, include `PostHogPersistedProperty.InstalledAppBuild`
-   * and `PostHogPersistedProperty.InstalledAppVersion` in your array.
+   * To keep the default app lifecycle behavior, include `InsightsPersistedProperty.InstalledAppBuild`
+   * and `InsightsPersistedProperty.InstalledAppVersion` in your array.
    *
-   * Note: The event queue (`PostHogPersistedProperty.Queue`) and logs queue
-   * (`PostHogPersistedProperty.LogsQueue`) are always preserved regardless of
+   * Note: The event queue (`InsightsPersistedProperty.Queue`) and logs queue
+   * (`InsightsPersistedProperty.LogsQueue`) are always preserved regardless of
    * what is passed in `propertiesToKeep`, to ensure in-flight data is not lost.
    *
    * {@label Identification}
    *
    * @example
    * ```js
-   * // reset after logout
+   * // reset after logout (preserves app lifecycle properties by default)
    * insights.reset()
    * ```
    *
    * @example
    * ```js
-   * // reset but keep feature flag overrides
-   * insights.reset([InsightsPersistedProperty.OverrideFeatureFlags])
+   * // reset but keep feature flag overrides and app lifecycle properties
+   * insights.reset([
+   *   InsightsPersistedProperty.OverrideFeatureFlags,
+   *   InsightsPersistedProperty.InstalledAppBuild,
+   *   InsightsPersistedProperty.InstalledAppVersion,
+   * ])
    * ```
    *
    * @param propertiesToKeep - Optional array of persisted properties to preserve during reset.
@@ -565,7 +691,16 @@ export class Insights extends InsightsCore {
    * @public
    */
   reset(propertiesToKeep?: InsightsPersistedProperty[]): void {
-    super.reset(propertiesToKeep)
+    // When propertiesToKeep is not explicitly provided, automatically preserve app lifecycle
+    // properties and device_id to prevent duplicate "Application Installed" events and
+    // to maintain stable feature flag bucketing across identity changes.
+    const effectivePropertiesToKeep = propertiesToKeep ?? [
+      InsightsPersistedProperty.InstalledAppBuild,
+      InsightsPersistedProperty.InstalledAppVersion,
+      InsightsPersistedProperty.DeviceId,
+    ]
+
+    super.reset(effectivePropertiesToKeep)
 
     if (this._setDefaultPersonProperties) {
       // Reset reloads flags asyncrhonously, but doesn't wait for it.
@@ -644,17 +779,17 @@ export class Insights extends InsightsCore {
   }
 
   /**
-   * Captures a structured log record and sends it to PostHog's logs product
+   * Captures a structured log record and sends it to Insights's logs product
    * (`/i/v1/logs`). Low-level primitive — most callers will prefer
-   * `posthog.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which
+   * `insights.logger.info(...)` / `.warn(...)` / `.error(...)` etc., which
    * wrap this with a level pre-set.
    *
    * Records are buffered per-session, rate-limited, batched into OTLP
    * payloads, and flushed on a timer, on AppState change, or when the
    * buffer reaches capacity. Configure flush cadence, rate cap, and a
-   * `beforeSend` filter via the `logs` option on `new PostHog(...)`.
+   * `beforeSend` filter via the `logs` option on `new Insights(...)`.
    *
-   * Note — naming collision: `posthog.captureLog()` (this method) is the
+   * Note — naming collision: `insights.captureLog()` (this method) is the
    * **logs product** API. There is also a separate, pre-existing
    * `sessionReplayConfig.captureLog` boolean that controls whether
    * **session replay** records the device's `console.*` output. The two
@@ -665,7 +800,7 @@ export class Insights extends InsightsCore {
    *
    * @example
    * ```ts
-   * posthog.captureLog({
+   * insights.captureLog({
    *   body: 'checkout completed',
    *   level: 'info',
    *   attributes: { order_id: 'ord_789', amount_cents: 4999 },
@@ -701,7 +836,7 @@ export class Insights extends InsightsCore {
    *
    * @example
    * ```ts
-   * await posthog.flushLogs()
+   * await insights.flushLogs()
    * ```
    *
    * @see flush
@@ -717,15 +852,15 @@ export class Insights extends InsightsCore {
 
   /**
    * Convenience per-level logger. Each method is shorthand for
-   * `posthog.captureLog({ body, level, attributes })`. Lazily constructed
+   * `insights.captureLog({ body, level, attributes })`. Lazily constructed
    * on first access, then reused.
    *
    * {@label Capture}
    *
    * @example
    * ```ts
-   * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
-   * posthog.logger.error('payment failed', { code: 'E001' })
+   * insights.logger.info('checkout completed', { order_id: 'ord_789' })
+   * insights.logger.error('payment failed', { code: 'E001' })
    * ```
    *
    * @public
@@ -999,12 +1134,12 @@ export class Insights extends InsightsCore {
    * @returns The device ID, or an empty string if not yet initialized
    */
   getDeviceId(): string {
-    const deviceId = this.getPersistedProperty<string>(PostHogPersistedProperty.DeviceId)
+    const deviceId = this.getPersistedProperty<string>(InsightsPersistedProperty.DeviceId)
     if (!deviceId) {
       // Lazy init for upgrades: existing installs won't have a device_id yet
       const anonId = this.getAnonymousId()
       if (anonId) {
-        this.setPersistedProperty(PostHogPersistedProperty.DeviceId, anonId)
+        this.setPersistedProperty(InsightsPersistedProperty.DeviceId, anonId)
         return anonId
       }
       return ''
@@ -1360,7 +1495,7 @@ export class Insights extends InsightsCore {
   }
 
   /**
-   * Associates events with a specific user. Learn more about [identifying users](https://insights.com/docs/product-analytics/identify)
+   * Associates events with a specific user. Learn more about [identifying users](https://insights.hanzo.ai/docs/product-analytics/identify)
    *
    * {@label Identification}
    *
@@ -1368,7 +1503,7 @@ export class Insights extends InsightsCore {
    * ```js
    * // Basic identify
    * insights.identify('distinctID', {
-   *   email: 'user@insights.com',
+   *   email: 'user@insights.hanzo.ai',
    *   name: 'My Name'
    * })
    * ```
@@ -1378,7 +1513,7 @@ export class Insights extends InsightsCore {
    * // Using $set and $set_once
    * insights.identify('distinctID', {
    *   $set: {
-   *     email: 'user@insights.com',
+   *     email: 'user@insights.hanzo.ai',
    *     name: 'My Name'
    *   },
    *   $set_once: {
@@ -1482,15 +1617,40 @@ export class Insights extends InsightsCore {
    * @param {Object} [additionalProperties] Any additional properties to add to the error event
    * @returns {void}
    */
-  captureException(error: Error | unknown, additionalProperties: InsightsEventProperties = {}): void {
-    const syntheticException = new Error('Synthetic Error')
-    this._errorTracking.captureException(error, additionalProperties, {
-      mechanism: {
-        handled: true,
-        type: 'generic',
-      },
-      syntheticException,
-    })
+  captureException(
+    error: Error | unknown,
+    additionalProperties: InsightsEventProperties = {},
+    hint?: CoreErrorTracking.EventHint
+  ): void {
+    const resolvedHint: CoreErrorTracking.EventHint = hint ?? {
+      mechanism: { handled: true, type: 'generic' },
+      syntheticException: new Error('Synthetic Error'),
+    }
+    super.captureException(error, additionalProperties, resolvedHint)
+
+    // On a fatal crash, persist the exception + recent logs before the app may die.
+    if (additionalProperties?.$exception_level === 'fatal') {
+      void this._eventsStorage.waitForPersist()
+      void this._logsStorage.waitForPersist()
+    }
+  }
+
+  protected override createErrorPropertiesBuilder(): CoreErrorTracking.ErrorPropertiesBuilder {
+    return new CoreErrorTracking.ErrorPropertiesBuilder(
+      [
+        new CoreErrorTracking.PromiseRejectionEventCoercer(),
+        new CoreErrorTracking.ErrorCoercer(),
+        new CoreErrorTracking.ErrorEventCoercer(),
+        new CoreErrorTracking.ObjectCoercer(),
+        new CoreErrorTracking.StringCoercer(),
+        new CoreErrorTracking.PrimitiveCoercer(),
+      ],
+      CoreErrorTracking.createStackParser(
+        isHermes() ? 'hermes' : 'web:javascript',
+        CoreErrorTracking.chromeStackLineParser,
+        CoreErrorTracking.geckoStackLineParser
+      )
+    )
   }
 
   initReactNativeNavigation(options: InsightsAutocaptureOptions): boolean {
@@ -1523,7 +1683,7 @@ export class Insights extends InsightsCore {
 
   /**
    * Sets properties on the person profile associated with the current `distinct_id`.
-   * Learn more about [identifying users](https://insights.com/docs/product-analytics/identify)
+   * Learn more about [identifying users](https://insights.hanzo.ai/docs/product-analytics/identify)
    *
    * {@label Identification}
    *

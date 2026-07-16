@@ -10,7 +10,7 @@ describe('loaded() with flags', () => {
 
     const createInsights = async (config?: Partial<InsightsConfig>) => {
         const insights = await createInsightsInstance(uuidv7(), {
-            api_host: 'https://app.insights.com',
+            api_host: 'https://insights.hanzo.ai',
             disable_compression: true,
             ...config,
             loaded: (ph) => {
@@ -62,7 +62,7 @@ describe('loaded() with flags', () => {
             expect(instance._send_request).toHaveBeenCalledTimes(1)
 
             expect(instance._send_request.mock.calls[0][0]).toMatchObject({
-                url: 'https://us.i.insights.com/flags/?v=2',
+                url: 'https://insights.hanzo.ai/flags/?v=2',
                 data: {
                     groups: { org: 'bazinga' },
                 },
@@ -88,7 +88,7 @@ describe('loaded() with flags', () => {
             expect(instance._send_request).toHaveBeenCalledTimes(1)
 
             expect(instance._send_request.mock.calls[0][0]).toMatchObject({
-                url: 'https://us.i.insights.com/flags/?v=2',
+                url: 'https://insights.hanzo.ai/flags/?v=2',
                 data: {
                     groups: { org: 'bazinga' },
                 },
@@ -101,7 +101,7 @@ describe('loaded() with flags', () => {
             expect(instance._send_request).toHaveBeenCalledTimes(2)
 
             expect(instance._send_request.mock.calls[1][0]).toMatchObject({
-                url: 'https://us.i.insights.com/flags/?v=2',
+                url: 'https://insights.hanzo.ai/flags/?v=2',
                 data: {
                     groups: { org: 'bazinga2' },
                 },
@@ -121,7 +121,7 @@ describe('loaded() with flags', () => {
 
             expect(instance._send_request).toHaveBeenCalledTimes(1)
             expect(instance._send_request.mock.calls[0][0]).toMatchObject({
-                url: 'https://us.i.insights.com/flags/?v=2&only_evaluate_survey_feature_flags=true',
+                url: 'https://insights.hanzo.ai/flags/?v=2&only_evaluate_survey_feature_flags=true',
                 data: {
                     groups: { org: 'bazinga' },
                 },

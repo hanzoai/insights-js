@@ -1,4 +1,4 @@
-import { expect, test, WindowWithPostHog } from '../utils/posthog-playwright-test-base'
+import { expect, test, WindowWithInsights } from '../utils/insights-playwright-test-base'
 import { start, waitForSessionRecordingToStart } from '../utils/setup'
 import { Page } from '@playwright/test'
 
@@ -19,7 +19,7 @@ function significantOnly(events: { sessionId: string; type: number; tag: string 
 
 async function simulateSessionExpiry(page: Page): Promise<void> {
     await page.evaluate(() => {
-        const ph = (window as WindowWithPostHog).posthog
+        const ph = (window as WindowWithInsights).insights
         const activityTs = ph?.sessionManager?.['_sessionActivityTimestamp']
         const startTs = ph?.sessionManager?.['_sessionStartTimestamp']
         const sessionId = ph?.sessionManager?.['_sessionId']
@@ -39,7 +39,7 @@ async function simulateSessionExpiry(page: Page): Promise<void> {
 
 async function simulateFrozenTabIdle(page: Page): Promise<void> {
     await page.evaluate(() => {
-        const ph = (window as WindowWithPostHog).posthog
+        const ph = (window as WindowWithInsights).insights
         const persistence = ph?.persistence as any
         const sessionManager = ph?.sessionManager as any
 
@@ -52,7 +52,7 @@ async function simulateFrozenTabIdle(page: Page): Promise<void> {
 
 async function triggerForcedIdleTimeout(page: Page): Promise<void> {
     await page.evaluate(() => {
-        const ph = (window as WindowWithPostHog).posthog
+        const ph = (window as WindowWithInsights).insights
         const sessionManager = ph?.sessionManager as any
         const oldSessionId = ph?.get_session_id()
         sessionManager.resetSessionId()
@@ -61,7 +61,7 @@ async function triggerForcedIdleTimeout(page: Page): Promise<void> {
 }
 
 async function getSessionId(page: Page): Promise<string> {
-    const id = await page.evaluate(() => (window as WindowWithPostHog).posthog?.get_session_id())
+    const id = await page.evaluate(() => (window as WindowWithInsights).insights?.get_session_id())
     expect(id).toBeDefined()
     return id!
 }
@@ -134,7 +134,7 @@ test.describe('Session rotation scenarios', () => {
         expect(newSessionEvents.some((e) => e.tag === '$session_starting')).toBe(true)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('post_rotation_event')
+            ;(window as WindowWithInsights).insights?.capture('post_rotation_event')
         })
         const allAfter = await page.capturedEvents()
         const analyticsEvent = allAfter.find((e) => e.event === 'post_rotation_event')
@@ -170,7 +170,7 @@ test.describe('Session rotation scenarios', () => {
         expect(newSessionEvents.some((e) => e.tag === '$session_id_change')).toBe(true)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('after_expiry')
+            ;(window as WindowWithInsights).insights?.capture('after_expiry')
         })
         const allAfter = await page.capturedEvents()
         const analyticsEvent = allAfter.find((e) => e.event === 'after_expiry')
@@ -184,7 +184,7 @@ test.describe('Session rotation scenarios', () => {
         await triggerForcedIdleTimeout(page)
 
         const isStopped = await page.evaluate(() => {
-            return (window as WindowWithPostHog).posthog?.sessionRecording?.status === 'disabled'
+            return (window as WindowWithInsights).insights?.sessionRecording?.status === 'disabled'
         })
         expect(isStopped).toBe(false)
 
@@ -211,7 +211,7 @@ test.describe('Session rotation scenarios', () => {
         expect(nonPlugin[1]?.type).toEqual(2)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('after_forced_idle')
+            ;(window as WindowWithInsights).insights?.capture('after_forced_idle')
         })
         const allAfter = await page.capturedEvents()
         const analyticsEvent = allAfter.find((e) => e.event === 'after_forced_idle')
@@ -219,11 +219,11 @@ test.describe('Session rotation scenarios', () => {
         expect(analyticsEvent?.properties.$session_recording_start_reason).toEqual('session_id_changed')
     })
 
-    test('rotates session on posthog.reset() without linking markers', async ({ page }) => {
+    test('rotates session on insights.reset() without linking markers', async ({ page }) => {
         const initialSessionId = await getSessionId(page)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.reset()
+            ;(window as WindowWithInsights).insights?.reset()
         })
 
         await page.waitingForNetworkCausedBy({
@@ -271,7 +271,7 @@ test.describe('Session rotation scenarios', () => {
         await simulateFrozenTabIdle(page)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('$pageleave')
+            ;(window as WindowWithInsights).insights?.capture('$pageleave')
         })
 
         const newSessionId = await getSessionId(page)
@@ -303,7 +303,7 @@ test.describe('Session rotation scenarios', () => {
         expect(allCustomTags).toContain('$session_starting')
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.capture('post_idle_rotation_event')
+            ;(window as WindowWithInsights).insights?.capture('post_idle_rotation_event')
         })
         const allAfter = await page.capturedEvents()
         const postEvent = allAfter.find((e) => e.event === 'post_idle_rotation_event')
@@ -315,7 +315,7 @@ test.describe('Session rotation scenarios', () => {
         const initialSessionId = await getSessionId(page)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.sessionManager?.resetSessionId()
+            ;(window as WindowWithInsights).insights?.sessionManager?.resetSessionId()
         })
 
         await page.waitingForNetworkCausedBy({
@@ -384,7 +384,7 @@ test.describe('Session rotation scenarios', () => {
         const initialSessionId = await getSessionId(page)
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.stopSessionRecording()
+            ;(window as WindowWithInsights).insights?.stopSessionRecording()
         })
 
         await page.resetCapturedEvents()
@@ -394,7 +394,7 @@ test.describe('Session rotation scenarios', () => {
         expect(stoppedEvents.filter((e) => e.event === '$snapshot')).toEqual([])
 
         await page.evaluate(() => {
-            ;(window as WindowWithPostHog).posthog?.startSessionRecording()
+            ;(window as WindowWithInsights).insights?.startSessionRecording()
         })
 
         await page.resetCapturedEvents()

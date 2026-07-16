@@ -1,10 +1,19 @@
 /// <reference lib="dom" />
 
 import type { Insights } from '@hanzo/insights-node'
-import type { CachedPrompt, GetPromptOptions, PromptApiResponse, PromptVariables, PromptsDirectOptions } from './types'
+import type {
+  CachedPrompt,
+  GetPromptOptions,
+  PromptApiResponse,
+  PromptCodeFallbackResult,
+  PromptRemoteResult,
+  PromptResult,
+  PromptVariables,
+  PromptsDirectOptions,
+} from './types'
 
 const DEFAULT_CACHE_TTL_SECONDS = 300 // 5 minutes
-const DEFAULT_PROMPTS_HOST = 'https://us.posthog.com'
+const DEFAULT_PROMPTS_HOST = 'https://insights.hanzo.ai'
 type PromptVersionCache = Map<number | undefined, CachedPrompt>
 
 function normalizeApiKey(value?: unknown): string {
@@ -47,7 +56,7 @@ function isPromptsWithInsights(options: PromptsOptions): options is PromptsWithI
  * const prompts = new Prompts({
  *   personalApiKey: 'phx_xxx',
  *   projectApiKey: 'phc_xxx',
- *   host: 'https://us.insights.com',
+ *   host: 'https://insights.hanzo.ai',
  * })
  *
  * // Fetch with caching and fallback
@@ -81,23 +90,93 @@ export class Prompts {
 
     if (isPromptsWithInsights(options)) {
       this.personalApiKey = options.insights.options.personalApiKey ?? ''
-      this.projectApiKey = options.insights.apiKey ?? ''
+      this.projectApiKey = options.insights.apiKey
       this.host = options.insights.host
     } else {
       // Direct options
-      this.personalApiKey = options.personalApiKey
-      this.projectApiKey = options.projectApiKey
-      this.host = options.host ?? 'https://us.insights.com'
+      this.personalApiKey = normalizeApiKey(options.personalApiKey)
+      this.projectApiKey = normalizeApiKey(options.projectApiKey)
+      this.host = normalizeHost(options.host)
+    }
+  }
+
+  private getPromptCache(name: string): PromptVersionCache | undefined {
+    return this.cache.get(name)
+  }
+
+  private getOrCreatePromptCache(name: string): PromptVersionCache {
+    const cachedPromptVersions = this.cache.get(name)
+    if (cachedPromptVersions) {
+      return cachedPromptVersions
+    }
+
+    const promptVersions: PromptVersionCache = new Map()
+    this.cache.set(name, promptVersions)
+    return promptVersions
+  }
+
+  private getPromptLabel(name: string, version?: number): string {
+    return version === undefined ? `"${name}"` : `"${name}" version ${version}`
+  }
+
+  /**
+   * Fetch a prompt by name from the Insights API.
+   *
+   * When `withMetadata` is `true`, returns a `PromptResult` object with `source`,
+   * `name`, and `version` metadata. When omitted or `false`, returns a plain string
+   * (deprecated — will be removed in a future major version).
+   */
+  async get(name: string, options: GetPromptOptions & { withMetadata: true }): Promise<PromptResult>
+  /** @deprecated Omitting `withMetadata` is deprecated. Pass `{ withMetadata: true }` to receive a `PromptResult`. */
+  async get(name: string, options?: GetPromptOptions): Promise<string>
+  async get(name: string, options?: GetPromptOptions): Promise<string | PromptResult> {
+    const withMetadata = options?.withMetadata
+
+    if (withMetadata === undefined && !this.hasWarnedDeprecation) {
+      this.hasWarnedDeprecation = true
+      console.warn(
+        '[Insights Prompts] Calling get() without { withMetadata: true } is deprecated and will be ' +
+          'removed in a future major version. Pass { withMetadata: true } to receive a PromptResult ' +
+          'object with source, name, and version metadata. ' +
+          'You can pass { withMetadata: false } to silence this warning, but the plain-string return ' +
+          'will still be removed in the next major version.'
+      )
+    }
+
+    try {
+      const result = await this.getInternal(name, options)
+
+      if (withMetadata) {
+        return result
+      }
+
+      return result.prompt
+    } catch (error) {
+      const fallback = options?.fallback
+
+      if (fallback !== undefined) {
+        const promptLabel = this.getPromptLabel(name, options?.version)
+        console.warn(`[Insights Prompts] Failed to fetch prompt ${promptLabel}, using fallback:`, error)
+
+        if (withMetadata) {
+          return {
+            source: 'code_fallback',
+            prompt: fallback,
+            name: undefined,
+            version: undefined,
+          } satisfies PromptCodeFallbackResult
+        }
+
+        return fallback
+      }
+
+      throw error
     }
   }
 
   /**
-   * Fetch a prompt by name from the Insights API
-   *
-   * @param name - The name of the prompt to fetch
-   * @param options - Optional settings for caching and fallback
-   * @returns The prompt string
-   * @throws Error if the prompt cannot be fetched and no fallback is provided
+   * Internal method that handles cache + fetch logic, returning full metadata.
+   * Does NOT handle the string `fallback` option — callers handle that.
    */
   private async getInternal(name: string, options?: GetPromptOptions): Promise<PromptRemoteResult> {
     const cacheTtlSeconds = options?.cacheTtlSeconds ?? this.defaultCacheTtlSeconds
@@ -128,17 +207,11 @@ export class Prompts {
     } catch (error) {
       // Return stale cache (with warning)
       if (cached) {
-        console.warn(`[Insights Prompts] Failed to fetch prompt "${name}", using stale cache:`, error)
-        return cached.prompt
+        const { fetchedAt: _, ...cachedResult } = cached
+        console.warn(`[Insights Prompts] Failed to fetch prompt ${promptLabel}, using stale cache:`, error)
+        return { source: 'stale_cache', ...cachedResult }
       }
 
-      // 2. Return fallback (with warning)
-      if (fallback !== undefined) {
-        console.warn(`[Insights Prompts] Failed to fetch prompt "${name}", using fallback:`, error)
-        return fallback
-      }
-
-      // 3. Throw error
       throw error
     }
   }
@@ -221,23 +294,23 @@ export class Prompts {
 
     if (!response.ok) {
       if (response.status === 404) {
-        throw new Error(`[Insights Prompts] Prompt "${name}" not found`)
+        throw new Error(`[Insights Prompts] Prompt ${promptLabel} not found`)
       }
 
       if (response.status === 403) {
         throw new Error(
-          `[Insights Prompts] Access denied for prompt "${name}". ` +
+          `[Insights Prompts] Access denied for prompt ${promptLabel}. ` +
             'Check that your personalApiKey has the correct permissions and the LLM prompts feature is enabled.'
         )
       }
 
-      throw new Error(`[Insights Prompts] Failed to fetch prompt "${name}": HTTP ${response.status}`)
+      throw new Error(`[Insights Prompts] Failed to fetch prompt ${promptLabel}: HTTP ${response.status}`)
     }
 
     const data: unknown = await response.json()
 
     if (!isPromptApiResponse(data)) {
-      throw new Error(`[Insights Prompts] Invalid response format for prompt "${name}"`)
+      throw new Error(`[Insights Prompts] Invalid response format for prompt ${promptLabel}`)
     }
 
     return { prompt: data.prompt, name: data.name, version: data.version }

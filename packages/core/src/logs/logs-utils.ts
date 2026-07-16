@@ -119,7 +119,7 @@ export function buildOtlpLogRecord(options: CaptureLogOptions, sdkContext: LogSd
   const autoAttributes: Record<string, LogAttributeValue> = {}
 
   if (sdkContext.distinctId) {
-    autoAttributes.posthogDistinctId = sdkContext.distinctId
+    autoAttributes.insightsDistinctId = sdkContext.distinctId
   }
   if (sdkContext.sessionId) {
     autoAttributes.sessionId = sdkContext.sessionId
@@ -171,7 +171,7 @@ export function buildOtlpLogRecord(options: CaptureLogOptions, sdkContext: LogSd
 /**
  * Wraps a list of records in the OTLP `resourceLogs` envelope.
  *
- * `scopeName` is the SDK package name (`posthog-js`, `posthog-react-native`,
+ * `scopeName` is the SDK package name (`insights-js`, `insights-react-native`,
  * etc.). `scopeVersion` is the SDK semver. The server combines them into a
  * single `instrumentation_scope` field (`{name}@{version}`) used for
  * SDK-version-level attribution in queries and dashboards.

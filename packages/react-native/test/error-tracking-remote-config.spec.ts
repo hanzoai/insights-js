@@ -13,7 +13,7 @@ jest.mock('../src/utils', () => ({
 }))
 
 import { trackUncaughtExceptions, trackUnhandledRejections, trackConsole } from '../src/error-tracking/utils'
-import { createMockLogger, createMockPostHog } from './test-utils'
+import { createMockLogger, createMockInsights } from './test-utils'
 
 const mockInsights = {
   capture: jest.fn(),

@@ -28,16 +28,32 @@ applications connected to [Hanzo Insights](https://insights.hanzo.ai).
 There must be ZERO `@posthog/*` dependency or identity references in source.
 Verify: `grep -rl '@posthog/' packages --include='*.ts' --include='package.json' | grep -v node_modules` → 0.
 
-## Wire protocol — DO NOT rebrand (server contract)
+## ZERO posthog — we own both sides of the wire
 
-The Insights ingestion server is a posthog-protocol fork and expects the on-the-wire
-constants UNCHANGED. Never rename these — they are values, not package identifiers:
+There is no PostHog anywhere in this SDK. **We own the ingestion server
+(`hanzoai/insights`: Django + `rust/capture` + `nodejs` plugin) AND this SDK**, so
+there is no external wire contract to preserve — the wire is ours. The server is
+already 100% posthog-free (0 refs in python/rust/node source); this SDK was the
+last laggard and is now swept (1452 → 0).
 
-- the `window.posthog` global variable name (UMD `output.globals` value),
-- `ph_*` cookie / localStorage persistence keys,
-- `$`-prefixed event names (`$pageview`, `$identify`, `$autocapture`, `$set`, …),
-- `distinct_id`, the `/decide`, `/flags` endpoints,
-- the `__PosthogExtensions__` / `__InsightsExtensions__` runtime hook (mixed in the fork).
+Verify (must stay 0):
+`grep -rioE 'posthog' packages/*/src packages/*/tests packages/*/package.json | wc -l`
+
+Renamed with the server, in lockstep — do NOT "restore" any of these:
+
+- `$last_posthog_reset` → **`$last_insights_reset`** — the server's taxonomy
+  (`insights/taxonomy/taxonomy.py`, `insights/insightsql/ai.py`) already expected
+  the `insights` form; the SDK emitting the `posthog` form was a live MISMATCH.
+- `__PosthogExtensions__` → `__InsightsExtensions__` (runtime hook).
+- `PostHog`/`posthog`/`POSTHOG` identifiers → `Insights`/`insights`/`INSIGHTS`.
+- All hosts → `https://insights.hanzo.ai` (`DEFAULT_PLUGIN_HOST`, `DEFAULT_NUXT_HOST`
+  and the core `host` default previously pointed at **PostHog's cloud**
+  `us.i.posthog.com` — a real bug). There is no separate assets CDN: remote config
+  is fetched from the same host (PostHog's us-assets/eu-assets split was removed).
+
+Still genuinely fixed by convention (not brand): `$`-prefixed event names
+(`$pageview`, `$identify`, `$autocapture`, `$set`) and `distinct_id` — these carry
+no posthog string and are the event schema the server + ClickHouse read.
 
 ### Ingest endpoints are Hanzo-native `/v1/*` (NOT PostHog `/e/`,`/batch/`,`/s/`)
 

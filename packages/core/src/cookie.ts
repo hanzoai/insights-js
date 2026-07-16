@@ -1,8 +1,8 @@
 import { isArray, isNoLike } from './utils'
 import { uuidv7 } from './vendor/uuidv7'
 
-const COOKIE_PREFIX = 'ph_'
-const COOKIE_SUFFIX = '_posthog'
+const COOKIE_PREFIX = 'hi_'
+const COOKIE_SUFFIX = '_insights'
 
 /**
  * Minimal cookie-reading interface compatible with Next.js `cookies()`,
@@ -36,7 +36,7 @@ export function cookieStoreFromHeader(cookieHeader: string): CookieStore {
   return { get: (name: string) => (name in cookies ? { value: cookies[name] } : undefined) }
 }
 
-export interface PostHogCookieState {
+export interface InsightsCookieState {
   distinctId: string
   isIdentified: boolean
   sessionId?: string
@@ -44,28 +44,28 @@ export interface PostHogCookieState {
 }
 
 /**
- * Returns the PostHog cookie name for the given API key.
+ * Returns the Insights cookie name for the given API key.
  *
- * PostHog-js stores state in a cookie named `ph_<sanitized_token>_posthog`.
+ * Insights-js stores state in a cookie named `hi_<sanitized_token>_insights`.
  * The token is sanitized by replacing `+` with `PL`, `/` with `SL`, `=` with `EQ`.
  *
- * @param apiKey - The PostHog project API key
+ * @param apiKey - The Insights project API key
  * @returns The cookie name string
  */
-export function getPostHogCookieName(apiKey: string): string {
+export function getInsightsCookieName(apiKey: string): string {
   const sanitized = apiKey.replace(/\+/g, 'PL').replace(/\//g, 'SL').replace(/=/g, 'EQ')
   return `${COOKIE_PREFIX}${sanitized}${COOKIE_SUFFIX}`
 }
 
 /**
- * Serializes an anonymous ID into the JSON format posthog-js expects.
+ * Serializes an anonymous ID into the JSON format insights-js expects.
  *
- * When `distinct_id === $device_id`, posthog-js treats the user as anonymous.
+ * When `distinct_id === $device_id`, insights-js treats the user as anonymous.
  *
  * @param anonymousId - The anonymous distinct ID to serialize
- * @returns JSON string suitable for the PostHog cookie value
+ * @returns JSON string suitable for the Insights cookie value
  */
-export function serializePostHogCookie(anonymousId: string): string {
+export function serializeInsightsCookie(anonymousId: string): string {
   const now = Date.now()
   const sessionId = uuidv7()
   return JSON.stringify({
@@ -77,21 +77,21 @@ export function serializePostHogCookie(anonymousId: string): string {
 }
 
 /**
- * Reads and parses the PostHog cookie from a cookie store.
+ * Reads and parses the Insights cookie from a cookie store.
  *
  * Compatible with Next.js `cookies()`, `request.cookies`, and any object
  * with a `get(name)` method that returns `{ value: string } | undefined`.
  */
-export function readPostHogCookie(cookies: CookieStore, apiKey: string): PostHogCookieState | null {
-  const cookieName = getPostHogCookieName(apiKey)
+export function readInsightsCookie(cookies: CookieStore, apiKey: string): InsightsCookieState | null {
+  const cookieName = getInsightsCookieName(apiKey)
   const cookie = cookies.get(cookieName)
-  return cookie ? parsePostHogCookie(cookie.value) : null
+  return cookie ? parseInsightsCookie(cookie.value) : null
 }
 
 /**
- * Converts cookie state into PostHog properties (e.g. `$session_id`, `$device_id`).
+ * Converts cookie state into Insights properties (e.g. `$session_id`, `$device_id`).
  */
-export function cookieStateToProperties(state: PostHogCookieState | null): Record<string, string> | undefined {
+export function cookieStateToProperties(state: InsightsCookieState | null): Record<string, string> | undefined {
   if (!state) {
     return undefined
   }
@@ -106,7 +106,7 @@ export function cookieStateToProperties(state: PostHogCookieState | null): Recor
 }
 
 /**
- * Parses a PostHog cookie value and extracts identity information.
+ * Parses a Insights cookie value and extracts identity information.
  *
  * The cookie value is a JSON object containing `distinct_id` and `$user_state`.
  * A user is considered identified if `$user_state` is `'identified'`.
@@ -114,7 +114,7 @@ export function cookieStateToProperties(state: PostHogCookieState | null): Recor
  * @param cookieValue - The raw cookie string value
  * @returns Parsed identity state, or null if the cookie is missing/invalid
  */
-export function parsePostHogCookie(cookieValue: string): PostHogCookieState | null {
+export function parseInsightsCookie(cookieValue: string): InsightsCookieState | null {
   if (!cookieValue) {
     return null
   }
@@ -144,7 +144,7 @@ export interface ConsentCookieConfig {
   opt_out_capturing_cookie_prefix?: string | null
 }
 
-const CONSENT_PREFIX = '__ph_opt_in_out_'
+const CONSENT_PREFIX = '__hi_opt_in_out_'
 
 export function getConsentCookieName(apiKey: string, config?: ConsentCookieConfig): string {
   if (config?.consent_persistence_name) {

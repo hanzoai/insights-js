@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { render, h } from 'preact'
-import { isNumber } from '@hanzo/insights-core'
+import { isNumber, isNull } from '@hanzo/insights-core'
 import {
     ConversationsRemoteConfig,
     ConversationsWidgetState,
@@ -16,6 +16,7 @@ import {
     RestoreFromTokenResponse,
     RequestRestoreLinkPayload,
     RequestRestoreLinkResponse,
+    TicketStatus,
 } from '../../../insights-conversations-types'
 import { Insights } from '../../../insights-core'
 import { STORED_PERSON_PROPERTIES_KEY } from '../../../constants'
@@ -107,7 +108,6 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
         // eslint-disable-next-line compat/compat
         return new Promise((resolve, reject) => {
-            const distinctId = this._insights.get_distinct_id()
             const personTraits = this._getPersonTraits()
 
             const name = userTraits?.name || personTraits.name || null
@@ -129,7 +129,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
                 payload.distinct_id = identity.identity_distinct_id
             } else {
                 payload.widget_session_id = this._widgetSessionId
-                payload.distinct_id = this._posthog.get_distinct_id()
+                payload.distinct_id = this._insights.get_distinct_id()
             }
 
             try {
@@ -310,6 +310,11 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
         // eslint-disable-next-line compat/compat
         return new Promise((resolve, reject) => {
+            const identity = this._identityFields()
+            const data = identity
+                ? { identity_distinct_id: identity.identity_distinct_id, identity_hash: identity.identity_hash }
+                : { widget_session_id: this._widgetSessionId }
+
             this._insights._send_request({
                 url: this._insights.requestRouter.endpointFor(
                     'api',
@@ -676,13 +681,13 @@ export class ConversationsManager implements ConversationsManagerInterface {
         }
 
         try {
-            const identityBefore = this._posthog.config.identity_distinct_id
+            const identityBefore = this._insights.config.identity_distinct_id
             const ticketBefore = this._currentTicketId
             const response = await this.getMessages(this._currentTicketId, this._lastMessageTimestamp || undefined)
 
             // Discard stale response if identity or ticket changed while in-flight
             if (
-                this._posthog.config.identity_distinct_id !== identityBefore ||
+                this._insights.config.identity_distinct_id !== identityBefore ||
                 this._currentTicketId !== ticketBefore
             ) {
                 return
@@ -914,13 +919,13 @@ export class ConversationsManager implements ConversationsManagerInterface {
      */
     private async _determineInitialView(): Promise<{ view: WidgetView; tickets: Ticket[] }> {
         try {
-            const identityBefore = this._posthog.config.identity_distinct_id
+            const identityBefore = this._insights.config.identity_distinct_id
             const response = await this.getTickets()
 
             // If identity changed while the request was in-flight, discard this
             // stale response -- setIdentity/clearIdentity already triggered a
             // fresh _loadTicketsAndReconcileView() with the correct credentials.
-            if (this._posthog.config.identity_distinct_id !== identityBefore) {
+            if (this._insights.config.identity_distinct_id !== identityBefore) {
                 return { view: 'messages', tickets: [] }
             }
 
@@ -1208,8 +1213,8 @@ export class ConversationsManager implements ConversationsManagerInterface {
     }
 
     private _identityFields(): { identity_distinct_id: string; identity_hash: string } | null {
-        const id = this._posthog.config.identity_distinct_id
-        const hash = this._posthog.config.identity_hash
+        const id = this._insights.config.identity_distinct_id
+        const hash = this._insights.config.identity_hash
         if (!id || !hash) {
             return null
         }
@@ -1237,10 +1242,10 @@ export class ConversationsManager implements ConversationsManagerInterface {
 
     private async _loadTicketsAndReconcileView(): Promise<void> {
         try {
-            const identityBefore = this._posthog.config.identity_distinct_id
+            const identityBefore = this._insights.config.identity_distinct_id
             const response = await this.getTickets()
 
-            if (this._posthog.config.identity_distinct_id !== identityBefore) {
+            if (this._insights.config.identity_distinct_id !== identityBefore) {
                 return
             }
 
@@ -1341,6 +1346,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
                 initialState={initialState}
                 initialUserTraits={initialUserTraits}
                 isUserIdentified={this._insights._isIdentified()}
+                isIdentityMode={!isNull(this._identityFields())}
                 initialView={initialView}
                 initialTickets={initialTickets}
                 showTicketList={this._showTicketList}

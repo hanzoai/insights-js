@@ -858,13 +858,13 @@ class FeatureFlagsPoller {
           // Invalid API key
           this.beginBackoff()
           throw new ClientError(
-            `Your project key or personal API key is invalid. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://insights.com/docs/api#rate-limiting`
+            `Your project key or personal API key is invalid. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://insights.hanzo.ai/docs/api#rate-limiting`
           )
 
         case 402:
           // Quota exceeded - clear all flags
           console.warn(
-            '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://insights.com/docs/billing/limits-alerts'
+            '[FEATURE FLAGS] Feature flags quota limit exceeded - unsetting all local flags. Learn more about billing limits at https://insights.hanzo.ai/docs/billing/limits-alerts'
           )
           this.featureFlags = []
           this.featureFlagsByKey = {}
@@ -876,14 +876,14 @@ class FeatureFlagsPoller {
           // Permissions issue
           this.beginBackoff()
           throw new ClientError(
-            `Your personal API key does not have permission to fetch feature flag definitions for local evaluation. Setting next polling interval to ${this.getPollingInterval()}ms. Are you sure you're using the correct personal and Project API key pair? More information: https://insights.com/docs/api/overview`
+            `Your personal API key does not have permission to fetch feature flag definitions for local evaluation. Setting next polling interval to ${this.getPollingInterval()}ms. Are you sure you're using the correct personal and Project API key pair? More information: https://insights.hanzo.ai/docs/api/overview`
           )
 
         case 429:
           // Rate limited
           this.beginBackoff()
           throw new ClientError(
-            `You are being rate limited. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://insights.com/docs/api#rate-limiting`
+            `You are being rate limited. Setting next polling interval to ${this.getPollingInterval()}ms. More information: https://insights.hanzo.ai/docs/api#rate-limiting`
           )
 
         case 200: {

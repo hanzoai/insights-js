@@ -6,10 +6,10 @@ jest.mock('@vercel/functions', () => ({
     waitUntil: mockVercelWaitUntil,
 }))
 
-const mockPostHogConstructor = jest.fn()
+const mockInsightsConstructor = jest.fn()
 
 jest.mock('@hanzo/insights-node', () => ({
-    PostHog: mockPostHogConstructor,
+    Insights: mockInsightsConstructor,
 }))
 
 describe('nodeClientCache waitUntil auto-detection', () => {
@@ -23,7 +23,7 @@ describe('nodeClientCache waitUntil auto-detection', () => {
 
         await getOrCreateNodeClient('phc_test', { host: 'https://test.com' })
 
-        expect(mockPostHogConstructor).toHaveBeenCalledWith(
+        expect(mockInsightsConstructor).toHaveBeenCalledWith(
             'phc_test',
             expect.objectContaining({ waitUntil: mockVercelWaitUntil })
         )
@@ -35,7 +35,7 @@ describe('nodeClientCache waitUntil auto-detection', () => {
         const explicitWaitUntil = jest.fn()
         await getOrCreateNodeClient('phc_test3', { host: 'https://test3.com', waitUntil: explicitWaitUntil })
 
-        expect(mockPostHogConstructor).toHaveBeenCalledWith(
+        expect(mockInsightsConstructor).toHaveBeenCalledWith(
             'phc_test3',
             expect.objectContaining({ waitUntil: explicitWaitUntil })
         )

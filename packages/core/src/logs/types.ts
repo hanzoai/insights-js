@@ -79,11 +79,11 @@ export interface BufferedLogEntry {
 export type BeforeSendLogFn = (record: CaptureLogOptions) => CaptureLogOptions | null
 
 /**
- * Configuration for the logs feature on `new PostHog(key, { logs: ... })`.
+ * Configuration for the logs feature on `new Insights(key, { logs: ... })`.
  * All fields are optional; per-SDK defaults apply (mobile vs browser tune
  * differently for cellular cost vs tab-suspension behavior).
  */
-export interface PostHogLogsConfig {
+export interface InsightsLogsConfig {
   /**
    * Service name attached to every record as the OTLP `service.name`
    * resource attribute. Used by the Logs UI for filtering / grouping.
@@ -177,10 +177,10 @@ export interface PostHogLogsConfig {
   beforeSend?: BeforeSendLogFn | BeforeSendLogFn[]
 }
 
-// Fields PostHogLogs needs resolved at runtime. The host SDK fills in its
-// defaults and hands the resolved config to the PostHogLogs constructor.
+// Fields InsightsLogs needs resolved at runtime. The host SDK fills in its
+// defaults and hands the resolved config to the InsightsLogs constructor.
 // Flat names internally — public API uses `rateCap: { maxLogs, windowMs }`.
-export interface ResolvedPostHogLogsConfig extends Omit<PostHogLogsConfig, 'rateCap'> {
+export interface ResolvedInsightsLogsConfig extends Omit<InsightsLogsConfig, 'rateCap'> {
   maxBufferSize: number
   flushIntervalMs: number
   maxBatchRecordsPerPost: number

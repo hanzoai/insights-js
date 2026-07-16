@@ -1,11 +1,21 @@
+import { LOAD_EXT_NOT_FOUND } from './constants'
+import Config from './config'
 import { Insights } from './insights-core'
-import { RemoteConfig } from './types'
-import { isNullish } from '@hanzo/insights-core'
+import type { CaptureLogOptions, RemoteConfig, Logger, LogSdkContext, LogAttributeValue, OtlpLogRecord } from './types'
+import { buildOtlpLogRecord, buildOtlpLogsPayload, isNullish } from '@hanzo/insights-core'
 import { assignableWindow } from './utils/globals'
 import { createLogger } from './utils/logger'
 import { Extension } from './extensions/types'
 
-export class InsightsLogs {
+const DEFAULT_FLUSH_INTERVAL_MS = 3000
+const DEFAULT_MAX_BUFFER_SIZE = 100
+const DEFAULT_MAX_LOGS_PER_INTERVAL = 1000
+
+interface BufferedLogEntry {
+    record: OtlpLogRecord
+}
+
+export class InsightsLogs implements Extension {
     private _isLogsEnabled: boolean = false
     private _isLoaded: boolean = false
     private readonly _logger = createLogger('[logs]')
@@ -54,16 +64,15 @@ export class InsightsLogs {
             return
         }
 
-        const logger = createLogger('[logs]')
         const phExtensions = assignableWindow?.__InsightsExtensions__
         if (!phExtensions) {
-            logger.error('Insights Extensions not found.')
+            this._logger.error('Insights Extensions not found.')
             return
         }
 
         const loadExternalDependency = phExtensions.loadExternalDependency
         if (!loadExternalDependency) {
-            logger.error('Insights loadExternalDependency extension not found.')
+            this._logger.error(LOAD_EXT_NOT_FOUND)
             return
         }
 

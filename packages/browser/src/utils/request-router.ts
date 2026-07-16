@@ -15,7 +15,8 @@ export type RequestRouterRegion = (typeof RequestRouterRegion)[keyof typeof Requ
 
 export type RequestRouterTarget = 'api' | 'ui' | 'assets' | 'flags'
 
-const ingestionDomain = 'i.insights.com'
+const ingestionDomain = 'insights.hanzo.ai'
+const staticAssetPath = /^\/static\//
 
 export class RequestRouter {
     instance: Insights
@@ -27,8 +28,8 @@ export class RequestRouter {
 
     get apiHost(): string {
         const host = this.instance.config.api_host.trim().replace(/\/$/, '')
-        if (host === 'https://app.insights.com') {
-            return 'https://us.i.insights.com'
+        if (host === 'https://insights.hanzo.ai') {
+            return 'https://insights.hanzo.ai'
         }
         return host
     }
@@ -47,12 +48,12 @@ export class RequestRouter {
 
         if (!host) {
             // No ui_host set, get it from the api_host. But api_host differs
-            // from the actual UI host, so replace the ingestion subdomain with just insights.com
-            host = this.apiHost.replace(`.${ingestionDomain}`, '.insights.com')
+            // from the actual UI host, so replace the ingestion subdomain with just insights.hanzo.ai
+            host = this.apiHost.replace(`.${ingestionDomain}`, '.insights.hanzo.ai')
         }
 
-        if (host === 'https://app.insights.com') {
-            return 'https://us.insights.com'
+        if (host === 'https://insights.hanzo.ai') {
+            return 'https://insights.hanzo.ai'
         }
 
         return host

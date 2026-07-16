@@ -156,12 +156,12 @@ describe('ConversationsManager', () => {
                 }
             }),
             requestRouter: {
-                endpointFor: jest.fn((type: string, path: string) => `https://test.insights.com${path}`),
+                endpointFor: jest.fn((type: string, path: string) => `https://test.example.com${path}`),
             },
             get_distinct_id: jest.fn().mockReturnValue('test-distinct-id'),
             get_property: jest.fn().mockReturnValue(undefined),
             get_session_id: jest.fn().mockReturnValue('test-session-id-123'),
-            get_session_replay_url: jest.fn().mockReturnValue('https://app.insights.com/replay/test-session?t=100'),
+            get_session_replay_url: jest.fn().mockReturnValue('https://insights.hanzo.ai/replay/test-session?t=100'),
             persistence: {
                 props: {
                     $name: 'Test User',
@@ -555,7 +555,7 @@ describe('ConversationsManager', () => {
                     data: expect.objectContaining({
                         session_id: 'test-session-id-123',
                         session_context: expect.objectContaining({
-                            session_replay_url: 'https://app.insights.com/replay/test-session?t=100',
+                            session_replay_url: 'https://insights.hanzo.ai/replay/test-session?t=100',
                             current_url: expect.any(String),
                         }),
                     }),
@@ -579,7 +579,7 @@ describe('ConversationsManager', () => {
             // session_id and replay_url should be included for debugging context
             expect(sendRequestCall.data.session_id).toBe('test-session-id-123')
             expect(sendRequestCall.data.session_context).toEqual({
-                session_replay_url: 'https://app.insights.com/replay/test-session?t=100',
+                session_replay_url: 'https://insights.hanzo.ai/replay/test-session?t=100',
                 current_url: undefined, // only sent with new tickets
             })
         })
@@ -602,7 +602,7 @@ describe('ConversationsManager', () => {
                         ticket_id: null,
                         session_id: 'test-session-id-123',
                         session_context: expect.objectContaining({
-                            session_replay_url: 'https://app.insights.com/replay/test-session?t=100',
+                            session_replay_url: 'https://insights.hanzo.ai/replay/test-session?t=100',
                             current_url: expect.any(String),
                         }),
                     }),

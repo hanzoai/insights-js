@@ -28,20 +28,15 @@ import { isDeadClicksEnabledForAutocapture } from './extensions/dead-clicks-auto
 import { setupSegmentIntegration } from './extensions/segment-integration'
 import { SentryIntegration, sentryIntegration, SentryIntegrationOptions } from './extensions/sentry-integration'
 import { PageViewManager } from './page-view'
-import { InsightsExceptions } from './insights-exceptions'
-import { InsightsFeatureFlags } from './insights-featureflags'
 import { InsightsPersistence } from './insights-persistence'
-import { InsightsSurveys } from './insights-surveys'
-import { InsightsConversations } from './extensions/conversations/insights-conversations'
 import {
     type DisplaySurveyOptions,
     type SurveyCallback,
     SurveyEventName,
     SurveyEventProperties,
-    SurveyRenderReason,
+    type SurveyRenderReason,
 } from './insights-surveys-types'
 import { ProductTourEventName, ProductTourEventProperties } from './insights-product-tours-types'
-import { InsightsLogs } from './insights-logs'
 import { RateLimiter } from './rate-limiter'
 import { RemoteConfigLoader } from './remote-config'
 import { extendURLParams, request, SUPPORTS_REQUEST } from './request'
@@ -117,19 +112,22 @@ import {
 } from '@hanzo/insights-core'
 import { uuidv7 } from './uuidv7'
 import { ExternalIntegrations } from './extensions/external-integration'
-import type { PostHogSurveys } from './posthog-surveys'
+import type { InsightsSurveys } from './insights-surveys'
 import type { Autocapture } from './autocapture'
 import type { DeadClicksAutocapture } from './extensions/dead-clicks-autocapture'
 import type { ExceptionObserver } from './extensions/exception-autocapture'
 import type { HistoryAutocapture } from './extensions/history-autocapture'
 import type { WebVitalsAutocapture } from './extensions/web-vitals'
 import type { Heatmaps } from './heatmaps'
+import type { InsightsConversations } from './extensions/conversations/insights-conversations'
+import type { InsightsExceptions } from './insights-exceptions'
+import type { InsightsLogs } from './insights-logs'
 import type { InsightsProductTours } from './insights-product-tours'
 import type { SiteApps } from './site-apps'
 import type { SessionRecording } from './extensions/replay/session-recording'
 import type { Extension } from './extensions/types'
 import type { Toolbar } from './extensions/toolbar'
-import type { PostHogFeatureFlags } from './posthog-featureflags'
+import type { InsightsFeatureFlags } from './insights-featureflags'
 import type { WebExperiments } from './web-experiments'
 
 /*
@@ -157,7 +155,7 @@ type OnlyValidKeys<T, Shape> = T extends Shape ? (Exclude<keyof T, keyof Shape> 
 const instances: Record<string, Insights> = {}
 
 // Tracks re-entrant calls to _execute_array. Used to detect when a third-party
-// Proxy (e.g., TikTok's in-app browser) wraps window.hi and converts method
+// Proxy (e.g., TikTok's in-app browser) wraps window.insights and converts method
 // calls into push() calls, which would otherwise cause infinite recursion.
 let _executeArrayDepth = 0
 
@@ -203,7 +201,7 @@ const defaultsThatVaryByConfig = (
 // to guarantee documentation is up to date, make sure to also update our website docs
 // NOTE²: This shouldn't ever change because we try very hard to be backwards-compatible
 export const defaultConfig = (defaults?: ConfigDefaults): InsightsConfig => ({
-    api_host: 'https://us.i.insights.com',
+    api_host: 'https://insights.hanzo.ai',
     flags_api_host: null,
     ui_host: null,
     token: '',
@@ -220,6 +218,7 @@ export const defaultConfig = (defaults?: ConfigDefaults): InsightsConfig => ({
     capture_pageleave: 'if_capture_pageview', // We'll only capture pageleave events if capture_pageview is also true
     defaults: defaults ?? 'unset',
     __preview_deferred_init_extensions: false, // Opt-in only for now
+    __preview_external_dependency_versioned_paths: false,
     debug: (location && isString(location?.search) && location.search.indexOf('__insights_debug=true') !== -1) || false,
     cookie_expiration: 365,
     upgrade: false,
@@ -285,25 +284,21 @@ export const defaultConfig = (defaults?: ConfigDefaults): InsightsConfig => ({
     ...defaultsThatVaryByConfig(defaults),
 })
 
+const CONFIG_RENAMES: [keyof InsightsConfig, keyof InsightsConfig][] = [
+    ['process_person', 'person_profiles'],
+    ['xhr_headers', 'request_headers'],
+    ['cookie_name', 'persistence_name'],
+    ['disable_cookie', 'disable_persistence'],
+    ['store_google', 'save_campaign_params'],
+    ['verbose', 'debug'],
+]
+
 export const configRenames = (origConfig: Partial<InsightsConfig>): Partial<InsightsConfig> => {
     const renames: Partial<InsightsConfig> = {}
-    if (!isUndefined(origConfig.process_person)) {
-        renames.person_profiles = origConfig.process_person
-    }
-    if (!isUndefined(origConfig.xhr_headers)) {
-        renames.request_headers = origConfig.xhr_headers
-    }
-    if (!isUndefined(origConfig.cookie_name)) {
-        renames.persistence_name = origConfig.cookie_name
-    }
-    if (!isUndefined(origConfig.disable_cookie)) {
-        renames.disable_persistence = origConfig.disable_cookie
-    }
-    if (!isUndefined(origConfig.store_google)) {
-        renames.save_campaign_params = origConfig.store_google
-    }
-    if (!isUndefined(origConfig.verbose)) {
-        renames.debug = origConfig.verbose
+    for (const [oldKey, newKey] of CONFIG_RENAMES) {
+        if (!isUndefined((origConfig as any)[oldKey])) {
+            ;(renames as any)[newKey] = (origConfig as any)[oldKey]
+        }
     }
     // on_xhr_error is not present, as the type is different to on_request_error
 
@@ -362,13 +357,13 @@ export class Insights implements InsightsInterface {
     rateLimiter: RateLimiter
     scrollManager: ScrollManager
     pageViewManager: PageViewManager
-    featureFlags: InsightsFeatureFlags
-    surveys: InsightsSurveys
-    conversations: InsightsConversations
-    logs: InsightsLogs
-    experiments: WebExperiments
-    toolbar: Toolbar
-    exceptions: InsightsExceptions
+    featureFlags: TreeShakeable<InsightsFeatureFlags>
+    surveys: TreeShakeable<InsightsSurveys>
+    conversations: TreeShakeable<InsightsConversations>
+    logs: TreeShakeable<InsightsLogs>
+    experiments: TreeShakeable<WebExperiments>
+    toolbar: TreeShakeable<Toolbar>
+    exceptions: TreeShakeable<InsightsExceptions>
     consent: ConsentManager
 
     // These are instance-specific state created after initialisation
@@ -460,15 +455,8 @@ export class Insights implements InsightsInterface {
         this._visibilityStateListener = null
         this._initialPersonProfilesConfig = null
         this._cachedPersonProperties = null
-        this.featureFlags = new InsightsFeatureFlags(this)
-        this.toolbar = new Toolbar(this)
         this.scrollManager = new ScrollManager(this)
         this.pageViewManager = new PageViewManager(this)
-        this.surveys = new InsightsSurveys(this)
-        this.conversations = new InsightsConversations(this)
-        this.logs = new InsightsLogs(this)
-        this.experiments = new WebExperiments(this)
-        this.exceptions = new InsightsExceptions(this)
         this.rateLimiter = new RateLimiter(this)
         this.requestRouter = new RequestRouter(this)
         this.consent = new ConsentManager(this)
@@ -476,7 +464,7 @@ export class Insights implements InsightsInterface {
 
         // Eagerly construct extensions from default classes so they're available before init().
         // For the slim bundle, these remain undefined until _initExtensions sets them from config.
-        const ext = PostHog.__defaultExtensionClasses ?? {}
+        const ext = Insights.__defaultExtensionClasses ?? {}
         this.featureFlags = ext.featureFlags && new ext.featureFlags(this)
         this.toolbar = ext.toolbar && new ext.toolbar(this)
         this.surveys = ext.surveys && new ext.surveys(this)
@@ -509,21 +497,21 @@ export class Insights implements InsightsInterface {
      *
      * @remarks
      * All new instances are added to the main insights object as sub properties (such as
-     * `insights.library_name`) and also returned by this function. [Learn more about configuration options](https://github.com/insights/@hanzo/insights/blob/6e0e873/src/insights-core.js#L57-L91)
+     * `insights.library_name`) and also returned by this function. [Learn more about configuration options](https://github.com/insights/insights-js/blob/6e0e873/src/insights-core.js#L57-L91)
      *
      * @example
      * ```js
      * // basic initialization
-     * insights.init('<ph_project_api_key>', {
-     *     api_host: '<ph_client_api_host>'
+     * insights.init('<hi_project_api_key>', {
+     *     api_host: '<hi_client_api_host>'
      * })
      * ```
      *
      * @example
      * ```js
      * // multiple instances
-     * insights.init('<ph_project_api_key>', {}, 'project1')
-     * insights.init('<ph_project_api_key>', {}, 'project2')
+     * insights.init('<hi_project_api_key>', {}, 'project1')
+     * insights.init('<hi_project_api_key>', {}, 'project2')
      * ```
      *
      * @public
@@ -570,7 +558,8 @@ export class Insights implements InsightsInterface {
     // code a bit cleaner, but will add some overhead.
     //
     _init(token: string, config: Partial<InsightsConfig> = {}, name?: string): Insights {
-        if (isUndefined(token) || isEmptyString(token)) {
+        const normalizedToken = isString(token) ? token.trim() : ''
+        if (!normalizedToken) {
             logger.critical(
                 'Insights was initialized without a token. This likely indicates a misconfiguration. Please check the first argument passed to insights.init()'
             )
@@ -773,7 +762,7 @@ export class Insights implements InsightsInterface {
 
         if (this.config.ip) {
             logger.warn(
-                'The `ip` config option has NO EFFECT AT ALL and has been deprecated. Use a custom transformation or "Discard IP data" project setting instead. See https://insights.com/tutorials/web-redact-properties#hiding-customer-ip-address for more information.'
+                'The `ip` config option has NO EFFECT AT ALL and has been deprecated. Use a custom transformation or "Discard IP data" project setting instead. See https://insights.hanzo.ai/tutorials/web-redact-properties#hiding-customer-ip-address for more information.'
             )
         }
 
@@ -784,15 +773,7 @@ export class Insights implements InsightsInterface {
         // we don't support IE11 anymore, so performance.now is safe
         // eslint-disable-next-line compat/compat
         const initStartTime = performance.now()
-
         const ext = { ...Insights.__defaultExtensionClasses, ...this.config.__extensionClasses }
-
-        if (ext.historyAutocapture) {
-            this.historyAutocapture = new ext.historyAutocapture(this) as HistoryAutocapture
-            this.historyAutocapture.startIfEnabled()
-        }
-
-        // Build queue of extension initialization tasks
         const initTasks: Array<() => void> = []
 
         // Due to name mangling, we can't easily iterate and assign these extensions
@@ -833,10 +814,7 @@ export class Insights implements InsightsInterface {
             this._extensions.push((this.conversations = this.conversations ?? new ext.conversations(this)))
         }
         if (ext.productTours) {
-            initTasks.push(() => {
-                this.productTours = new ext.productTours!(this) as InsightsProductTours
-                this.productTours.loadIfEnabled()
-            })
+            this._extensions.push((this.productTours = new ext.productTours(this)))
         }
         if (ext.heatmaps) {
             this._extensions.push((this.heatmaps = new ext.heatmaps(this)))
@@ -1119,7 +1097,7 @@ export class Insights implements InsightsInterface {
                         try {
                             ;(item as any).call(this)
                         } catch (e) {
-                            logger.error('Error executing queued PostHog call', item, e)
+                            logger.error('Error executing queued Insights call', item, e)
                         }
                     } else if (isArray(item) && fn_name === 'alias') {
                         alias_calls.push(item)
@@ -1148,7 +1126,7 @@ export class Insights implements InsightsInterface {
                             thisArg[item[0]].apply(thisArg, item.slice(1))
                         }
                     } catch (e) {
-                        logger.error('Error executing queued PostHog call', item, e)
+                        logger.error('Error executing queued Insights call', item, e)
                     }
                 })
             }
@@ -1179,7 +1157,7 @@ export class Insights implements InsightsInterface {
         if (_executeArrayDepth > 0 && isArray(item) && isString(item[0])) {
             // push() is being called while _execute_array is already running.
             // This happens when a third-party Proxy (e.g., TikTok's in-app browser)
-            // wraps window.hi and converts method calls into push() calls,
+            // wraps window.insights and converts method calls into push() calls,
             // creating an infinite loop: _execute_array -> this[method] -> Proxy ->
             // push -> _execute_array -> ...
             // Dispatch directly from the prototype to break the cycle.
@@ -2352,18 +2330,18 @@ export class Insights implements InsightsInterface {
 
     private _validateIdentifyId(id: string | undefined): id is string {
         if (!id || isEmptyString(id)) {
-            logger.critical('Unique user id has not been set in posthog.identify')
+            logger.critical('Unique user id has not been set in insights.identify')
             return false
         }
         if (id === COOKIELESS_SENTINEL_VALUE) {
             logger.critical(
-                `The string "${id}" was set in posthog.identify which indicates an error. This ID is only used as a sentinel value.`
+                `The string "${id}" was set in insights.identify which indicates an error. This ID is only used as a sentinel value.`
             )
             return false
         }
         if (isDistinctIdStringLike(id) || ['undefined', 'null'].includes(id.toLowerCase())) {
             logger.critical(
-                `The string "${id}" was set in posthog.identify which indicates an error. This ID should be unique to the user and not a hardcoded string.`
+                `The string "${id}" was set in insights.identify which indicates an error. This ID should be unique to the user and not a hardcoded string.`
             )
             return false
         }
@@ -2422,22 +2400,7 @@ export class Insights implements InsightsInterface {
             )
         }
 
-        //if the new_distinct_id has not been set ignore the identify event
-        if (!new_distinct_id) {
-            logger.error('Unique user id has not been set in insights.identify')
-            return
-        }
-
-        if (isDistinctIdStringLike(new_distinct_id)) {
-            logger.critical(
-                `The string "${new_distinct_id}" was set in insights.identify which indicates an error. This ID should be unique to the user and not a hardcoded string.`
-            )
-            return
-        }
-        if (new_distinct_id === COOKIELESS_SENTINEL_VALUE) {
-            logger.critical(
-                `The string "${COOKIELESS_SENTINEL_VALUE}" was set in insights.identify which indicates an error. This ID is only used as a sentinel value.`
-            )
+        if (!this._validateIdentifyId(new_distinct_id)) {
             return
         }
 
@@ -2869,7 +2832,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.setIdentity('user_123', 'a1b2c3d4e5f6...')
+     * insights.setIdentity('user_123', 'a1b2c3d4e5f6...')
      * ```
      *
      * @public
@@ -2886,7 +2849,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.clearIdentity()
+     * insights.clearIdentity()
      * ```
      *
      * @public
@@ -3093,7 +3056,7 @@ export class Insights implements InsightsInterface {
             if (isBoolean(this.config.debug)) {
                 if (this.config.debug) {
                     Config.DEBUG = true
-                    localStore._is_supported() && localStore._set('ph_debug', true)
+                    localStore._is_supported() && localStore._set('hi_debug', true)
                     logger.info('set_config', {
                         config,
                         oldConfig,
@@ -3101,7 +3064,7 @@ export class Insights implements InsightsInterface {
                     })
                 } else {
                     Config.DEBUG = false
-                    localStore._is_supported() && localStore._remove('ph_debug')
+                    localStore._is_supported() && localStore._remove('hi_debug')
                 }
             }
 
@@ -3121,7 +3084,7 @@ export class Insights implements InsightsInterface {
 
     /**
      * @internal
-     * Allows wrapper SDKs (e.g. posthog-flutter, posthog-react-native) to override the
+     * Allows wrapper SDKs (e.g. insights-flutter, insights-react-native) to override the
      * `$lib` and `$lib_version` properties sent with every event.
      *
      * This is not a public API and may change without notice.
@@ -3267,6 +3230,8 @@ export class Insights implements InsightsInterface {
      * @returns {CaptureResult} The result of the capture
      */
     captureException(error: unknown, additionalProperties?: Properties): CaptureResult | undefined {
+        if (!this.exceptions) return
+
         const syntheticException = new Error('Insights syntheticException')
         const errorToProperties = this.exceptions.buildProperties(error, {
             handled: true,
@@ -3287,7 +3252,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.addExceptionStep('Checkout button clicked', {
+     * insights.addExceptionStep('Checkout button clicked', {
      *   checkout_id: 'ch_123',
      * })
      * ```
@@ -3297,7 +3262,7 @@ export class Insights implements InsightsInterface {
     }
 
     /**
-     * Capture a log entry and send it to the PostHog logs endpoint.
+     * Capture a log entry and send it to the Insights logs endpoint.
      *
      * {@label Logs}
      *
@@ -3305,7 +3270,7 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.captureLog({
+     * insights.captureLog({
      *   body: 'checkout completed',
      *   level: 'info',
      *   attributes: { order_id: 'ord_789', amount_cents: 4999 },
@@ -3328,12 +3293,12 @@ export class Insights implements InsightsInterface {
      *
      * @example
      * ```js
-     * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
-     * posthog.logger.error('payment failed', { error_code: 'E001' })
+     * insights.logger.info('checkout completed', { order_id: 'ord_789' })
+     * insights.logger.error('payment failed', { error_code: 'E001' })
      * ```
      */
     get logger() {
-        return this.logs?.logger ?? PostHog._noopLogger
+        return this.logs?.logger ?? Insights._noopLogger
     }
 
     /**
@@ -3525,7 +3490,7 @@ export class Insights implements InsightsInterface {
      * This also enables person processing for the current user.
      *
      * This is useful for using in a cohort your internal/test filters for your insights org.
-     * @see https://insights.com/tutorials/filter-internal-users
+     * @see https://insights.hanzo.ai/tutorials/filter-internal-users
      * Create a cohort with `$internal_or_test_user` IS SET, and set your internal test filters to be NOT IN that cohort.
      *
      * {@label Identification}
@@ -4037,7 +4002,7 @@ export class Insights implements InsightsInterface {
 
     private _checkLocalStorageForDebug(debugConfig: boolean | undefined) {
         const explicitlyFalse = isBoolean(debugConfig) && !debugConfig
-        const isTrueInLocalStorage = localStore._is_supported() && localStore._get('ph_debug') === 'true'
+        const isTrueInLocalStorage = localStore._is_supported() && localStore._get('hi_debug') === 'true'
         return explicitlyFalse ? false : isTrueInLocalStorage ? true : debugConfig
     }
 }
@@ -4091,28 +4056,28 @@ export function init_from_snippet(): void {
         /**
          * The snippet uses some clever tricks to allow deferred loading of array.js (this code)
          *
-         * window.hi is an array which the queue of calls made before the lib is loaded
+         * window.insights is an array which the queue of calls made before the lib is loaded
          * It has methods attached to it to simulate the insights object so for instance
          *
          * window.insights.init("TOKEN", {api_host: "foo" })
          * window.insights.capture("my-event", {foo: "bar" })
          *
-         * ... will mean that window.hi will look like this:
-         * window.hi == [
+         * ... will mean that window.insights will look like this:
+         * window.insights == [
          *  ["my-event", {foo: "bar"}]
          * ]
          *
-         * window.hi[_i] == [
+         * window.insights[_i] == [
          *   ["TOKEN", {api_host: "foo" }, "insights"]
          * ]
          *
          * If a name is given to the init function then the same as above is true but as a sub-property on the object:
          *
          * window.insights.init("TOKEN", {}, "ph2")
-         * window.hi.ph2.people.set({foo: "bar"})
+         * window.insights.ph2.people.set({foo: "bar"})
          *
-         * window.hi.ph2 == []
-         * window.hi.people == [
+         * window.insights.ph2 == []
+         * window.insights.people == [
          *  ["set", {foo: "bar"}]
          * ]
          *

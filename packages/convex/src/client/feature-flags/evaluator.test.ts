@@ -1,8 +1,8 @@
 import { describe, test, expect } from '@jest/globals'
 import { LocalFeatureFlagEvaluator } from './evaluator.js'
-import type { FlagDefinitions, PostHogFeatureFlag } from './types.js'
+import type { FlagDefinitions, InsightsFeatureFlag } from './types.js'
 
-function definitions(flags: PostHogFeatureFlag[], extra: Partial<FlagDefinitions> = {}): FlagDefinitions {
+function definitions(flags: InsightsFeatureFlag[], extra: Partial<FlagDefinitions> = {}): FlagDefinitions {
   return {
     flags,
     groupTypeMapping: extra.groupTypeMapping ?? {},
@@ -10,7 +10,7 @@ function definitions(flags: PostHogFeatureFlag[], extra: Partial<FlagDefinitions
   }
 }
 
-function makeFlag(key: string, overrides: Partial<PostHogFeatureFlag> = {}): PostHogFeatureFlag {
+function makeFlag(key: string, overrides: Partial<InsightsFeatureFlag> = {}): InsightsFeatureFlag {
   return {
     id: 1,
     name: key,
