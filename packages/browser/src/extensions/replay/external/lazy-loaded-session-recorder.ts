@@ -80,7 +80,7 @@ import {
     RecordingStrategyContext,
 } from './recording-strategies'
 
-const BASE_ENDPOINT = '/s/'
+const BASE_ENDPOINT = '/v1/s'
 const DEFAULT_CANVAS_QUALITY = 0.4
 const DEFAULT_CANVAS_FPS = 4
 const MAX_CANVAS_FPS = 12
