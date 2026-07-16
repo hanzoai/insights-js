@@ -1,9 +1,9 @@
 'use client'
 
-import { usePostHog, useFeatureFlag, useActiveFeatureFlags } from '@hanzo/insights-next'
+import { useInsights, useFeatureFlag, useActiveFeatureFlags } from '@hanzo/insights-next'
 
 export default function ClientHooksContent() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const exampleFlag = useFeatureFlag('example-flag')
     const activeFlags = useActiveFeatureFlags()
 
@@ -13,19 +13,19 @@ export default function ClientHooksContent() {
             <p className="text-gray-600 mb-6">
                 These hooks from <code className="bg-gray-100 px-1 rounded">@hanzo/insights-next</code> provide real-time
                 feature flag values on the client. Create a flag called{' '}
-                <code className="bg-gray-100 px-1 rounded">example-flag</code> in your PostHog project to see values
+                <code className="bg-gray-100 px-1 rounded">example-flag</code> in your Insights project to see values
                 below.
             </p>
 
             <div className="space-y-4">
-                <HookCard title="usePostHog()" description="Returns the PostHog client instance.">
+                <HookCard title="useInsights()" description="Returns the Insights client instance.">
                     <p className="text-sm">
                         Distinct ID:{' '}
-                        <code className="bg-gray-100 px-1 rounded">{posthog?.get_distinct_id() ?? 'loading...'}</code>
+                        <code className="bg-gray-100 px-1 rounded">{insights?.get_distinct_id() ?? 'loading...'}</code>
                     </p>
                     <p className="text-sm">
                         Session ID:{' '}
-                        <code className="bg-gray-100 px-1 rounded">{posthog?.get_session_id() ?? 'loading...'}</code>
+                        <code className="bg-gray-100 px-1 rounded">{insights?.get_session_id() ?? 'loading...'}</code>
                     </p>
                 </HookCard>
 

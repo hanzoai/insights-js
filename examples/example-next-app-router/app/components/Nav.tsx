@@ -16,12 +16,12 @@ export function Nav() {
     const [user, setUser] = useState<string | null>(null)
 
     useEffect(() => {
-        const update = () => setUser(localStorage.getItem('posthog-example-user'))
+        const update = () => setUser(localStorage.getItem('insights-example-user'))
         update()
-        /* eslint-disable posthog-js/no-add-event-listener */
+        /* eslint-disable insights-js/no-add-event-listener */
         window.addEventListener('auth-change', update)
         window.addEventListener('storage', update)
-        /* eslint-enable posthog-js/no-add-event-listener */
+        /* eslint-enable insights-js/no-add-event-listener */
         return () => {
             window.removeEventListener('auth-change', update)
             window.removeEventListener('storage', update)

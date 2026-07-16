@@ -7,12 +7,12 @@ import { BasicTracerProvider, SimpleSpanProcessor } from '@opentelemetry/sdk-tra
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { Agent } from '@convex-dev/agent'
 import { openai } from '@ai-sdk/openai'
-import { PostHogTraceExporter } from '@hanzo/insights-ai/otel'
+import { InsightsTraceExporter } from '@hanzo/insights-ai/otel'
 import { components } from '../_generated/api'
 import { action } from '../_generated/server'
 import { v } from 'convex/values'
 
-// PostHogTraceExporter is a standard OTEL SpanExporter — add it as a span
+// InsightsTraceExporter is a standard OTEL SpanExporter — add it as a span
 // processor alongside any other exporters in your OTEL setup.
 const provider = new BasicTracerProvider({
     resource: resourceFromAttributes({
@@ -20,9 +20,9 @@ const provider = new BasicTracerProvider({
     }),
     spanProcessors: [
         new SimpleSpanProcessor(
-            new PostHogTraceExporter({
-                projectToken: process.env.POSTHOG_PROJECT_TOKEN!,
-                host: process.env.POSTHOG_HOST,
+            new InsightsTraceExporter({
+                projectToken: process.env.INSIGHTS_PROJECT_TOKEN!,
+                host: process.env.INSIGHTS_HOST,
             })
         ),
     ],
@@ -30,7 +30,7 @@ const provider = new BasicTracerProvider({
 trace.setGlobalTracerProvider(provider)
 
 // Demonstrates using @convex-dev/agent with the Vercel AI SDK's
-// experimental_telemetry and PostHog's PostHogTraceExporter to
+// experimental_telemetry and Insights's InsightsTraceExporter to
 // automatically capture $ai_generation events.
 export const generate = action({
     args: {
@@ -54,7 +54,7 @@ export const generate = action({
                 isEnabled: true,
                 functionId: 'convex-agent-otel',
                 metadata: {
-                    posthog_distinct_id: distinctId,
+                    insights_distinct_id: distinctId,
                 },
             },
         })

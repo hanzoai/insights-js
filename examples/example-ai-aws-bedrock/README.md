@@ -1,6 +1,6 @@
-# AWS Bedrock + PostHog AI Examples
+# AWS Bedrock + Insights AI Examples
 
-Track AWS Bedrock LLM calls with PostHog via OpenTelemetry instrumentation.
+Track AWS Bedrock LLM calls with Insights via OpenTelemetry instrumentation.
 
 ## Setup
 
@@ -13,7 +13,7 @@ cp .env.example .env
 
 ## Examples
 
-- **chat.ts** - Bedrock Converse API with OpenTelemetry tracing to PostHog
+- **chat.ts** - Bedrock Converse API with OpenTelemetry tracing to Insights
 
 ## Run
 

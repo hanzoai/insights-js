@@ -11,7 +11,7 @@ import { IconSymbol } from '@/components/ui/IconSymbol'
 const LISTED_URL = 'https://httpbin.org/headers'
 
 // postman-echo.com/headers also echoes headers but is NOT in the `addTracingHeaders`
-// list in app/posthog.tsx, so the PostHog headers should NOT appear on this response.
+// list in app/insights.tsx, so the Insights headers should NOT appear on this response.
 const UNLISTED_URL = 'https://postman-echo.com/headers'
 
 type Result = {
@@ -48,23 +48,23 @@ export default function TracingHeadersScreen() {
                 <ThemedText type="title">Tracing Headers</ThemedText>
             </ThemedView>
             <ThemedText>
-                When `addTracingHeaders` is set on PostHog init, the SDK patches the global `fetch` to inject
-                `X-POSTHOG-DISTINCT-ID` and `X-POSTHOG-SESSION-ID` on requests to the configured hostnames. This is
-                used to link LLM traces and backend spans to the current PostHog session replay.
+                When `addTracingHeaders` is set on Insights init, the SDK patches the global `fetch` to inject
+                `X-INSIGHTS-DISTINCT-ID` and `X-INSIGHTS-SESSION-ID` on requests to the configured hostnames. This is
+                used to link LLM traces and backend spans to the current Insights session replay.
             </ThemedText>
 
             <ThemedView style={styles.sectionContainer}>
                 <ThemedText type="subtitle">Listed hostname (httpbin.org)</ThemedText>
                 <ThemedText>
-                    Echoes the request headers back. You should see `X-Posthog-Distinct-Id` and
-                    `X-Posthog-Session-Id` in the response.
+                    Echoes the request headers back. You should see `X-Insights-Distinct-Id` and
+                    `X-Insights-Session-Id` in the response.
                 </ThemedText>
                 <Button onPress={() => void runRequest(LISTED_URL)} title="Fetch listed hostname" />
             </ThemedView>
 
             <ThemedView style={styles.sectionContainer}>
                 <ThemedText type="subtitle">Unlisted hostname</ThemedText>
-                <ThemedText>Same endpoint on a different host. The PostHog headers should NOT be added.</ThemedText>
+                <ThemedText>Same endpoint on a different host. The Insights headers should NOT be added.</ThemedText>
                 <Button onPress={() => void runRequest(UNLISTED_URL)} title="Fetch unlisted hostname" />
             </ThemedView>
 
@@ -83,7 +83,7 @@ export default function TracingHeadersScreen() {
                             <Text style={styles.resultStatus}>Status: {result.status}</Text>
                             <Text style={styles.resultSubtitle}>Echoed headers:</Text>
                             {Object.entries(result.echoedHeaders ?? {}).map(([key, value]) => {
-                                const isTracing = key.toLowerCase().startsWith('x-posthog-')
+                                const isTracing = key.toLowerCase().startsWith('x-insights-')
                                 return (
                                     <Text
                                         key={key}

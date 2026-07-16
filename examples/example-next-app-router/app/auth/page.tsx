@@ -2,14 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePostHog } from '@hanzo/insights-next'
+import { useInsights } from '@hanzo/insights-next'
 
 export default function AuthPage() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [email, setEmail] = useState('user@example.com')
     const [loggedInAs, setLoggedInAs] = useState<string | null>(() => {
         if (typeof window !== 'undefined') {
-            return localStorage.getItem('posthog-example-user')
+            return localStorage.getItem('insights-example-user')
         }
         return null
     })
@@ -18,16 +18,16 @@ export default function AuthPage() {
         e.preventDefault()
         if (!email) return
 
-        posthog.identify(email, { email })
-        localStorage.setItem('posthog-example-user', email)
+        insights.identify(email, { email })
+        localStorage.setItem('insights-example-user', email)
         setLoggedInAs(email)
         setEmail('')
         window.dispatchEvent(new Event('auth-change'))
     }
 
     function handleLogout() {
-        posthog.reset()
-        localStorage.removeItem('posthog-example-user')
+        insights.reset()
+        localStorage.removeItem('insights-example-user')
         setLoggedInAs(null)
         window.dispatchEvent(new Event('auth-change'))
     }
@@ -36,8 +36,8 @@ export default function AuthPage() {
         <div>
             <h1 className="text-2xl font-bold mb-2">Authentication</h1>
             <p className="text-gray-600 mb-6">
-                This demo uses <code className="bg-gray-100 px-1 rounded">posthog.identify()</code> and{' '}
-                <code className="bg-gray-100 px-1 rounded">posthog.reset()</code> to manage user identity. After logging
+                This demo uses <code className="bg-gray-100 px-1 rounded">insights.identify()</code> and{' '}
+                <code className="bg-gray-100 px-1 rounded">insights.reset()</code> to manage user identity. After logging
                 in, visit the{' '}
                 <Link href="/server-flags" className="text-blue-600 underline">
                     Server Flags
@@ -51,7 +51,7 @@ export default function AuthPage() {
                         Logged in as <strong>{loggedInAs}</strong>
                     </p>
                     <p className="text-sm text-gray-500 mb-4">
-                        Distinct ID: <code className="bg-gray-100 px-1 rounded">{posthog.get_distinct_id()}</code>
+                        Distinct ID: <code className="bg-gray-100 px-1 rounded">{insights.get_distinct_id()}</code>
                     </p>
                     <button
                         onClick={handleLogout}

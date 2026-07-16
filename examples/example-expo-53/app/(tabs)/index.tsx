@@ -46,7 +46,7 @@ export default function HomeScreen() {
 
     const handleCheckStatus = async () => {
         try {
-            const isActive = await posthog.isSessionReplayActive()
+            const isActive = await insights.isSessionReplayActive()
             setReplayStatus(`Active: ${isActive}`)
         } catch (e) {
             setReplayStatus(`Error: ${e}`)

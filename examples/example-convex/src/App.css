@@ -10,7 +10,7 @@
 :root {
     color-scheme: dark light;
 
-    /* Warm-dark palette — leans into PostHog's hedgehog warmth without going amber. */
+    /* Warm-dark palette — leans into Insights's hedgehog warmth without going amber. */
     --bg-0: #0a0a0b;
     --bg-1: #131214;
     --bg-2: #1b1a1d;
@@ -29,7 +29,7 @@
     --text-2: #8d8a92;
     --text-3: #5b585e;
 
-    --accent: #f54e00; /* PostHog hedgehog orange */
+    --accent: #f54e00; /* Insights hedgehog orange */
     --accent-soft: rgba(245, 78, 0, 0.16);
     --accent-faint: rgba(245, 78, 0, 0.08);
     --accent-bright: #ff6a1f;

@@ -4,50 +4,50 @@
 
 ### Patch Changes
 
-- [#3678](https://github.com/PostHog/posthog-js/pull/3678) [`add2fae`](https://github.com/PostHog/posthog-js/commit/add2fae385046aa95452db12acb0f7deb91e84b3) Thanks [@ksvat](https://github.com/ksvat)! - fix(replay): keep `ph-no-capture` placeholders in normal flow during replay. Blocked elements were rebuilt with `position: absolute` + recorded `left/top` regardless of how they were originally positioned, pulling in-flow elements (flex/grid children, inline spans) out of flow and collapsing sibling layout. Snapshot now captures the element's computed `position`, `transform`, and `display`; rebuild only forces absolute positioning when the original was non-static or contributed a transform, and promotes inline placeholders to `inline-block` so the redacted slot is preserved. Old recordings without the new attributes keep the legacy absolute behavior.
+- [#3678](https://github.com/Insights/insights-js/pull/3678) [`add2fae`](https://github.com/Insights/insights-js/commit/add2fae385046aa95452db12acb0f7deb91e84b3) Thanks [@ksvat](https://github.com/ksvat)! - fix(replay): keep `ph-no-capture` placeholders in normal flow during replay. Blocked elements were rebuilt with `position: absolute` + recorded `left/top` regardless of how they were originally positioned, pulling in-flow elements (flex/grid children, inline spans) out of flow and collapsing sibling layout. Snapshot now captures the element's computed `position`, `transform`, and `display`; rebuild only forces absolute positioning when the original was non-static or contributed a transform, and promotes inline placeholders to `inline-block` so the redacted slot is preserved. Old recordings without the new attributes keep the legacy absolute behavior.
   (2026-05-27)
-- Updated dependencies [[`add2fae`](https://github.com/PostHog/posthog-js/commit/add2fae385046aa95452db12acb0f7deb91e84b3)]:
-    - @posthog/rrweb-snapshot@0.0.65
-    - @posthog/rrdom@0.0.65
+- Updated dependencies [[`add2fae`](https://github.com/Insights/insights-js/commit/add2fae385046aa95452db12acb0f7deb91e84b3)]:
+    - @insights/rrweb-snapshot@0.0.65
+    - @insights/rrdom@0.0.65
 
 ## 0.0.66
 
 ### Patch Changes
 
-- [#3667](https://github.com/PostHog/posthog-js/pull/3667) [`cafa9cc`](https://github.com/PostHog/posthog-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c) Thanks [@pauldambra](https://github.com/pauldambra)! - fix(replay): stop polling preload-as-style `<link>` elements forever. Session recorder treated `<link rel="preload" as="style" href="*.css">` as if it were a stylesheet and waited for `link.sheet` to populate. Per spec preload links never instantiate a `CSSStyleSheet`, so the wait timed out, re-serialized the link, scheduled another wait, and leaked a `load` listener on every cycle — multiplying further on every real `load` event. Pages with Next.js-style CSS preloads accumulated thousands of active polling chains, saturating the main thread and freezing the tab on refocus
+- [#3667](https://github.com/Insights/insights-js/pull/3667) [`cafa9cc`](https://github.com/Insights/insights-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c) Thanks [@pauldambra](https://github.com/pauldambra)! - fix(replay): stop polling preload-as-style `<link>` elements forever. Session recorder treated `<link rel="preload" as="style" href="*.css">` as if it were a stylesheet and waited for `link.sheet` to populate. Per spec preload links never instantiate a `CSSStyleSheet`, so the wait timed out, re-serialized the link, scheduled another wait, and leaked a `load` listener on every cycle — multiplying further on every real `load` event. Pages with Next.js-style CSS preloads accumulated thousands of active polling chains, saturating the main thread and freezing the tab on refocus
   (2026-05-26)
-- Updated dependencies [[`cafa9cc`](https://github.com/PostHog/posthog-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c)]:
-    - @posthog/rrweb-snapshot@0.0.64
-    - @posthog/rrdom@0.0.64
+- Updated dependencies [[`cafa9cc`](https://github.com/Insights/insights-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c)]:
+    - @insights/rrweb-snapshot@0.0.64
+    - @insights/rrdom@0.0.64
 
 ## 0.0.65
 
 ### Patch Changes
 
-- Updated dependencies [[`5fb74b6`](https://github.com/PostHog/posthog-js/commit/5fb74b60bb31394d6511845cc902daf8810dbf3f)]:
-    - @posthog/rrweb-snapshot@0.0.63
-    - @posthog/rrdom@0.0.63
+- Updated dependencies [[`5fb74b6`](https://github.com/Insights/insights-js/commit/5fb74b60bb31394d6511845cc902daf8810dbf3f)]:
+    - @insights/rrweb-snapshot@0.0.63
+    - @insights/rrdom@0.0.63
 
 ## 0.0.64
 
 ### Patch Changes
 
-- [#3558](https://github.com/PostHog/posthog-js/pull/3558) [`3d93020`](https://github.com/PostHog/posthog-js/commit/3d93020ead535e16c04d92e29c71a0805c5d760f) Thanks [@marandaneto](https://github.com/marandaneto)! - Fix iframe mutation buffer cleanup when iframe pagehide events overlap.
+- [#3558](https://github.com/Insights/insights-js/pull/3558) [`3d93020`](https://github.com/Insights/insights-js/commit/3d93020ead535e16c04d92e29c71a0805c5d760f) Thanks [@marandaneto](https://github.com/marandaneto)! - Fix iframe mutation buffer cleanup when iframe pagehide events overlap.
   (2026-05-11)
 
 ## 0.0.63
 
 ### Patch Changes
 
-- Updated dependencies [[`94a5ba0`](https://github.com/PostHog/posthog-js/commit/94a5ba0cf6d3a0f943517a126a59f52baa77f2fe)]:
-    - @posthog/rrweb-snapshot@0.0.62
-    - @posthog/rrdom@0.0.62
+- Updated dependencies [[`94a5ba0`](https://github.com/Insights/insights-js/commit/94a5ba0cf6d3a0f943517a126a59f52baa77f2fe)]:
+    - @insights/rrweb-snapshot@0.0.62
+    - @insights/rrdom@0.0.62
 
 ## 0.0.62
 
 ### Patch Changes
 
-- [#3527](https://github.com/PostHog/posthog-js/pull/3527) [`33aa019`](https://github.com/PostHog/posthog-js/commit/33aa019c04a77b7657ec008307b37a7fb9c52629) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Skip canvas snapshot while WebGL context is lost. On mobile under GPU
+- [#3527](https://github.com/Insights/insights-js/pull/3527) [`33aa019`](https://github.com/Insights/insights-js/commit/33aa019c04a77b7657ec008307b37a7fb9c52629) Thanks [@TueHaulund](https://github.com/TueHaulund)! - Skip canvas snapshot while WebGL context is lost. On mobile under GPU
   pressure or tab backgrounding, `createImageBitmap` returns a transparent
   bitmap rather than throwing for a context-lost WebGL canvas. The worker's
   first-frame transparency check then suppresses emission and stores the
@@ -63,17 +63,17 @@
 
 ### Patch Changes
 
-- [#3510](https://github.com/PostHog/posthog-js/pull/3510) [`a5d86c9`](https://github.com/PostHog/posthog-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474) Thanks [@arnaudhillen](https://github.com/arnaudhillen)! - Move posthog-rrweb sources into the posthog-js monorepo under `packages/rrweb/`.
-  The seven packages we publish (`@posthog/rrweb`, `@posthog/rrweb-types`,
-  `@posthog/rrweb-utils`, `@posthog/rrdom`, `@posthog/rrweb-snapshot`,
-  `@posthog/rrweb-record`, `@posthog/rrweb-plugin-console-record`) now release
+- [#3510](https://github.com/Insights/insights-js/pull/3510) [`a5d86c9`](https://github.com/Insights/insights-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474) Thanks [@arnaudhillen](https://github.com/arnaudhillen)! - Move insights-rrweb sources into the insights-js monorepo under `packages/rrweb/`.
+  The seven packages we publish (`@insights/rrweb`, `@insights/rrweb-types`,
+  `@insights/rrweb-utils`, `@insights/rrdom`, `@insights/rrweb-snapshot`,
+  `@insights/rrweb-record`, `@insights/rrweb-plugin-console-record`) now release
   from this repo via the existing changesets pipeline. No runtime behavior
   changes. (2026-05-05)
-- Updated dependencies [[`a5d86c9`](https://github.com/PostHog/posthog-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474)]:
-    - @posthog/rrweb-types@0.0.61
-    - @posthog/rrweb-utils@0.0.61
-    - @posthog/rrdom@0.0.61
-    - @posthog/rrweb-snapshot@0.0.61
+- Updated dependencies [[`a5d86c9`](https://github.com/Insights/insights-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474)]:
+    - @insights/rrweb-types@0.0.61
+    - @insights/rrweb-utils@0.0.61
+    - @insights/rrdom@0.0.61
+    - @insights/rrweb-snapshot@0.0.61
 
 ## 2.0.0-alpha.18
 
@@ -136,13 +136,13 @@
 
 - [#1497](https://github.com/rrweb-io/rrweb/pull/1497) [`2606a2a`](https://github.com/rrweb-io/rrweb/commit/2606a2a28f2a6d897b8ae4ea3ec40ef0eeacbfaf) Thanks [@Juice10](https://github.com/Juice10)! - Split plugins out of rrweb and move them into their own packages: @rrweb/packer, @rrweb/rrweb-plugin-canvas-webrtc-record, @rrweb/rrweb-plugin-canvas-webrtc-replay, @rrweb/rrweb-plugin-sequential-id-record, @rrweb/rrweb-plugin-sequential-id-replay, @rrweb/rrweb-plugin-console-record, @rrweb/rrweb-plugin-console-replay. Check out the README of each package for more information or check out https://github.com/rrweb-io/rrweb/pull/1033 to see the changes.
 
-- [#1497](https://github.com/rrweb-io/rrweb/pull/1497) [`2606a2a`](https://github.com/rrweb-io/rrweb/commit/2606a2a28f2a6d897b8ae4ea3ec40ef0eeacbfaf) Thanks [@Juice10](https://github.com/Juice10)! - Distributed files have new filenames, paths and extensions. **Important: If you reference distributed files or types directly, you might have to update your paths/filenames. E.g. you import from `rrweb/typings/...` or `rrdom/es`. However you run `import rrweb from '@posthog/rrweb'` you won't notice a difference with this change.** If you include rrweb files directly in a script tag, you might have to update that path to include a the `.umd.cjs` files instead. All `.js` files now use ES modules which can be used in modern browsers, node.js and bundlers that support ES modules. All npm packages now also ship `.cjs` and `.umd.cjs` files. The `.umd.cjs` files are CommonJS modules that bundle all files together to make it easy to ship one file to browser environments (similar to the previous `.js` files). The `.cjs` files are CommonJS modules that can be used in older Node.js environments. Types should be better defined in `package.json` and if you need specific types they might be exported from new packages (for example `PlayerMachineState` and `SpeedMachineState` are now exported from `@rrweb/replay`). Check the `package.json`'s `main` and `exports` field for the available files.
+- [#1497](https://github.com/rrweb-io/rrweb/pull/1497) [`2606a2a`](https://github.com/rrweb-io/rrweb/commit/2606a2a28f2a6d897b8ae4ea3ec40ef0eeacbfaf) Thanks [@Juice10](https://github.com/Juice10)! - Distributed files have new filenames, paths and extensions. **Important: If you reference distributed files or types directly, you might have to update your paths/filenames. E.g. you import from `rrweb/typings/...` or `rrdom/es`. However you run `import rrweb from '@insights/rrweb'` you won't notice a difference with this change.** If you include rrweb files directly in a script tag, you might have to update that path to include a the `.umd.cjs` files instead. All `.js` files now use ES modules which can be used in modern browsers, node.js and bundlers that support ES modules. All npm packages now also ship `.cjs` and `.umd.cjs` files. The `.umd.cjs` files are CommonJS modules that bundle all files together to make it easy to ship one file to browser environments (similar to the previous `.js` files). The `.cjs` files are CommonJS modules that can be used in older Node.js environments. Types should be better defined in `package.json` and if you need specific types they might be exported from new packages (for example `PlayerMachineState` and `SpeedMachineState` are now exported from `@rrweb/replay`). Check the `package.json`'s `main` and `exports` field for the available files.
 
 - [#1497](https://github.com/rrweb-io/rrweb/pull/1497) [`2606a2a`](https://github.com/rrweb-io/rrweb/commit/2606a2a28f2a6d897b8ae4ea3ec40ef0eeacbfaf) Thanks [@Juice10](https://github.com/Juice10)! - Remove the rrweb-all.js, rrweb-record.js, and rrweb-replay.js files from `rrweb` package. Now you can use `@rrweb/all`, `@rrweb/record`, and `@rrweb/replay` packages instead. Check out the README of each package for more information or check out [PR #1033](https://github.com/rrweb-io/rrweb/pull/1033) to see the changes.
 
 ### Patch Changes
 
-- [#1033](https://github.com/rrweb-io/rrweb/pull/1033) [`7261c43`](https://github.com/rrweb-io/rrweb/commit/7261c43f60973e88325edf832e4d0e057fbff0ae) Thanks [@Juice10](https://github.com/Juice10)! - Export `ReplayPlugin` from rrweb directly. Previously we had to do `import type { ReplayPlugin } from 'rrweb/dist/types';` now we can do `import type { ReplayPlugin } from '@posthog/rrweb';`
+- [#1033](https://github.com/rrweb-io/rrweb/pull/1033) [`7261c43`](https://github.com/rrweb-io/rrweb/commit/7261c43f60973e88325edf832e4d0e057fbff0ae) Thanks [@Juice10](https://github.com/Juice10)! - Export `ReplayPlugin` from rrweb directly. Previously we had to do `import type { ReplayPlugin } from 'rrweb/dist/types';` now we can do `import type { ReplayPlugin } from '@insights/rrweb';`
 
 - [#1468](https://github.com/rrweb-io/rrweb/pull/1468) [`4014305`](https://github.com/rrweb-io/rrweb/commit/40143059446cee5c042c007b1c2e976f36e172f5) Thanks [@eoghanmurray](https://github.com/eoghanmurray)! - inlineImages: during snapshot avoid adding an event listener for inlining of same-origin images (async listener mutates the snapshot which can be problematic)
 

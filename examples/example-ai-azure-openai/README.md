@@ -1,6 +1,6 @@
-# Azure OpenAI + PostHog AI Examples
+# Azure OpenAI + Insights AI Examples
 
-Track Azure OpenAI API calls with PostHog.
+Track Azure OpenAI API calls with Insights.
 
 ## Setup
 

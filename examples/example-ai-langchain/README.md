@@ -1,6 +1,6 @@
-# LangChain + PostHog AI Examples
+# LangChain + Insights AI Examples
 
-Track LangChain LLM calls with PostHog using the callback handler.
+Track LangChain LLM calls with Insights using the callback handler.
 
 ## Setup
 
@@ -12,7 +12,7 @@ cp .env.example .env
 
 ## Examples
 
-- **callback-handler.ts** - LangChain with PostHog callback handler
+- **callback-handler.ts** - LangChain with Insights callback handler
 
 ## Run
 

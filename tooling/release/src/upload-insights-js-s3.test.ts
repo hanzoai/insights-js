@@ -9,7 +9,7 @@ import {
     collectReleaseAssets,
     inferContentType,
     type ReleaseAsset,
-} from './upload-posthog-js-s3.ts'
+} from './upload-insights-js-s3.ts'
 
 test('buildAssetUploadPlans publishes immutable semver assets, major-version alias assets, and top-level compatibility assets', () => {
     const assets: ReleaseAsset[] = [
@@ -124,7 +124,7 @@ test('inferContentType restores aws-cli style MIME inference for release assets'
 })
 
 test('collectReleaseAssets includes browser source maps from the dist root', async () => {
-    const distDir = await fs.mkdtemp(path.join(os.tmpdir(), 'posthog-js-dist-'))
+    const distDir = await fs.mkdtemp(path.join(os.tmpdir(), 'insights-js-dist-'))
 
     try {
         await fs.writeFile(path.join(distDir, 'array.js'), '')

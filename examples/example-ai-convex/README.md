@@ -1,6 +1,6 @@
-# Convex + PostHog AI Examples
+# Convex + Insights AI Examples
 
-Track Convex AI actions with PostHog via OpenTelemetry.
+Track Convex AI actions with Insights via OpenTelemetry.
 
 ## Setup
 
@@ -12,7 +12,7 @@ cp .env.example .env
 
 ## Examples
 
-- **generate.ts** - Convex-style OTEL integration with Vercel AI SDK and PostHog
+- **generate.ts** - Convex-style OTEL integration with Vercel AI SDK and Insights
 
 ## Run
 

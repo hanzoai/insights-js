@@ -1,6 +1,6 @@
-# OpenRouter + PostHog AI Examples
+# OpenRouter + Insights AI Examples
 
-Track OpenRouter API calls with PostHog via the OpenAI-compatible API.
+Track OpenRouter API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 
