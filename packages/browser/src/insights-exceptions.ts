@@ -1,9 +1,10 @@
 import { ERROR_TRACKING_CAPTURE_EXTENSION_EXCEPTIONS, ERROR_TRACKING_SUPPRESSION_RULES } from './constants'
+import { Extension } from './extensions/types'
 import { Insights } from './insights-core'
 import { CaptureResult, ErrorTrackingSuppressionRule, Properties, RemoteConfig } from './types'
 import { createLogger } from './utils/logger'
 import { propertyComparisons } from './utils/property-utils'
-import { isString, isArray, ErrorTracking, isNullish } from '@hanzo/insights-core'
+import { isString, isArray, isObject, ErrorTracking, isNullish } from '@hanzo/insights-core'
 
 const logger = createLogger('[Error tracking]')
 
@@ -22,7 +23,7 @@ export function buildErrorPropertiesBuilder() {
         ErrorTracking.createDefaultStackParser()
     )
 }
-export class InsightsExceptions {
+export class InsightsExceptions implements Extension {
     private readonly _instance: Insights
     private _suppressionRules: ErrorTrackingSuppressionRule[] = []
     private _errorPropertiesBuilder: ErrorTracking.ErrorPropertiesBuilder = buildErrorPropertiesBuilder()
@@ -78,27 +79,9 @@ export class InsightsExceptions {
         })
     }
 
-    sendExceptionEvent(properties: Properties): CaptureResult | undefined {
-        const exceptionList = properties.$exception_list
-
-        if (this._isExceptionList(exceptionList)) {
-            if (this._matchesSuppressionRule(exceptionList)) {
-                logger.info('Skipping exception capture because a suppression rule matched')
-                return
-            }
-
-            if (!this._captureExtensionExceptions && this._isExtensionException(exceptionList)) {
-                logger.info('Skipping exception capture because it was thrown by an extension')
-                return
-            }
-
-            if (
-                !this._instance.config.error_tracking.__captureInsightsExceptions &&
-                this._isInsightsException(exceptionList)
-            ) {
-                logger.info('Skipping exception capture because it was thrown by the Insights SDK')
-                return
-            }
+    addExceptionStep(message: string, properties?: Properties): void {
+        if (!this._exceptionStepsConfig.enabled) {
+            return
         }
 
         try {
@@ -143,11 +126,11 @@ export class InsightsExceptions {
                 }
 
                 if (
-                    !this._instance.config.error_tracking.__capturePostHogExceptions &&
-                    this._isPostHogException(exceptionList)
+                    !this._instance.config.error_tracking.__captureInsightsExceptions &&
+                    this._isInsightsException(exceptionList)
                 ) {
-                    this._addDroppedExceptionStep('Exception dropped: thrown by the PostHog SDK')
-                    logger.info('Skipping exception capture because it was thrown by the PostHog SDK')
+                    this._addDroppedExceptionStep('Exception dropped: thrown by the Insights SDK')
+                    logger.info('Skipping exception capture because it was thrown by the Insights SDK')
                     return
                 }
             }
@@ -261,7 +244,7 @@ export class InsightsExceptions {
             const exception = exceptionList[0]
             const frames = exception.stacktrace?.frames ?? []
             const lastFrame = frames[frames.length - 1]
-            return lastFrame?.filename?.includes('insights.com/static') ?? false
+            return lastFrame?.filename?.includes('insights.hanzo.ai/static') ?? false
         }
 
         return false

@@ -17,21 +17,23 @@ export {
   toOtlpAnyValue,
   toOtlpKeyValueList,
 } from './logs/logs-utils'
-export { PostHogLogs } from './logs'
+export { InsightsLogs } from './logs'
 export type {
   BeforeSendLogFn,
   BufferedLogEntry,
   CaptureLogger,
   LogSdkContext,
-  PostHogLogsConfig,
-  ResolvedPostHogLogsConfig,
+  InsightsLogsConfig,
+  ResolvedInsightsLogsConfig,
 } from './logs/types'
 // Re-export the user-facing OTLP log types straight from `@hanzo/insights-types`
 // via the `logs/types` barrel so consumers don't have to import from two
 // packages to type their `captureLog` calls.
 export type { CaptureLogOptions, LogAttributeValue, LogAttributes, LogSeverityLevel } from './logs/types'
 export { uuidv7 } from './vendor/uuidv7'
+export * from './cookie'
 export * from './insights-core'
 export * from './insights-core-stateless'
+export * from './tracing-headers'
 export * from './types'
 export { getValidationError, getLengthFromRules, getRequirementsHint } from './surveys/validation'

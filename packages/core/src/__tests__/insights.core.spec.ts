@@ -144,7 +144,7 @@ describe('Insights Core', () => {
         return errorAPIResponse
       })
 
-      await posthog.getFlags('test-distinct-id', {}, personProperties)
+      await insights.getFlags('test-distinct-id', {}, personProperties)
 
       expect(mocks.fetch).toHaveBeenCalledTimes(1)
       const requestBody = JSON.parse(mocks.fetch.mock.calls[0][1].body)

@@ -204,7 +204,7 @@ describe('fetch wrapper', () => {
             const { wrappedFetch, cleanup } = setupWrappedFetch(async (input: RequestInfo | URL, requestInit) => {
                 downstreamBody = requestInit?.body
                 // Mimics the browser/native fetch path (or a downstream wrapper) consuming the init body.
-                // This throws if PostHog's body recording has already locked/disturbed the stream.
+                // This throws if Insights's body recording has already locked/disturbed the stream.
                 const downstreamRequest = new Request(input, requestInit)
                 downstreamText = await downstreamRequest.text()
                 return new Response('ok')
@@ -423,7 +423,7 @@ describe('fetch wrapper', () => {
         // This is intentionally a partial mirror — the playwright spec
         // playwright/mocked/session-recording/csrf-headers-preserved.spec.ts
         // is authoritative for the REAL composed wrapper behaviour (it
-        // boots posthog-js end-to-end with __add_tracing_headers and
+        // boots insights-js end-to-end with __add_tracing_headers and
         // session recording network capture both enabled). The jest test
         // here only proves the structural invariant that two `new
         // Request(url, init)`-style wrappers compose without dropping
@@ -444,9 +444,9 @@ describe('fetch wrapper', () => {
                     return originalFetch(req)
                 }
                 if (hostnames.includes(reqHostname)) {
-                    req.headers.set('X-POSTHOG-SESSION-ID', sessionId)
-                    req.headers.set('X-POSTHOG-WINDOW-ID', windowId)
-                    req.headers.set('X-POSTHOG-DISTINCT-ID', distinctId)
+                    req.headers.set('X-INSIGHTS-SESSION-ID', sessionId)
+                    req.headers.set('X-INSIGHTS-WINDOW-ID', windowId)
+                    req.headers.set('X-INSIGHTS-DISTINCT-ID', distinctId)
                 }
                 return originalFetch(req)
             }
@@ -476,9 +476,9 @@ describe('fetch wrapper', () => {
                 cleanup()
 
                 expect(downstream!.headers.get(name)).toBe(value)
-                expect(downstream!.headers.get('x-posthog-distinct-id')).toBe('distinct-abc')
-                expect(downstream!.headers.get('x-posthog-session-id')).toBe('session-abc')
-                expect(downstream!.headers.get('x-posthog-window-id')).toBe('window-abc')
+                expect(downstream!.headers.get('x-insights-distinct-id')).toBe('distinct-abc')
+                expect(downstream!.headers.get('x-insights-session-id')).toBe('session-abc')
+                expect(downstream!.headers.get('x-insights-window-id')).toBe('window-abc')
             })
         })
 
@@ -507,9 +507,9 @@ describe('fetch wrapper', () => {
                 cleanup()
 
                 expect(downstream!.headers.get(name)).toBe(value)
-                expect(downstream!.headers.get('x-posthog-distinct-id')).toBe('distinct-xyz')
-                expect(downstream!.headers.get('x-posthog-session-id')).toBe('session-xyz')
-                expect(downstream!.headers.get('x-posthog-window-id')).toBe('window-xyz')
+                expect(downstream!.headers.get('x-insights-distinct-id')).toBe('distinct-xyz')
+                expect(downstream!.headers.get('x-insights-session-id')).toBe('session-xyz')
+                expect(downstream!.headers.get('x-insights-window-id')).toBe('window-xyz')
             })
         })
     })

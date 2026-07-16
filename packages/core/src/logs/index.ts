@@ -8,10 +8,10 @@ import type {
   BufferedLogEntry,
   CaptureLogOptions,
   LogSdkContext,
-  ResolvedPostHogLogsConfig,
+  ResolvedInsightsLogsConfig,
 } from './types'
 
-export class PostHogLogs {
+export class InsightsLogs {
   private _maxBufferSize: number
   private _flushIntervalMs: number
   // Mutable — halved on 413 to shrink the next POST, and ramped back up by
@@ -35,7 +35,7 @@ export class PostHogLogs {
 
   constructor(
     private readonly _instance: InsightsCoreStateless,
-    private readonly _config: ResolvedPostHogLogsConfig,
+    private readonly _config: ResolvedInsightsLogsConfig,
     private readonly _logger: Logger,
     private readonly _getContext: () => LogSdkContext,
     private readonly _onReady: (fn: () => void) => void,
@@ -375,7 +375,7 @@ export class PostHogLogs {
 
   private _flushInBackground(): void {
     void this.flush().catch((err) => {
-      this._logger.error('PostHog logs flush failed:', err)
+      this._logger.error('Insights logs flush failed:', err)
     })
   }
 

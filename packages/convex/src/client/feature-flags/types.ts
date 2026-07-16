@@ -27,7 +27,7 @@ export type FeatureFlagCondition = {
 
 export type FeatureFlagBucketingIdentifier = 'distinct_id' | 'device_id' | '' | null
 
-export type PostHogFeatureFlag = {
+export type InsightsFeatureFlag = {
   id: number
   name: string
   key: string
@@ -51,7 +51,7 @@ export type PostHogFeatureFlag = {
 }
 
 export type FlagDefinitions = {
-  flags: PostHogFeatureFlag[]
+  flags: InsightsFeatureFlag[]
   groupTypeMapping: Record<string, string>
   cohorts: Record<string, PropertyGroup>
 }

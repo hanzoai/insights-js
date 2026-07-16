@@ -8,7 +8,7 @@ import { dirname } from 'node:path'
 
 const filename = fileURLToPath(import.meta.url)
 const resolvedDirname = dirname(filename)
-const DEFAULT_NUXT_HOST = 'https://us.i.posthog.com'
+const DEFAULT_NUXT_HOST = 'https://insights.hanzo.ai'
 
 function normalizeApiKey(value?: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
@@ -71,7 +71,7 @@ export default defineNuxtModule<ModuleOptions>({
     },
   },
   defaults: () => ({
-    host: 'https://us.i.insights.com',
+    host: 'https://insights.hanzo.ai',
     debug: false,
     clientConfig: {},
     serverConfig: {},

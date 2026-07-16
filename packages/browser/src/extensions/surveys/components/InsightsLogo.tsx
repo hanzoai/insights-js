@@ -14,7 +14,7 @@ export function InsightsLogo({ urlParams }: InsightsLogoProps) {
 
     return (
         <a
-            href={`https://insights.com/surveys${queryString ? `?${queryString}` : ''}`}
+            href={`https://insights.hanzo.ai/surveys${queryString ? `?${queryString}` : ''}`}
             target="_blank"
             rel="noopener"
             className="footer-branding"

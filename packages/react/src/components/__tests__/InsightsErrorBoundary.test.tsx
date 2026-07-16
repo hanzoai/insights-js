@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { render } from '@testing-library/react'
 import { __INSIGHTS_ERROR_MESSAGES, InsightsErrorBoundary } from '../InsightsErrorBoundary'
+import { setDefaultInsightsInstance } from '../../context/insights-default'
 import insights from '@hanzo/insights'
 
 describe('InsightsErrorBoundary component', () => {
@@ -61,11 +62,11 @@ describe('InsightsErrorBoundary component', () => {
 
 describe('captureException processing', () => {
     beforeEach(() => {
-        setDefaultPostHogInstance(posthog)
+        setDefaultInsightsInstance(insights)
     })
 
     afterEach(() => {
-        setDefaultPostHogInstance(undefined)
+        setDefaultInsightsInstance(undefined)
     })
 
     mockFunction(console, 'error')

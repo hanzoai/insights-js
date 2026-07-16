@@ -33,12 +33,12 @@ export interface CaptureLogOptions {
 /**
  * Per-level convenience logger. Each method captures a structured log record
  * at the corresponding severity, equivalent to
- * `posthog.captureLog({ body, level, attributes })`.
+ * `insights.captureLog({ body, level, attributes })`.
  *
  * @example
  * ```ts
- * posthog.logger.info('checkout completed', { order_id: 'ord_789' })
- * posthog.logger.error('payment failed', { code: 'E001' })
+ * insights.logger.info('checkout completed', { order_id: 'ord_789' })
+ * insights.logger.error('payment failed', { code: 'E001' })
  * ```
  */
 export interface Logger {

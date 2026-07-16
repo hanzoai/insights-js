@@ -1,18 +1,18 @@
-import { createLogger, Logger, PostHogPersistedProperty, Survey } from '@hanzo/insights-core'
+import { createLogger, Logger, InsightsPersistedProperty, Survey } from '@hanzo/insights-core'
 import { applySurveyTranslation, detectSurveyLanguage } from '@hanzo/insights-core/surveys'
-import { PostHog } from '../posthog-rn'
+import { Insights } from '../insights-rn'
 
 const logger = createLogger('[SurveyTranslations]')
 
-function getLogger(instance: PostHog): Logger | undefined {
+function getLogger(instance: Insights): Logger | undefined {
   return instance.isDebug ? logger : undefined
 }
 
-export function detectUserLanguage(instance: PostHog): string | null {
+export function detectUserLanguage(instance: Insights): string | null {
   return detectSurveyLanguage(
     {
       overrideLanguage: instance.getSurveyDisplayLanguageOverride(),
-      storedPersonProperties: instance.getPersistedProperty(PostHogPersistedProperty.PersonProperties),
+      storedPersonProperties: instance.getPersistedProperty(InsightsPersistedProperty.PersonProperties),
       locale: instance.getCommonEventProperties().$locale,
     },
     getLogger(instance)
@@ -21,7 +21,7 @@ export function detectUserLanguage(instance: PostHog): string | null {
 
 export function applySurveyTranslationForUser(
   survey: Survey,
-  instance: PostHog
+  instance: Insights
 ): { survey: Survey; language: string | null } {
   const userLanguage = detectUserLanguage(instance)
   const logger = getLogger(instance)

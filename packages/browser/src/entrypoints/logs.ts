@@ -5,11 +5,12 @@ import { resourceFromAttributes } from '@opentelemetry/resources'
 
 import { assignableWindow } from '../utils/globals'
 import { Insights } from '../insights-core'
-import { isNull, isObject } from '@hanzo/insights-core'
+import { isArray, isBoolean, isFunction, isNull, isNumber, isObject } from '@hanzo/insights-core'
 
 const setupOpenTelemetry = (insights: Insights) => {
+    const serviceName = insights.config.logs?.serviceName || 'insights-browser-logs'
     let attributes: Record<string, string> = {
-        'service.name': 'insights-browser-logs',
+        'service.name': serviceName,
         host: assignableWindow.location.host,
     }
 

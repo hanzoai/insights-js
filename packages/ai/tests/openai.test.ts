@@ -1561,7 +1561,7 @@ describe('InsightsOpenAI - Jest test suite', () => {
                 {
                   type: 'url_citation',
                   text: 'Insights docs',
-                  url: 'https://insights.com',
+                  url: 'https://insights.hanzo.ai',
                 },
               ] as any,
             },
