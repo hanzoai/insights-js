@@ -1,0 +1,51 @@
+name: No PostHog
+
+# We own the ingestion server (hanzoai/insights) AND this SDK, so there is no
+# external wire contract to preserve — the wire is ours and it is Hanzo-native.
+# This guard keeps posthog identifiers from creeping back in. See LLM.md
+# ("ZERO posthog — we own both sides of the wire").
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    no-posthog:
+        name: zero posthog refs
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Fail on any posthog reference
+              run: |
+                  echo "Scanning packages/ for posthog references..."
+                  hits=$(grep -rioE 'posthog' packages \
+                      --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' \
+                      --include='*.cjs' --include='*.jsx' --include='*.json' --include='*.jsonc' \
+                      --include='*.yml' --include='*.yaml' --include='*.html' --include='*.css' \
+                      2>/dev/null \
+                      | grep -v node_modules | grep -v '/dist/' | grep -v '/lib/' \
+                      | grep -v '/references/' || true)
+
+                  if [ -n "$hits" ]; then
+                      echo "::error::Found posthog references — this fork is Hanzo-native, use insights."
+                      echo "$hits" | head -40
+                      echo ""
+                      echo "Renames (see LLM.md): PostHog->Insights, posthog->insights, POSTHOG->INSIGHTS,"
+                      echo "__PosthogExtensions__->__InsightsExtensions__, \$last_posthog_reset->\$last_insights_reset,"
+                      echo "hosts -> https://insights.hanzo.ai"
+                      exit 1
+                  fi
+
+            - name: Fail on any posthog-named file
+              run: |
+                  files=$(find packages -iname '*posthog*' \
+                      -not -path '*/node_modules/*' -not -path '*/dist/*' -not -path '*/lib/*' \
+                      2>/dev/null || true)
+                  if [ -n "$files" ]; then
+                      echo "::error::Found posthog-named files — rename to insights."
+                      echo "$files"
+                      exit 1
+                  fi
+                  echo "OK: zero posthog refs, zero posthog-named files."
