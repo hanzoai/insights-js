@@ -1017,7 +1017,7 @@ export abstract class InsightsCoreStateless {
 
     const payload = JSON.stringify(data)
 
-    const url = `${this.host}/batch/`
+    const url = `${this.host}/v1/e`
 
     const gzippedPayload = !this.disableCompression ? await gzipCompress(payload, this.isDebug) : null
     const fetchOptions: InsightsFetchOptions = {
@@ -1189,7 +1189,7 @@ export abstract class InsightsCoreStateless {
 
       const payload = JSON.stringify(data)
 
-      const url = `${this.host}/batch/`
+      const url = `${this.host}/v1/e`
 
       const gzippedPayload = !this.disableCompression ? await gzipCompress(payload, this.isDebug) : null
       const fetchOptions: InsightsFetchOptions = {

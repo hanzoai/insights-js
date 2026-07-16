@@ -101,7 +101,7 @@ const removeAuthorizationHeader = (data: CapturedNetworkRequest): CapturedNetwor
     return data
 }
 
-const INSIGHTS_PATHS_TO_IGNORE = ['/s/', '/e/', '/i/']
+const INSIGHTS_PATHS_TO_IGNORE = ['/v1/s', '/v1/e', '/v1/ai', '/s/', '/e/', '/i/']
 // want to ignore insights paths when capturing requests, or we can get trapped in a loop
 // because calls to Insights would be reported using a call to Insights which would be reported....
 const ignoreInsightsPaths = (

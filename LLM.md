@@ -36,8 +36,23 @@ constants UNCHANGED. Never rename these — they are values, not package identif
 - the `window.posthog` global variable name (UMD `output.globals` value),
 - `ph_*` cookie / localStorage persistence keys,
 - `$`-prefixed event names (`$pageview`, `$identify`, `$autocapture`, `$set`, …),
-- `distinct_id`, the `/decide`, `/e/`, `/flags` endpoints,
+- `distinct_id`, the `/decide`, `/flags` endpoints,
 - the `__PosthogExtensions__` / `__InsightsExtensions__` runtime hook (mixed in the fork).
+
+### Ingest endpoints are Hanzo-native `/v1/*` (NOT PostHog `/e/`,`/batch/`,`/s/`)
+
+We own the capture server (`hanzoai/insights` `rust/capture`) AND this SDK, so the
+event-ingest wire contract is Hanzo `/v1`, not the PostHog paths. Both sides moved
+together — do NOT "restore" the old paths:
+
+- events → `POST /v1/e` (single OR batch; was `/e/` + `/batch/`)
+- session recordings → `POST /v1/s` (was `/s/`)
+- AI/LLM events → `POST /v1/ai` (was `/i/v0/ai`)
+
+Set in `packages/browser/src/insights-core.ts` (`analyticsDefaultEndpoint`),
+`packages/core/src/insights-core-stateless.ts` (batch URL), and the replay
+`BASE_ENDPOINT`. The capture server serves ONLY these `/v1` paths (legacy removed,
+forward-only).
 
 Package *import specifiers* `posthog-js` / `posthog-node` ARE rebranded to
 `@hanzo/insights` / `@hanzo/insights-node` (those are package names, not wire constants).
