@@ -6,9 +6,9 @@
 # print commands before executing them and stop on first error
 set -x -e
 
-# Ensure common tool paths are available so posthog-cli can auto-detect git
+# Ensure common tool paths are available so insights-cli can auto-detect git
 # (Xcode runs build phases with a minimal PATH)
-export PATH="/usr/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin:$HOME/.posthog:$PATH"
+export PATH="/usr/bin:/usr/local/bin:/opt/homebrew/bin:$HOME/.cargo/bin:$HOME/.local/bin:$HOME/.insights:$PATH"
 
 # WITH_ENVIRONMENT is executed by React Native
 
@@ -66,12 +66,12 @@ if [ -z "$PH_CLI_PATH" ] || [ ! -x "$PH_CLI_PATH" ]; then
   exit 1
 fi
 
-MIN_POSTHOG_CLI_VERSION="0.7.8"
+MIN_INSIGHTS_CLI_VERSION="0.7.8"
 PH_CLI_VERSION=$("$PH_CLI_PATH" --version 2>/dev/null | awk '{print $NF}' | tr -d 'v')
 if [ -n "$PH_CLI_VERSION" ]; then
-  LOWEST=$(printf '%s\n%s\n' "$MIN_POSTHOG_CLI_VERSION" "$PH_CLI_VERSION" | sort -t. -k1,1n -k2,2n -k3,3n | head -n1)
-  if [ "$LOWEST" != "$MIN_POSTHOG_CLI_VERSION" ]; then
-    echo "error: posthog-cli >= ${MIN_POSTHOG_CLI_VERSION} required (found ${PH_CLI_VERSION}). Upgrade: npm install -g @posthog/cli@latest"
+  LOWEST=$(printf '%s\n%s\n' "$MIN_INSIGHTS_CLI_VERSION" "$PH_CLI_VERSION" | sort -t. -k1,1n -k2,2n -k3,3n | head -n1)
+  if [ "$LOWEST" != "$MIN_INSIGHTS_CLI_VERSION" ]; then
+    echo "error: insights-cli >= ${MIN_INSIGHTS_CLI_VERSION} required (found ${PH_CLI_VERSION}). Upgrade: npm install -g @insights/cli@latest"
     exit 1
   fi
 fi

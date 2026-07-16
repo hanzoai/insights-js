@@ -18,15 +18,19 @@ jobs:
             - uses: actions/checkout@v4
 
             - name: Fail on any posthog reference
+              # CHANGELOG.md is excluded on purpose: published release notes are
+              # immutable history — rewriting them would be dishonest. Everything
+              # else (code, docs, READMEs, scripts) must be posthog-free.
               run: |
                   echo "Scanning packages/ for posthog references..."
                   hits=$(grep -rioE 'posthog' packages \
                       --include='*.ts' --include='*.tsx' --include='*.js' --include='*.mjs' \
                       --include='*.cjs' --include='*.jsx' --include='*.json' --include='*.jsonc' \
                       --include='*.yml' --include='*.yaml' --include='*.html' --include='*.css' \
+                      --include='*.sh' --include='*.md' \
                       2>/dev/null \
                       | grep -v node_modules | grep -v '/dist/' | grep -v '/lib/' \
-                      | grep -v '/references/' || true)
+                      | grep -v '/references/' | grep -viE '/CHANGELOG\.md' || true)
 
                   if [ -n "$hits" ]; then
                       echo "::error::Found posthog references — this fork is Hanzo-native, use insights."

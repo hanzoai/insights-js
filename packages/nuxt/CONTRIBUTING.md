@@ -1,6 +1,6 @@
 # Contributing
 
-This guide covers package-specific development for `@posthog/nuxt`.
+This guide covers package-specific development for `@insights/nuxt`.
 
 For repository-wide setup, see the root [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
