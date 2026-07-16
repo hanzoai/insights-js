@@ -1,6 +1,6 @@
 # Contributing
 
-This guide covers package-specific development for `posthog-react-native`.
+This guide covers package-specific development for `insights-react-native`.
 
 For repository-wide setup, see the root [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
@@ -13,7 +13,7 @@ See [Example Expo 53](../../examples/example-expo-53/README.md).
 Run these commands from the repository root:
 
 ```sh
-pnpm --filter=posthog-react-native lint
-pnpm --filter=posthog-react-native test
-pnpm --filter=posthog-react-native build
+pnpm --filter=insights-react-native lint
+pnpm --filter=insights-react-native test
+pnpm --filter=insights-react-native build
 ```

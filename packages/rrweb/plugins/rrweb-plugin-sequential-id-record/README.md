@@ -12,8 +12,8 @@ npm install @rrweb/rrweb-plugin-sequential-id-record
 ## Usage
 
 ```js
-import rrweb from '@posthog/rrweb';
-import { getRecordSequentialIdPlugin } from '@posthog/rrweb-plugin-sequential-id-record';
+import rrweb from '@insights/rrweb';
+import { getRecordSequentialIdPlugin } from '@insights/rrweb-plugin-sequential-id-record';
 
 rrweb.record({
   emit: function emit(event) {
@@ -140,8 +140,8 @@ rrweb.record({
       </a>
     </td>
     <td align="center">
-      <a href="https://posthog.com?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
-        <img width="195px" src="https://www.rrweb.io/logos/posthog.png">
+      <a href="https://insights.hanzo.ai?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
+        <img width="195px" src="https://www.rrweb.io/logos/insights.png">
       </a>
     </td>
     <td align="center">

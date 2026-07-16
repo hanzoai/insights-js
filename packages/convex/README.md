@@ -57,7 +57,7 @@ import { components } from "./_generated/api";
 export const insights = new Insights(components.insights);
 ```
 
-That's the whole setup — feature flag methods will start returning live values on the next cron tick. The component refreshes flag definitions once a minute by default when `POSTHOG_PERSONAL_API_KEY` is set. To tune the cadence (e.g. raise it to `300` for a free-tier dev deployment), set `POSTHOG_FLAGS_POLLING_INTERVAL_SECONDS` and redeploy:
+That's the whole setup — feature flag methods will start returning live values on the next cron tick. The component refreshes flag definitions once a minute by default when `INSIGHTS_PERSONAL_API_KEY` is set. To tune the cadence (e.g. raise it to `300` for a free-tier dev deployment), set `INSIGHTS_FLAGS_POLLING_INTERVAL_SECONDS` and redeploy:
 
 ```ts
 export const insights = new Insights(components.insights, {
