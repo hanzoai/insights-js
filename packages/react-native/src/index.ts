@@ -22,5 +22,5 @@ export type {
   LogAttributes,
   LogAttributeValue,
   LogSeverityLevel,
-  PostHogLogsConfig,
+  InsightsLogsConfig,
 } from '@hanzo/insights-core'

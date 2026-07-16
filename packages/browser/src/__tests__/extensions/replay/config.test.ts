@@ -70,30 +70,30 @@ describe('config', () => {
             it.each([
                 [
                     {
-                        name: 'https://app.insights.com/api/feature_flag/',
+                        name: 'https://insights.hanzo.ai/api/feature_flag/',
                     },
                     {
-                        name: 'https://app.insights.com/api/feature_flag/',
+                        name: 'https://insights.hanzo.ai/api/feature_flag/',
                     },
                     undefined,
                 ],
                 [
                     {
-                        name: 'https://app.insights.com/s/?ip=0&ver=123',
-                    },
-                    undefined,
-                    undefined,
-                ],
-                [
-                    {
-                        name: 'https://app.insights.com/e/?ip=0&ver=123',
+                        name: 'https://insights.hanzo.ai/s/?ip=0&ver=123',
                     },
                     undefined,
                     undefined,
                 ],
                 [
                     {
-                        name: 'https://app.insights.com/i/v0/e/?ip=0&ver=123',
+                        name: 'https://insights.hanzo.ai/e/?ip=0&ver=123',
+                    },
+                    undefined,
+                    undefined,
+                ],
+                [
+                    {
+                        name: 'https://insights.hanzo.ai/i/v0/e/?ip=0&ver=123',
                     },
                     undefined,
                     undefined,
@@ -101,7 +101,7 @@ describe('config', () => {
                 [
                     {
                         // even an imaginary future world of rust session replay capture
-                        name: 'https://app.insights.com/i/v0/s/?ip=0&ver=123',
+                        name: 'https://insights.hanzo.ai/i/v0/s/?ip=0&ver=123',
                     },
                     undefined,
                     undefined,
@@ -109,7 +109,7 @@ describe('config', () => {
                 [
                     {
                         // using a relative path as a reverse proxy api host
-                        name: 'https://app.insights.com/ingest/s/?ip=0&ver=123',
+                        name: 'https://insights.hanzo.ai/ingest/s/?ip=0&ver=123',
                     },
                     undefined,
                     '/ingest',
@@ -117,14 +117,14 @@ describe('config', () => {
                 [
                     {
                         // using a reverse proxy with a path
-                        name: 'https://app.insights.com/ingest/s/?ip=0&ver=123',
+                        name: 'https://insights.hanzo.ai/ingest/s/?ip=0&ver=123',
                     },
                     undefined,
-                    'https://app.insights.com/ingest',
+                    'https://insights.hanzo.ai/ingest',
                 ],
             ])('ignores ingestion paths', (capturedRequest, expected, apiHost?: string) => {
                 const networkOptions = buildNetworkRequestOptions(
-                    { ...defaultConfig(), api_host: apiHost || 'https://us.insights.com' },
+                    { ...defaultConfig(), api_host: apiHost || 'https://insights.hanzo.ai' },
                     {}
                 )
                 const x = networkOptions.maskRequestFn!(capturedRequest as CapturedNetworkRequest)

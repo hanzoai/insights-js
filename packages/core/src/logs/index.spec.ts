@@ -1,7 +1,7 @@
-import { PostHogPersistedProperty } from '../types'
+import { InsightsPersistedProperty } from '../types'
 import type { Logger } from '../types'
-import { PostHogLogs } from './index'
-import type { BufferedLogEntry, ResolvedPostHogLogsConfig } from './types'
+import { InsightsLogs } from './index'
+import type { BufferedLogEntry, ResolvedInsightsLogsConfig } from './types'
 
 // Default resolved config for tests — mirrors what each SDK would build by
 // merging user config onto its own defaults. Test-only fixture; the real
@@ -14,7 +14,7 @@ const DEFAULT_MAX_BATCH_RECORDS_PER_POST = 50
 const DEFAULT_RATE_CAP_WINDOW_MS = 10000
 const DEFAULT_BACKGROUND_FLUSH_BUDGET_MS = 25000
 const DEFAULT_TERMINATION_FLUSH_BUDGET_MS = 2000
-const resolveForTest = (partial?: Partial<ResolvedPostHogLogsConfig>): ResolvedPostHogLogsConfig => ({
+const resolveForTest = (partial?: Partial<ResolvedInsightsLogsConfig>): ResolvedInsightsLogsConfig => ({
   ...partial,
   maxBufferSize: partial?.maxBufferSize ?? DEFAULT_MAX_BUFFER_SIZE,
   flushIntervalMs: partial?.flushIntervalMs ?? DEFAULT_FLUSH_INTERVAL_MS,
@@ -27,7 +27,7 @@ const resolveForTest = (partial?: Partial<ResolvedPostHogLogsConfig>): ResolvedP
   maxLogsPerInterval: partial?.maxLogsPerInterval,
 })
 
-// Mock PostHog instance exposing the `PostHogCoreStateless` surface PostHogLogs
+// Mock Insights instance exposing the `InsightsCoreStateless` surface InsightsLogs
 // touches. Init gating is injected separately via the onReady closure.
 const createMockInstance = (overrides: Record<string, any> = {}): any => {
   const store: Record<string, any> = {}
@@ -35,7 +35,7 @@ const createMockInstance = (overrides: Record<string, any> = {}): any => {
     optedOut: false,
     getDistinctId: jest.fn(() => 'user-123'),
     getSessionId: jest.fn(() => 'sess-456'),
-    getLibraryId: jest.fn(() => 'posthog-core-tests'),
+    getLibraryId: jest.fn(() => 'insights-core-tests'),
     getLibraryVersion: jest.fn(() => '0.0.0-test'),
     getPersistedProperty: jest.fn((key: string) => store[key]),
     setPersistedProperty: jest.fn((key: string, value: any) => {
@@ -70,7 +70,7 @@ const createMockLogger = (): Logger => {
 }
 
 const readQueue = (instance: any): BufferedLogEntry[] => {
-  return (instance._store[PostHogPersistedProperty.LogsQueue] as BufferedLogEntry[] | undefined) ?? []
+  return (instance._store[InsightsPersistedProperty.LogsQueue] as BufferedLogEntry[] | undefined) ?? []
 }
 
 // Default getContext closure for tests — reads from the mock instance the way
@@ -80,7 +80,7 @@ const getContextFor = (instance: any) => (): { distinctId?: string; sessionId?: 
   sessionId: instance.getSessionId() || undefined,
 })
 
-describe('PostHogLogs', () => {
+describe('InsightsLogs', () => {
   let mockInstance: any
   let logger: Logger
 
@@ -90,13 +90,13 @@ describe('PostHogLogs', () => {
   })
 
   it('constructs without throwing', () => {
-    const logs = new PostHogLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), immediateOnReady)
+    const logs = new InsightsLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), immediateOnReady)
     expect(logs).toBeDefined()
   })
 
   describe('captureLog', () => {
     it('writes a record to the logs queue via setPersistedProperty', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -109,13 +109,13 @@ describe('PostHogLogs', () => {
       expect(queue).toHaveLength(1)
       expect(queue[0].record.body).toEqual({ stringValue: 'hello world' })
       expect(mockInstance.setPersistedProperty).toHaveBeenCalledWith(
-        PostHogPersistedProperty.LogsQueue,
+        InsightsPersistedProperty.LogsQueue,
         expect.any(Array)
       )
     })
 
     it('maps severity levels correctly', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -130,7 +130,7 @@ describe('PostHogLogs', () => {
     })
 
     it('defaults to INFO when no level is provided', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -144,7 +144,7 @@ describe('PostHogLogs', () => {
     })
 
     it('auto-populates distinctId and sessionId', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -155,27 +155,27 @@ describe('PostHogLogs', () => {
 
       const queue = readQueue(mockInstance)
       const attrs = Object.fromEntries(queue[0].record.attributes.map((a: any) => [a.key, a.value]))
-      expect(attrs['posthogDistinctId']).toEqual({ stringValue: 'user-123' })
+      expect(attrs['insightsDistinctId']).toEqual({ stringValue: 'user-123' })
       expect(attrs['sessionId']).toEqual({ stringValue: 'sess-456' })
     })
 
     it('merges user attributes over auto-populated ones', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
         getContextFor(mockInstance),
         immediateOnReady
       )
-      logs.captureLog({ body: 'test', attributes: { posthogDistinctId: 'override' } })
+      logs.captureLog({ body: 'test', attributes: { insightsDistinctId: 'override' } })
 
       const queue = readQueue(mockInstance)
       const attrs = Object.fromEntries(queue[0].record.attributes.map((a: any) => [a.key, a.value]))
-      expect(attrs['posthogDistinctId']).toEqual({ stringValue: 'override' })
+      expect(attrs['insightsDistinctId']).toEqual({ stringValue: 'override' })
     })
 
     it('is a no-op when body is empty', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -188,7 +188,7 @@ describe('PostHogLogs', () => {
     })
 
     it('is a no-op when body is missing', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -201,13 +201,13 @@ describe('PostHogLogs', () => {
 
     it('is a no-op when optedOut is true', () => {
       const instance = createMockInstance({ optedOut: true })
-      const logs = new PostHogLogs(instance, resolveForTest(), logger, getContextFor(instance), immediateOnReady)
+      const logs = new InsightsLogs(instance, resolveForTest(), logger, getContextFor(instance), immediateOnReady)
       logs.captureLog({ body: 'should be dropped' })
       expect(readQueue(instance)).toHaveLength(0)
     })
 
     it('captures unconditionally — only optedOut, missing body, and beforeSend can drop', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -219,7 +219,7 @@ describe('PostHogLogs', () => {
     })
 
     it('appends subsequent captures to the existing queue', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -238,7 +238,7 @@ describe('PostHogLogs', () => {
     })
 
     it('drops the oldest record when buffer overflows maxBufferSize', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBufferSize: 3 }),
         logger,
@@ -257,7 +257,7 @@ describe('PostHogLogs', () => {
     })
 
     it('logs a diagnostic when evicting on overflow', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBufferSize: 1 }),
         logger,
@@ -272,7 +272,7 @@ describe('PostHogLogs', () => {
     })
 
     it('passes trace context through to the OTLP record', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -302,11 +302,11 @@ describe('PostHogLogs', () => {
         pending.push(fn)
       }
 
-      mockInstance._store[PostHogPersistedProperty.LogsQueue] = [
+      mockInstance._store[InsightsPersistedProperty.LogsQueue] = [
         { record: { body: { stringValue: 'prior-session' } } as any },
       ]
 
-      const logs = new PostHogLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), defer)
+      const logs = new InsightsLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), defer)
       logs.captureLog({ body: 'before-init' })
 
       expect(mockInstance.setPersistedProperty).not.toHaveBeenCalled()
@@ -323,7 +323,7 @@ describe('PostHogLogs', () => {
       const neverReady = jest.fn(() => {
         /* simulate rejected init: fn is never called */
       })
-      const logs = new PostHogLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), neverReady)
+      const logs = new InsightsLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), neverReady)
 
       logs.captureLog({ body: 'dropped' })
 
@@ -341,7 +341,7 @@ describe('PostHogLogs', () => {
         getDistinctId: jest.fn().mockReturnValue('user-A'),
       })
 
-      const logs = new PostHogLogs(instance, resolveForTest(), logger, getContextFor(instance), defer)
+      const logs = new InsightsLogs(instance, resolveForTest(), logger, getContextFor(instance), defer)
       logs.captureLog({ body: 'captured-as-user-A' })
 
       instance.getDistinctId = jest.fn().mockReturnValue('user-B')
@@ -351,14 +351,14 @@ describe('PostHogLogs', () => {
       const queue = readQueue(instance)
       expect(queue).toHaveLength(1)
       const attrs = Object.fromEntries(queue[0].record.attributes.map((a: any) => [a.key, a.value]))
-      expect(attrs['posthogDistinctId']).toEqual({ stringValue: 'user-A' })
+      expect(attrs['insightsDistinctId']).toEqual({ stringValue: 'user-A' })
     })
 
     it('captureLog does not throw to the caller', () => {
       const neverReady = (): void => {
         /* simulate rejected init */
       }
-      const logs = new PostHogLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), neverReady)
+      const logs = new InsightsLogs(mockInstance, resolveForTest(), logger, getContextFor(mockInstance), neverReady)
 
       expect(() => logs.captureLog({ body: 'after-reject-1' })).not.toThrow()
       expect(() => logs.captureLog({ body: 'after-reject-2' })).not.toThrow()
@@ -367,7 +367,7 @@ describe('PostHogLogs', () => {
 
   describe('flush', () => {
     it('is a no-op when the queue is empty', async () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -379,7 +379,7 @@ describe('PostHogLogs', () => {
     })
 
     it('drains the queue and sends an OTLP payload with resource + scope attrs', async () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ serviceName: 'my-service', environment: 'prod', serviceVersion: '1.2.3' }),
         logger,
@@ -401,11 +401,11 @@ describe('PostHogLogs', () => {
       expect(resourceAttrs['service.version']).toEqual({ stringValue: '1.2.3' })
       // OTLP-standard SDK identification — pulled from the instance's
       // getLibraryId/Version so every SDK self-identifies.
-      expect(resourceAttrs['telemetry.sdk.name']).toEqual({ stringValue: 'posthog-core-tests' })
+      expect(resourceAttrs['telemetry.sdk.name']).toEqual({ stringValue: 'insights-core-tests' })
       expect(resourceAttrs['telemetry.sdk.version']).toEqual({ stringValue: '0.0.0-test' })
 
       const scope = payload.resourceLogs[0].scopeLogs[0].scope
-      expect(scope).toEqual({ name: 'posthog-core-tests', version: '0.0.0-test' })
+      expect(scope).toEqual({ name: 'insights-core-tests', version: '0.0.0-test' })
 
       const bodies = payload.resourceLogs[0].scopeLogs[0].logRecords.map((r: any) => r.body.stringValue)
       expect(bodies).toEqual(['one', 'two'])
@@ -414,7 +414,7 @@ describe('PostHogLogs', () => {
     })
 
     it('defaults service.name to "unknown_service" when not configured', async () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -438,7 +438,7 @@ describe('PostHogLogs', () => {
       // dashboards, and bug-correlation. Letting a stray user key clobber
       // them silently breaks ingestion attribution, so the layout puts
       // user attrs first and SDK identity attrs on top.
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({
           resourceAttributes: {
@@ -461,7 +461,7 @@ describe('PostHogLogs', () => {
           a.value,
         ])
       )
-      expect(attrs['telemetry.sdk.name']).toEqual({ stringValue: 'posthog-core-tests' })
+      expect(attrs['telemetry.sdk.name']).toEqual({ stringValue: 'insights-core-tests' })
       expect(attrs['telemetry.sdk.version']).toEqual({ stringValue: '0.0.0-test' })
       expect(attrs['service.name']).toEqual({ stringValue: 'unknown_service' })
       expect(attrs['host.name']).toEqual({ stringValue: 'my-host' })
@@ -480,7 +480,7 @@ describe('PostHogLogs', () => {
         sendOrder.push(payload.resourceLogs[0].scopeLogs[0].logRecords.length)
         return { kind: 'ok' }
       })
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 2, maxBufferSize: 10 }),
         logger,
@@ -511,7 +511,7 @@ describe('PostHogLogs', () => {
         }
         return { kind: 'ok' }
       })
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 4, maxBufferSize: 10 }),
         logger,
@@ -544,7 +544,7 @@ describe('PostHogLogs', () => {
         }
         return { kind: 'ok' }
       })
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 4, maxBufferSize: 100 }),
         logger,
@@ -568,7 +568,7 @@ describe('PostHogLogs', () => {
 
     it('drops the only record when too-large arrives on a batch of size 1', async () => {
       mockInstance._sendLogsBatch = jest.fn(() => Promise.resolve({ kind: 'too-large' }))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 1 }),
         logger,
@@ -586,7 +586,7 @@ describe('PostHogLogs', () => {
 
     it('warns explicitly when dropping a size-1 413 (visibility for the lost record)', async () => {
       mockInstance._sendLogsBatch = jest.fn(() => Promise.resolve({ kind: 'too-large' }))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 1 }),
         logger,
@@ -609,7 +609,7 @@ describe('PostHogLogs', () => {
         callCount++
         return Promise.resolve(callCount === 1 ? { kind: 'too-large' } : { kind: 'ok' })
       })
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 1, maxBufferSize: 10 }),
         logger,
@@ -637,7 +637,7 @@ describe('PostHogLogs', () => {
         sendSizes.push(size)
         return { kind: 'too-large' }
       })
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 4, maxBufferSize: 10 }),
         logger,
@@ -662,7 +662,7 @@ describe('PostHogLogs', () => {
     it('keeps records in the queue on retry-later outcome and re-throws the carried error', async () => {
       const netErr = new Error('offline')
       mockInstance._sendLogsBatch = jest.fn(() => Promise.resolve({ kind: 'retry-later', error: netErr }))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -679,7 +679,7 @@ describe('PostHogLogs', () => {
     it('drops the batch on fatal outcome and re-throws the carried error', async () => {
       const bogus = new Error('malformed')
       mockInstance._sendLogsBatch = jest.fn(() => Promise.resolve({ kind: 'fatal', error: bogus }))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -702,7 +702,7 @@ describe('PostHogLogs', () => {
       const waitForStoragePersist = jest.fn(async () => {
         sequence.push('waitForPersist')
       })
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 2, maxBufferSize: 10 }),
         logger,
@@ -731,7 +731,7 @@ describe('PostHogLogs', () => {
             resolveFirst = r
           })
       )
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -755,7 +755,7 @@ describe('PostHogLogs', () => {
     afterEach(() => jest.useRealTimers())
 
     it('fires a flush when the buffer hits maxBufferSize', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBufferSize: 3 }),
         logger,
@@ -773,7 +773,7 @@ describe('PostHogLogs', () => {
     })
 
     it('schedules one timer per idle window and fires flush on expiry', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ flushIntervalMs: 5000 }),
         logger,
@@ -794,7 +794,7 @@ describe('PostHogLogs', () => {
     })
 
     it('does not schedule a timer for the threshold-triggered path', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBufferSize: 2, flushIntervalMs: 5000 }),
         logger,
@@ -815,7 +815,7 @@ describe('PostHogLogs', () => {
     afterEach(() => jest.useRealTimers())
 
     it('drains the queue and clears any armed flush timer', async () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ flushIntervalMs: 5000 }),
         logger,
@@ -836,7 +836,7 @@ describe('PostHogLogs', () => {
 
     it('swallows flush errors so shutdown can complete', async () => {
       mockInstance._sendLogsBatch = jest.fn(() => Promise.resolve({ kind: 'fatal', error: new Error('boom') }))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -849,7 +849,7 @@ describe('PostHogLogs', () => {
     })
 
     it('is a no-op when the queue is empty and no timer is armed', async () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -861,7 +861,7 @@ describe('PostHogLogs', () => {
     })
 
     it('called twice is idempotent (second call is a no-op once queue drains)', async () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -885,7 +885,7 @@ describe('PostHogLogs', () => {
             resolveFirst = r
           })
       )
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -912,7 +912,7 @@ describe('PostHogLogs', () => {
       jest.useRealTimers()
       // _sendLogsBatch never resolves — the budget must force shutdown to return.
       mockInstance._sendLogsBatch = jest.fn(() => new Promise(() => {}))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -931,7 +931,7 @@ describe('PostHogLogs', () => {
 
     it('propagates a _waitForStoragePersist rejection out of flush (so callers can react)', async () => {
       const persistErr = new Error('disk is gone')
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest(),
         logger,
@@ -951,8 +951,8 @@ describe('PostHogLogs', () => {
   describe('beforeSend hook', () => {
     // Helper that hides the constructor boilerplate so the table-driven
     // cases below can be a single line of setup each.
-    const makeLogs = (beforeSend: PostHogLogsConfig['beforeSend']): PostHogLogs =>
-      new PostHogLogs(
+    const makeLogs = (beforeSend: InsightsLogsConfig['beforeSend']): InsightsLogs =>
+      new InsightsLogs(
         mockInstance,
         resolveForTest({ beforeSend }),
         logger,
@@ -966,7 +966,7 @@ describe('PostHogLogs', () => {
     // were warping the table when forced into it.
     type Case = {
       name: string
-      beforeSend: PostHogLogsConfig['beforeSend']
+      beforeSend: InsightsLogsConfig['beforeSend']
       input: string
       expectedQueueLen: number
       expectedBody?: string
@@ -1038,7 +1038,7 @@ describe('PostHogLogs', () => {
         throw new Error('bad filter')
       })
       const after = jest.fn((r: any) => ({ ...r, body: `${r.body}!` }))
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ beforeSend: [thrower, after] }),
         logger,
@@ -1085,7 +1085,7 @@ describe('PostHogLogs', () => {
     ]
 
     it.each(capCases)('$name', ({ maxLogsPerInterval, capturesInWindow, expectedQueueLen }) => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxLogsPerInterval, rateCapWindowMs: 1000 }),
         logger,
@@ -1099,7 +1099,7 @@ describe('PostHogLogs', () => {
     })
 
     it('warns exactly once per window when dropping, regardless of how many drops', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxLogsPerInterval: 2, rateCapWindowMs: 1000 }),
         logger,
@@ -1114,7 +1114,7 @@ describe('PostHogLogs', () => {
     })
 
     it('resets the counter when the window rolls (and warns again on next overflow)', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxLogsPerInterval: 1, rateCapWindowMs: 1000 }),
         logger,
@@ -1134,7 +1134,7 @@ describe('PostHogLogs', () => {
     })
 
     it('resets the window when the clock jumps backward (NTP correction / manual clock change)', () => {
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxLogsPerInterval: 2, rateCapWindowMs: 1000 }),
         logger,
@@ -1167,7 +1167,7 @@ describe('PostHogLogs', () => {
         .fn()
         .mockReturnValueOnce(null)
         .mockImplementation((r: any) => r)
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxLogsPerInterval: 1, rateCapWindowMs: 1000, beforeSend }),
         logger,
@@ -1198,7 +1198,7 @@ describe('PostHogLogs', () => {
           })
       )
 
-      const logs = new PostHogLogs(
+      const logs = new InsightsLogs(
         mockInstance,
         resolveForTest({ maxBatchRecordsPerPost: 1, maxBufferSize: 10 }),
         logger,

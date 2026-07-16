@@ -187,7 +187,7 @@ describe('InsightsExceptions', () => {
                 platform: 'javascript:web',
             }
             const insightsFrame = {
-                filename: 'https://internal-t.insights.com/static/array.js',
+                filename: 'https://internal-t.example.com/static/array.js',
                 platform: 'javascript:web',
             }
 
@@ -310,7 +310,7 @@ describe('InsightsExceptions', () => {
                     max_bytes: 80,
                 },
             }
-            exceptions = new PostHogExceptions(posthog)
+            exceptions = new InsightsExceptions(insights)
 
             exceptions.addExceptionStep('first')
             exceptions.addExceptionStep('second')
@@ -329,7 +329,7 @@ describe('InsightsExceptions', () => {
                     enabled: false,
                 },
             }
-            exceptions = new PostHogExceptions(posthog)
+            exceptions = new InsightsExceptions(insights)
 
             exceptions.addExceptionStep('ignored')
             exceptions.sendExceptionEvent({ custom_property: true })

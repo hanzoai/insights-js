@@ -363,21 +363,21 @@ describe('persistence', () => {
             it.each([
                 {
                     label: 'expire_days change',
-                    mutate: (lib: PostHogPersistence) => ((lib as any)._expire_days = 90),
+                    mutate: (lib: InsightsPersistence) => ((lib as any)._expire_days = 90),
                 },
                 {
                     label: 'cross_subdomain change',
-                    mutate: (lib: PostHogPersistence) => ((lib as any)._cross_subdomain = true),
+                    mutate: (lib: InsightsPersistence) => ((lib as any)._cross_subdomain = true),
                 },
                 {
                     label: 'secure change',
-                    mutate: (lib: PostHogPersistence) => ((lib as any)._secure = true),
+                    mutate: (lib: InsightsPersistence) => ((lib as any)._secure = true),
                 },
             ])('writes through when $label invalidates the storage args, even with unchanged props', ({ mutate }) => {
                 // The no-op fingerprint must cover all four arguments to
                 // `_storage._set` — serialized props plus expire_days,
                 // cross_subdomain, secure. Otherwise a customer who calls
-                // `posthog.set_config({ cookie_expiration: 90 })` would
+                // `insights.set_config({ cookie_expiration: 90 })` would
                 // mutate `_expire_days` but the no-op check (which only
                 // saw props) would short-circuit, and the cookie keeps
                 // its old `Expires` header until some other prop changes.
@@ -472,8 +472,8 @@ describe('persistence', () => {
             })
 
             it('writes immediately when debounce is 0 (default)', () => {
-                const config = makePostHogConfig('test-debounce-off', persistenceMode)
-                const debounced = new PostHogPersistence(config)
+                const config = makeInsightsConfig('test-debounce-off', persistenceMode)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
                 spy.mockClear()
 
@@ -486,10 +486,10 @@ describe('persistence', () => {
 
             it('coalesces multiple saves within the debounce window into one write', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-on', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-on', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
                 spy.mockClear()
 
@@ -508,10 +508,10 @@ describe('persistence', () => {
 
             it('in-memory props update synchronously even before the debounced write lands', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-sync', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-sync', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
 
                 debounced.register({ distinct_id: 'live' })
                 expect(debounced.props.distinct_id).toBe('live')
@@ -520,10 +520,10 @@ describe('persistence', () => {
 
             it('flush() writes pending state immediately', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-flush', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-flush', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
                 spy.mockClear()
 
@@ -540,10 +540,10 @@ describe('persistence', () => {
 
             it('remove() cancels any pending debounced write', () => {
                 const config = {
-                    ...makePostHogConfig('test-debounce-remove', persistenceMode),
+                    ...makeInsightsConfig('test-debounce-remove', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 const setSpy = jest.spyOn(debounced['_storage'], '_set')
                 const removeSpy = jest.spyOn(debounced['_storage'], '_remove')
 
@@ -559,7 +559,7 @@ describe('persistence', () => {
             })
 
             it('flush() does NOT resurrect storage after remove() (the reset bug)', () => {
-                // Sequence: posthog.reset() → clear() → remove() cancels
+                // Sequence: insights.reset() → clear() → remove() cancels
                 // the timer, clears _lastSavedSerialized, deletes storage.
                 // Then the unload listener fires flush(). Without the
                 // pending-timer guard, flush() would call _writeNow() with
@@ -568,10 +568,10 @@ describe('persistence', () => {
                 // deleted. The guard means flush() is a no-op once there
                 // is no pending timer.
                 const config = {
-                    ...makePostHogConfig('test-flush-after-remove', persistenceMode),
+                    ...makeInsightsConfig('test-flush-after-remove', persistenceMode),
                     persistence_save_debounce_ms: 250,
                 }
-                const debounced = new PostHogPersistence(config)
+                const debounced = new InsightsPersistence(config)
                 debounced.register({ distinct_id: 'before-reset' })
 
                 // Simulate reset
@@ -587,15 +587,15 @@ describe('persistence', () => {
             })
 
             it('writes through on flush() when debounce is enabled at runtime via set_config (late-enable)', () => {
-                // Customer constructs PostHog with debounce=0 (no listener
+                // Customer constructs Insights with debounce=0 (no listener
                 // would be installed under the old logic), then later does
-                // `posthog.set_config({ persistence_save_debounce_ms: 250 })`.
+                // `insights.set_config({ persistence_save_debounce_ms: 250 })`.
                 // The mutable config is read every save() via _saveDebounceMs(),
                 // so save() correctly starts debouncing. But we must ALSO
                 // have installed unload listeners at construction so the
                 // pending write isn't lost on page close.
-                const config: any = makePostHogConfig('test-late-debounce', persistenceMode)
-                const debounced = new PostHogPersistence(config)
+                const config: any = makeInsightsConfig('test-late-debounce', persistenceMode)
+                const debounced = new InsightsPersistence(config)
                 const spy = jest.spyOn(debounced['_storage'], '_set')
 
                 // Enable debounce after construction.

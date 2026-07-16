@@ -334,7 +334,7 @@ export class InsightsConversations {
     }
 
     /**
-     * Parse and redeem `ph_conv_restore` token from the current URL.
+     * Parse and redeem `hi_conv_restore` token from the current URL.
      *
      * @returns Promise with restore status, or null when no token/conversations unavailable
      */
@@ -382,12 +382,12 @@ export class InsightsConversations {
         return this._conversationsManager?.getWidgetSessionId() ?? null
     }
 
-    /** @internal Called by PostHog.setIdentity() -- forwards to the manager without recursing */
+    /** @internal Called by Insights.setIdentity() -- forwards to the manager without recursing */
     _onIdentityChanged(): void {
         this._conversationsManager?.setIdentity()
     }
 
-    /** @internal Called by PostHog.clearIdentity() -- forwards to the manager without recursing */
+    /** @internal Called by Insights.clearIdentity() -- forwards to the manager without recursing */
     _onIdentityCleared(): void {
         this._conversationsManager?.clearIdentity()
     }

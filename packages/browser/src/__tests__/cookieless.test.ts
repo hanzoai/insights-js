@@ -316,32 +316,32 @@ describe('cookieless', () => {
         })
 
         it('should start in cookieless mode when opt_out_capturing_by_default is set (regression for #2841)', async () => {
-            const { posthog, beforeSendMock } = await setup({
+            const { insights, beforeSendMock } = await setup({
                 cookieless_mode: 'on_reject',
                 opt_out_capturing_by_default: true,
             })
             await delay(1) // wait for async initial pageview capture
 
-            expect(posthog.has_opted_out_capturing()).toEqual(true)
-            expect(posthog.get_explicit_consent_status()).toBe('pending')
+            expect(insights.has_opted_out_capturing()).toEqual(true)
+            expect(insights.get_explicit_consent_status()).toBe('pending')
 
             expect(beforeSendMock).toBeCalledTimes(1)
             const pageview = beforeSendMock.mock.calls[0][0]
             expect(pageview.event).toBe('$pageview')
-            expect(pageview.properties.distinct_id).toEqual('$posthog_cookieless')
+            expect(pageview.properties.distinct_id).toEqual('$insights_cookieless')
             expect(pageview.properties.$device_id).toBe(null)
             expect(pageview.properties.$cookieless_mode).toEqual(true)
 
-            posthog.capture(eventName, eventProperties)
+            insights.capture(eventName, eventProperties)
             expect(beforeSendMock).toBeCalledTimes(2)
             const event = beforeSendMock.mock.calls[1][0]
             expect(event.event).toBe(eventName)
-            expect(event.properties.distinct_id).toEqual('$posthog_cookieless')
+            expect(event.properties.distinct_id).toEqual('$insights_cookieless')
             expect(event.properties.$cookieless_mode).toEqual(true)
         })
 
         it('should switch from cookieless to non-cookieless on opt-in when opt_out_capturing_by_default is set', async () => {
-            const { posthog, beforeSendMock } = await setup({
+            const { insights, beforeSendMock } = await setup({
                 cookieless_mode: 'on_reject',
                 opt_out_capturing_by_default: true,
             })
@@ -349,8 +349,8 @@ describe('cookieless', () => {
             expect(beforeSendMock).toBeCalledTimes(1)
             expect(beforeSendMock.mock.calls[0][0].properties.$cookieless_mode).toEqual(true)
 
-            posthog.opt_in_capturing()
-            posthog.capture(eventName, eventProperties)
+            insights.opt_in_capturing()
+            insights.capture(eventName, eventProperties)
 
             expect(beforeSendMock.mock.calls[1][0].event).toBe('$opt_in')
             const customEvent = beforeSendMock.mock.calls[beforeSendMock.mock.calls.length - 1][0]
@@ -388,25 +388,25 @@ describe('cookieless', () => {
             // capturing, but the RequestQueue was never enabled — so batched events were enqueued
             // but never flushed over the network.
             jest.useFakeTimers()
-            const { posthog } = await setup({
+            const { insights } = await setup({
                 cookieless_mode: 'on_reject',
                 request_batching: true,
             })
             jest.advanceTimersByTime(10)
             expect(mockedFetch).toBeCalledTimes(1) // flags only — queue is paused, no events yet
 
-            posthog.opt_out_capturing()
+            insights.opt_out_capturing()
             // opt_out triggers an initial $pageview in cookieless mode — it should be sent immediately (non-batched)
             expect(mockedFetch).toBeCalledTimes(2) // flags + pageview
             expect(JSON.parse(mockedFetch.mock.calls[1][1].body).event).toEqual('$pageview')
-            expect(JSON.parse(mockedFetch.mock.calls[1][1].body).properties.distinct_id).toEqual('$posthog_cookieless')
+            expect(JSON.parse(mockedFetch.mock.calls[1][1].body).properties.distinct_id).toEqual('$insights_cookieless')
 
-            posthog.capture('custom event')
+            insights.capture('custom event')
             jest.advanceTimersByTime(5000) // flush the batch queue
             expect(mockedFetch).toBeCalledTimes(3) // flags + pageview + custom event
             expect(JSON.parse(mockedFetch.mock.calls[2][1].body)[0].event).toEqual('custom event')
             expect(JSON.parse(mockedFetch.mock.calls[2][1].body)[0].properties.distinct_id).toEqual(
-                '$posthog_cookieless'
+                '$insights_cookieless'
             )
         })
     })

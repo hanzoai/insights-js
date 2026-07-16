@@ -1,16 +1,10 @@
-import { Insights } from '@hanzo/insights-node'
-import { captureSpan } from './capture'
-import type { Context, Span } from '@opentelemetry/api'
-import type { ReadableSpan, SpanProcessor } from '@opentelemetry/sdk-trace-base'
-import type { InsightsTelemetryOptions } from './types'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import type { Context } from '@opentelemetry/api'
+import { BatchSpanProcessor, type SpanProcessor, type ReadableSpan, type Span } from '@opentelemetry/sdk-trace-base'
 
-export class InsightsSpanProcessor implements SpanProcessor {
-  private readonly pendingCaptures = new Set<Promise<void>>()
+import { isAISpan } from './spans'
 
-  constructor(
-    private readonly phClient: Insights,
-    private readonly options: InsightsTelemetryOptions = {}
-  ) {}
+const DEFAULT_OTEL_HOST = 'https://insights.hanzo.ai'
 
 function normalizeApiKey(value?: unknown): string {
   return typeof value === 'string' ? value.trim() : ''
@@ -21,14 +15,14 @@ function normalizeHost(value?: unknown): string {
   return normalizedValue || DEFAULT_OTEL_HOST
 }
 
-export interface PostHogSpanProcessorOptions {
+export interface InsightsSpanProcessorOptions {
   /**
-   * Your PostHog project API key.
+   * Your Insights project API key.
    */
   apiKey?: string
 
   /**
-   * PostHog host URL. Defaults to `https://us.i.posthog.com`.
+   * Insights host URL. Defaults to `https://insights.hanzo.ai`.
    */
   host?: string
 
@@ -54,37 +48,37 @@ class NoopSpanProcessor implements SpanProcessor {
 }
 
 /**
- * An OpenTelemetry `SpanProcessor` that sends AI traces to PostHog.
+ * An OpenTelemetry `SpanProcessor` that sends AI traces to Insights.
  *
  * Missing or blank project API keys disable the processor.
  *
- * Internally batches spans and exports them to PostHog's OTLP ingestion
+ * Internally batches spans and exports them to Insights's OTLP ingestion
  * endpoint. Only AI-related spans (those whose name or attribute keys
  * start with `gen_ai.`, `llm.`, `ai.`, or `traceloop.`) are exported;
  * all other spans are silently dropped.
  *
  * This is the recommended integration point when your setup accepts a
  * `SpanProcessor`. If you need a `TraceExporter` instead (e.g. for
- * Vercel's `registerOTel`), use {@link PostHogTraceExporter}.
+ * Vercel's `registerOTel`), use {@link InsightsTraceExporter}.
  *
  * @example
  * ```ts
- * import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
+ * import { InsightsSpanProcessor } from '@hanzo/insights-ai/otel'
  * import { NodeSDK } from '@opentelemetry/sdk-node'
  *
  * const sdk = new NodeSDK({
- *   spanProcessors: [new PostHogSpanProcessor({ apiKey: 'phc_...' })],
+ *   spanProcessors: [new InsightsSpanProcessor({ apiKey: 'phc_...' })],
  * })
  * sdk.start()
  * ```
  */
-export class PostHogSpanProcessor implements SpanProcessor {
+export class InsightsSpanProcessor implements SpanProcessor {
   private readonly inner: SpanProcessor
 
-  constructor(options: PostHogSpanProcessorOptions = {}) {
+  constructor(options: InsightsSpanProcessorOptions = {}) {
     const apiKey = normalizeApiKey(options.apiKey)
     if (!apiKey) {
-      console.warn('[PostHogSpanProcessor] apiKey is missing or blank; the processor will be disabled.')
+      console.warn('[InsightsSpanProcessor] apiKey is missing or blank; the processor will be disabled.')
       this.inner = new NoopSpanProcessor()
       return
     }
@@ -116,6 +110,11 @@ export class PostHogSpanProcessor implements SpanProcessor {
     }
   }
 
-export function createInsightsSpanProcessor(phClient: Insights, options: InsightsTelemetryOptions = {}): SpanProcessor {
-  return new InsightsSpanProcessor(phClient, options)
+  shutdown(): Promise<void> {
+    return this.inner.shutdown()
+  }
+
+  forceFlush(): Promise<void> {
+    return this.inner.forceFlush()
+  }
 }

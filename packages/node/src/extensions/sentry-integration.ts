@@ -102,7 +102,7 @@ export function createEventProcessor(
       return event
     }
 
-    const uiHost = _insights.options.host ?? 'https://us.i.insights.com'
+    const uiHost = _insights.options.host ?? 'https://insights.hanzo.ai'
     const personUrl = new URL(`/project/${_insights.apiKey}/person/${userId}`, uiHost).toString()
 
     event.tags['Insights Person URL'] = personUrl

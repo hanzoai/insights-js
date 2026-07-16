@@ -1,5 +1,5 @@
 import type { Insights } from '../insights-rn'
-import { JsonType, Logger, InsightsEventProperties, ErrorTracking as CoreErrorTracking } from '@hanzo/insights-core'
+import { JsonType, Logger, ErrorTracking as CoreErrorTracking, isInsightsFetchNetworkError } from '@hanzo/insights-core'
 import { trackConsole, trackUncaughtExceptions, trackUnhandledRejections } from './utils'
 import { getRemoteConfigBool } from '../utils'
 
@@ -70,18 +70,6 @@ export class ErrorTracking {
     )
   }
 
-  captureException(input: unknown, additionalProperties: InsightsEventProperties, hint: CoreErrorTracking.EventHint) {
-    try {
-      const properties = this.errorPropertiesBuilder.buildFromUnknown(input, hint)
-      return this.instance.capture('$exception', {
-        ...properties,
-        ...additionalProperties,
-      } as unknown as InsightsEventProperties)
-    } catch (error) {
-      this.logger.error('An error occurred while capturing an $exception event:', error)
-    }
-  }
-
   private resolveOptions(options: ErrorTrackingOptions): ResolvedErrorTrackingOptions {
     const autocaptureOptions = this.resolveAutocaptureOptions(options.autocapture)
     return {
@@ -119,7 +107,7 @@ export class ErrorTracking {
       }
 
       // Offline/timeout failures are expected, not application errors.
-      if (isPostHogFetchNetworkError(error)) {
+      if (isInsightsFetchNetworkError(error)) {
         return
       }
 
@@ -158,7 +146,7 @@ export class ErrorTracking {
       }
 
       // Offline/timeout failures are expected, not application errors.
-      if (isPostHogFetchNetworkError(error)) {
+      if (isInsightsFetchNetworkError(error)) {
         return
       }
 

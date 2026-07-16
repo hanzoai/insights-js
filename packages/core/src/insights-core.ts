@@ -760,7 +760,7 @@ export abstract class InsightsCore extends InsightsCoreStateless {
             quotaLimited: res.quotaLimited,
           })
           this._logger.warn(
-            '[FEATURE FLAGS] Feature flags quota limit exceeded. Learn more about billing limits at https://insights.com/docs/billing/limits-alerts'
+            '[FEATURE FLAGS] Feature flags quota limit exceeded. Learn more about billing limits at https://insights.hanzo.ai/docs/billing/limits-alerts'
           )
           this.maybeNotifyRemoteConfig(triggerOnRemoteConfig, res)
           return res
@@ -1157,7 +1157,9 @@ export abstract class InsightsCore extends InsightsCoreStateless {
    * @param {Object} [additionalProperties] Any additional properties to add to the error event
    * @returns {CaptureResult} The result of the capture
    */
-  captureException(error: unknown, additionalProperties?: InsightsEventProperties): void {
+  captureException(error: unknown, additionalProperties?: InsightsEventProperties, hint?: EventHint): void {
+    const handled = hint?.mechanism?.handled ?? true
+    const synthetic = hint?.mechanism?.synthetic ?? false
     const properties: { [key: string]: any } = {
       $exception_level: 'error',
       $exception_list: [
@@ -1165,13 +1167,15 @@ export abstract class InsightsCore extends InsightsCoreStateless {
           type: isPlainError(error) ? error.name : 'Error',
           value: isPlainError(error) ? error.message : error,
           mechanism: {
-            handled: true,
-            synthetic: false,
+            handled,
+            synthetic,
           },
         },
       ],
       ...additionalProperties,
     }
+
+    this.capture('$exception', properties, { _originatedFromCaptureException: true })
   }
 
   /**
@@ -1332,7 +1336,7 @@ export abstract class InsightsCore extends InsightsCoreStateless {
 
   /**
    * Sets properties on the person profile associated with the current `distinct_id`.
-   * Learn more about [identifying users](https://insights.com/docs/product-analytics/identify)
+   * Learn more about [identifying users](https://insights.hanzo.ai/docs/product-analytics/identify)
    *
    * {@label Identification}
    *

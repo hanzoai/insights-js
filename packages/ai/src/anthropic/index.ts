@@ -8,6 +8,7 @@ import {
   extractAvailableToolCalls,
   extractInsightsParams,
   sendEventWithErrorToInsights,
+  getModelParams,
 } from '../utils'
 import { captureAiGeneration } from '../captureAiGeneration'
 import type { FormattedContentItem, FormattedTextContent, FormattedFunctionCall, FormattedMessage } from '../types'

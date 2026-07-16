@@ -25,7 +25,7 @@ describe('Insights Core', () => {
       await waitForPromises()
       expect(mocks.fetch).toHaveBeenCalledTimes(2)
       const batchCall = mocks.fetch.mock.calls[1]
-      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(batchCall[0]).toEqual('https://insights.hanzo.ai/batch/')
       expect(parseBody(batchCall)).toMatchObject({
         api_key: 'TEST_API_KEY',
         batch: [
@@ -64,7 +64,7 @@ describe('Insights Core', () => {
       await waitForPromises()
       expect(mocks.fetch).toHaveBeenCalledTimes(2)
       const batchCall = mocks.fetch.mock.calls[1]
-      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(batchCall[0]).toEqual('https://insights.hanzo.ai/batch/')
       expect(parseBody(batchCall)).toMatchObject({
         api_key: 'TEST_API_KEY',
         batch: [
@@ -104,7 +104,7 @@ describe('Insights Core', () => {
       await waitForPromises()
       expect(mocks.fetch).toHaveBeenCalledTimes(2)
       const batchCall = mocks.fetch.mock.calls[1]
-      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(batchCall[0]).toEqual('https://insights.hanzo.ai/batch/')
       expect(parseBody(batchCall)).toMatchObject({
         api_key: 'TEST_API_KEY',
         batch: [
@@ -140,7 +140,7 @@ describe('Insights Core', () => {
 
       expect(mocks.fetch).toHaveBeenCalledTimes(2)
       const batchCall = mocks.fetch.mock.calls[1]
-      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(batchCall[0]).toEqual('https://insights.hanzo.ai/batch/')
       expect(parseBody(batchCall)).toMatchObject({
         batch: [
           {
@@ -171,7 +171,7 @@ describe('Insights Core', () => {
       expect(mocks.storage.setItem).toHaveBeenCalledWith('distinct_id', 'id-1')
       expect(mocks.fetch).toHaveBeenCalledTimes(2)
       const batchCall = mocks.fetch.mock.calls[1]
-      expect(batchCall[0]).toEqual('https://us.i.insights.com/batch/')
+      expect(batchCall[0]).toEqual('https://insights.hanzo.ai/batch/')
       expect(parseBody(batchCall)).toMatchObject({
         batch: [
           {

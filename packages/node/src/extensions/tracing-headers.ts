@@ -1,18 +1,18 @@
 import type { IncomingHttpHeaders } from 'node:http'
 
 const TRACING_HEADER_MAX_LENGTH = 1000
-// Remove C0 controls, DEL, and C1 controls from PostHog tracing IDs only.
+// Remove C0 controls, DEL, and C1 controls from Insights tracing IDs only.
 // eslint-disable-next-line no-control-regex
 const TRACING_HEADER_CONTROL_CHARS_REGEX = /[\x00-\x1f\x7f-\x9f]/g
 
 type HeaderValue = IncomingHttpHeaders[string]
 
-export const POSTHOG_TRACING_HEADERS = {
-  sessionId: 'x-posthog-session-id',
-  distinctId: 'x-posthog-distinct-id',
+export const INSIGHTS_TRACING_HEADERS = {
+  sessionId: 'x-insights-session-id',
+  distinctId: 'x-insights-distinct-id',
 } as const
 
-export interface PostHogTracingHeaderValues {
+export interface InsightsTracingHeaderValues {
   sessionId?: string
   distinctId?: string
 }
@@ -50,13 +50,13 @@ export function sanitizeTracingHeaderValue(value: HeaderValue): string | undefin
   return sanitized.length > TRACING_HEADER_MAX_LENGTH ? sanitized.slice(0, TRACING_HEADER_MAX_LENGTH) : sanitized
 }
 
-export function getPostHogTracingHeaderValues(headers?: IncomingHttpHeaders): PostHogTracingHeaderValues {
+export function getInsightsTracingHeaderValues(headers?: IncomingHttpHeaders): InsightsTracingHeaderValues {
   if (!headers) {
     return {}
   }
 
-  const sessionId = sanitizeTracingHeaderValue(headers[POSTHOG_TRACING_HEADERS.sessionId])
-  const distinctId = sanitizeTracingHeaderValue(headers[POSTHOG_TRACING_HEADERS.distinctId])
+  const sessionId = sanitizeTracingHeaderValue(headers[INSIGHTS_TRACING_HEADERS.sessionId])
+  const distinctId = sanitizeTracingHeaderValue(headers[INSIGHTS_TRACING_HEADERS.distinctId])
 
   return {
     ...(sessionId !== undefined ? { sessionId } : {}),

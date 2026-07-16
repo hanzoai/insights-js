@@ -174,7 +174,7 @@ describe('logs-utils', () => {
     it('auto-populates browser SDK context (currentUrl → url.full)', () => {
       const record = buildOtlpLogRecord({ body: 'test' }, browserSdkContext)
       const attrs = Object.fromEntries(record.attributes.map((a) => [a.key, a.value]))
-      expect(attrs['posthogDistinctId']).toEqual({ stringValue: 'user-123' })
+      expect(attrs['insightsDistinctId']).toEqual({ stringValue: 'user-123' })
       expect(attrs['sessionId']).toEqual({ stringValue: 'session-456' })
       expect(attrs['url.full']).toEqual({ stringValue: 'https://example.com/page' })
       expect(attrs['feature_flags']).toEqual({
@@ -196,11 +196,11 @@ describe('logs-utils', () => {
 
     it('user attributes override auto-populated ones', () => {
       const record = buildOtlpLogRecord(
-        { body: 'test', attributes: { posthogDistinctId: 'custom-id' } },
+        { body: 'test', attributes: { insightsDistinctId: 'custom-id' } },
         browserSdkContext
       )
       const attrs = Object.fromEntries(record.attributes.map((a) => [a.key, a.value]))
-      expect(attrs['posthogDistinctId']).toEqual({ stringValue: 'custom-id' })
+      expect(attrs['insightsDistinctId']).toEqual({ stringValue: 'custom-id' })
     })
 
     it('includes trace context when provided', () => {

@@ -1,5 +1,5 @@
-export { PostHogContext, type PostHog } from './context/PostHogContext'
-export { PostHogProvider } from './context/PostHogProviderSlim'
+export { InsightsContext, type Insights } from './context/InsightsContext'
+export { InsightsProvider } from './context/InsightsProviderSlim'
 export * from './hooks'
 export * from './components'
 export * from './helpers'

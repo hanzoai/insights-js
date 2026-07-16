@@ -10,6 +10,7 @@ import {
   formatOpenAIResponsesInput,
   calculateWebSearchCount,
   sendEventWithErrorToInsights,
+  getModelParams,
 } from '../utils'
 import { captureAiGeneration } from '../captureAiGeneration'
 import type { APIPromise } from 'openai'
@@ -19,7 +20,7 @@ import type { ResponseCreateParamsWithTools, ExtractParsedContentFromParams } fr
 import type { FormattedMessage, FormattedContent, FormattedFunctionCall } from '../types'
 import { sanitizeOpenAI, sanitizeOpenAIResponse } from '../sanitization'
 import { extractInsightsParams } from '../utils'
-import { isResponseTokenChunk } from './utils'
+import { isResponseTokenChunk, buildProviderMetadata, extractRequestId } from './utils'
 
 const Chat = OpenAIOrignal.Chat
 const Completions = Chat.Completions

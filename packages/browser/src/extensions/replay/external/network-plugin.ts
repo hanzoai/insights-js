@@ -11,7 +11,17 @@
 
 import type { IWindow, listenerHandler, RecordPlugin } from '../types/rrweb-types'
 import { CapturedNetworkRequest, Headers, InitiatorType, NetworkRecordOptions } from '../../../types'
-import { isArray, isBoolean, isFormData, isNull, isNullish, isString, isUndefined, isObject } from '@hanzo/insights-core'
+import {
+    isArray,
+    isBoolean,
+    isFormData,
+    isFunction,
+    isNull,
+    isNullish,
+    isString,
+    isUndefined,
+    isObject,
+} from '@hanzo/insights-core'
 import { isDocument } from '../../../utils/type-utils'
 import { createLogger } from '../../../utils/logger'
 import { formDataToQuery } from '../../../utils/request-utils'

@@ -118,12 +118,12 @@ describe('tracing headers', () => {
 
             const headers = new Headers(downstreamInit?.headers)
             expect(headers.get('x-original')).toBe('original-header-value')
-            expect(headers.get('X-POSTHOG-SESSION-ID')).toBe('session-id')
-            expect(headers.get('X-POSTHOG-WINDOW-ID')).toBe('window-id')
-            expect(headers.get('X-POSTHOG-DISTINCT-ID')).toBe('distinct-id')
-            expect(callerHeaders.get('X-POSTHOG-SESSION-ID')).toBeNull()
-            expect(callerHeaders.get('X-POSTHOG-WINDOW-ID')).toBeNull()
-            expect(callerHeaders.get('X-POSTHOG-DISTINCT-ID')).toBeNull()
+            expect(headers.get('X-INSIGHTS-SESSION-ID')).toBe('session-id')
+            expect(headers.get('X-INSIGHTS-WINDOW-ID')).toBe('window-id')
+            expect(headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('distinct-id')
+            expect(callerHeaders.get('X-INSIGHTS-SESSION-ID')).toBeNull()
+            expect(callerHeaders.get('X-INSIGHTS-WINDOW-ID')).toBeNull()
+            expect(callerHeaders.get('X-INSIGHTS-DISTINCT-ID')).toBeNull()
         })
 
         it('delegates unchanged when the hostname does not match', async () => {
@@ -163,9 +163,9 @@ describe('tracing headers', () => {
             expect(downstreamRequest?.url).toBe('https://other.example/path')
             expect(downstreamRequest?.method).toBe('POST')
             expect(downstreamRequest?.headers.get('x-request')).toBe('request-header')
-            expect(downstreamRequest?.headers.get('X-POSTHOG-SESSION-ID')).toBeNull()
-            expect(downstreamRequest?.headers.get('X-POSTHOG-WINDOW-ID')).toBeNull()
-            expect(downstreamRequest?.headers.get('X-POSTHOG-DISTINCT-ID')).toBeNull()
+            expect(downstreamRequest?.headers.get('X-INSIGHTS-SESSION-ID')).toBeNull()
+            expect(downstreamRequest?.headers.get('X-INSIGHTS-WINDOW-ID')).toBeNull()
+            expect(downstreamRequest?.headers.get('X-INSIGHTS-DISTINCT-ID')).toBeNull()
             await expect(downstreamRequest?.clone().text()).resolves.toBe('request-body')
             expect(sessionManager.checkAndGetSessionAndWindowId).not.toHaveBeenCalled()
         })
@@ -196,9 +196,9 @@ describe('tracing headers', () => {
             expect(downstreamRequest.method).toBe('PUT')
             expect(downstreamRequest.headers.get('x-request')).toBeNull()
             expect(downstreamRequest.headers.get('x-init')).toBe('init-header')
-            expect(downstreamRequest.headers.get('X-POSTHOG-SESSION-ID')).toBe('session-id')
-            expect(downstreamRequest.headers.get('X-POSTHOG-WINDOW-ID')).toBe('window-id')
-            expect(downstreamRequest.headers.get('X-POSTHOG-DISTINCT-ID')).toBe('distinct-id')
+            expect(downstreamRequest.headers.get('X-INSIGHTS-SESSION-ID')).toBe('session-id')
+            expect(downstreamRequest.headers.get('X-INSIGHTS-WINDOW-ID')).toBe('window-id')
+            expect(downstreamRequest.headers.get('X-INSIGHTS-DISTINCT-ID')).toBe('distinct-id')
             await expect(downstreamRequest.clone().text()).resolves.toBe('override-body')
         })
 
@@ -222,9 +222,9 @@ describe('tracing headers', () => {
                 url: 'https://example.com/path',
                 distinctId: 'distinct-id',
                 expectedHeaders: [
-                    ['X-POSTHOG-SESSION-ID', 'session-id'],
-                    ['X-POSTHOG-WINDOW-ID', 'window-id'],
-                    ['X-POSTHOG-DISTINCT-ID', 'distinct-id'],
+                    ['X-INSIGHTS-SESSION-ID', 'session-id'],
+                    ['X-INSIGHTS-WINDOW-ID', 'window-id'],
+                    ['X-INSIGHTS-DISTINCT-ID', 'distinct-id'],
                 ],
                 absentHeaders: [],
             },
@@ -234,9 +234,9 @@ describe('tracing headers', () => {
                 distinctId: 'distinct-id',
                 expectedHeaders: [],
                 absentHeaders: [
-                    ['X-POSTHOG-SESSION-ID', 'session-id'],
-                    ['X-POSTHOG-WINDOW-ID', 'window-id'],
-                    ['X-POSTHOG-DISTINCT-ID', 'distinct-id'],
+                    ['X-INSIGHTS-SESSION-ID', 'session-id'],
+                    ['X-INSIGHTS-WINDOW-ID', 'window-id'],
+                    ['X-INSIGHTS-DISTINCT-ID', 'distinct-id'],
                 ],
             },
             {
@@ -244,10 +244,10 @@ describe('tracing headers', () => {
                 url: 'https://example.com/path',
                 distinctId: COOKIELESS_SENTINEL_VALUE,
                 expectedHeaders: [
-                    ['X-POSTHOG-SESSION-ID', 'session-id'],
-                    ['X-POSTHOG-WINDOW-ID', 'window-id'],
+                    ['X-INSIGHTS-SESSION-ID', 'session-id'],
+                    ['X-INSIGHTS-WINDOW-ID', 'window-id'],
                 ],
-                absentHeaders: [['X-POSTHOG-DISTINCT-ID', 'distinct-id']],
+                absentHeaders: [['X-INSIGHTS-DISTINCT-ID', 'distinct-id']],
             },
         ])('$name', ({ url, distinctId, expectedHeaders, absentHeaders }) => {
             const setRequestHeaderSpy = jest

@@ -148,7 +148,7 @@ function resolveOptions(userOptions: InsightsRollupPluginOptions): ResolvedInsig
     }
     const userSourcemaps = userOptions.sourcemaps ?? {}
     const insightsOptions: ResolvedInsightsRollupPluginOptions = {
-        host: userOptions.host || 'https://us.i.insights.com',
+        host: userOptions.host || 'https://insights.hanzo.ai',
         personalApiKey: userOptions.personalApiKey,
         projectId,
         cliBinaryPath:
