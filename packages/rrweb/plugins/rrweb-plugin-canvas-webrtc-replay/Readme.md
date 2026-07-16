@@ -13,8 +13,8 @@ https://user-images.githubusercontent.com/4106/186701616-fd71a107-5d53-423c-ba09
 ```js
 // Record side
 
-import rrweb from '@posthog/rrweb';
-import { RRWebPluginCanvasWebRTCRecord } from '@posthog/rrweb-plugin-canvas-webrtc-record';
+import rrweb from '@insights/rrweb';
+import { RRWebPluginCanvasWebRTCRecord } from '@insights/rrweb-plugin-canvas-webrtc-record';
 
 const webRTCRecordPlugin = new RRWebPluginCanvasWebRTCRecord({
   signalSendCallback: (msg) => {
@@ -42,8 +42,8 @@ rrweb.record({
 
 ```js
 // Replay side
-import rrweb from '@posthog/rrweb';
-import { RRWebPluginCanvasWebRTCReplay } from '@posthog/rrweb-plugin-canvas-webrtc-replay';
+import rrweb from '@insights/rrweb';
+import { RRWebPluginCanvasWebRTCReplay } from '@insights/rrweb-plugin-canvas-webrtc-replay';
 
 const webRTCReplayPlugin = new RRWebPluginCanvasWebRTCReplay({
   canvasFoundCallback(canvas, context) {
@@ -186,8 +186,8 @@ https://github.com/rrweb-io/rrweb/pull/976
       </a>
     </td>
     <td align="center">
-      <a href="https://posthog.com?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
-        <img width="195px" src="https://www.rrweb.io/logos/posthog.png">
+      <a href="https://insights.hanzo.ai?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
+        <img width="195px" src="https://www.rrweb.io/logos/insights.png">
       </a>
     </td>
     <td align="center">

@@ -1,18 +1,18 @@
-# @posthog/mcp
+# @insights/mcp
 
-PostHog SDK for instrumenting Model Context Protocol (MCP) servers. Tracks tool calls, tool listing, initialization, user intent, identity, and errors — without changing your tool handler logic.
+Insights SDK for instrumenting Model Context Protocol (MCP) servers. Tracks tool calls, tool listing, initialization, user intent, identity, and errors — without changing your tool handler logic.
 
 ## Install
 
 ```bash
-npm install @posthog/mcp
+npm install @insights/mcp
 ```
 
 ## Usage
 
 ```typescript
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { track } from '@posthog/mcp'
+import { track } from '@insights/mcp'
 
 const server = new McpServer({ name: 'my-mcp-server', version: '1.0.0' })
 
