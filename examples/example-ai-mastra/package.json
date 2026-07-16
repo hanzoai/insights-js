@@ -10,7 +10,7 @@
   "dependencies": {
     "@mastra/core": "^1.14.0",
     "@mastra/observability": "^1.8.0",
-    "@mastra/posthog": "^1.0.16",
+    "@mastra/insights": "^1.0.16",
     "zod": "^3.0.0"
   },
   "devDependencies": {

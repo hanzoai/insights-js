@@ -3,13 +3,14 @@
 Hanzo Insights JS — monorepo of analytics SDKs (browser, node, react, react-native,
 nextjs, nuxt, ai, convex, mcp) plus a vendored rrweb session-replay stack.
 
-Fork of PostHog's `posthog-js` monorepo, fully rebranded to the Hanzo Insights identity
-and published under the `@hanzo/*` npm scope. Canonical repo: `github.com/hanzoinsights/insights-js`.
+Hanzo-native end to end, published under the `@hanzo/*` npm scope. Originally
+derived from an upstream OSS analytics SDK (see `LICENSE` for attribution); no
+upstream brand remains in this codebase — see "ZERO upstream brand" below.
 
 Provides analytics, feature flags, session replay, and A/B testing for web and Node.js
 applications connected to [Hanzo Insights](https://insights.hanzo.ai).
 
-## Package naming (one scheme, no posthog)
+## Package naming (one scheme)
 
 - SDKs: `@hanzo/insights` (browser), `@hanzo/insights-core`, `@hanzo/insights-types`,
   `@hanzo/insights-node`, `@hanzo/insights-react`, `@hanzo/insights-react-native`,
@@ -25,40 +26,45 @@ applications connected to [Hanzo Insights](https://insights.hanzo.ai).
   `@hanzo/rrweb-packer`, and the `@hanzo/rrweb-plugin-*` family.
 - Tooling: `@hanzo/insights-tooling-*` and `eslint-plugin-insights`.
 
-There must be ZERO `@posthog/*` dependency or identity references in source.
-Verify: `grep -rl '@posthog/' packages --include='*.ts' --include='package.json' | grep -v node_modules` → 0.
+## ZERO upstream brand — we own both sides of the wire
 
-## ZERO posthog — we own both sides of the wire
-
-There is no PostHog anywhere in this SDK. **We own the ingestion server
+This codebase is Hanzo-native end to end. **We own the ingestion server
 (`hanzoai/insights`: Django + `rust/capture` + `nodejs` plugin) AND this SDK**, so
-there is no external wire contract to preserve — the wire is ours. The server is
-already 100% posthog-free (0 refs in python/rust/node source); this SDK was the
-last laggard and is now swept (1452 → 0).
+there is no external wire contract to preserve — the wire is ours. Anyone tempted
+to "restore" an upstream constant for compatibility: there is nothing to be
+compatible with. Both sides move together.
 
-Verify (must stay 0):
-`grep -rioE 'posthog' packages/*/src packages/*/tests packages/*/package.json | wc -l`
+**Enforced by CI**, not by convention: `.github/workflows/brand-guard.yml` fails on
+any upstream-brand reference or filename, anywhere in the repo (excluding
+`node_modules`, generated `dist`/`lib`/`references`, and the guard itself — a
+guard must name what it forbids, so that ONE file is the only place the string may
+appear; never run a rebrand sweep across it).
 
-Renamed with the server, in lockstep — do NOT "restore" any of these:
+Settled during the sweep (1452 refs → 0), keep them settled:
 
-- `$last_posthog_reset` → **`$last_insights_reset`** — the server's taxonomy
-  (`insights/taxonomy/taxonomy.py`, `insights/insightsql/ai.py`) already expected
-  the `insights` form; the SDK emitting the `posthog` form was a live MISMATCH.
-- `__PosthogExtensions__` → `__InsightsExtensions__` (runtime hook).
-- `PostHog`/`posthog`/`POSTHOG` identifiers → `Insights`/`insights`/`INSIGHTS`.
-- All hosts → `https://insights.hanzo.ai` (`DEFAULT_PLUGIN_HOST`, `DEFAULT_NUXT_HOST`
-  and the core `host` default previously pointed at **PostHog's cloud**
-  `us.i.posthog.com` — a real bug). There is no separate assets CDN: remote config
-  is fetched from the same host (PostHog's us-assets/eu-assets split was removed).
+- **Event property**: the reset property is `$last_insights_reset`. The server
+  taxonomy (`insights/taxonomy/taxonomy.py`, `insights/insightsql/ai.py`) always
+  expected this form — the SDK previously emitted the upstream form, which was a
+  live MISMATCH silently dropping the property.
+- **Runtime hook**: `__InsightsExtensions__`.
+- **Hosts**: everything defaults to `https://insights.hanzo.ai`.
+  `DEFAULT_PLUGIN_HOST`, `DEFAULT_NUXT_HOST` and the core `host` default used to
+  point at the *upstream vendor's cloud* — a real bug, since it sent our users'
+  events to a third party. There is NO separate assets CDN: remote config is
+  fetched from the same host (the upstream us-assets/eu-assets split was removed;
+  it had degenerated into `if (x === A) x = A`).
+- **Generated output**: `references/` is gitignored (`pnpm generate-references`
+  regenerates it); 58MB of snapshots named for upstream versions we never shipped
+  were dropped.
 
-Still genuinely fixed by convention (not brand): `$`-prefixed event names
-(`$pageview`, `$identify`, `$autocapture`, `$set`) and `distinct_id` — these carry
-no posthog string and are the event schema the server + ClickHouse read.
+NOT brand, do not touch: `$`-prefixed event names (`$pageview`, `$identify`,
+`$autocapture`, `$set`) and `distinct_id` — that's the event schema the server and
+ClickHouse read.
 
-### Ingest endpoints are Hanzo-native `/v1/*` (NOT PostHog `/e/`,`/batch/`,`/s/`)
+### Ingest endpoints are Hanzo-native `/v1/*`
 
 We own the capture server (`hanzoai/insights` `rust/capture`) AND this SDK, so the
-event-ingest wire contract is Hanzo `/v1`, not the PostHog paths. Both sides moved
+event-ingest wire contract is Hanzo `/v1`, not the upstream paths. Both sides moved
 together — do NOT "restore" the old paths:
 
 - events → `POST /v1/e` (single OR batch; was `/e/` + `/batch/`)
@@ -70,5 +76,16 @@ Set in `packages/browser/src/insights-core.ts` (`analyticsDefaultEndpoint`),
 `BASE_ENDPOINT`. The capture server serves ONLY these `/v1` paths (legacy removed,
 forward-only).
 
-Package *import specifiers* `posthog-js` / `posthog-node` ARE rebranded to
-`@hanzo/insights` / `@hanzo/insights-node` (those are package names, not wire constants).
+Import specifiers are `@hanzo/insights` / `@hanzo/insights-node` — package names,
+not wire constants.
+
+## LICENSE / NOTICE are exempt — never rebrand attribution
+
+`LICENSE` and `NOTICE` name the real upstream copyright holders and the real
+upstream repo URL — read them there; they are the source of truth and must stay
+verbatim. Apache-2.0 section 4(c) requires retaining those notices, and rewriting
+a third party's copyright line falsifies who owns the work. An earlier rebrand
+pass did exactly that (it renamed the copyright holder and invented a
+non-existent upstream URL); both were restored, and the two files are excluded
+from the brand guard. The rebrand covers OUR identity, package names, and code —
+never someone else's copyright.

@@ -4,42 +4,42 @@
 
 ### Patch Changes
 
-- Updated dependencies [[`add2fae`](https://github.com/PostHog/posthog-js/commit/add2fae385046aa95452db12acb0f7deb91e84b3)]:
-    - @posthog/rrweb-snapshot@0.0.65
+- Updated dependencies [[`add2fae`](https://github.com/Insights/insights-js/commit/add2fae385046aa95452db12acb0f7deb91e84b3)]:
+    - @insights/rrweb-snapshot@0.0.65
 
 ## 0.0.64
 
 ### Patch Changes
 
-- Updated dependencies [[`cafa9cc`](https://github.com/PostHog/posthog-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c)]:
-    - @posthog/rrweb-snapshot@0.0.64
+- Updated dependencies [[`cafa9cc`](https://github.com/Insights/insights-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c)]:
+    - @insights/rrweb-snapshot@0.0.64
 
 ## 0.0.63
 
 ### Patch Changes
 
-- Updated dependencies [[`5fb74b6`](https://github.com/PostHog/posthog-js/commit/5fb74b60bb31394d6511845cc902daf8810dbf3f)]:
-    - @posthog/rrweb-snapshot@0.0.63
+- Updated dependencies [[`5fb74b6`](https://github.com/Insights/insights-js/commit/5fb74b60bb31394d6511845cc902daf8810dbf3f)]:
+    - @insights/rrweb-snapshot@0.0.63
 
 ## 0.0.62
 
 ### Patch Changes
 
-- Updated dependencies [[`94a5ba0`](https://github.com/PostHog/posthog-js/commit/94a5ba0cf6d3a0f943517a126a59f52baa77f2fe)]:
-    - @posthog/rrweb-snapshot@0.0.62
+- Updated dependencies [[`94a5ba0`](https://github.com/Insights/insights-js/commit/94a5ba0cf6d3a0f943517a126a59f52baa77f2fe)]:
+    - @insights/rrweb-snapshot@0.0.62
 
 ## 0.0.61
 
 ### Patch Changes
 
-- [#3510](https://github.com/PostHog/posthog-js/pull/3510) [`a5d86c9`](https://github.com/PostHog/posthog-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474) Thanks [@arnaudhillen](https://github.com/arnaudhillen)! - Move posthog-rrweb sources into the posthog-js monorepo under `packages/rrweb/`.
-  The seven packages we publish (`@posthog/rrweb`, `@posthog/rrweb-types`,
-  `@posthog/rrweb-utils`, `@posthog/rrdom`, `@posthog/rrweb-snapshot`,
-  `@posthog/rrweb-record`, `@posthog/rrweb-plugin-console-record`) now release
+- [#3510](https://github.com/Insights/insights-js/pull/3510) [`a5d86c9`](https://github.com/Insights/insights-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474) Thanks [@arnaudhillen](https://github.com/arnaudhillen)! - Move insights-rrweb sources into the insights-js monorepo under `packages/rrweb/`.
+  The seven packages we publish (`@insights/rrweb`, `@insights/rrweb-types`,
+  `@insights/rrweb-utils`, `@insights/rrdom`, `@insights/rrweb-snapshot`,
+  `@insights/rrweb-record`, `@insights/rrweb-plugin-console-record`) now release
   from this repo via the existing changesets pipeline. No runtime behavior
   changes. (2026-05-05)
-- Updated dependencies [[`a5d86c9`](https://github.com/PostHog/posthog-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474)]:
-    - @posthog/rrweb-snapshot@0.0.61
+- Updated dependencies [[`a5d86c9`](https://github.com/Insights/insights-js/commit/a5d86c9dbeda7d5f757c5d2216431b64cfcec474)]:
+    - @insights/rrweb-snapshot@0.0.61
 
 ## 2.0.0-alpha.18
 
@@ -74,7 +74,7 @@
 
 ### Major Changes
 
-- [#1497](https://github.com/rrweb-io/rrweb/pull/1497) [`2606a2a`](https://github.com/rrweb-io/rrweb/commit/2606a2a28f2a6d897b8ae4ea3ec40ef0eeacbfaf) Thanks [@Juice10](https://github.com/Juice10)! - Distributed files have new filenames, paths and extensions. **Important: If you reference distributed files or types directly, you might have to update your paths/filenames. E.g. you import from `rrweb/typings/...` or `rrdom/es`. However you run `import rrweb from '@posthog/rrweb'` you won't notice a difference with this change.** If you include rrweb files directly in a script tag, you might have to update that path to include a the `.umd.cjs` files instead. All `.js` files now use ES modules which can be used in modern browsers, node.js and bundlers that support ES modules. All npm packages now also ship `.cjs` and `.umd.cjs` files. The `.umd.cjs` files are CommonJS modules that bundle all files together to make it easy to ship one file to browser environments (similar to the previous `.js` files). The `.cjs` files are CommonJS modules that can be used in older Node.js environments. Types should be better defined in `package.json` and if you need specific types they might be exported from new packages (for example `PlayerMachineState` and `SpeedMachineState` are now exported from `@rrweb/replay`). Check the `package.json`'s `main` and `exports` field for the available files.
+- [#1497](https://github.com/rrweb-io/rrweb/pull/1497) [`2606a2a`](https://github.com/rrweb-io/rrweb/commit/2606a2a28f2a6d897b8ae4ea3ec40ef0eeacbfaf) Thanks [@Juice10](https://github.com/Juice10)! - Distributed files have new filenames, paths and extensions. **Important: If you reference distributed files or types directly, you might have to update your paths/filenames. E.g. you import from `rrweb/typings/...` or `rrdom/es`. However you run `import rrweb from '@insights/rrweb'` you won't notice a difference with this change.** If you include rrweb files directly in a script tag, you might have to update that path to include a the `.umd.cjs` files instead. All `.js` files now use ES modules which can be used in modern browsers, node.js and bundlers that support ES modules. All npm packages now also ship `.cjs` and `.umd.cjs` files. The `.umd.cjs` files are CommonJS modules that bundle all files together to make it easy to ship one file to browser environments (similar to the previous `.js` files). The `.cjs` files are CommonJS modules that can be used in older Node.js environments. Types should be better defined in `package.json` and if you need specific types they might be exported from new packages (for example `PlayerMachineState` and `SpeedMachineState` are now exported from `@rrweb/replay`). Check the `package.json`'s `main` and `exports` field for the available files.
 
 ### Patch Changes
 

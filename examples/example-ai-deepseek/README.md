@@ -1,6 +1,6 @@
-# DeepSeek + PostHog AI Examples
+# DeepSeek + Insights AI Examples
 
-Track DeepSeek API calls with PostHog via the OpenAI-compatible API.
+Track DeepSeek API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

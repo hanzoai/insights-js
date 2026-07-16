@@ -180,7 +180,7 @@ async function verifyUploadedAssets(bucket: string, keys: string[], label: strin
     await Promise.all(keys.map((key) => verifyUploadedObject(bucket, key)))
 }
 
-export async function uploadPostHogJsS3(bucket: string, version: string): Promise<void> {
+export async function uploadInsightsJsS3(bucket: string, version: string): Promise<void> {
     const parsedVersion = parseSemver(version)
     if (!parsedVersion) {
         throw new Error(`Invalid version format: '${version}'`)
@@ -189,7 +189,7 @@ export async function uploadPostHogJsS3(bucket: string, version: string): Promis
     const assets = await collectReleaseAssets()
     const uploadPlans = buildAssetUploadPlans(version, assets)
 
-    console.log(`==> Uploading posthog-js v${version}`)
+    console.log(`==> Uploading insights-js v${version}`)
     console.log(`    immutable prefix: s3://${bucket}/static/${version}/`)
     if (parsedVersion.prerelease) {
         console.log('    mutable aliases: skipped for prerelease publish')

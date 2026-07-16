@@ -2,10 +2,10 @@ import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { action } from '../_generated/server'
 import { v } from 'convex/values'
-import { posthog } from '../posthog.js'
+import { insights } from '../insights.js'
 
 // Demonstrates using the Vercel AI SDK (without @convex-dev/agent)
-// to call an LLM and capture $ai_generation events to PostHog.
+// to call an LLM and capture $ai_generation events to Insights.
 export const generate = action({
     args: {
         prompt: v.string(),
@@ -22,7 +22,7 @@ export const generate = action({
 
         const latency = (Date.now() - startTime) / 1000
 
-        await posthog.capture(ctx, {
+        await insights.capture(ctx, {
             distinctId: args.distinctId ?? 'anonymous',
             event: '$ai_generation',
             properties: {

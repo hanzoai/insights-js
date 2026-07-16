@@ -1,6 +1,6 @@
-# Mistral + PostHog AI Examples
+# Mistral + Insights AI Examples
 
-Track Mistral API calls with PostHog via the OpenAI-compatible API.
+Track Mistral API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

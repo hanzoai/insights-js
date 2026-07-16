@@ -1,6 +1,6 @@
-# Fireworks AI + PostHog AI Examples
+# Fireworks AI + Insights AI Examples
 
-Track Fireworks AI API calls with PostHog via the OpenAI-compatible API.
+Track Fireworks AI API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

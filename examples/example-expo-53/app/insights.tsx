@@ -24,9 +24,9 @@ export const insights = new Insights(process.env.EXPO_PUBLIC_INSIGHTS_PROJECT_AP
             console: ['error', 'warn'],
         },
     },
-    // Inject X-POSTHOG-DISTINCT-ID and X-POSTHOG-SESSION-ID on outgoing fetch
+    // Inject X-INSIGHTS-DISTINCT-ID and X-INSIGHTS-SESSION-ID on outgoing fetch
     // requests to these hostnames. Used by the Tracing Headers screen to verify
-    // the patch works end-to-end; see https://posthog.com/docs/llm-analytics/link-session-replay
+    // the patch works end-to-end; see https://insights.hanzo.ai/docs/llm-analytics/link-session-replay
     addTracingHeaders: ['httpbin.org'],
     logs: {
         serviceName: 'expo-example',

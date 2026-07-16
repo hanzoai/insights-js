@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { PostHogProvider, PostHogPageView } from '@hanzo/insights-next'
+import { InsightsProvider, InsightsPageView } from '@hanzo/insights-next'
 import { Nav } from './components/Nav'
 import { ConsentBanner } from './components/ConsentBanner'
 import './globals.css'
@@ -13,16 +13,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     return (
         <html lang="en">
             <body className="bg-gray-50 text-gray-900 min-h-screen">
-                <PostHogProvider
-                    apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY!}
+                <InsightsProvider
+                    apiKey={process.env.NEXT_PUBLIC_INSIGHTS_KEY!}
                     clientOptions={{ api_host: '/ingest' }}
                     bootstrapFlags
                 >
-                    <PostHogPageView />
+                    <InsightsPageView />
                     <Nav />
                     <main className="max-w-4xl mx-auto px-4 py-8">{children}</main>
                     <ConsentBanner />
-                </PostHogProvider>
+                </InsightsProvider>
             </body>
         </html>
     )
