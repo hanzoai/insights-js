@@ -1,18 +1,18 @@
-# @posthog/next Usage Guide
+# @insights/next Usage Guide
 
-Comprehensive reference for every feature in the `@posthog/next` package.
+Comprehensive reference for every feature in the `@insights/next` package.
 
 ## Table of Contents
 
 - [App Router Setup](#app-router-setup)
     - [Environment Variables](#environment-variables)
     - [Middleware](#middleware)
-    - [PostHogProvider](#posthogprovider)
+    - [InsightsProvider](#insightsprovider)
     - [Pageview Tracking](#pageview-tracking)
     - [Client Hooks](#client-hooks)
     - [Server-Side Usage](#server-side-usage)
 - [Pages Router Setup](#pages-router-setup)
-    - [PostHogProvider (Pages)](#posthogprovider-pages)
+    - [InsightsProvider (Pages)](#insightsprovider-pages)
     - [Pageview Tracking (Pages)](#pageview-tracking-pages)
     - [Server-Side Props](#server-side-props)
     - [Bootstrapping Flags (Pages)](#bootstrapping-flags-pages)
@@ -33,52 +33,52 @@ Comprehensive reference for every feature in the `@posthog/next` package.
 
 ```env
 # Required (or pass apiKey as a prop)
-NEXT_PUBLIC_POSTHOG_KEY=phc_your_key_here
+NEXT_PUBLIC_INSIGHTS_KEY=phc_your_key_here
 
-# Optional — custom PostHog host
-NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+# Optional — custom Insights host
+NEXT_PUBLIC_INSIGHTS_HOST=https://us.i.insights.com
 ```
 
 ### Middleware
 
-The middleware serves two purposes: seeding the PostHog identity cookie on first visit, and optionally proxying API requests through your domain.
+The middleware serves two purposes: seeding the Insights identity cookie on first visit, and optionally proxying API requests through your domain.
 
 ```ts
 // middleware.ts
-import { postHogMiddleware } from '@posthog/next'
+import { insightsMiddleware } from '@insights/next'
 
-export default postHogMiddleware({ proxy: true })
+export default insightsMiddleware({ proxy: true })
 
 export const config = {
     matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
 ```
 
-The middleware generates a UUIDv7 anonymous ID and sets the `ph_<key>_posthog` cookie on the first request. This ensures both client and server share the same identity from the very first render.
+The middleware generates a UUIDv7 anonymous ID and sets the `ph_<key>_insights` cookie on the first request. This ensures both client and server share the same identity from the very first render.
 
-### PostHogProvider
+### InsightsProvider
 
-`PostHogProvider` is a React Server Component that wraps your app with the PostHog context.
+`InsightsProvider` is a React Server Component that wraps your app with the Insights context.
 
 ```tsx
 // app/layout.tsx
 import { Suspense } from 'react'
-import { PostHogProvider, PostHogPageView } from '@posthog/next'
+import { InsightsProvider, InsightsPageView } from '@insights/next'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
             <body>
-                <PostHogProvider
-                    apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY!}
+                <InsightsProvider
+                    apiKey={process.env.NEXT_PUBLIC_INSIGHTS_KEY!}
                     clientOptions={{ api_host: '/ingest' }}
                     bootstrapFlags
                 >
                     <Suspense fallback={null}>
-                        <PostHogPageView />
+                        <InsightsPageView />
                     </Suspense>
                     {children}
-                </PostHogProvider>
+                </InsightsProvider>
             </body>
         </html>
     )
@@ -89,9 +89,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 | Prop             | Type                              | Default                   | Description                                                                                        |
 | ---------------- | --------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------- |
-| `apiKey`         | `string`                          | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key. Read from env var if omitted.                                             |
-| `clientOptions`  | `Partial<PostHogConfig>`          | See below                 | `posthog-js` configuration overrides.                                                              |
-| `serverOptions`  | `Partial<PostHogOptions>`         | `undefined`               | `posthog-node` configuration overrides for server-side flag evaluation.                            |
+| `apiKey`         | `string`                          | `NEXT_PUBLIC_INSIGHTS_KEY` | Insights project API key. Read from env var if omitted.                                             |
+| `clientOptions`  | `Partial<InsightsConfig>`          | See below                 | `insights-js` configuration overrides.                                                              |
+| `serverOptions`  | `Partial<InsightsOptions>`         | `undefined`               | `insights-node` configuration overrides for server-side flag evaluation.                            |
 | `bootstrapFlags` | `boolean \| BootstrapFlagsConfig` | `undefined`               | Enable server-side feature flag evaluation. See [Feature Flag Bootstrap](#feature-flag-bootstrap). |
 | `children`       | `React.ReactNode`                 | —                         | Your app content.                                                                                  |
 
@@ -106,50 +106,50 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-These defaults disable automatic pageviews (so `PostHogPageView` doesn't cause duplicates) and ensure the server can read identity and consent state from cookies. You can override any of them via the `clientOptions` prop.
+These defaults disable automatic pageviews (so `InsightsPageView` doesn't cause duplicates) and ensure the server can read identity and consent state from cookies. You can override any of them via the `clientOptions` prop.
 
 **Static vs Dynamic rendering:**
 
-By default (without `bootstrapFlags`), `PostHogProvider` does not call any dynamic Next.js APIs (`cookies()`, `headers()`). This makes it compatible with static generation, ISR, and Partial Prerendering (PPR).
+By default (without `bootstrapFlags`), `InsightsProvider` does not call any dynamic Next.js APIs (`cookies()`, `headers()`). This makes it compatible with static generation, ISR, and Partial Prerendering (PPR).
 
 When `bootstrapFlags` is enabled, the provider calls `cookies()` and evaluates flags server-side, which opts the route into dynamic rendering.
 
 ### Pageview Tracking
 
-`PostHogPageView` is a client component that automatically captures `$pageview` events on route changes. This is needed because Next.js App Router navigations are soft (client-side) — the browser doesn't fire a full page load, so `posthog-js`'s built-in pageview tracking doesn't trigger.
+`InsightsPageView` is a client component that automatically captures `$pageview` events on route changes. This is needed because Next.js App Router navigations are soft (client-side) — the browser doesn't fire a full page load, so `insights-js`'s built-in pageview tracking doesn't trigger.
 
 ```tsx
-import { PostHogPageView } from '@posthog/next'
+import { InsightsPageView } from '@insights/next'
 
-// Inside your PostHogProvider:
-;<PostHogPageView />
+// Inside your InsightsProvider:
+;<InsightsPageView />
 ```
 
 ### Client Hooks
 
-All hooks are re-exported from `posthog-js/react` and must be used in client components (`'use client'`).
+All hooks are re-exported from `insights-js/react` and must be used in client components (`'use client'`).
 
 ```tsx
 'use client'
-import { usePostHog, useFeatureFlag, useActiveFeatureFlags, PostHogFeature } from '@posthog/next'
+import { useInsights, useFeatureFlag, useActiveFeatureFlags, InsightsFeature } from '@insights/next'
 ```
 
 | Export                    | Type                             | Description                                                     |
 | ------------------------- | -------------------------------- | --------------------------------------------------------------- |
-| `usePostHog()`            | `PostHog`                        | Returns the `posthog-js` client instance.                       |
+| `useInsights()`            | `Insights`                        | Returns the `insights-js` client instance.                       |
 | `useFeatureFlag(key)`     | `FeatureFlagResult \| undefined` | Returns the flag result (`{ key, enabled, variant, payload }`). |
 | `useActiveFeatureFlags()` | `string[]`                       | Returns all active (truthy) feature flag keys.                  |
-| `PostHogFeature`          | Component                        | Conditionally renders children based on a flag.                 |
+| `InsightsFeature`          | Component                        | Conditionally renders children based on a flag.                 |
 
 **Example: Event capture**
 
 ```tsx
 'use client'
-import { usePostHog } from '@posthog/next'
+import { useInsights } from '@insights/next'
 
 export function TrackButton() {
-    const posthog = usePostHog()
-    return <button onClick={() => posthog.capture('button_clicked')}>Track</button>
+    const insights = useInsights()
+    return <button onClick={() => insights.capture('button_clicked')}>Track</button>
 }
 ```
 
@@ -157,73 +157,73 @@ export function TrackButton() {
 
 ```tsx
 'use client'
-import { PostHogFeature } from '@posthog/next'
+import { InsightsFeature } from '@insights/next'
 
 export function NewBanner() {
     return (
-        <PostHogFeature flag="show-banner" match={true}>
+        <InsightsFeature flag="show-banner" match={true}>
             <div>New feature available!</div>
-        </PostHogFeature>
+        </InsightsFeature>
     )
 }
 ```
 
 ### Server-Side Usage
 
-Use `getPostHog()` in server components, route handlers, and server actions to evaluate flags and capture events server-side. The returned client is preconfigured with the current user's context (distinct ID, session ID, and device ID) read from the PostHog cookie, so all flag evaluations and captured events are automatically attributed to the correct user.
+Use `getInsights()` in server components, route handlers, and server actions to evaluate flags and capture events server-side. The returned client is preconfigured with the current user's context (distinct ID, session ID, and device ID) read from the Insights cookie, so all flag evaluations and captured events are automatically attributed to the correct user.
 
 ```tsx
-import { getPostHog } from '@posthog/next'
+import { getInsights } from '@insights/next'
 
 export default async function DashboardPage() {
-    const posthog = await getPostHog()
+    const insights = await getInsights()
 
     // Evaluate feature flags
-    const flags = await posthog.getAllFlags()
-    const result = await posthog.getFeatureFlagResult('new-dashboard')
+    const flags = await insights.getAllFlags()
+    const result = await insights.getFeatureFlagResult('new-dashboard')
     const showNewDashboard = result?.enabled
 
     // Capture server-side events
-    posthog.capture({ event: 'dashboard_viewed' })
+    insights.capture({ event: 'dashboard_viewed' })
 
     return <div>{showNewDashboard ? <NewDashboard /> : <OldDashboard />}</div>
 }
 ```
 
-**Note:** `getPostHog()` calls `cookies()` internally, which automatically opts the route into dynamic rendering. Pages using it cannot be statically generated.
+**Note:** `getInsights()` calls `cookies()` internally, which automatically opts the route into dynamic rendering. Pages using it cannot be statically generated.
 
-`getPostHog()` accepts optional parameters:
+`getInsights()` accepts optional parameters:
 
 ```ts
-const posthog = await getPostHog(apiKey?, options?)
+const insights = await getInsights(apiKey?, options?)
 ```
 
 | Parameter | Type                      | Description                                                   |
 | --------- | ------------------------- | ------------------------------------------------------------- |
-| `apiKey`  | `string`                  | Override the API key (defaults to `NEXT_PUBLIC_POSTHOG_KEY`). |
-| `options` | `Partial<PostHogOptions>` | `posthog-node` options (e.g., `{ host: '...' }`).             |
+| `apiKey`  | `string`                  | Override the API key (defaults to `NEXT_PUBLIC_INSIGHTS_KEY`). |
+| `options` | `Partial<InsightsOptions>` | `insights-node` options (e.g., `{ host: '...' }`).             |
 
-The returned client is scoped to the current user via `enterContext()`. The user's identity, session ID, and device ID are automatically read from the PostHog cookie. Server clients are cached and reused across requests.
+The returned client is scoped to the current user via `enterContext()`. The user's identity, session ID, and device ID are automatically read from the Insights cookie. Server clients are cached and reused across requests.
 
 ---
 
 ## Pages Router Setup
 
-### PostHogProvider (Pages)
+### InsightsProvider (Pages)
 
-Wrap your `_app` with `PostHogProvider` to initialize PostHog for all pages:
+Wrap your `_app` with `InsightsProvider` to initialize Insights for all pages:
 
 ```tsx
 // pages/_app.tsx
 import type { AppProps } from 'next/app'
-import { PostHogProvider, PostHogPageView } from '@posthog/next/pages'
+import { InsightsProvider, InsightsPageView } from '@insights/next/pages'
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
-        <PostHogProvider apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY!} clientOptions={{ api_host: '/ingest' }}>
-            <PostHogPageView />
+        <InsightsProvider apiKey={process.env.NEXT_PUBLIC_INSIGHTS_KEY!} clientOptions={{ api_host: '/ingest' }}>
+            <InsightsPageView />
             <Component {...pageProps} />
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }
 ```
@@ -232,43 +232,43 @@ export default function App({ Component, pageProps }: AppProps) {
 
 | Prop            | Type                     | Default                   | Description                                                  |
 | --------------- | ------------------------ | ------------------------- | ------------------------------------------------------------ |
-| `apiKey`        | `string`                 | `NEXT_PUBLIC_POSTHOG_KEY` | PostHog project API key. Read from env var if omitted.       |
-| `clientOptions` | `Partial<PostHogConfig>` | See below                 | `posthog-js` configuration overrides.                        |
-| `bootstrap`     | `BootstrapConfig`        | `undefined`               | Server-evaluated bootstrap data from `getServerSidePostHog`. |
+| `apiKey`        | `string`                 | `NEXT_PUBLIC_INSIGHTS_KEY` | Insights project API key. Read from env var if omitted.       |
+| `clientOptions` | `Partial<InsightsConfig>` | See below                 | `insights-js` configuration overrides.                        |
+| `bootstrap`     | `BootstrapConfig`        | `undefined`               | Server-evaluated bootstrap data from `getServerSideInsights`. |
 | `children`      | `React.ReactNode`        | —                         | Your app content.                                            |
 
-The same [default options](#posthogprovider) are applied automatically. The `api_host` can also be set via the `NEXT_PUBLIC_POSTHOG_HOST` environment variable.
+The same [default options](#insightsprovider) are applied automatically. The `api_host` can also be set via the `NEXT_PUBLIC_INSIGHTS_HOST` environment variable.
 
 ### Pageview Tracking (Pages)
 
-`PostHogPageView` (from `@posthog/next/pages`) tracks route changes using `next/router`. Place it inside your `PostHogProvider`:
+`InsightsPageView` (from `@insights/next/pages`) tracks route changes using `next/router`. Place it inside your `InsightsProvider`:
 
 ```tsx
-import { PostHogPageView } from '@posthog/next/pages'
+import { InsightsPageView } from '@insights/next/pages'
 
-// Inside your PostHogProvider in _app.tsx:
-;<PostHogPageView />
+// Inside your InsightsProvider in _app.tsx:
+;<InsightsPageView />
 ```
 
 It captures a `$pageview` event on every `router.asPath` change, including query parameters.
 
 ### Server-Side Props
 
-Use `getServerSidePostHog` inside your existing `getServerSideProps` to access a PostHog server client scoped to the current user:
+Use `getServerSideInsights` inside your existing `getServerSideProps` to access a Insights server client scoped to the current user:
 
 ```tsx
 // pages/dashboard.tsx
 import type { GetServerSideProps } from 'next'
-import { getServerSidePostHog } from '@posthog/next/pages'
+import { getServerSideInsights } from '@insights/next/pages'
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const posthog = await getServerSidePostHog(ctx)
+    const insights = await getServerSideInsights(ctx)
 
     // Evaluate flags for the current user
-    const result = await posthog.getFeatureFlagResult('new-ui')
+    const result = await insights.getFeatureFlagResult('new-ui')
 
     // Capture a server-side event
-    posthog.capture({ event: 'dashboard_viewed' })
+    insights.capture({ event: 'dashboard_viewed' })
 
     return { props: { showNewUI: result?.enabled ?? false } }
 }
@@ -278,9 +278,9 @@ export default function Dashboard({ showNewUI }: { showNewUI: boolean }) {
 }
 ```
 
-`getServerSidePostHog` returns a `posthog-node` client preconfigured with the current user's context (distinct ID, session ID, device ID) read from the PostHog cookie. Methods like `getAllFlags()`, `getFeatureFlagResult()`, and `capture()` automatically use this identity.
+`getServerSideInsights` returns a `insights-node` client preconfigured with the current user's context (distinct ID, session ID, device ID) read from the Insights cookie. Methods like `getAllFlags()`, `getFeatureFlagResult()`, and `capture()` automatically use this identity.
 
-The API key defaults to `NEXT_PUBLIC_POSTHOG_KEY`. You can override it with an optional second argument: `getServerSidePostHog(ctx, 'phc_custom_key')`.
+The API key defaults to `NEXT_PUBLIC_INSIGHTS_KEY`. You can override it with an optional second argument: `getServerSideInsights(ctx, 'phc_custom_key')`.
 
 ### Bootstrapping Flags (Pages)
 
@@ -289,12 +289,12 @@ To eliminate flag flicker on page load, evaluate flags server-side and pass them
 ```tsx
 // pages/dashboard.tsx
 import type { GetServerSideProps } from 'next'
-import { getServerSidePostHog } from '@posthog/next/pages'
+import { getServerSideInsights } from '@insights/next/pages'
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    const posthog = getServerSidePostHog(ctx)
-    const flags = await posthog.getAllFlagsAndPayloads()
-    return { props: { posthogBootstrap: flags } }
+    const insights = getServerSideInsights(ctx)
+    const flags = await insights.getAllFlagsAndPayloads()
+    return { props: { insightsBootstrap: flags } }
 }
 ```
 
@@ -303,18 +303,18 @@ Then wire the bootstrap data into the provider via `pageProps`:
 ```tsx
 // pages/_app.tsx
 import type { AppProps } from 'next/app'
-import { PostHogProvider, PostHogPageView } from '@posthog/next/pages'
+import { InsightsProvider, InsightsPageView } from '@insights/next/pages'
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
-        <PostHogProvider
-            apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY!}
+        <InsightsProvider
+            apiKey={process.env.NEXT_PUBLIC_INSIGHTS_KEY!}
             clientOptions={{ api_host: '/ingest' }}
-            bootstrap={pageProps.posthogBootstrap}
+            bootstrap={pageProps.insightsBootstrap}
         >
-            <PostHogPageView />
+            <InsightsPageView />
             <Component {...pageProps} />
-        </PostHogProvider>
+        </InsightsProvider>
     )
 }
 ```
@@ -323,14 +323,14 @@ export default function App({ Component, pageProps }: AppProps) {
 
 ## Feature Flag Bootstrap
 
-Bootstrap lets the server evaluate feature flags and pass the results to the client SDK, eliminating the round-trip to PostHog's API on page load. Hooks like `useFeatureFlag()` return real values immediately.
+Bootstrap lets the server evaluate feature flags and pass the results to the client SDK, eliminating the round-trip to Insights's API on page load. Hooks like `useFeatureFlag()` return real values immediately.
 
 ### Basic usage
 
 Pass `bootstrapFlags` as `true` to evaluate all flags:
 
 ```tsx
-<PostHogProvider bootstrapFlags>{children}</PostHogProvider>
+<InsightsProvider bootstrapFlags>{children}</InsightsProvider>
 ```
 
 ### Advanced usage
@@ -338,10 +338,10 @@ Pass `bootstrapFlags` as `true` to evaluate all flags:
 Pass an object to control evaluation:
 
 ```tsx
-<PostHogProvider
+<InsightsProvider
     bootstrapFlags={{
         flags: ['new-ui', 'pricing-v2'], // only evaluate these flags
-        groups: { company: 'posthog' }, // evaluate for a group
+        groups: { company: 'insights' }, // evaluate for a group
         personProperties: { plan: 'enterprise' }, // known person properties
         groupProperties: {
             // known group properties
@@ -350,7 +350,7 @@ Pass an object to control evaluation:
     }}
 >
     {children}
-</PostHogProvider>
+</InsightsProvider>
 ```
 
 **`BootstrapFlagsConfig` options:**
@@ -365,15 +365,15 @@ Pass an object to control evaluation:
 ### How it works
 
 1. The provider reads the identity cookie via `cookies()`
-2. It calls `posthog-node`'s `getAllFlagsAndPayloads()` with the user's `distinctId`
-3. Results are passed as `bootstrap` data to `posthog-js`
+2. It calls `insights-node`'s `getAllFlagsAndPayloads()` with the user's `distinctId`
+3. Results are passed as `bootstrap` data to `insights-js`
 4. `advanced_disable_feature_flags_on_first_load` is set to `true` so the client doesn't re-fetch flags
 5. The node client is cached and reused across requests
 
 ### Trade-offs
 
 - Enabling `bootstrapFlags` opts the route into **dynamic rendering** (incompatible with static generation / ISR)
-- Adds a server-side call to PostHog on each request (deduplicated per render)
+- Adds a server-side call to Insights on each request (deduplicated per render)
 - If the user has opted out of tracking, flag evaluation is skipped and no bootstrap data is passed
 
 ---
@@ -388,10 +388,10 @@ See the [ConsentBanner example](./examples/app-router/app/components/ConsentBann
 
 ### How consent flows through the stack
 
-1. **posthog-js** writes a consent cookie (`__ph_opt_in_out_<apiKey>`) with value `1` (opted in) or `0` (opted out)
+1. **insights-js** writes a consent cookie (`__ph_opt_in_out_<apiKey>`) with value `1` (opted in) or `0` (opted out)
 2. **Middleware** reads the consent cookie. If opted out, it skips identity cookie seeding and deletes any existing identity cookie
-3. **PostHogProvider** checks consent before evaluating bootstrap flags. If opted out, no flags are evaluated
-4. **getPostHog()** checks consent before setting up user context. If opted out, the client is returned without identity scoping
+3. **InsightsProvider** checks consent before evaluating bootstrap flags. If opted out, no flags are evaluated
+4. **getInsights()** checks consent before setting up user context. If opted out, the client is returned without identity scoping
 
 ### Consent defaults
 
@@ -409,7 +409,7 @@ The package applies these defaults to ensure the server can read consent:
 If your app requires user consent before setting any cookies, disable anonymous cookie seeding in the middleware:
 
 ```ts
-export default postHogMiddleware({
+export default insightsMiddleware({
     proxy: true,
     seedAnonymousCookie: false,
 })
@@ -418,7 +418,7 @@ export default postHogMiddleware({
 And on the client:
 
 ```tsx
-<PostHogProvider clientOptions={{ opt_out_capturing_by_default: true }}>
+<InsightsProvider clientOptions={{ opt_out_capturing_by_default: true }}>
 ```
 
 With this configuration, no identity cookie is seeded and no flags are evaluated until the user explicitly opts in.
@@ -429,19 +429,19 @@ With this configuration, no identity cookie is seeded and no flags are evaluated
 
 ### API Proxy
 
-Proxying routes PostHog API calls through your domain, which can help avoid ad blockers.
+Proxying routes Insights API calls through your domain, which can help avoid ad blockers.
 
 ```ts
-// Simplest — defaults to path prefix '/ingest' and host 'https://us.i.posthog.com'
-export default postHogMiddleware({ proxy: true })
+// Simplest — defaults to path prefix '/ingest' and host 'https://us.i.insights.com'
+export default insightsMiddleware({ proxy: true })
 ```
 
 ```ts
 // Custom path and host
-export default postHogMiddleware({
+export default insightsMiddleware({
     proxy: {
         pathPrefix: '/analytics',
-        host: 'https://eu.i.posthog.com',
+        host: 'https://eu.i.insights.com',
     },
 })
 ```
@@ -449,28 +449,28 @@ export default postHogMiddleware({
 When using the proxy, set `api_host` to the path prefix in your provider `clientOptions`:
 
 ```tsx
-<PostHogProvider clientOptions={{ api_host: '/ingest' }}>
+<InsightsProvider clientOptions={{ api_host: '/ingest' }}>
 ```
 
-**How it works:** Requests matching the path prefix (e.g., `/ingest/e`, `/ingest/decide`) are rewritten to the PostHog ingest host via `NextResponse.rewrite()`. The path prefix is stripped and the remaining path and query string are forwarded.
+**How it works:** Requests matching the path prefix (e.g., `/ingest/e`, `/ingest/decide`) are rewritten to the Insights ingest host via `NextResponse.rewrite()`. The path prefix is stripped and the remaining path and query string are forwarded.
 
 ### Composing with Other Middleware
 
-Pass an existing `NextResponse` to compose PostHog middleware with your own:
+Pass an existing `NextResponse` to compose Insights middleware with your own:
 
 ```ts
 // middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { postHogMiddleware } from '@posthog/next'
+import { insightsMiddleware } from '@insights/next'
 
 export default async function middleware(request: NextRequest) {
     // Your custom middleware logic
     const response = NextResponse.next()
     response.headers.set('x-custom-header', 'value')
 
-    // PostHog seeds cookies on the existing response
-    return postHogMiddleware({ proxy: true, response })(request)
+    // Insights seeds cookies on the existing response
+    return insightsMiddleware({ proxy: true, response })(request)
 }
 
 export const config = {
@@ -489,19 +489,19 @@ export const config = {
 ### Full Middleware Options
 
 ```ts
-interface PostHogMiddlewareOptions {
-    apiKey?: string // defaults to NEXT_PUBLIC_POSTHOG_KEY
+interface InsightsMiddlewareOptions {
+    apiKey?: string // defaults to NEXT_PUBLIC_INSIGHTS_KEY
     cookieMaxAgeSeconds?: number // default: 365 days (31,536,000 seconds)
     response?: NextResponse // compose with existing middleware
     seedAnonymousCookie?: boolean // default: true
     consentCookieName?: string // custom consent cookie name
     consentCookiePrefix?: string // custom consent cookie prefix
-    proxy?: boolean | PostHogProxyOptions // enable API proxying
+    proxy?: boolean | InsightsProxyOptions // enable API proxying
 }
 
-interface PostHogProxyOptions {
+interface InsightsProxyOptions {
     pathPrefix?: string // default: '/ingest'
-    host?: string // default: 'https://us.i.posthog.com'
+    host?: string // default: 'https://us.i.insights.com'
 }
 ```
 
@@ -509,49 +509,49 @@ interface PostHogProxyOptions {
 
 ## API Reference
 
-### `@posthog/next` (main entry point)
+### `@insights/next` (main entry point)
 
 **Server context** (React Server Components):
 
 | Export                          | Description                                                      |
 | ------------------------------- | ---------------------------------------------------------------- |
-| `PostHogProvider`               | Async server component that wraps your app with PostHog context. |
-| `PostHogPageView`               | Client component for automatic pageview tracking.                |
-| `usePostHog`                    | Hook returning the `posthog-js` client instance.                 |
+| `InsightsProvider`               | Async server component that wraps your app with Insights context. |
+| `InsightsPageView`               | Client component for automatic pageview tracking.                |
+| `useInsights`                    | Hook returning the `insights-js` client instance.                 |
 | `useFeatureFlag`                | Hook returning a feature flag's value.                           |
 | `useActiveFeatureFlags`         | Hook returning all active flag keys.                             |
-| `PostHogFeature`                | Component for conditional rendering based on a flag.             |
-| `getPostHog(apiKey?, options?)` | Returns a `posthog-node` client scoped to the current user.      |
-| `postHogMiddleware(options?)`   | Creates a Next.js middleware function.                           |
+| `InsightsFeature`                | Component for conditional rendering based on a flag.             |
+| `getInsights(apiKey?, options?)` | Returns a `insights-node` client scoped to the current user.      |
+| `insightsMiddleware(options?)`   | Creates a Next.js middleware function.                           |
 | `DEFAULT_INGEST_PATH`           | The default proxy path prefix (`'/ingest'`).                     |
 
 **Client context** (the same, minus server-only exports):
 
 | Export                  | Description                                          |
 | ----------------------- | ---------------------------------------------------- |
-| `PostHogPageView`       | Client component for automatic pageview tracking.    |
-| `usePostHog`            | Hook returning the `posthog-js` client instance.     |
+| `InsightsPageView`       | Client component for automatic pageview tracking.    |
+| `useInsights`            | Hook returning the `insights-js` client instance.     |
 | `useFeatureFlag`        | Hook returning a feature flag's value.               |
 | `useActiveFeatureFlags` | Hook returning all active flag keys.                 |
-| `PostHogFeature`        | Component for conditional rendering based on a flag. |
+| `InsightsFeature`        | Component for conditional rendering based on a flag. |
 
 **Types** (available in both contexts):
 
 | Export                     | Description                         |
 | -------------------------- | ----------------------------------- |
-| `PostHogProviderProps`     | Props for `PostHogProvider`.        |
+| `InsightsProviderProps`     | Props for `InsightsProvider`.        |
 | `BootstrapFlagsConfig`     | Configuration for `bootstrapFlags`. |
-| `PostHogMiddlewareOptions` | Type for middleware configuration.  |
-| `PostHogProxyOptions`      | Type for proxy configuration.       |
+| `InsightsMiddlewareOptions` | Type for middleware configuration.  |
+| `InsightsProxyOptions`      | Type for proxy configuration.       |
 
-### `@posthog/next/pages`
+### `@insights/next/pages`
 
 | Export                                         | Description                                                      |
 | ---------------------------------------------- | ---------------------------------------------------------------- |
-| `PostHogProvider`                              | Composable provider for `_app.tsx`.                              |
-| `PostHogPageView`                              | Pageview tracker using `next/router`.                            |
-| `getServerSidePostHog(ctx, apiKey?, options?)` | Returns a scoped `posthog-node` client for `getServerSideProps`. |
-| `PagesPostHogProviderProps`                    | Type for `PostHogProvider` props.                                |
+| `InsightsProvider`                              | Composable provider for `_app.tsx`.                              |
+| `InsightsPageView`                              | Pageview tracker using `next/router`.                            |
+| `getServerSideInsights(ctx, apiKey?, options?)` | Returns a scoped `insights-node` client for `getServerSideProps`. |
+| `PagesInsightsProviderProps`                    | Type for `InsightsProvider` props.                                |
 
 ---
 
@@ -559,7 +559,7 @@ interface PostHogProxyOptions {
 
 ### Cookie format
 
-The identity cookie is named `ph_<sanitized_key>_posthog` and contains JSON:
+The identity cookie is named `ph_<sanitized_key>_insights` and contains JSON:
 
 ```json
 {
@@ -572,15 +572,15 @@ The identity cookie is named `ph_<sanitized_key>_posthog` and contains JSON:
 
 ### Server client caching
 
-Both `getPostHog()` (App Router) and `getServerSidePostHog()` (Pages Router) reuse `posthog-node` client instances across requests. Clients are cached by `apiKey:host` combination in a module-level `Map`. Per-request isolation is achieved via `enterContext()` which uses `AsyncLocalStorage`.
+Both `getInsights()` (App Router) and `getServerSideInsights()` (Pages Router) reuse `insights-node` client instances across requests. Clients are cached by `apiKey:host` combination in a module-level `Map`. Per-request isolation is achieved via `enterContext()` which uses `AsyncLocalStorage`.
 
 ### Client initialization
 
-The client-side `posthog-js` instance is initialized eagerly during render (not in a `useEffect`). This is intentional — React fires effects bottom-up, so child effects (e.g., a consent banner) would otherwise try to access PostHog before the parent provider's effect has run. The `__loaded` guard on `posthog-js` prevents double initialization in React StrictMode.
+The client-side `insights-js` instance is initialized eagerly during render (not in a `useEffect`). This is intentional — React fires effects bottom-up, so child effects (e.g., a consent banner) would otherwise try to access Insights before the parent provider's effect has run. The `__loaded` guard on `insights-js` prevents double initialization in React StrictMode.
 
 ### Request scoping via `enterContext()`
 
-On the server, `getPostHog()` calls `client.enterContext()` to scope the shared client to the current request's user. This sets the `distinctId`, `$session_id`, and `$device_id` for all subsequent calls within that request. This is what allows a single cached `posthog-node` instance to serve multiple concurrent requests correctly.
+On the server, `getInsights()` calls `client.enterContext()` to scope the shared client to the current request's user. This sets the `distinctId`, `$session_id`, and `$device_id` for all subsequent calls within that request. This is what allows a single cached `insights-node` instance to serve multiple concurrent requests correctly.
 
 ---
 
