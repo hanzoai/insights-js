@@ -23,7 +23,7 @@ jobs:
       - run: pnpm test:unit
 
       - name: Node edge runtime tests
-        run: pnpm --filter=posthog-node test:edge-compat
+        run: pnpm --filter=insights-node test:edge-compat
 
   integration:
     name: Playwright E2E tests
@@ -250,7 +250,7 @@ jobs:
 
       - name: Install Chrome for Puppeteer
         if: steps.changed.outputs.rrweb-changed == 'true'
-        run: pnpm --filter @posthog/rrweb exec puppeteer browsers install chrome
+        run: pnpm --filter @insights/rrweb exec puppeteer browsers install chrome
 
       - name: Run rrweb tests
         if: steps.changed.outputs.rrweb-changed == 'true'
@@ -299,7 +299,7 @@ jobs:
   generate-references:
     # Runs the same api-extractor pipeline the release workflow uses to bump
     # versions, so type-extraction breakages (e.g. unresolved DOM globals in
-    # `@posthog/core` types when extracted from a non-DOM tsconfig) surface
+    # `@insights/core` types when extracted from a non-DOM tsconfig) surface
     # on the PR instead of blocking the release.
     name: Generate references
     runs-on: hanzo-build-linux-amd64

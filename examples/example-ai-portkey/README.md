@@ -1,6 +1,6 @@
-# Portkey + PostHog AI Examples
+# Portkey + Insights AI Examples
 
-Track Portkey AI gateway calls with PostHog via the OpenAI-compatible API.
+Track Portkey AI gateway calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

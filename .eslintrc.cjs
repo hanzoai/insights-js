@@ -102,7 +102,7 @@ module.exports = {
             files: ['packages/core/src/**'],
             excludedFiles: ['**/*.spec.*', '**/*.test.*'],
             rules: {
-                'posthog-js/no-unsafe-web-global': 'error',
+                'insights-js/no-unsafe-web-global': 'error',
             },
         },
         {

@@ -1,6 +1,6 @@
-# @posthog/next App Router Example
+# @insights/next App Router Example
 
-A Next.js 15 App Router example demonstrating all features of the `@posthog/next` package.
+A Next.js 15 App Router example demonstrating all features of the `@insights/next` package.
 
 ## Setup
 
@@ -10,11 +10,11 @@ A Next.js 15 App Router example demonstrating all features of the `@posthog/next
     cp .env.local.example .env.local
     ```
 
-2. Add your PostHog API key to `.env.local`:
+2. Add your Insights API key to `.env.local`:
 
     ```
-    NEXT_PUBLIC_POSTHOG_KEY=phc_your_key_here
-    NEXT_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
+    NEXT_PUBLIC_INSIGHTS_KEY=phc_your_key_here
+    NEXT_PUBLIC_INSIGHTS_HOST=https://us.i.insights.com
     ```
 
 3. From the monorepo root, export packages as tarballs:
@@ -36,7 +36,7 @@ A Next.js 15 App Router example demonstrating all features of the `@posthog/next
 
 | Route            | Feature           | Description                                                |
 | ---------------- | ----------------- | ---------------------------------------------------------- |
-| `/auth`          | Identity          | Log in/out with `posthog.identify()` and `posthog.reset()` |
+| `/auth`          | Identity          | Log in/out with `insights.identify()` and `insights.reset()` |
 | `/server-flags`  | Server Components | Evaluate feature flags server-side                         |
 | `/client-hooks`  | React Hooks       | Use `useFeatureFlag` and friends                           |
 | `/ssr-bootstrap` | SSR Bootstrap     | Feature flags on first render with no flicker              |
@@ -44,6 +44,6 @@ A Next.js 15 App Router example demonstrating all features of the `@posthog/next
 
 ## Feature Flags
 
-Create these flags in your PostHog project to see the demos in action:
+Create these flags in your Insights project to see the demos in action:
 
 - **`example-flag`** -- Used by the Client Hooks and SSR Bootstrap demos. Can be boolean or multivariate.

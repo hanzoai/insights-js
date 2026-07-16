@@ -1,6 +1,6 @@
-# Helicone + PostHog AI Examples
+# Helicone + Insights AI Examples
 
-Track Helicone API calls with PostHog via the OpenAI-compatible API.
+Track Helicone API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

@@ -1,6 +1,6 @@
-# Cohere + PostHog AI Examples
+# Cohere + Insights AI Examples
 
-Track Cohere API calls with PostHog via the OpenAI-compatible API.
+Track Cohere API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

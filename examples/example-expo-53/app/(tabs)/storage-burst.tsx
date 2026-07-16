@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import PostHog from 'posthog-react-native'
+import Insights from 'insights-react-native'
 
 // Counting storage: every setItem is one disk write. We track the count and the
 // bytes serialized so the screen can show what a burst of captures actually
@@ -19,10 +19,10 @@ const countingStorage = {
 
 // Dedicated instance for this demo. flushAt is set high so a burst stays in one
 // batch and we observe storage *write coalescing* rather than a flush-per-capture.
-// (The main app instance in app/posthog.tsx uses flushAt: 1, which drains storage
+// (The main app instance in app/insights.tsx uses flushAt: 1, which drains storage
 // on every capture and would hide the effect.)
-const burstPostHog = new PostHog(process.env.EXPO_PUBLIC_POSTHOG_PROJECT_API_KEY ?? 'phc_storage_burst_demo', {
-    host: process.env.EXPO_PUBLIC_POSTHOG_API_HOST,
+const burstInsights = new Insights(process.env.EXPO_PUBLIC_INSIGHTS_PROJECT_API_KEY ?? 'phc_storage_burst_demo', {
+    host: process.env.EXPO_PUBLIC_INSIGHTS_API_HOST,
     flushAt: 1000,
     captureAppLifecycleEvents: false,
     customStorage: countingStorage,
@@ -41,7 +41,7 @@ export default function StorageBurstScreen() {
         const beforeBytes = totalBytes
 
         for (let i = 0; i < BURST_SIZE; i++) {
-            burstPostHog.capture('storage_burst_event', { index: i })
+            burstInsights.capture('storage_burst_event', { index: i })
         }
 
         // Writes are debounced, so the coalesced write lands on a later tick.

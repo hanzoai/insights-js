@@ -1,0 +1,64 @@
+name: Brand guard
+
+# This fork is Hanzo-native end to end. We own the ingestion server
+# (hanzoai/insights) AND this SDK, so there is no upstream wire contract to
+# preserve — both sides move together. See LLM.md ("ZERO upstream brand").
+#
+# The forbidden string is assembled at runtime so this file itself stays clean:
+# a guard should not be the thing that trips the guard.
+#
+# LICENSE and NOTICE are excluded ON PURPOSE — Apache-2.0 section 4(c) requires
+# retaining upstream attribution, and the copyright holders named there are the
+# real ones. Never rebrand a third party's copyright notice.
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    brand-guard:
+        name: zero upstream brand
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Fail on any upstream-brand reference
+              run: |
+                  P="$(printf 'post%s' 'hog')"
+
+                  hits=$(grep -rilE "$P" . 2>/dev/null \
+                      | grep -v '/node_modules/' | grep -v '/\.git/' \
+                      | grep -v '/dist/' | grep -v '/lib/' | grep -v '\.turbo' \
+                      | grep -v '/references/' \
+                      | grep -vE '^\./(LICENSE|NOTICE)$' \
+                      | grep -vE '(^|/)LICENSE$|(^|/)NOTICE$' \
+                      | grep -v '.github/workflows/brand-guard.yml' || true)
+
+                  if [ -n "$hits" ]; then
+                      echo "::error::Upstream brand found — this fork is Hanzo-native; use insights."
+                      echo "$hits" | head -40
+                      echo ""
+                      echo "See LLM.md. Identifiers -> Insights/insights/INSIGHTS;"
+                      echo "hook -> __InsightsExtensions__; property -> \$last_insights_reset;"
+                      echo "hosts -> https://insights.hanzo.ai"
+                      echo "(LICENSE/NOTICE are exempt — legally required attribution.)"
+                      exit 1
+                  fi
+                  echo "OK: zero upstream-brand refs."
+
+            - name: Fail on any upstream-brand filename
+              run: |
+                  P="$(printf 'post%s' 'hog')"
+
+                  files=$(find . -iname "*${P}*" \
+                      -not -path '*/node_modules/*' -not -path '*/.git/*' \
+                      -not -path '*/dist/*' -not -path '*/lib/*' \
+                      2>/dev/null || true)
+
+                  if [ -n "$files" ]; then
+                      echo "::error::Upstream-brand filename found — rename to insights."
+                      echo "$files"
+                      exit 1
+                  fi
+                  echo "OK: zero upstream-brand filenames."

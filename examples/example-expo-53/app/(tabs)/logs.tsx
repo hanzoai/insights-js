@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { AppState, Button, ScrollView, StyleSheet, View } from 'react-native'
-import { PostHogPersistedProperty } from 'posthog-react-native'
+import { InsightsPersistedProperty } from 'insights-react-native'
 
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { IconSymbol } from '@/components/ui/IconSymbol'
-import { beforeSendMode, posthog } from '../posthog'
+import { beforeSendMode, insights } from '../insights'
 
 type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 type BeforeSendMode = 'pass' | 'drop' | 'throw'
@@ -26,27 +26,27 @@ export default function LogsScreen() {
         appState: null,
     })
     // Mirror of `beforeSendMode.current` for UI display. The actual filter
-    // reads from the module-level ref in posthog.tsx.
+    // reads from the module-level ref in insights.tsx.
     const [beforeSendModeUI, setBeforeSendModeUI] = useState<BeforeSendMode>(beforeSendMode.current)
     const [queueDump, setQueueDump] = useState<string>('')
 
     const refresh = (): void => {
         setDevStatus({
-            distinctId: posthog.getDistinctId() || null,
-            sessionId: posthog.getSessionId() || null,
-            appState: ((posthog as any)._currentAppState ?? null) as DevStatus['appState'],
+            distinctId: insights.getDistinctId() || null,
+            sessionId: insights.getSessionId() || null,
+            appState: ((insights as any)._currentAppState ?? null) as DevStatus['appState'],
         })
     }
 
     // Emit a log on every AppState transition so the SDK's `app.state`
-    // tagging path can be exercised without manual taps. The PostHog
+    // tagging path can be exercised without manual taps. The Insights
     // constructor registers its own AppState listener first, which updates
     // `_currentAppState` synchronously *before* this hook's body runs, so
     // the captured record reads the new state.
     useEffect(() => {
         let prev: string = AppState.currentState
         const sub = AppState.addEventListener('change', (next) => {
-            posthog.logger.info(`AppState ${prev} → ${next}`, { from: prev, to: next })
+            insights.logger.info(`AppState ${prev} → ${next}`, { from: prev, to: next })
             prev = next
             refresh()
         })
@@ -63,7 +63,7 @@ export default function LogsScreen() {
     // ===== Existing capture buttons =====
 
     const sendOne = (level: LogLevel): void => {
-        posthog.logger[level](`${level} log from example-expo-53`, {
+        insights.logger[level](`${level} log from example-expo-53`, {
             source: 'logs-tab',
             level,
             tsClient: Date.now(),
@@ -74,13 +74,13 @@ export default function LogsScreen() {
     const sendAllLevels = (): void => {
         const levels: LogLevel[] = ['trace', 'debug', 'info', 'warn', 'error', 'fatal']
         levels.forEach((level, i) => {
-            posthog.logger[level](`Level-sweep message (${level}) #${i}`, { sweep: true, index: i })
+            insights.logger[level](`Level-sweep message (${level}) #${i}`, { sweep: true, index: i })
         })
         bump(`Sent all 6 levels`)
     }
 
     const sendStructured = (): void => {
-        posthog.captureLog({
+        insights.captureLog({
             body: 'Structured attributes payload',
             level: 'info',
             attributes: {
@@ -96,7 +96,7 @@ export default function LogsScreen() {
 
     const sendBurst = (): void => {
         for (let i = 0; i < 20; i++) {
-            posthog.logger[i % 2 === 0 ? 'info' : 'debug'](`Burst log #${i}`, { i })
+            insights.logger[i % 2 === 0 ? 'info' : 'debug'](`Burst log #${i}`, { i })
         }
         bump('Sent 20-burst')
     }
@@ -105,13 +105,13 @@ export default function LogsScreen() {
         // Hit the rate-cap window (default 500/10s on RN). Should emit
         // 500-ish and then warn + drop.
         for (let i = 0; i < 600; i++) {
-            posthog.logger.info(`Flood #${i}`, { i, flood: true })
+            insights.logger.info(`Flood #${i}`, { i, flood: true })
         }
         bump('Sent 600-flood (expect rate cap)')
     }
 
     const sendError = (): void => {
-        posthog.logger.error('Simulated error with stack', {
+        insights.logger.error('Simulated error with stack', {
             errorName: 'SimulatedError',
             errorMessage: 'Something bad happened',
             stack: new Error('Simulated').stack ?? '',
@@ -124,7 +124,7 @@ export default function LogsScreen() {
             // Drain BOTH pipelines — events on `flush()`, logs on `flushLogs()`.
             // Run in parallel so a slow events flush doesn't delay logs and
             // vice-versa.
-            await Promise.all([posthog.flush(), posthog.flushLogs()])
+            await Promise.all([insights.flush(), insights.flushLogs()])
             bump('Manual flush ok')
         } catch (e) {
             setStatus(`Flush error: ${e}`)
@@ -140,7 +140,7 @@ export default function LogsScreen() {
     // `flushLogs`).
 
     const setBefore = (mode: BeforeSendMode): void => {
-        // Update the shared ref in posthog.tsx — the `beforeSend` closure
+        // Update the shared ref in insights.tsx — the `beforeSend` closure
         // reads it on every capture, so behavior switches at runtime
         // without touching SDK internals. This is the public-API-only
         // pattern customers should follow for runtime-tunable filters.
@@ -151,22 +151,22 @@ export default function LogsScreen() {
 
     const captureNoLevel = (): void => {
         // Verifies default-level INFO behaviour without a `level` arg.
-        posthog.captureLog({ body: 'no-level test (defaults to INFO)' })
+        insights.captureLog({ body: 'no-level test (defaults to INFO)' })
         bump('Sent no-level (default INFO)')
     }
 
     const captureEmptyBody = (): void => {
-        posthog.captureLog({ body: '' })
+        insights.captureLog({ body: '' })
         bump('Sent empty body (should be silently dropped)')
     }
 
     const captureNoBody = (): void => {
-        posthog.captureLog({} as any)
+        insights.captureLog({} as any)
         bump('Sent no body (should be silently dropped)')
     }
 
     const dumpQueue = (): void => {
-        const queue = posthog.getPersistedProperty(PostHogPersistedProperty.LogsQueue) as unknown[] | undefined
+        const queue = insights.getPersistedProperty(InsightsPersistedProperty.LogsQueue) as unknown[] | undefined
         const text = queue
             ? `length=${queue.length}\n${JSON.stringify(queue, null, 2).slice(0, 4000)}`
             : '(empty/undefined)'
@@ -174,31 +174,31 @@ export default function LogsScreen() {
     }
 
     const screenAndCapture = async (name: string): Promise<void> => {
-        await posthog.screen(name)
-        posthog.logger.info(`captured on ${name}`, { screenTagTest: true })
+        await insights.screen(name)
+        insights.logger.info(`captured on ${name}`, { screenTagTest: true })
         bump(`screen('${name}') + capture`)
     }
 
     const callIdentify = (id: string): void => {
-        posthog.identify(id, { source: 'logs-tab' })
+        insights.identify(id, { source: 'logs-tab' })
         refresh()
         bump(`identify('${id}')`)
     }
 
     const callReset = (): void => {
-        posthog.reset()
+        insights.reset()
         refresh()
         bump('reset()')
     }
 
     const callOptOut = async (): Promise<void> => {
-        await posthog.optOut()
+        await insights.optOut()
         refresh()
         bump('optOut()')
     }
 
     const callOptIn = async (): Promise<void> => {
-        await posthog.optIn()
+        await insights.optIn()
         refresh()
         bump('optIn()')
     }

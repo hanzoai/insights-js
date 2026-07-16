@@ -1,6 +1,6 @@
-# Cerebras + PostHog AI Examples
+# Cerebras + Insights AI Examples
 
-Track Cerebras API calls with PostHog via the OpenAI-compatible API.
+Track Cerebras API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

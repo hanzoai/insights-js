@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { usePostHog } from '@hanzo/insights-next'
+import { useInsights } from '@hanzo/insights-next'
 
 export default function CapturePage() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [events, setEvents] = useState<string[]>([])
 
     function capture(eventName: string, properties?: Record<string, unknown>) {
-        posthog.capture(eventName, properties)
+        insights.capture(eventName, properties)
         setEvents((prev) => [...prev, `${eventName}${properties ? ' ' + JSON.stringify(properties) : ''}`])
     }
 
@@ -16,8 +16,8 @@ export default function CapturePage() {
         <div>
             <h1 className="text-2xl font-bold mb-2">Event Capture</h1>
             <p className="text-gray-600 mb-6">
-                Capture custom events using <code className="bg-gray-100 px-1 rounded">posthog.capture()</code>. Events
-                appear in your PostHog project&#39;s activity feed.
+                Capture custom events using <code className="bg-gray-100 px-1 rounded">insights.capture()</code>. Events
+                appear in your Insights project&#39;s activity feed.
             </p>
 
             <div className="bg-white rounded-lg border border-gray-200 p-6 mb-4">

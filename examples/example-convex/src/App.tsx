@@ -132,7 +132,7 @@ function App() {
     // 7. AI Generation
     const [aiLibrary, setAiLibrary] = useState<'agent' | 'ai-sdk'>('agent')
     const [aiCapture, setAiCapture] = useState<'otel' | 'manual'>('otel')
-    const [aiPrompt, setAiPrompt] = useState('What is PostHog?')
+    const [aiPrompt, setAiPrompt] = useState('What is Insights?')
 
     // Log + result state
     const [log, setLog] = useState<string[]>([])
@@ -251,11 +251,11 @@ function App() {
                 <div className="hero-left">
                     <div className="hero-eyebrow">@hanzo/insights-convex · v1</div>
                     <h1 className="hero-title">
-                        PostHog inside Convex<span className="hero-title-dot">.</span>
+                        Insights inside Convex<span className="hero-title-dot">.</span>
                     </h1>
                     <p className="hero-sub">
                         Capture events, identify users, track exceptions, and evaluate feature flags — all from your
-                        queries, mutations, and actions. Pick any method below to fire it against your PostHog project.
+                        queries, mutations, and actions. Pick any method below to fire it against your Insights project.
                     </p>
                 </div>
                 <div className="hero-right">
@@ -393,10 +393,10 @@ function App() {
                     {/* 3. Capture Exception */}
                     <Section num="03" title="Capture exception" subtitle="captureException() · mutation context">
                         <p className="section-lede">
-                            Sends an Error / string / object to PostHog's error tracking pipeline. For automatic
+                            Sends an Error / string / object to Insights's error tracking pipeline. For automatic
                             capture of every uncaught error in your Convex deployment, set up{' '}
-                            <a href="https://docs.convex.dev/production/integrations/exception-reporting#configuring-posthog-error-tracking">
-                                Convex's first-party PostHog integration
+                            <a href="https://docs.convex.dev/production/integrations/exception-reporting#configuring-insights-error-tracking">
+                                Convex's first-party Insights integration
                             </a>{' '}
                             on the Convex dashboard — this method is for cases where you want to attach explicit
                             properties or fire from non-error paths.
@@ -470,7 +470,7 @@ function App() {
                     >
                         <p className="section-lede">
                             Local methods evaluate against the cached definitions — no per-call network round trip,
-                            work in queries. Remote methods hit PostHog's <code>/flags</code> endpoint directly — action
+                            work in queries. Remote methods hit Insights's <code>/flags</code> endpoint directly — action
                             context only, handles every flag type. Local returns <code>null</code> when it can't reach a
                             verdict (flag missing, experience continuity, static cohort, missing property).
                         </p>
@@ -582,7 +582,7 @@ function App() {
                         <div className="subsection-divider">
                             <span className="subsection-label">Remote · action context</span>
                             <span className="subsection-note">
-                                hits PostHog's <code>/flags</code> directly · no personal API key needed
+                                hits Insights's <code>/flags</code> directly · no personal API key needed
                             </span>
                         </div>
                         <div className="method-grid">
@@ -648,7 +648,7 @@ function App() {
                             Captures <code>$ai_generation</code> events. OpenTelemetry is the recommended path — it
                             slots in alongside any other OTel instrumentation you already have. Manual capture is the
                             escape hatch for cases where you can't add OTel. See{' '}
-                            <a href="https://posthog.com/docs/llm-analytics/installation/convex">
+                            <a href="https://insights.hanzo.ai/docs/llm-analytics/installation/convex">
                                 LLM analytics for Convex
                             </a>{' '}
                             for the full setup.
@@ -751,8 +751,8 @@ function App() {
                             <div className="empty">
                                 {cacheStatus === undefined && 'Connecting to Convex…'}
                                 {cacheStatus === null &&
-                                    'No flag definitions cached yet. Set POSTHOG_PERSONAL_API_KEY and wait for the cron, or click Refresh flag cache.'}
-                                {cacheStatus && cacheStatus.flagCount === 0 && 'No flags returned from PostHog.'}
+                                    'No flag definitions cached yet. Set INSIGHTS_PERSONAL_API_KEY and wait for the cron, or click Refresh flag cache.'}
+                                {cacheStatus && cacheStatus.flagCount === 0 && 'No flags returned from Insights.'}
                             </div>
                         ) : (
                             <FlashOnChange value={liveFlagsKey}>
@@ -775,7 +775,7 @@ function App() {
                             </FlashOnChange>
                         )}
                         <div className="live-card-foot">
-                            change a flag in PostHog → row flashes when the cron picks it up
+                            change a flag in Insights → row flashes when the cron picks it up
                         </div>
                     </div>
 
@@ -824,14 +824,14 @@ function App() {
             <footer className="footer">
                 <span>
                     @hanzo/insights-convex ·{' '}
-                    <a href="https://github.com/PostHog/posthog-js/tree/main/packages/convex">readme</a> ·{' '}
-                    <a href="https://posthog.com/docs/product-analytics">analytics</a> ·{' '}
-                    <a href="https://posthog.com/docs/feature-flags">feature flags</a> ·{' '}
-                    <a href="https://posthog.com/docs/llm-analytics/installation/convex">llm analytics</a>
+                    <a href="https://github.com/Insights/insights-js/tree/main/packages/convex">readme</a> ·{' '}
+                    <a href="https://insights.hanzo.ai/docs/product-analytics">analytics</a> ·{' '}
+                    <a href="https://insights.hanzo.ai/docs/feature-flags">feature flags</a> ·{' '}
+                    <a href="https://insights.hanzo.ai/docs/llm-analytics/installation/convex">llm analytics</a>
                 </span>
                 <span className="footer-tip">
                     Captured events show up in your{' '}
-                    <a href="https://us.posthog.com/activity/explore">PostHog activity feed</a>.
+                    <a href="https://us.insights.com/activity/explore">Insights activity feed</a>.
                 </span>
             </footer>
         </div>

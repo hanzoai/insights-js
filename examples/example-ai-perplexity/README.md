@@ -1,6 +1,6 @@
-# Perplexity + PostHog AI Examples
+# Perplexity + Insights AI Examples
 
-Track Perplexity API calls with PostHog via the OpenAI-compatible API.
+Track Perplexity API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

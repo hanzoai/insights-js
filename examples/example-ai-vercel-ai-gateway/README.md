@@ -1,6 +1,6 @@
-# Vercel AI Gateway + PostHog AI Examples
+# Vercel AI Gateway + Insights AI Examples
 
-Track Vercel AI Gateway API calls with PostHog via the OpenAI-compatible API.
+Track Vercel AI Gateway API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

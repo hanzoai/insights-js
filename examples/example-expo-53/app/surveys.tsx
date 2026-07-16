@@ -2,7 +2,7 @@ import { Stack } from 'expo-router'
 import { Button, ScrollView, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useState } from 'react'
-import { SurveyModal } from 'posthog-react-native'
+import { SurveyModal } from 'insights-react-native'
 
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -21,7 +21,7 @@ const POSITIONS: { label: string; value: string | undefined }[] = [
 ]
 
 // Demo survey for local dogfooding. Real apps get Survey objects from
-// PostHogSurveyProvider, so consumers don't usually construct these by hand.
+// InsightsSurveyProvider, so consumers don't usually construct these by hand.
 const DEMO_SURVEY: any = {
     id: 'demo-survey',
     name: 'Demo survey',

@@ -13,8 +13,8 @@ async function main(): Promise<void> {
             if (!bucket || !version) {
                 throw new Error(`upload-s3 requires <bucket> <version>\n\n${getUsage()}`)
             }
-            const { uploadPostHogJsS3 } = await import('./upload-posthog-js-s3.ts')
-            await uploadPostHogJsS3(bucket, version)
+            const { uploadInsightsJsS3 } = await import('./upload-insights-js-s3.ts')
+            await uploadInsightsJsS3(bucket, version)
             return
         }
         default:

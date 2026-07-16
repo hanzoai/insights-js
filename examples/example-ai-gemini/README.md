@@ -1,6 +1,6 @@
-# Google Gemini + PostHog AI Examples
+# Google Gemini + Insights AI Examples
 
-Track Google Gemini API calls with PostHog via OpenTelemetry.
+Track Google Gemini API calls with Insights via OpenTelemetry.
 
 ## Setup
 

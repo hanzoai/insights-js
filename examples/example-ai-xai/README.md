@@ -1,6 +1,6 @@
-# xAI + PostHog AI Examples
+# xAI + Insights AI Examples
 
-Track xAI API calls with PostHog via the OpenAI-compatible API.
+Track xAI API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

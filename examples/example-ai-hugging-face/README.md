@@ -1,6 +1,6 @@
-# Hugging Face + PostHog AI Examples
+# Hugging Face + Insights AI Examples
 
-Track Hugging Face API calls with PostHog via the OpenAI-compatible API.
+Track Hugging Face API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

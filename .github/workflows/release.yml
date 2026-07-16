@@ -65,7 +65,7 @@ jobs:
             contents: read
         outputs:
             commit-hash: ${{ steps.commit-version-bump.outputs.commit-hash }}
-            # posthog-js SDK version after `pnpm bump`. Downstream jobs use this
+            # insights-js SDK version after `pnpm bump`. Downstream jobs use this
             # to construct version-pinned CDN URLs (e.g. the toolbar bundle's
             # `TOOLBAR_PUBLIC_PATH`) and to double-check the S3 upload path.
             version: ${{ steps.get-version.outputs.version }}
@@ -111,7 +111,7 @@ jobs:
             - name: Update lockfile
               run: pnpm install
 
-            - name: Get posthog-js version
+            - name: Get insights-js version
               id: get-version
               run: |
                   VERSION=$(jq -r .version packages/browser/package.json)
@@ -120,7 +120,7 @@ jobs:
                       exit 1
                   fi
                   echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-                  echo "Resolved posthog-js version: $VERSION"
+                  echo "Resolved insights-js version: $VERSION"
 
             - name: Commit version bump and lockfile
               id: commit-version-bump
@@ -132,29 +132,29 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ steps.releaser.outputs.token }}
 
-            - name: Send failure event to PostHog
+            - name: Send failure event to Insights
               if: ${{ failure() }}
-              uses: PostHog/posthog-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
+              uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  posthog-token: '${{ secrets.POSTHOG_PROJECT_API_KEY }}'
-                  event: 'posthog-js-github-release-workflow-failure'
+                  insights-token: '${{ secrets.INSIGHTS_PROJECT_API_KEY }}'
+                  event: 'insights-js-github-release-workflow-failure'
                   properties: >-
                       {
                         "commitSha": "${{ github.sha }}",
                         "jobStatus": "${{ job.status }}",
                         "ref": "${{ github.ref }}",
                         "jobName": "version-bump",
-                        "packageName": "posthog-js"
+                        "packageName": "insights-js"
                       }
 
             - name: Notify Slack - Failed
               if: ${{ failure() && needs.notify-approval-needed.outputs.slack_ts != '' }}
-              uses: PostHog/.github/.github/actions/slack-thread-reply@5fc4680761e8ac29a61b212756230eba0e276d8c
+              uses: Insights/.github/.github/actions/slack-thread-reply@5fc4680761e8ac29a61b212756230eba0e276d8c
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
                   thread_ts: ${{ needs.notify-approval-needed.outputs.slack_ts }}
-                  message: '❌ Failed to bump versions for `posthog-js`! <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>'
+                  message: '❌ Failed to bump versions for `insights-js`! <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>'
                   emoji_reaction: 'x'
 
     notify-rejected:
@@ -366,7 +366,7 @@ jobs:
                   emoji_reaction: 'x'
 
     build-s3-artifacts:
-        name: Build posthog-js dist for S3
+        name: Build insights-js dist for S3
         needs: [version-bump, notify-approval-needed]
         runs-on: hanzo-build-linux-amd64
         # Run in parallel with publish — must NOT wait for publish because
@@ -385,9 +385,9 @@ jobs:
                   ref: ${{ needs.version-bump.outputs.commit-hash }}
                   fetch-depth: 1
 
-            - name: Check posthog-js version
+            - name: Check insights-js version
               id: check-version
-              uses: PostHog/check-package-version@f540540cb12d45ec3c58d42dbf1d60070ed2d268 # v2.1.1
+              uses: Insights/check-package-version@f540540cb12d45ec3c58d42dbf1d60070ed2d268 # v2.1.1
               with:
                   path: packages/browser
 
@@ -399,7 +399,7 @@ jobs:
               if: steps.check-version.outputs.is-new-version == 'true'
               uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
               with:
-                  name: posthog-js-dist
+                  name: insights-js-dist
                   path: |
                       packages/browser/dist/*.js
                       packages/browser/dist/*.js.map
@@ -407,14 +407,14 @@ jobs:
                   if-no-files-found: error
 
     build-toolbar:
-        # Build the toolbar bundle from posthog/posthog@master once per region.
+        # Build the toolbar bundle from insights/insights@master once per region.
         # Each region gets its own `TOOLBAR_PUBLIC_PATH`, so asset URLs baked
         # into the JS and CSS (and the runtime CSS loader in ToolbarApp.tsx)
         # point at the region-local CDN for the SDK version being released.
-        # See the matching posthog/posthog PR that wires up TOOLBAR_PUBLIC_PATH.
+        # See the matching insights/insights PR that wires up TOOLBAR_PUBLIC_PATH.
         #
         # Runs in parallel with `build-s3-artifacts`. If the release turns out
-        # not to include a new posthog-js version, the artifacts produced here
+        # not to include a new insights-js version, the artifacts produced here
         # are simply never downloaded by `upload-s3` (which is gated on
         # `is-new-version`). We prefer parallelism over gating because
         # `build-s3-artifacts` does a full `pnpm install + build` that would
@@ -429,18 +429,18 @@ jobs:
             fail-fast: false
             matrix:
                 region:
-                    - { name: us, host: us-assets.i.posthog.com }
-                    - { name: eu, host: eu-assets.i.posthog.com }
+                    - { name: us, host: us-assets.i.insights.com }
+                    - { name: eu, host: eu-assets.i.insights.com }
         env:
             # esbuild bakes this into the bundle at build time. Trailing slash
-            # is required (posthog/posthog's frontend/toolbar-config.mjs adds
+            # is required (insights/insights's frontend/toolbar-config.mjs adds
             # it defensively, but we set it correctly here too).
             TOOLBAR_PUBLIC_PATH: https://${{ matrix.region.host }}/static/${{ needs.version-bump.outputs.version }}/
         steps:
-            - name: Checkout posthog/posthog
+            - name: Checkout insights/insights
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
-                  repository: PostHog/posthog
+                  repository: Insights/insights
                   ref: master
                   fetch-depth: 1
 
@@ -454,17 +454,17 @@ jobs:
                   cache: 'pnpm'
 
             - name: Install frontend dependencies
-              run: pnpm --filter=@posthog/frontend... install --frozen-lockfile
+              run: pnpm --filter=@insights/frontend... install --frozen-lockfile
 
             # The toolbar imports compiled output from a couple of workspace
-            # packages (`@posthog/tailwind` exposes `dist/tailwind.css`;
-            # `@posthog/hogvm` exposes `dist/index.js`). `pnpm install` does not
+            # packages (`@insights/tailwind` exposes `dist/tailwind.css`;
+            # `@insights/hogvm` exposes `dist/index.js`). `pnpm install` does not
             # run their build scripts, so we build them explicitly first.
-            # `^...` builds only the workspace dependencies of @posthog/frontend,
-            # not @posthog/frontend itself (whose `build` script would build
+            # `^...` builds only the workspace dependencies of @insights/frontend,
+            # not @insights/frontend itself (whose `build` script would build
             # the whole app, which we don't need for the toolbar).
             - name: Build toolbar workspace dependencies
-              run: pnpm --filter='@posthog/frontend^...' run build
+              run: pnpm --filter='@insights/frontend^...' run build
 
             # Run from the frontend directory: esbuild's `alias` config (e.g.
             # `buffer` -> `buffer`) resolves bare specifiers from `process.cwd()`,
@@ -512,7 +512,7 @@ jobs:
 
             # Assert the cross-repo contract: the `TOOLBAR_PUBLIC_PATH` env
             # var we passed in must actually appear in the bundle. If
-            # posthog/posthog@master doesn't yet honour TOOLBAR_PUBLIC_PATH
+            # insights/insights@master doesn't yet honour TOOLBAR_PUBLIC_PATH
             # (e.g. the matching PR hasn't landed or was reverted), esbuild
             # silently falls back to its hardcoded default `publicPath` and
             # we'd otherwise ship a bundle pointing at the wrong CDN.
@@ -525,7 +525,7 @@ jobs:
                   shopt -s inherit_errexit
                   if ! grep -aq "$TOOLBAR_PUBLIC_PATH" frontend/dist/toolbar.js; then
                       echo "❌ toolbar.js does not contain TOOLBAR_PUBLIC_PATH='$TOOLBAR_PUBLIC_PATH'"
-                      echo "   posthog/posthog@$(git rev-parse HEAD) may not honour the env var yet."
+                      echo "   insights/insights@$(git rev-parse HEAD) may not honour the env var yet."
                       exit 1
                   fi
                   echo "✓ TOOLBAR_PUBLIC_PATH baked into bundle"
@@ -534,7 +534,7 @@ jobs:
                   echo "  toolbar.js:          $(wc -c < frontend/dist/toolbar.js) bytes"
                   echo "  toolbar.css:         $(wc -c < frontend/dist/toolbar.css) bytes"
                   echo "  assets/:             $(find frontend/dist/assets -type f | wc -l | tr -d ' ') files"
-                  echo "  built from:          PostHog/posthog@$(git rev-parse HEAD)"
+                  echo "  built from:          Insights/insights@$(git rev-parse HEAD)"
 
             - name: Upload toolbar artifact
               uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -552,9 +552,9 @@ jobs:
 
     upload-s3:
         # Matrixed per region so each cell downloads only the toolbar artifact
-        # that was built with the matching `TOOLBAR_PUBLIC_PATH`. posthog-js's
+        # that was built with the matching `TOOLBAR_PUBLIC_PATH`. insights-js's
         # own dist is region-agnostic and downloaded identically in both cells.
-        name: Upload posthog-js dist to S3 (${{ matrix.region.name }})
+        name: Upload insights-js dist to S3 (${{ matrix.region.name }})
         needs: [build-s3-artifacts, build-toolbar, version-bump, notify-approval-needed]
         runs-on: hanzo-build-linux-amd64
         if: always() && needs.build-s3-artifacts.outputs.is-new-version == 'true'
@@ -566,11 +566,11 @@ jobs:
             fail-fast: false
             matrix:
                 region:
-                    - { name: us, bucket: us-assets.i.posthog.com, aws_region: us-east-1 }
-                    - { name: eu, bucket: eu-assets.i.posthog.com, aws_region: eu-central-1 }
+                    - { name: us, bucket: us-assets.i.insights.com, aws_region: us-east-1 }
+                    - { name: eu, bucket: eu-assets.i.insights.com, aws_region: eu-central-1 }
         steps:
             # Sparse checkout the release tooling plus the root pnpm files so
-            # we can do a locked, filtered install for @posthog-tooling/release.
+            # we can do a locked, filtered install for @insights-tooling/release.
             - name: Checkout release tooling
               uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
               with:
@@ -593,12 +593,12 @@ jobs:
                   cache: 'pnpm'
 
             - name: Install release tooling dependencies
-              run: pnpm install --filter @posthog-tooling/release... --frozen-lockfile
+              run: pnpm install --filter @insights-tooling/release... --frozen-lockfile
 
             - name: Download dist artifact
               uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
-                  name: posthog-js-dist
+                  name: insights-js-dist
                   path: packages/browser/dist
 
             # No `if` guard on this step: the toolbar bundle is a required
@@ -631,19 +631,19 @@ jobs:
                   VERSION: ${{ needs.build-s3-artifacts.outputs.committed-version }}
               run: node tooling/release/src/cli.ts upload-s3 "$BUCKET" "$VERSION"
 
-            - name: Send failure event to PostHog
+            - name: Send failure event to Insights
               if: ${{ failure() }}
-              uses: PostHog/posthog-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
+              uses: Insights/insights-github-action@58dea254b598fb5d469c0699c98af8288a7f7650 # v1.2.0
               with:
-                  posthog-token: '${{ secrets.POSTHOG_PROJECT_API_KEY }}'
-                  event: 'posthog-js-github-release-workflow-failure'
+                  insights-token: '${{ secrets.INSIGHTS_PROJECT_API_KEY }}'
+                  event: 'insights-js-github-release-workflow-failure'
                   properties: >-
                       {
                         "commitSha": "${{ github.sha }}",
                         "jobStatus": "${{ job.status }}",
                         "ref": "${{ github.ref }}",
                         "jobName": "upload-s3",
-                        "packageName": "posthog-js",
+                        "packageName": "insights-js",
                         "packageVersion": "${{ needs.build-s3-artifacts.outputs.committed-version }}",
                         "region": "${{ matrix.region.name }}",
                         "bucket": "${{ matrix.region.bucket }}"
@@ -652,12 +652,12 @@ jobs:
             - name: Notify Slack - S3 Upload Failed
               continue-on-error: true
               if: ${{ failure() && needs.notify-approval-needed.outputs.slack_ts != '' }}
-              uses: PostHog/.github/.github/actions/slack-thread-reply@5fc4680761e8ac29a61b212756230eba0e276d8c
+              uses: Insights/.github/.github/actions/slack-thread-reply@5fc4680761e8ac29a61b212756230eba0e276d8c
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
                   thread_ts: ${{ needs.notify-approval-needed.outputs.slack_ts }}
-                  message: '❌ Failed to upload posthog-js v${{ needs.build-s3-artifacts.outputs.committed-version }} dist to ${{ matrix.region.bucket }}! <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>'
+                  message: '❌ Failed to upload insights-js v${{ needs.build-s3-artifacts.outputs.committed-version }} dist to ${{ matrix.region.bucket }}! <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>'
                   emoji_reaction: 'x'
 
     notify-released:
@@ -702,10 +702,10 @@ jobs:
         steps:
             - name: Notify Slack - Partial Release
               continue-on-error: true # Slack failure shouldn't mark release as failed
-              uses: PostHog/.github/.github/actions/slack-thread-reply@5fc4680761e8ac29a61b212756230eba0e276d8c
+              uses: Insights/.github/.github/actions/slack-thread-reply@5fc4680761e8ac29a61b212756230eba0e276d8c
               with:
                   slack_bot_token: ${{ secrets.SLACK_CLIENT_LIBRARIES_BOT_TOKEN }}
                   slack_channel_id: ${{ vars.SLACK_APPROVALS_CLIENT_LIBRARIES_CHANNEL_ID }}
                   thread_ts: ${{ needs.notify-approval-needed.outputs.slack_ts }}
-                  message: '⚠️ npm packages released, but S3 publish failed — posthog-js v${{ needs.build-s3-artifacts.outputs.committed-version }} immutable assets and/or major-version or top-level aliases need attention. <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>'
+                  message: '⚠️ npm packages released, but S3 publish failed — insights-js v${{ needs.build-s3-artifacts.outputs.committed-version }} immutable assets and/or major-version or top-level aliases need attention. <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>'
                   emoji_reaction: 'warning'

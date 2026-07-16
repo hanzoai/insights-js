@@ -1,6 +1,6 @@
-# Dedalus Labs + PostHog AI Examples
+# Dedalus Labs + Insights AI Examples
 
-Track Dedalus Labs API calls with PostHog via the OpenAI-compatible API.
+Track Dedalus Labs API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

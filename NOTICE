@@ -1,7 +1,14 @@
 insights-js
 Copyright (c) 2026 Hanzo AI, Inc.
 
-This product includes software from Insights (https://github.com/getinsights/insights-js) and Mixpanel (https://github.com/mixpanel/mixpanel-js), licensed under Apache-2.0:
+This product includes software from PostHog (https://github.com/PostHog/posthog-js)
+and Mixpanel (https://github.com/mixpanel/mixpanel-js), licensed under Apache-2.0:
 
-    Copyright 2020 Insights / Hiberly, Inc.
+    Copyright 2020 Posthog / Hiberly, Inc.
     Copyright 2015 Mixpanel, Inc.
+
+ATTRIBUTION — do not rebrand this file or LICENSE. Apache-2.0 section 4(c)
+requires retaining the upstream attribution notices, and the parties named above
+are the actual copyright holders. The Hanzo rebrand covers our identity, package
+names, and code — never a third party's copyright notice. These two files are
+deliberately excluded from the brand guard.

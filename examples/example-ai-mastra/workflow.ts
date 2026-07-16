@@ -1,10 +1,10 @@
-/** Mastra agent with PostHog tracking via the official @mastra/posthog exporter. */
+/** Mastra agent with Insights tracking via the official @mastra/insights exporter. */
 
 import { Mastra } from '@mastra/core'
 import { Agent } from '@mastra/core/agent'
 import { createTool } from '@mastra/core/tools'
 import { Observability } from '@mastra/observability'
-import { PosthogExporter } from '@mastra/posthog'
+import { InsightsExporter } from '@mastra/insights'
 import { z } from 'zod'
 
 const weatherTool = createTool({
@@ -36,12 +36,12 @@ const mastra = new Mastra({
     agents: { weatherAgent },
     observability: new Observability({
         configs: {
-            posthog: {
+            insights: {
                 serviceName: 'example-mastra-app',
                 exporters: [
-                    new PosthogExporter({
-                        apiKey: process.env.POSTHOG_API_KEY!,
-                        host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
+                    new InsightsExporter({
+                        apiKey: process.env.INSIGHTS_API_KEY!,
+                        host: process.env.INSIGHTS_HOST || 'https://us.i.insights.com',
                         defaultDistinctId: 'example-user',
                     }),
                 ],

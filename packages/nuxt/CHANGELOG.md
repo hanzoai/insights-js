@@ -4,829 +4,829 @@
 
 ### Patch Changes
 
-- Updated dependencies [[`8fcf40d`](https://github.com/PostHog/posthog-js/commit/8fcf40d3798a107f446dd75b13b81088eac1ab2c)]:
-  - posthog-js@1.378.1
-  - @posthog/core@1.30.2
-  - posthog-node@5.35.11
+- Updated dependencies [[`8fcf40d`](https://github.com/Insights/insights-js/commit/8fcf40d3798a107f446dd75b13b81088eac1ab2c)]:
+  - insights-js@1.378.1
+  - @insights/core@1.30.2
+  - insights-node@5.35.11
 
 ## 1.7.51
 
 ### Patch Changes
 
-- Updated dependencies [[`8181354`](https://github.com/PostHog/posthog-js/commit/8181354cae602f3f2b5e8c5b5bcd2e090e25edcc)]:
-  - posthog-js@1.378.0
-  - @posthog/core@1.30.1
-  - posthog-node@5.35.10
+- Updated dependencies [[`8181354`](https://github.com/Insights/insights-js/commit/8181354cae602f3f2b5e8c5b5bcd2e090e25edcc)]:
+  - insights-js@1.378.0
+  - @insights/core@1.30.1
+  - insights-node@5.35.10
 
 ## 1.7.50
 
 ### Patch Changes
 
-- Updated dependencies [[`f3cc6fa`](https://github.com/PostHog/posthog-js/commit/f3cc6fa8278547e8ea75c0b87d79cffa10158e45), [`3d4a76f`](https://github.com/PostHog/posthog-js/commit/3d4a76f323ac789df91448fdb05d356dc91bb87f)]:
-  - posthog-js@1.377.0
-  - posthog-node@5.35.9
-  - @posthog/core@1.30.0
+- Updated dependencies [[`f3cc6fa`](https://github.com/Insights/insights-js/commit/f3cc6fa8278547e8ea75c0b87d79cffa10158e45), [`3d4a76f`](https://github.com/Insights/insights-js/commit/3d4a76f323ac789df91448fdb05d356dc91bb87f)]:
+  - insights-js@1.377.0
+  - insights-node@5.35.9
+  - @insights/core@1.30.0
 
 ## 1.7.49
 
 ### Patch Changes
 
-- Updated dependencies [[`663e250`](https://github.com/PostHog/posthog-js/commit/663e250b10df6bcadf42b7938fa3a77fb91f427b)]:
-  - posthog-js@1.376.6
-  - @posthog/core@1.29.15
-  - posthog-node@5.35.8
+- Updated dependencies [[`663e250`](https://github.com/Insights/insights-js/commit/663e250b10df6bcadf42b7938fa3a77fb91f427b)]:
+  - insights-js@1.376.6
+  - @insights/core@1.29.15
+  - insights-node@5.35.8
 
 ## 1.7.48
 
 ### Patch Changes
 
-- Updated dependencies [[`66cbc59`](https://github.com/PostHog/posthog-js/commit/66cbc5987427d539999834a2db3f0110ba6bd8c5), [`d9ad199`](https://github.com/PostHog/posthog-js/commit/d9ad1993d320ffc899dd57ce2f1cf1787e9c6635)]:
-  - posthog-js@1.376.5
-  - @posthog/core@1.29.14
-  - posthog-node@5.35.7
+- Updated dependencies [[`66cbc59`](https://github.com/Insights/insights-js/commit/66cbc5987427d539999834a2db3f0110ba6bd8c5), [`d9ad199`](https://github.com/Insights/insights-js/commit/d9ad1993d320ffc899dd57ce2f1cf1787e9c6635)]:
+  - insights-js@1.376.5
+  - @insights/core@1.29.14
+  - insights-node@5.35.7
 
 ## 1.7.47
 
 ### Patch Changes
 
-- Updated dependencies [[`f59f35a`](https://github.com/PostHog/posthog-js/commit/f59f35ac5a6a0aa98be5f3ea3b88370df8d398aa), [`f01cd93`](https://github.com/PostHog/posthog-js/commit/f01cd939e096820b84666a463a61775ef69ce4c4), [`7b84b75`](https://github.com/PostHog/posthog-js/commit/7b84b7599d076c9c3c86f923f7d56cf937ad9874), [`cc71f3f`](https://github.com/PostHog/posthog-js/commit/cc71f3fa1f87838c28a68e593cd3f274f63db397), [`e1ff722`](https://github.com/PostHog/posthog-js/commit/e1ff722bf0bd333ffdf5d077f8f60893aaf7ef5e)]:
-  - posthog-js@1.376.4
-  - @posthog/core@1.29.13
-  - posthog-node@5.35.6
+- Updated dependencies [[`f59f35a`](https://github.com/Insights/insights-js/commit/f59f35ac5a6a0aa98be5f3ea3b88370df8d398aa), [`f01cd93`](https://github.com/Insights/insights-js/commit/f01cd939e096820b84666a463a61775ef69ce4c4), [`7b84b75`](https://github.com/Insights/insights-js/commit/7b84b7599d076c9c3c86f923f7d56cf937ad9874), [`cc71f3f`](https://github.com/Insights/insights-js/commit/cc71f3fa1f87838c28a68e593cd3f274f63db397), [`e1ff722`](https://github.com/Insights/insights-js/commit/e1ff722bf0bd333ffdf5d077f8f60893aaf7ef5e)]:
+  - insights-js@1.376.4
+  - @insights/core@1.29.13
+  - insights-node@5.35.6
 
 ## 1.7.46
 
 ### Patch Changes
 
-- Updated dependencies [[`9cac1f6`](https://github.com/PostHog/posthog-js/commit/9cac1f650ed994a067bbffc5ec16b6d4dc65254f)]:
-  - posthog-js@1.376.3
-  - @posthog/core@1.29.12
-  - posthog-node@5.35.5
+- Updated dependencies [[`9cac1f6`](https://github.com/Insights/insights-js/commit/9cac1f650ed994a067bbffc5ec16b6d4dc65254f)]:
+  - insights-js@1.376.3
+  - @insights/core@1.29.12
+  - insights-node@5.35.5
 
 ## 1.7.45
 
 ### Patch Changes
 
-- Updated dependencies [[`cafa9cc`](https://github.com/PostHog/posthog-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c)]:
-  - posthog-js@1.376.2
-  - @posthog/core@1.29.11
-  - posthog-node@5.35.4
+- Updated dependencies [[`cafa9cc`](https://github.com/Insights/insights-js/commit/cafa9cc786a07613677ec16f2fc9f0c4e833a12c)]:
+  - insights-js@1.376.2
+  - @insights/core@1.29.11
+  - insights-node@5.35.4
 
 ## 1.7.44
 
 ### Patch Changes
 
-- Updated dependencies [[`5568f12`](https://github.com/PostHog/posthog-js/commit/5568f12f46b4ebb7539f261edddda2f695ba03a2)]:
-  - @posthog/core@1.29.10
-  - posthog-js@1.376.1
-  - posthog-node@5.35.3
+- Updated dependencies [[`5568f12`](https://github.com/Insights/insights-js/commit/5568f12f46b4ebb7539f261edddda2f695ba03a2)]:
+  - @insights/core@1.29.10
+  - insights-js@1.376.1
+  - insights-node@5.35.3
 
 ## 1.7.43
 
 ### Patch Changes
 
-- Updated dependencies [[`5d7a2d3`](https://github.com/PostHog/posthog-js/commit/5d7a2d336befb9c2b7be9ff1961d674623d33901)]:
-  - posthog-node@5.35.2
+- Updated dependencies [[`5d7a2d3`](https://github.com/Insights/insights-js/commit/5d7a2d336befb9c2b7be9ff1961d674623d33901)]:
+  - insights-node@5.35.2
 
 ## 1.7.42
 
 ### Patch Changes
 
-- [#3661](https://github.com/PostHog/posthog-js/pull/3661) [`f12ee73`](https://github.com/PostHog/posthog-js/commit/f12ee73362545c2fe946a566d76bb14b7d5aa746) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Bump `@posthog/cli` to `~0.7.13`, which drops several unused runtime dependencies (`axios`, `axios-proxy-builder`, `console.table`, `rimraf`).
+- [#3661](https://github.com/Insights/insights-js/pull/3661) [`f12ee73`](https://github.com/Insights/insights-js/commit/f12ee73362545c2fe946a566d76bb14b7d5aa746) Thanks [@rafaeelaudibert](https://github.com/rafaeelaudibert)! - Bump `@insights/cli` to `~0.7.13`, which drops several unused runtime dependencies (`axios`, `axios-proxy-builder`, `console.table`, `rimraf`).
   (2026-05-22)
 
 ## 1.7.41
 
 ### Patch Changes
 
-- Updated dependencies [[`c806cca`](https://github.com/PostHog/posthog-js/commit/c806ccafdcc39b38e9554f8a17a8c2fbd3361dda), [`6e8d349`](https://github.com/PostHog/posthog-js/commit/6e8d3495d0a29076aeea5220e19e646aeb7f063f)]:
-  - posthog-js@1.376.0
-  - @posthog/core@1.29.9
-  - posthog-node@5.35.1
+- Updated dependencies [[`c806cca`](https://github.com/Insights/insights-js/commit/c806ccafdcc39b38e9554f8a17a8c2fbd3361dda), [`6e8d349`](https://github.com/Insights/insights-js/commit/6e8d3495d0a29076aeea5220e19e646aeb7f063f)]:
+  - insights-js@1.376.0
+  - @insights/core@1.29.9
+  - insights-node@5.35.1
 
 ## 1.7.40
 
 ### Patch Changes
 
-- Updated dependencies [[`2e1d5f4`](https://github.com/PostHog/posthog-js/commit/2e1d5f4081c98a04e6a16f57e42491911453994d), [`18ea8b5`](https://github.com/PostHog/posthog-js/commit/18ea8b53f608607075c93bc18b29be8dfd41eb3f)]:
-  - posthog-js@1.375.0
-  - posthog-node@5.35.0
-  - @posthog/core@1.29.8
+- Updated dependencies [[`2e1d5f4`](https://github.com/Insights/insights-js/commit/2e1d5f4081c98a04e6a16f57e42491911453994d), [`18ea8b5`](https://github.com/Insights/insights-js/commit/18ea8b53f608607075c93bc18b29be8dfd41eb3f)]:
+  - insights-js@1.375.0
+  - insights-node@5.35.0
+  - @insights/core@1.29.8
 
 ## 1.7.39
 
 ### Patch Changes
 
-- Updated dependencies [[`f42f371`](https://github.com/PostHog/posthog-js/commit/f42f3710f8e8788ecffce742face8ad34db3ef1c)]:
-  - posthog-node@5.34.10
+- Updated dependencies [[`f42f371`](https://github.com/Insights/insights-js/commit/f42f3710f8e8788ecffce742face8ad34db3ef1c)]:
+  - insights-node@5.34.10
 
 ## 1.7.38
 
 ### Patch Changes
 
-- Updated dependencies [[`87e2145`](https://github.com/PostHog/posthog-js/commit/87e2145b5d09ed8a24df1fc337dad5c3c90c1b8a), [`4f87827`](https://github.com/PostHog/posthog-js/commit/4f87827dda9c102a6deded986f2afd9fdddfb2e5), [`280832b`](https://github.com/PostHog/posthog-js/commit/280832b50b4c058e010436c4aab861cb143577c1)]:
-  - posthog-js@1.374.4
-  - @posthog/core@1.29.7
-  - posthog-node@5.34.9
+- Updated dependencies [[`87e2145`](https://github.com/Insights/insights-js/commit/87e2145b5d09ed8a24df1fc337dad5c3c90c1b8a), [`4f87827`](https://github.com/Insights/insights-js/commit/4f87827dda9c102a6deded986f2afd9fdddfb2e5), [`280832b`](https://github.com/Insights/insights-js/commit/280832b50b4c058e010436c4aab861cb143577c1)]:
+  - insights-js@1.374.4
+  - @insights/core@1.29.7
+  - insights-node@5.34.9
 
 ## 1.7.37
 
 ### Patch Changes
 
-- Updated dependencies [[`12ef3f6`](https://github.com/PostHog/posthog-js/commit/12ef3f63d18831b8ceffe7e81cea07d0c8a392a7)]:
-  - posthog-node@5.34.8
-  - posthog-js@1.374.3
+- Updated dependencies [[`12ef3f6`](https://github.com/Insights/insights-js/commit/12ef3f63d18831b8ceffe7e81cea07d0c8a392a7)]:
+  - insights-node@5.34.8
+  - insights-js@1.374.3
 
 ## 1.7.36
 
 ### Patch Changes
 
-- Updated dependencies [[`557b893`](https://github.com/PostHog/posthog-js/commit/557b8934aa0b990184e0376fb1fc28433ad336c6), [`a880dbc`](https://github.com/PostHog/posthog-js/commit/a880dbcbbfd01bbef939c627f3b541744e3c3587)]:
-  - posthog-js@1.374.3
-  - @posthog/core@1.29.6
-  - posthog-node@5.34.7
+- Updated dependencies [[`557b893`](https://github.com/Insights/insights-js/commit/557b8934aa0b990184e0376fb1fc28433ad336c6), [`a880dbc`](https://github.com/Insights/insights-js/commit/a880dbcbbfd01bbef939c627f3b541744e3c3587)]:
+  - insights-js@1.374.3
+  - @insights/core@1.29.6
+  - insights-node@5.34.7
 
 ## 1.7.35
 
 ### Patch Changes
 
-- Updated dependencies [[`e119eec`](https://github.com/PostHog/posthog-js/commit/e119eec0e4eaa3d6501d87cb745f25bbf247dcf7)]:
-  - posthog-node@5.34.6
+- Updated dependencies [[`e119eec`](https://github.com/Insights/insights-js/commit/e119eec0e4eaa3d6501d87cb745f25bbf247dcf7)]:
+  - insights-node@5.34.6
 
 ## 1.7.34
 
 ### Patch Changes
 
-- Updated dependencies [[`df91995`](https://github.com/PostHog/posthog-js/commit/df919950f298741980ed302828736cbf6785b1eb)]:
-  - posthog-js@1.374.2
-  - @posthog/core@1.29.5
-  - posthog-node@5.34.5
+- Updated dependencies [[`df91995`](https://github.com/Insights/insights-js/commit/df919950f298741980ed302828736cbf6785b1eb)]:
+  - insights-js@1.374.2
+  - @insights/core@1.29.5
+  - insights-node@5.34.5
 
 ## 1.7.33
 
 ### Patch Changes
 
-- Updated dependencies [[`07a0f5f`](https://github.com/PostHog/posthog-js/commit/07a0f5f7a25f9867047dd6c633b881f45caef72c)]:
-  - posthog-js@1.374.1
-  - @posthog/core@1.29.4
-  - posthog-node@5.34.4
+- Updated dependencies [[`07a0f5f`](https://github.com/Insights/insights-js/commit/07a0f5f7a25f9867047dd6c633b881f45caef72c)]:
+  - insights-js@1.374.1
+  - @insights/core@1.29.4
+  - insights-node@5.34.4
 
 ## 1.7.32
 
 ### Patch Changes
 
-- Updated dependencies [[`3c0a09f`](https://github.com/PostHog/posthog-js/commit/3c0a09f05ab768b94b5518a3109e44a5c9f33c70), [`594ea11`](https://github.com/PostHog/posthog-js/commit/594ea1146045d49080f6dfd951b037c13278e975)]:
-  - posthog-js@1.374.0
-  - @posthog/core@1.29.3
-  - posthog-node@5.34.3
+- Updated dependencies [[`3c0a09f`](https://github.com/Insights/insights-js/commit/3c0a09f05ab768b94b5518a3109e44a5c9f33c70), [`594ea11`](https://github.com/Insights/insights-js/commit/594ea1146045d49080f6dfd951b037c13278e975)]:
+  - insights-js@1.374.0
+  - @insights/core@1.29.3
+  - insights-node@5.34.3
 
 ## 1.7.31
 
 ### Patch Changes
 
-- Updated dependencies [[`221973e`](https://github.com/PostHog/posthog-js/commit/221973e4a2a50196ffb5c45c468f3de812ed82cf)]:
-  - posthog-js@1.373.5
-  - @posthog/core@1.29.2
-  - posthog-node@5.34.2
+- Updated dependencies [[`221973e`](https://github.com/Insights/insights-js/commit/221973e4a2a50196ffb5c45c468f3de812ed82cf)]:
+  - insights-js@1.373.5
+  - @insights/core@1.29.2
+  - insights-node@5.34.2
 
 ## 1.7.30
 
 ### Patch Changes
 
-- Updated dependencies [[`4b895bf`](https://github.com/PostHog/posthog-js/commit/4b895bf0151f24c0b72e8ce4cae47906795b29b8)]:
-  - @posthog/core@1.29.1
-  - posthog-js@1.373.4
-  - posthog-node@5.34.1
+- Updated dependencies [[`4b895bf`](https://github.com/Insights/insights-js/commit/4b895bf0151f24c0b72e8ce4cae47906795b29b8)]:
+  - @insights/core@1.29.1
+  - insights-js@1.373.4
+  - insights-node@5.34.1
 
 ## 1.7.29
 
 ### Patch Changes
 
-- Updated dependencies [[`ad60818`](https://github.com/PostHog/posthog-js/commit/ad60818222252f1b65bb8778b12862c287168422)]:
-  - @posthog/core@1.29.0
-  - posthog-node@5.34.0
-  - posthog-js@1.373.3
+- Updated dependencies [[`ad60818`](https://github.com/Insights/insights-js/commit/ad60818222252f1b65bb8778b12862c287168422)]:
+  - @insights/core@1.29.0
+  - insights-node@5.34.0
+  - insights-js@1.373.3
 
 ## 1.7.28
 
 ### Patch Changes
 
-- Updated dependencies [[`223d925`](https://github.com/PostHog/posthog-js/commit/223d9255e3dfb02af099b7529292cb56854daa77)]:
-  - posthog-js@1.373.2
-  - @posthog/core@1.28.7
-  - posthog-node@5.33.7
+- Updated dependencies [[`223d925`](https://github.com/Insights/insights-js/commit/223d9255e3dfb02af099b7529292cb56854daa77)]:
+  - insights-js@1.373.2
+  - @insights/core@1.28.7
+  - insights-node@5.33.7
 
 ## 1.7.27
 
 ### Patch Changes
 
-- Updated dependencies [[`7d027bc`](https://github.com/PostHog/posthog-js/commit/7d027bcfef3f0ffa47bdb31cd41f07784c2f2e7c)]:
-  - posthog-js@1.373.1
-  - @posthog/core@1.28.6
-  - posthog-node@5.33.6
+- Updated dependencies [[`7d027bc`](https://github.com/Insights/insights-js/commit/7d027bcfef3f0ffa47bdb31cd41f07784c2f2e7c)]:
+  - insights-js@1.373.1
+  - @insights/core@1.28.6
+  - insights-node@5.33.6
 
 ## 1.7.26
 
 ### Patch Changes
 
-- [#3560](https://github.com/PostHog/posthog-js/pull/3560) [`4d3f654`](https://github.com/PostHog/posthog-js/commit/4d3f65447db38d1effc44f016218cbe1a1063726) Thanks [@marandaneto](https://github.com/marandaneto)! - Fix Vue error capture to report the Nuxt error info string instead of the component instance.
+- [#3560](https://github.com/Insights/insights-js/pull/3560) [`4d3f654`](https://github.com/Insights/insights-js/commit/4d3f65447db38d1effc44f016218cbe1a1063726) Thanks [@marandaneto](https://github.com/marandaneto)! - Fix Vue error capture to report the Nuxt error info string instead of the component instance.
   (2026-05-11)
-- Updated dependencies [[`4c0c7d9`](https://github.com/PostHog/posthog-js/commit/4c0c7d9f48e6f4f5301f8208285191f62dc8407a), [`3511848`](https://github.com/PostHog/posthog-js/commit/3511848fd03bd77b117dccc6f06237a06d38d618), [`0a835fa`](https://github.com/PostHog/posthog-js/commit/0a835fa1d5db988d508aa023240ab5b4b50f0969)]:
-  - posthog-js@1.373.0
-  - @posthog/core@1.28.5
-  - posthog-node@5.33.5
+- Updated dependencies [[`4c0c7d9`](https://github.com/Insights/insights-js/commit/4c0c7d9f48e6f4f5301f8208285191f62dc8407a), [`3511848`](https://github.com/Insights/insights-js/commit/3511848fd03bd77b117dccc6f06237a06d38d618), [`0a835fa`](https://github.com/Insights/insights-js/commit/0a835fa1d5db988d508aa023240ab5b4b50f0969)]:
+  - insights-js@1.373.0
+  - @insights/core@1.28.5
+  - insights-node@5.33.5
 
 ## 1.7.25
 
 ### Patch Changes
 
-- Updated dependencies [[`d120042`](https://github.com/PostHog/posthog-js/commit/d12004237985bc552423e31e75bb0fa42d0921ca), [`94a5ba0`](https://github.com/PostHog/posthog-js/commit/94a5ba0cf6d3a0f943517a126a59f52baa77f2fe)]:
-  - posthog-js@1.372.10
-  - @posthog/core@1.28.4
-  - posthog-node@5.33.4
+- Updated dependencies [[`d120042`](https://github.com/Insights/insights-js/commit/d12004237985bc552423e31e75bb0fa42d0921ca), [`94a5ba0`](https://github.com/Insights/insights-js/commit/94a5ba0cf6d3a0f943517a126a59f52baa77f2fe)]:
+  - insights-js@1.372.10
+  - @insights/core@1.28.4
+  - insights-node@5.33.4
 
 ## 1.7.24
 
 ### Patch Changes
 
-- Updated dependencies [[`026e09d`](https://github.com/PostHog/posthog-js/commit/026e09d3d540ce39c06e88cd39db6c08403e855d)]:
-  - posthog-js@1.372.9
-  - @posthog/core@1.28.3
-  - posthog-node@5.33.3
+- Updated dependencies [[`026e09d`](https://github.com/Insights/insights-js/commit/026e09d3d540ce39c06e88cd39db6c08403e855d)]:
+  - insights-js@1.372.9
+  - @insights/core@1.28.3
+  - insights-node@5.33.3
 
 ## 1.7.23
 
 ### Patch Changes
 
-- Updated dependencies [[`220cd61`](https://github.com/PostHog/posthog-js/commit/220cd61e332ca4982c7bc3b6f740d797ef9e4e7f), [`255b273`](https://github.com/PostHog/posthog-js/commit/255b27380658b450d1427d4a478e4d7a4bf773f1)]:
-  - @posthog/core@1.28.2
-  - posthog-node@5.33.2
-  - posthog-js@1.372.8
+- Updated dependencies [[`220cd61`](https://github.com/Insights/insights-js/commit/220cd61e332ca4982c7bc3b6f740d797ef9e4e7f), [`255b273`](https://github.com/Insights/insights-js/commit/255b27380658b450d1427d4a478e4d7a4bf773f1)]:
+  - @insights/core@1.28.2
+  - insights-node@5.33.2
+  - insights-js@1.372.8
 
 ## 1.7.22
 
 ### Patch Changes
 
-- Updated dependencies [[`8aee3d5`](https://github.com/PostHog/posthog-js/commit/8aee3d55f8e2bf7a14a534c940327d8e08ba64f6)]:
-  - @posthog/core@1.28.1
-  - posthog-js@1.372.7
-  - posthog-node@5.33.1
+- Updated dependencies [[`8aee3d5`](https://github.com/Insights/insights-js/commit/8aee3d55f8e2bf7a14a534c940327d8e08ba64f6)]:
+  - @insights/core@1.28.1
+  - insights-js@1.372.7
+  - insights-node@5.33.1
 
 ## 1.7.21
 
 ### Patch Changes
 
-- Updated dependencies [[`f8bc02f`](https://github.com/PostHog/posthog-js/commit/f8bc02f946b51f27f55f97351ca8d81a1fa54e9d)]:
-  - posthog-node@5.33.0
+- Updated dependencies [[`f8bc02f`](https://github.com/Insights/insights-js/commit/f8bc02f946b51f27f55f97351ca8d81a1fa54e9d)]:
+  - insights-node@5.33.0
 
 ## 1.7.20
 
 ### Patch Changes
 
-- Updated dependencies [[`cf56753`](https://github.com/PostHog/posthog-js/commit/cf56753d775225df2751dee2de7987d4a47fef8c), [`04db756`](https://github.com/PostHog/posthog-js/commit/04db75663208251d1b09c80b09e5d00188e897fd)]:
-  - posthog-js@1.372.6
-  - @posthog/core@1.28.0
-  - posthog-node@5.32.1
+- Updated dependencies [[`cf56753`](https://github.com/Insights/insights-js/commit/cf56753d775225df2751dee2de7987d4a47fef8c), [`04db756`](https://github.com/Insights/insights-js/commit/04db75663208251d1b09c80b09e5d00188e897fd)]:
+  - insights-js@1.372.6
+  - @insights/core@1.28.0
+  - insights-node@5.32.1
 
 ## 1.7.19
 
 ### Patch Changes
 
-- Updated dependencies [[`70ba8f8`](https://github.com/PostHog/posthog-js/commit/70ba8f84649680a8c5e85b0deae00741075dc21b)]:
-  - posthog-node@5.32.0
+- Updated dependencies [[`70ba8f8`](https://github.com/Insights/insights-js/commit/70ba8f84649680a8c5e85b0deae00741075dc21b)]:
+  - insights-node@5.32.0
 
 ## 1.7.18
 
 ### Patch Changes
 
-- Updated dependencies [[`974e4b2`](https://github.com/PostHog/posthog-js/commit/974e4b273d36399e9491c88eb0a95aa23bca69b3)]:
-  - posthog-node@5.31.0
+- Updated dependencies [[`974e4b2`](https://github.com/Insights/insights-js/commit/974e4b273d36399e9491c88eb0a95aa23bca69b3)]:
+  - insights-node@5.31.0
 
 ## 1.7.17
 
 ### Patch Changes
 
-- Updated dependencies [[`c726aae`](https://github.com/PostHog/posthog-js/commit/c726aaea62483509469317870e6c3a3bedee3f18)]:
-  - posthog-js@1.372.5
-  - @posthog/core@1.27.9
-  - posthog-node@5.30.8
+- Updated dependencies [[`c726aae`](https://github.com/Insights/insights-js/commit/c726aaea62483509469317870e6c3a3bedee3f18)]:
+  - insights-js@1.372.5
+  - @insights/core@1.27.9
+  - insights-node@5.30.8
 
 ## 1.7.16
 
 ### Patch Changes
 
-- Updated dependencies [[`5a6b2a5`](https://github.com/PostHog/posthog-js/commit/5a6b2a55c015345909f93f744ebddd618e1fc85d)]:
-  - posthog-js@1.372.4
-  - @posthog/core@1.27.8
-  - posthog-node@5.30.7
+- Updated dependencies [[`5a6b2a5`](https://github.com/Insights/insights-js/commit/5a6b2a55c015345909f93f744ebddd618e1fc85d)]:
+  - insights-js@1.372.4
+  - @insights/core@1.27.8
+  - insights-node@5.30.7
 
 ## 1.7.15
 
 ### Patch Changes
 
-- Updated dependencies [[`5b8efc3`](https://github.com/PostHog/posthog-js/commit/5b8efc35d9acf77db2d6979ffa4b655b5f279721)]:
-  - posthog-js@1.372.3
-  - @posthog/core@1.27.7
-  - posthog-node@5.30.6
+- Updated dependencies [[`5b8efc3`](https://github.com/Insights/insights-js/commit/5b8efc35d9acf77db2d6979ffa4b655b5f279721)]:
+  - insights-js@1.372.3
+  - @insights/core@1.27.7
+  - insights-node@5.30.6
 
 ## 1.7.14
 
 ### Patch Changes
 
-- Updated dependencies [[`cba2570`](https://github.com/PostHog/posthog-js/commit/cba25700dca2e8d8e138ea6034bd42dc9d002596)]:
-  - posthog-js@1.372.2
-  - @posthog/core@1.27.6
-  - posthog-node@5.30.5
+- Updated dependencies [[`cba2570`](https://github.com/Insights/insights-js/commit/cba25700dca2e8d8e138ea6034bd42dc9d002596)]:
+  - insights-js@1.372.2
+  - @insights/core@1.27.6
+  - insights-node@5.30.5
 
 ## 1.7.13
 
 ### Patch Changes
 
-- Updated dependencies [[`70508df`](https://github.com/PostHog/posthog-js/commit/70508dfd7dd1201dd9c61c126a3c27ad39311c6a)]:
-  - @posthog/core@1.27.5
-  - posthog-js@1.372.1
-  - posthog-node@5.30.4
+- Updated dependencies [[`70508df`](https://github.com/Insights/insights-js/commit/70508dfd7dd1201dd9c61c126a3c27ad39311c6a)]:
+  - @insights/core@1.27.5
+  - insights-js@1.372.1
+  - insights-node@5.30.4
 
 ## 1.7.12
 
 ### Patch Changes
 
-- Updated dependencies [[`eaa1322`](https://github.com/PostHog/posthog-js/commit/eaa1322bcbf6606bb188f84ac64246a8cfb22256)]:
-  - posthog-js@1.372.0
-  - @posthog/core@1.27.4
-  - posthog-node@5.30.3
+- Updated dependencies [[`eaa1322`](https://github.com/Insights/insights-js/commit/eaa1322bcbf6606bb188f84ac64246a8cfb22256)]:
+  - insights-js@1.372.0
+  - @insights/core@1.27.4
+  - insights-node@5.30.3
 
 ## 1.7.11
 
 ### Patch Changes
 
-- Updated dependencies [[`3c4fc1e`](https://github.com/PostHog/posthog-js/commit/3c4fc1e70f3f2394fbdd141efda44bdbddbb9062)]:
-  - posthog-js@1.371.4
-  - @posthog/core@1.27.3
-  - posthog-node@5.30.2
+- Updated dependencies [[`3c4fc1e`](https://github.com/Insights/insights-js/commit/3c4fc1e70f3f2394fbdd141efda44bdbddbb9062)]:
+  - insights-js@1.371.4
+  - @insights/core@1.27.3
+  - insights-node@5.30.2
 
 ## 1.7.10
 
 ### Patch Changes
 
-- Updated dependencies [[`61cf83e`](https://github.com/PostHog/posthog-js/commit/61cf83efbd0dd846ace9281b001daa0d633fcd8c), [`daf028d`](https://github.com/PostHog/posthog-js/commit/daf028d553f756b9f58c01b848ad2d431239458b)]:
-  - posthog-js@1.371.3
-  - @posthog/core@1.27.2
-  - posthog-node@5.30.1
+- Updated dependencies [[`61cf83e`](https://github.com/Insights/insights-js/commit/61cf83efbd0dd846ace9281b001daa0d633fcd8c), [`daf028d`](https://github.com/Insights/insights-js/commit/daf028d553f756b9f58c01b848ad2d431239458b)]:
+  - insights-js@1.371.3
+  - @insights/core@1.27.2
+  - insights-node@5.30.1
 
 ## 1.7.9
 
 ### Patch Changes
 
-- Updated dependencies [[`eadbcd7`](https://github.com/PostHog/posthog-js/commit/eadbcd7b15e48e6d04f7cac487df25db2f73e9a7)]:
-  - posthog-node@5.30.0
+- Updated dependencies [[`eadbcd7`](https://github.com/Insights/insights-js/commit/eadbcd7b15e48e6d04f7cac487df25db2f73e9a7)]:
+  - insights-node@5.30.0
 
 ## 1.7.8
 
 ### Patch Changes
 
-- Updated dependencies [[`96f19b7`](https://github.com/PostHog/posthog-js/commit/96f19b79d563937ed8f98e12796eee541a2dae7f)]:
-  - posthog-js@1.371.2
-  - @posthog/core@1.27.1
-  - posthog-node@5.29.7
+- Updated dependencies [[`96f19b7`](https://github.com/Insights/insights-js/commit/96f19b79d563937ed8f98e12796eee541a2dae7f)]:
+  - insights-js@1.371.2
+  - @insights/core@1.27.1
+  - insights-node@5.29.7
 
 ## 1.7.7
 
 ### Patch Changes
 
-- Updated dependencies [[`2da17e8`](https://github.com/PostHog/posthog-js/commit/2da17e8c94b2705cb5852a9fe993925bf1e24b55)]:
-  - posthog-js@1.371.1
+- Updated dependencies [[`2da17e8`](https://github.com/Insights/insights-js/commit/2da17e8c94b2705cb5852a9fe993925bf1e24b55)]:
+  - insights-js@1.371.1
 
 ## 1.7.6
 
 ### Patch Changes
 
-- Updated dependencies [[`1a8b727`](https://github.com/PostHog/posthog-js/commit/1a8b7277c50a42bbb3f736afd530ff1c3389a7de)]:
-  - posthog-js@1.371.0
-  - @posthog/core@1.27.0
-  - posthog-node@5.29.6
+- Updated dependencies [[`1a8b727`](https://github.com/Insights/insights-js/commit/1a8b7277c50a42bbb3f736afd530ff1c3389a7de)]:
+  - insights-js@1.371.0
+  - @insights/core@1.27.0
+  - insights-node@5.29.6
 
 ## 1.7.5
 
 ### Patch Changes
 
-- Updated dependencies [[`6f19ce8`](https://github.com/PostHog/posthog-js/commit/6f19ce8fed80f81e75552c5725b648e5f2e53634)]:
-  - posthog-js@1.370.1
+- Updated dependencies [[`6f19ce8`](https://github.com/Insights/insights-js/commit/6f19ce8fed80f81e75552c5725b648e5f2e53634)]:
+  - insights-js@1.370.1
 
 ## 1.7.4
 
 ### Patch Changes
 
-- Updated dependencies [[`922a1c1`](https://github.com/PostHog/posthog-js/commit/922a1c1838a5ed2ad37f59dade5fc3cc81bb4246)]:
-  - posthog-js@1.370.0
-  - @posthog/core@1.26.0
-  - posthog-node@5.29.5
+- Updated dependencies [[`922a1c1`](https://github.com/Insights/insights-js/commit/922a1c1838a5ed2ad37f59dade5fc3cc81bb4246)]:
+  - insights-js@1.370.0
+  - @insights/core@1.26.0
+  - insights-node@5.29.5
 
 ## 1.7.3
 
 ### Patch Changes
 
-- Updated dependencies [[`b26c57c`](https://github.com/PostHog/posthog-js/commit/b26c57c31574c6e2fddcf6a98551421fe90b559d)]:
-  - posthog-node@5.29.4
+- Updated dependencies [[`b26c57c`](https://github.com/Insights/insights-js/commit/b26c57c31574c6e2fddcf6a98551421fe90b559d)]:
+  - insights-node@5.29.4
 
 ## 1.7.2
 
 ### Patch Changes
 
-- [#3426](https://github.com/PostHog/posthog-js/pull/3426) [`1a0b58d`](https://github.com/PostHog/posthog-js/commit/1a0b58d1d07c61662169d3bc56eed8cfd8855d65) Thanks [@marandaneto](https://github.com/marandaneto)! - Trim surrounding whitespace from user-provided API keys, personal API keys, and host config values before using them.
+- [#3426](https://github.com/Insights/insights-js/pull/3426) [`1a0b58d`](https://github.com/Insights/insights-js/commit/1a0b58d1d07c61662169d3bc56eed8cfd8855d65) Thanks [@marandaneto](https://github.com/marandaneto)! - Trim surrounding whitespace from user-provided API keys, personal API keys, and host config values before using them.
   (2026-04-21)
-- Updated dependencies [[`1a0b58d`](https://github.com/PostHog/posthog-js/commit/1a0b58d1d07c61662169d3bc56eed8cfd8855d65)]:
-  - @posthog/core@1.25.3
-  - @posthog/plugin-utils@1.1.1
-  - posthog-node@5.29.3
-  - posthog-js@1.369.5
+- Updated dependencies [[`1a0b58d`](https://github.com/Insights/insights-js/commit/1a0b58d1d07c61662169d3bc56eed8cfd8855d65)]:
+  - @insights/core@1.25.3
+  - @insights/plugin-utils@1.1.1
+  - insights-node@5.29.3
+  - insights-js@1.369.5
 
 ## 1.7.1
 
 ### Patch Changes
 
-- Updated dependencies [[`d61bce1`](https://github.com/PostHog/posthog-js/commit/d61bce11b4bd3abe95bcc76960bde585945a7edc)]:
-  - posthog-js@1.369.4
+- Updated dependencies [[`d61bce1`](https://github.com/Insights/insights-js/commit/d61bce11b4bd3abe95bcc76960bde585945a7edc)]:
+  - insights-js@1.369.4
 
 ## 1.7.0
 
 ### Minor Changes
 
-- [#3418](https://github.com/PostHog/posthog-js/pull/3418) [`04d276c`](https://github.com/PostHog/posthog-js/commit/04d276c340d97ee557d62d5df3ad1335fefda652) Thanks [@turnipdabeets](https://github.com/turnipdabeets)! - Add `build` to sourcemaps config, forwarded to posthog-cli as `--build`. Lets consumers of the bundler plugins (webpack, rollup, nextjs-config, nuxt) attach a build number as release metadata. Requires posthog-cli >= 0.7.8.
+- [#3418](https://github.com/Insights/insights-js/pull/3418) [`04d276c`](https://github.com/Insights/insights-js/commit/04d276c340d97ee557d62d5df3ad1335fefda652) Thanks [@turnipdabeets](https://github.com/turnipdabeets)! - Add `build` to sourcemaps config, forwarded to insights-cli as `--build`. Lets consumers of the bundler plugins (webpack, rollup, nextjs-config, nuxt) attach a build number as release metadata. Requires insights-cli >= 0.7.8.
   (2026-04-19)
 
 ### Patch Changes
 
-- Updated dependencies [[`04d276c`](https://github.com/PostHog/posthog-js/commit/04d276c340d97ee557d62d5df3ad1335fefda652)]:
-  - @posthog/plugin-utils@1.1.0
+- Updated dependencies [[`04d276c`](https://github.com/Insights/insights-js/commit/04d276c340d97ee557d62d5df3ad1335fefda652)]:
+  - @insights/plugin-utils@1.1.0
 
 ## 1.6.16
 
 ### Patch Changes
 
-- Updated dependencies [[`ea08727`](https://github.com/PostHog/posthog-js/commit/ea087272bbe210e5610c9271aa1194776e927353), [`3d8b2e2`](https://github.com/PostHog/posthog-js/commit/3d8b2e282927d0c09670b3f112c7dc159cebf059)]:
-  - posthog-js@1.369.3
+- Updated dependencies [[`ea08727`](https://github.com/Insights/insights-js/commit/ea087272bbe210e5610c9271aa1194776e927353), [`3d8b2e2`](https://github.com/Insights/insights-js/commit/3d8b2e282927d0c09670b3f112c7dc159cebf059)]:
+  - insights-js@1.369.3
 
 ## 1.6.15
 
 ### Patch Changes
 
-- Updated dependencies [[`4a65604`](https://github.com/PostHog/posthog-js/commit/4a65604775fe87c47e5fbdb5f03673f2481c26ea)]:
-  - posthog-js@1.369.2
+- Updated dependencies [[`4a65604`](https://github.com/Insights/insights-js/commit/4a65604775fe87c47e5fbdb5f03673f2481c26ea)]:
+  - insights-js@1.369.2
 
 ## 1.6.14
 
 ### Patch Changes
 
-- Updated dependencies [[`85ae4d9`](https://github.com/PostHog/posthog-js/commit/85ae4d9e2bb4e3f487c9b27fc581ed38c1a82c99), [`00cd1ce`](https://github.com/PostHog/posthog-js/commit/00cd1cef1d2d8a02339997bd3156aa1e395bea40)]:
-  - posthog-js@1.369.1
+- Updated dependencies [[`85ae4d9`](https://github.com/Insights/insights-js/commit/85ae4d9e2bb4e3f487c9b27fc581ed38c1a82c99), [`00cd1ce`](https://github.com/Insights/insights-js/commit/00cd1cef1d2d8a02339997bd3156aa1e395bea40)]:
+  - insights-js@1.369.1
 
 ## 1.6.13
 
 ### Patch Changes
 
-- Updated dependencies [[`eea5260`](https://github.com/PostHog/posthog-js/commit/eea5260bbd58fb8b2d7f0550bb03d741aaab376a), [`b1fd228`](https://github.com/PostHog/posthog-js/commit/b1fd228eab45dc688b769378afa96a0f74167fab)]:
-  - posthog-js@1.369.0
+- Updated dependencies [[`eea5260`](https://github.com/Insights/insights-js/commit/eea5260bbd58fb8b2d7f0550bb03d741aaab376a), [`b1fd228`](https://github.com/Insights/insights-js/commit/b1fd228eab45dc688b769378afa96a0f74167fab)]:
+  - insights-js@1.369.0
 
 ## 1.6.12
 
 ### Patch Changes
 
-- Updated dependencies [[`f1bea33`](https://github.com/PostHog/posthog-js/commit/f1bea33f64800c187f09a0989426ea0e73f43128)]:
-  - posthog-js@1.368.2
+- Updated dependencies [[`f1bea33`](https://github.com/Insights/insights-js/commit/f1bea33f64800c187f09a0989426ea0e73f43128)]:
+  - insights-js@1.368.2
 
 ## 1.6.11
 
 ### Patch Changes
 
-- Updated dependencies [[`d7c71b1`](https://github.com/PostHog/posthog-js/commit/d7c71b1316720d972e41b63987ef57512d615ea7)]:
-  - posthog-js@1.368.1
+- Updated dependencies [[`d7c71b1`](https://github.com/Insights/insights-js/commit/d7c71b1316720d972e41b63987ef57512d615ea7)]:
+  - insights-js@1.368.1
 
 ## 1.6.10
 
 ### Patch Changes
 
-- Updated dependencies [[`3fcf5c4`](https://github.com/PostHog/posthog-js/commit/3fcf5c449b3fe10ce187d40ea03425de9f94e85f), [`f5fe0a8`](https://github.com/PostHog/posthog-js/commit/f5fe0a8b11457a33c02029162a43e4eb2d3cb2d9)]:
-  - posthog-js@1.368.0
+- Updated dependencies [[`3fcf5c4`](https://github.com/Insights/insights-js/commit/3fcf5c449b3fe10ce187d40ea03425de9f94e85f), [`f5fe0a8`](https://github.com/Insights/insights-js/commit/f5fe0a8b11457a33c02029162a43e4eb2d3cb2d9)]:
+  - insights-js@1.368.0
 
 ## 1.6.9
 
 ### Patch Changes
 
-- Updated dependencies [[`353be9a`](https://github.com/PostHog/posthog-js/commit/353be9a878fe209a032f2d70376ece78ee67303c)]:
-  - posthog-js@1.367.0
+- Updated dependencies [[`353be9a`](https://github.com/Insights/insights-js/commit/353be9a878fe209a032f2d70376ece78ee67303c)]:
+  - insights-js@1.367.0
 
 ## 1.6.8
 
 ### Patch Changes
 
-- Updated dependencies [[`575e354`](https://github.com/PostHog/posthog-js/commit/575e354d0040bd83ac698495a4f0a07dece83eb3)]:
-  - posthog-js@1.366.2
+- Updated dependencies [[`575e354`](https://github.com/Insights/insights-js/commit/575e354d0040bd83ac698495a4f0a07dece83eb3)]:
+  - insights-js@1.366.2
 
 ## 1.6.7
 
 ### Patch Changes
 
-- Updated dependencies [[`802bf39`](https://github.com/PostHog/posthog-js/commit/802bf3919304f66694788bf0cb93e457326ab44b)]:
-  - posthog-js@1.366.1
+- Updated dependencies [[`802bf39`](https://github.com/Insights/insights-js/commit/802bf3919304f66694788bf0cb93e457326ab44b)]:
+  - insights-js@1.366.1
 
 ## 1.6.6
 
 ### Patch Changes
 
-- Updated dependencies [[`b599672`](https://github.com/PostHog/posthog-js/commit/b5996729b1d30fb99429c509e6a85ef8d7aca955)]:
-  - posthog-js@1.366.0
+- Updated dependencies [[`b599672`](https://github.com/Insights/insights-js/commit/b5996729b1d30fb99429c509e6a85ef8d7aca955)]:
+  - insights-js@1.366.0
 
 ## 1.6.5
 
 ### Patch Changes
 
-- Updated dependencies [[`c735b08`](https://github.com/PostHog/posthog-js/commit/c735b08577f8fa85935dcec5bc5814870ac4ed56)]:
-  - @posthog/core@1.25.2
-  - posthog-node@5.29.2
-  - posthog-js@1.365.5
+- Updated dependencies [[`c735b08`](https://github.com/Insights/insights-js/commit/c735b08577f8fa85935dcec5bc5814870ac4ed56)]:
+  - @insights/core@1.25.2
+  - insights-node@5.29.2
+  - insights-js@1.365.5
 
 ## 1.6.4
 
 ### Patch Changes
 
-- Updated dependencies [[`3939856`](https://github.com/PostHog/posthog-js/commit/3939856b917a3bad696cb7e5da73d4d50c3e0c53)]:
-  - posthog-js@1.365.4
+- Updated dependencies [[`3939856`](https://github.com/Insights/insights-js/commit/3939856b917a3bad696cb7e5da73d4d50c3e0c53)]:
+  - insights-js@1.365.4
 
 ## 1.6.3
 
 ### Patch Changes
 
-- Updated dependencies [[`dbdddca`](https://github.com/PostHog/posthog-js/commit/dbdddcad578adf282f620d2afcd5808600a9c287)]:
-  - posthog-js@1.365.3
+- Updated dependencies [[`dbdddca`](https://github.com/Insights/insights-js/commit/dbdddcad578adf282f620d2afcd5808600a9c287)]:
+  - insights-js@1.365.3
 
 ## 1.6.2
 
 ### Patch Changes
 
-- Updated dependencies [[`c387f6d`](https://github.com/PostHog/posthog-js/commit/c387f6dc146c9c09640e471e66043ad832b0476e)]:
-  - posthog-js@1.365.2
+- Updated dependencies [[`c387f6d`](https://github.com/Insights/insights-js/commit/c387f6dc146c9c09640e471e66043ad832b0476e)]:
+  - insights-js@1.365.2
 
 ## 1.6.1
 
 ### Patch Changes
 
-- Updated dependencies [[`57ee5b2`](https://github.com/PostHog/posthog-js/commit/57ee5b25fd2c97f334f52b4eba28ea925033d6ed)]:
-  - @posthog/core@1.25.1
-  - posthog-js@1.365.1
-  - posthog-node@5.29.1
+- Updated dependencies [[`57ee5b2`](https://github.com/Insights/insights-js/commit/57ee5b25fd2c97f334f52b4eba28ea925033d6ed)]:
+  - @insights/core@1.25.1
+  - insights-js@1.365.1
+  - insights-node@5.29.1
 
 ## 1.6.0
 
 ### Minor Changes
 
-- [#3302](https://github.com/PostHog/posthog-js/pull/3302) [`fc5589f`](https://github.com/PostHog/posthog-js/commit/fc5589fcc51bd53ba818822831867d3c00d83a11) Thanks [@dmarticus](https://github.com/dmarticus)! - preserve $set_once semantics in local flag evaluation cache
+- [#3302](https://github.com/Insights/insights-js/pull/3302) [`fc5589f`](https://github.com/Insights/insights-js/commit/fc5589fcc51bd53ba818822831867d3c00d83a11) Thanks [@dmarticus](https://github.com/dmarticus)! - preserve $set_once semantics in local flag evaluation cache
   (2026-04-07)
 
 ### Patch Changes
 
-- Updated dependencies [[`fc5589f`](https://github.com/PostHog/posthog-js/commit/fc5589fcc51bd53ba818822831867d3c00d83a11)]:
-  - posthog-js@1.365.0
-  - @posthog/core@1.25.0
-  - posthog-node@5.29.0
+- Updated dependencies [[`fc5589f`](https://github.com/Insights/insights-js/commit/fc5589fcc51bd53ba818822831867d3c00d83a11)]:
+  - insights-js@1.365.0
+  - @insights/core@1.25.0
+  - insights-node@5.29.0
 
 ## 1.5.103
 
 ### Patch Changes
 
-- Updated dependencies [[`b25b689`](https://github.com/PostHog/posthog-js/commit/b25b68967f7e85317e2aacb8ecc4dc66a95095eb)]:
-  - posthog-js@1.364.7
+- Updated dependencies [[`b25b689`](https://github.com/Insights/insights-js/commit/b25b68967f7e85317e2aacb8ecc4dc66a95095eb)]:
+  - insights-js@1.364.7
 
 ## 1.5.102
 
 ### Patch Changes
 
-- Updated dependencies [[`a01a3d5`](https://github.com/PostHog/posthog-js/commit/a01a3d55dc134b1b269be58c7922ce3780c57fc5), [`68cd4e5`](https://github.com/PostHog/posthog-js/commit/68cd4e5f1133b95bcb87c382a0ae5f1bcb96903d)]:
-  - @posthog/core@1.24.6
-  - posthog-js@1.364.6
-  - posthog-node@5.28.11
+- Updated dependencies [[`a01a3d5`](https://github.com/Insights/insights-js/commit/a01a3d55dc134b1b269be58c7922ce3780c57fc5), [`68cd4e5`](https://github.com/Insights/insights-js/commit/68cd4e5f1133b95bcb87c382a0ae5f1bcb96903d)]:
+  - @insights/core@1.24.6
+  - insights-js@1.364.6
+  - insights-node@5.28.11
 
 ## 1.5.101
 
 ### Patch Changes
 
-- [#3309](https://github.com/PostHog/posthog-js/pull/3309) [`197eeda`](https://github.com/PostHog/posthog-js/commit/197eeda0b09fd2671a8a40f1bfd48a7b940f7371) Thanks [@marandaneto](https://github.com/marandaneto)! - Extract CLI and sourcemap utilities from @posthog/core into @posthog/plugin-utils to remove cross-spawn from React Native dependencies
+- [#3309](https://github.com/Insights/insights-js/pull/3309) [`197eeda`](https://github.com/Insights/insights-js/commit/197eeda0b09fd2671a8a40f1bfd48a7b940f7371) Thanks [@marandaneto](https://github.com/marandaneto)! - Extract CLI and sourcemap utilities from @insights/core into @insights/plugin-utils to remove cross-spawn from React Native dependencies
   (2026-04-01)
-- Updated dependencies [[`197eeda`](https://github.com/PostHog/posthog-js/commit/197eeda0b09fd2671a8a40f1bfd48a7b940f7371), [`c5feb5c`](https://github.com/PostHog/posthog-js/commit/c5feb5c35eefe0a459facc3b72752ab7d6696c1c), [`7b944fc`](https://github.com/PostHog/posthog-js/commit/7b944fc2a6099c0dfa4aa28f55872bd226b17b37)]:
-  - @posthog/core@1.24.5
-  - @posthog/plugin-utils@1.0.1
-  - posthog-js@1.364.5
-  - posthog-node@5.28.10
+- Updated dependencies [[`197eeda`](https://github.com/Insights/insights-js/commit/197eeda0b09fd2671a8a40f1bfd48a7b940f7371), [`c5feb5c`](https://github.com/Insights/insights-js/commit/c5feb5c35eefe0a459facc3b72752ab7d6696c1c), [`7b944fc`](https://github.com/Insights/insights-js/commit/7b944fc2a6099c0dfa4aa28f55872bd226b17b37)]:
+  - @insights/core@1.24.5
+  - @insights/plugin-utils@1.0.1
+  - insights-js@1.364.5
+  - insights-node@5.28.10
 
 ## 1.5.100
 
 ### Patch Changes
 
-- Updated dependencies [[`2365df5`](https://github.com/PostHog/posthog-js/commit/2365df5c420fb88dccb74c85beeb058be92eb66e)]:
-  - posthog-js@1.364.4
+- Updated dependencies [[`2365df5`](https://github.com/Insights/insights-js/commit/2365df5c420fb88dccb74c85beeb058be92eb66e)]:
+  - insights-js@1.364.4
 
 ## 1.5.99
 
 ### Patch Changes
 
-- Updated dependencies [[`bab5f3a`](https://github.com/PostHog/posthog-js/commit/bab5f3a0c061dc48c2b573136c03758a3ba3c301)]:
-  - posthog-js@1.364.3
+- Updated dependencies [[`bab5f3a`](https://github.com/Insights/insights-js/commit/bab5f3a0c061dc48c2b573136c03758a3ba3c301)]:
+  - insights-js@1.364.3
 
 ## 1.5.98
 
 ### Patch Changes
 
-- Updated dependencies [[`341caaf`](https://github.com/PostHog/posthog-js/commit/341caaf627d752b35a3b9461a8b1f1fd532f306f), [`a863914`](https://github.com/PostHog/posthog-js/commit/a863914bca09643f2aef7ca029b96de9cbfbc24c)]:
-  - posthog-js@1.364.2
-  - @posthog/core@1.24.4
-  - posthog-node@5.28.9
+- Updated dependencies [[`341caaf`](https://github.com/Insights/insights-js/commit/341caaf627d752b35a3b9461a8b1f1fd532f306f), [`a863914`](https://github.com/Insights/insights-js/commit/a863914bca09643f2aef7ca029b96de9cbfbc24c)]:
+  - insights-js@1.364.2
+  - @insights/core@1.24.4
+  - insights-node@5.28.9
 
 ## 1.5.97
 
 ### Patch Changes
 
-- Updated dependencies [[`4bdfdbc`](https://github.com/PostHog/posthog-js/commit/4bdfdbcfe6a5600664a609a6b17c7d7cb72cd20f)]:
-  - @posthog/core@1.24.3
-  - posthog-js@1.364.1
-  - posthog-node@5.28.8
+- Updated dependencies [[`4bdfdbc`](https://github.com/Insights/insights-js/commit/4bdfdbcfe6a5600664a609a6b17c7d7cb72cd20f)]:
+  - @insights/core@1.24.3
+  - insights-js@1.364.1
+  - insights-node@5.28.8
 
 ## 1.5.96
 
 ### Patch Changes
 
-- Updated dependencies [[`8d34289`](https://github.com/PostHog/posthog-js/commit/8d34289f7cf91945223eed4366b11fb187a63a40), [`00a5079`](https://github.com/PostHog/posthog-js/commit/00a50795a16e9274fc6b4ea642b4a5e270f07222)]:
-  - posthog-js@1.364.0
-  - @posthog/core@1.24.2
-  - posthog-node@5.28.7
+- Updated dependencies [[`8d34289`](https://github.com/Insights/insights-js/commit/8d34289f7cf91945223eed4366b11fb187a63a40), [`00a5079`](https://github.com/Insights/insights-js/commit/00a50795a16e9274fc6b4ea642b4a5e270f07222)]:
+  - insights-js@1.364.0
+  - @insights/core@1.24.2
+  - insights-node@5.28.7
 
 ## 1.5.95
 
 ### Patch Changes
 
-- Updated dependencies [[`32edaad`](https://github.com/PostHog/posthog-js/commit/32edaadd509e32a3a679142ccb704fd9e404d1a2)]:
-  - posthog-js@1.363.6
+- Updated dependencies [[`32edaad`](https://github.com/Insights/insights-js/commit/32edaadd509e32a3a679142ccb704fd9e404d1a2)]:
+  - insights-js@1.363.6
 
 ## 1.5.94
 
 ### Patch Changes
 
-- Updated dependencies [[`5784dca`](https://github.com/PostHog/posthog-js/commit/5784dcaeb71f7e67d9c9df28f116886a573d19df)]:
-  - posthog-node@5.28.6
+- Updated dependencies [[`5784dca`](https://github.com/Insights/insights-js/commit/5784dcaeb71f7e67d9c9df28f116886a573d19df)]:
+  - insights-node@5.28.6
 
 ## 1.5.93
 
 ### Patch Changes
 
-- Updated dependencies [[`c59dc90`](https://github.com/PostHog/posthog-js/commit/c59dc90e167f2e1dc3fc4e53d2d716f9dc5e3c70), [`ba08262`](https://github.com/PostHog/posthog-js/commit/ba08262a0bcf4ae1db3ef3bb841e0ad07002fbea)]:
-  - posthog-js@1.363.5
+- Updated dependencies [[`c59dc90`](https://github.com/Insights/insights-js/commit/c59dc90e167f2e1dc3fc4e53d2d716f9dc5e3c70), [`ba08262`](https://github.com/Insights/insights-js/commit/ba08262a0bcf4ae1db3ef3bb841e0ad07002fbea)]:
+  - insights-js@1.363.5
 
 ## 1.5.92
 
 ### Patch Changes
 
-- Updated dependencies [[`664a11b`](https://github.com/PostHog/posthog-js/commit/664a11b083cf0a92630676207abb52aeb6a7c1e9)]:
-  - posthog-js@1.363.4
+- Updated dependencies [[`664a11b`](https://github.com/Insights/insights-js/commit/664a11b083cf0a92630676207abb52aeb6a7c1e9)]:
+  - insights-js@1.363.4
 
 ## 1.5.91
 
 ### Patch Changes
 
-- Updated dependencies [[`42fbd41`](https://github.com/PostHog/posthog-js/commit/42fbd4190ac4c4ce850158407512d15fa2e590c8)]:
-  - posthog-js@1.363.3
+- Updated dependencies [[`42fbd41`](https://github.com/Insights/insights-js/commit/42fbd4190ac4c4ce850158407512d15fa2e590c8)]:
+  - insights-js@1.363.3
 
 ## 1.5.90
 
 ### Patch Changes
 
-- Updated dependencies [[`e5ef520`](https://github.com/PostHog/posthog-js/commit/e5ef5201bf764aac11a765549f9561010d3b4329), [`1435ec8`](https://github.com/PostHog/posthog-js/commit/1435ec8bb64dd6ac8f5359630b7f01b051cc5fe6)]:
-  - posthog-js@1.363.2
+- Updated dependencies [[`e5ef520`](https://github.com/Insights/insights-js/commit/e5ef5201bf764aac11a765549f9561010d3b4329), [`1435ec8`](https://github.com/Insights/insights-js/commit/1435ec8bb64dd6ac8f5359630b7f01b051cc5fe6)]:
+  - insights-js@1.363.2
 
 ## 1.5.89
 
 ### Patch Changes
 
-- Updated dependencies [[`314120a`](https://github.com/PostHog/posthog-js/commit/314120aa2377b3c8031dd774833fe9082ecdbd39)]:
-  - @posthog/core@1.24.1
-  - posthog-js@1.363.1
-  - posthog-node@5.28.5
+- Updated dependencies [[`314120a`](https://github.com/Insights/insights-js/commit/314120aa2377b3c8031dd774833fe9082ecdbd39)]:
+  - @insights/core@1.24.1
+  - insights-js@1.363.1
+  - insights-node@5.28.5
 
 ## 1.5.88
 
 ### Patch Changes
 
-- Updated dependencies [[`7efa558`](https://github.com/PostHog/posthog-js/commit/7efa558fa0a5e3355d4f3c7974ec20b6a1b810b4), [`1acd6fd`](https://github.com/PostHog/posthog-js/commit/1acd6fdfaaa46da71ca15bba2916c3bb81c3e7ef)]:
-  - posthog-js@1.363.0
+- Updated dependencies [[`7efa558`](https://github.com/Insights/insights-js/commit/7efa558fa0a5e3355d4f3c7974ec20b6a1b810b4), [`1acd6fd`](https://github.com/Insights/insights-js/commit/1acd6fdfaaa46da71ca15bba2916c3bb81c3e7ef)]:
+  - insights-js@1.363.0
 
 ## 1.5.87
 
 ### Patch Changes
 
-- Updated dependencies [[`ff8a93e`](https://github.com/PostHog/posthog-js/commit/ff8a93e99bb9bab98d02074d84973430d279a29d), [`9cd2313`](https://github.com/PostHog/posthog-js/commit/9cd23138343e1020811f85853d6016cc985bb24f)]:
-  - posthog-js@1.362.0
-  - @posthog/core@1.24.0
-  - posthog-node@5.28.4
+- Updated dependencies [[`ff8a93e`](https://github.com/Insights/insights-js/commit/ff8a93e99bb9bab98d02074d84973430d279a29d), [`9cd2313`](https://github.com/Insights/insights-js/commit/9cd23138343e1020811f85853d6016cc985bb24f)]:
+  - insights-js@1.362.0
+  - @insights/core@1.24.0
+  - insights-node@5.28.4
 
 ## 1.5.86
 
 ### Patch Changes
 
-- Updated dependencies [[`c265d62`](https://github.com/PostHog/posthog-js/commit/c265d6207c43986d0599ad2464df53e2b813f08c)]:
-  - posthog-js@1.361.1
+- Updated dependencies [[`c265d62`](https://github.com/Insights/insights-js/commit/c265d6207c43986d0599ad2464df53e2b813f08c)]:
+  - insights-js@1.361.1
 
 ## 1.5.85
 
 ### Patch Changes
 
-- Updated dependencies [[`bf4f078`](https://github.com/PostHog/posthog-js/commit/bf4f078096c506906afecb1dbe9fc31100900a0f), [`8773fdf`](https://github.com/PostHog/posthog-js/commit/8773fdfdb87980da3db1f141099577424b35153b), [`697e423`](https://github.com/PostHog/posthog-js/commit/697e4237ca945caa33b26f35872951ad0e7530d4), [`552c018`](https://github.com/PostHog/posthog-js/commit/552c01843b9ae1fbf8fdf1a2e98e0b7fdc37c851), [`e4a58d0`](https://github.com/PostHog/posthog-js/commit/e4a58d0a071c7605a69ae4492efd895cd50047bd), [`fe1fd7b`](https://github.com/PostHog/posthog-js/commit/fe1fd7b222b2ca51164e01fceca892628efac89c)]:
-  - posthog-js@1.361.0
-  - posthog-node@5.28.3
+- Updated dependencies [[`bf4f078`](https://github.com/Insights/insights-js/commit/bf4f078096c506906afecb1dbe9fc31100900a0f), [`8773fdf`](https://github.com/Insights/insights-js/commit/8773fdfdb87980da3db1f141099577424b35153b), [`697e423`](https://github.com/Insights/insights-js/commit/697e4237ca945caa33b26f35872951ad0e7530d4), [`552c018`](https://github.com/Insights/insights-js/commit/552c01843b9ae1fbf8fdf1a2e98e0b7fdc37c851), [`e4a58d0`](https://github.com/Insights/insights-js/commit/e4a58d0a071c7605a69ae4492efd895cd50047bd), [`fe1fd7b`](https://github.com/Insights/insights-js/commit/fe1fd7b222b2ca51164e01fceca892628efac89c)]:
+  - insights-js@1.361.0
+  - insights-node@5.28.3
 
 ## 1.5.84
 
 ### Patch Changes
 
-- Updated dependencies [[`bc30c2d`](https://github.com/PostHog/posthog-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a), [`bc30c2d`](https://github.com/PostHog/posthog-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a), [`bc30c2d`](https://github.com/PostHog/posthog-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a), [`bc30c2d`](https://github.com/PostHog/posthog-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a)]:
-  - @posthog/core@1.23.4
-  - posthog-js@1.360.2
-  - posthog-node@5.28.2
+- Updated dependencies [[`bc30c2d`](https://github.com/Insights/insights-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a), [`bc30c2d`](https://github.com/Insights/insights-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a), [`bc30c2d`](https://github.com/Insights/insights-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a), [`bc30c2d`](https://github.com/Insights/insights-js/commit/bc30c2d988bb307e811d97711f208c125eefba3a)]:
+  - @insights/core@1.23.4
+  - insights-js@1.360.2
+  - insights-node@5.28.2
 
 ## 1.5.83
 
 ### Patch Changes
 
-- Updated dependencies [[`4009c15`](https://github.com/PostHog/posthog-js/commit/4009c15c85c96b5cf99fdbcda448b9893c95541e)]:
-  - @posthog/core@1.23.3
-  - posthog-js@1.360.1
-  - posthog-node@5.28.1
+- Updated dependencies [[`4009c15`](https://github.com/Insights/insights-js/commit/4009c15c85c96b5cf99fdbcda448b9893c95541e)]:
+  - @insights/core@1.23.3
+  - insights-js@1.360.1
+  - insights-node@5.28.1
 
 ## 1.5.82
 
 ### Patch Changes
 
-- Updated dependencies [[`db089fd`](https://github.com/PostHog/posthog-js/commit/db089fd81f35a9c5e825c43853a870a17c916ce0), [`c5a37cb`](https://github.com/PostHog/posthog-js/commit/c5a37cbc248515ff5333f425ffa270136169d47f)]:
-  - posthog-js@1.360.0
+- Updated dependencies [[`db089fd`](https://github.com/Insights/insights-js/commit/db089fd81f35a9c5e825c43853a870a17c916ce0), [`c5a37cb`](https://github.com/Insights/insights-js/commit/c5a37cbc248515ff5333f425ffa270136169d47f)]:
+  - insights-js@1.360.0
 
 ## 1.5.81
 
 ### Patch Changes
 
-- Updated dependencies [[`2b0cd52`](https://github.com/PostHog/posthog-js/commit/2b0cd52bac03b50322c497eb1f2fd070e54c83b4)]:
-  - posthog-js@1.359.1
+- Updated dependencies [[`2b0cd52`](https://github.com/Insights/insights-js/commit/2b0cd52bac03b50322c497eb1f2fd070e54c83b4)]:
+  - insights-js@1.359.1
 
 ## 1.5.80
 
 ### Patch Changes
 
-- Updated dependencies [[`9180726`](https://github.com/PostHog/posthog-js/commit/91807266924dd6bf4689d94f1480158c38ec7ca3)]:
-  - posthog-js@1.359.0
+- Updated dependencies [[`9180726`](https://github.com/Insights/insights-js/commit/91807266924dd6bf4689d94f1480158c38ec7ca3)]:
+  - insights-js@1.359.0
 
 ## 1.5.79
 
 ### Patch Changes
 
-- Updated dependencies [[`33e9fb4`](https://github.com/PostHog/posthog-js/commit/33e9fb4b3fae3676e10bdc2b0990e8ec229dd5be)]:
-  - posthog-node@5.28.0
+- Updated dependencies [[`33e9fb4`](https://github.com/Insights/insights-js/commit/33e9fb4b3fae3676e10bdc2b0990e8ec229dd5be)]:
+  - insights-node@5.28.0
 
 ## 1.5.78
 
 ### Patch Changes
 
-- Updated dependencies [[`4601bbc`](https://github.com/PostHog/posthog-js/commit/4601bbc3d8456ce36ea1065a44101415501d4729)]:
-  - posthog-node@5.27.1
+- Updated dependencies [[`4601bbc`](https://github.com/Insights/insights-js/commit/4601bbc3d8456ce36ea1065a44101415501d4729)]:
+  - insights-node@5.27.1
 
 ## 1.5.77
 
 ### Patch Changes
 
-- Updated dependencies [[`9f41d26`](https://github.com/PostHog/posthog-js/commit/9f41d26d460d1dae557a37a1bec9575a785322e9), [`9d0df0e`](https://github.com/PostHog/posthog-js/commit/9d0df0e9fe9b2439526d730df0e2cb7cd4868fee)]:
-  - posthog-js@1.358.1
+- Updated dependencies [[`9f41d26`](https://github.com/Insights/insights-js/commit/9f41d26d460d1dae557a37a1bec9575a785322e9), [`9d0df0e`](https://github.com/Insights/insights-js/commit/9d0df0e9fe9b2439526d730df0e2cb7cd4868fee)]:
+  - insights-js@1.358.1
 
 ## 1.5.76
 
 ### Patch Changes
 
-- Updated dependencies [[`2eff595`](https://github.com/PostHog/posthog-js/commit/2eff595e137f2b430092ec4330a42261fb470764)]:
-  - posthog-node@5.27.0
+- Updated dependencies [[`2eff595`](https://github.com/Insights/insights-js/commit/2eff595e137f2b430092ec4330a42261fb470764)]:
+  - insights-node@5.27.0
 
 ## 1.5.75
 
 ### Patch Changes
 
-- Updated dependencies [[`20c1ff2`](https://github.com/PostHog/posthog-js/commit/20c1ff2ac07705303aaf329a5b0143e89adec453), [`0e08337`](https://github.com/PostHog/posthog-js/commit/0e083378a1ee9133427b40b0a9350f7cfc902244)]:
-  - posthog-js@1.358.0
+- Updated dependencies [[`20c1ff2`](https://github.com/Insights/insights-js/commit/20c1ff2ac07705303aaf329a5b0143e89adec453), [`0e08337`](https://github.com/Insights/insights-js/commit/0e083378a1ee9133427b40b0a9350f7cfc902244)]:
+  - insights-js@1.358.0
 
 ## 1.5.74
 
 ### Patch Changes
 
-- Updated dependencies [[`f485c92`](https://github.com/PostHog/posthog-js/commit/f485c9217d17aae68ceb257420463946163d0060)]:
-  - posthog-js@1.357.2
+- Updated dependencies [[`f485c92`](https://github.com/Insights/insights-js/commit/f485c9217d17aae68ceb257420463946163d0060)]:
+  - insights-js@1.357.2
 
 ## 1.5.73
 
 ### Patch Changes
 
-- [#3182](https://github.com/PostHog/posthog-js/pull/3182) [`2304af0`](https://github.com/PostHog/posthog-js/commit/2304af092b4da4d5480f40f1fb8f748ce89e8c25) Thanks [@marandaneto](https://github.com/marandaneto)! - refactor: use `getFeatureFlagResult` instead of deprecated `getFeatureFlagPayload` internally
+- [#3182](https://github.com/Insights/insights-js/pull/3182) [`2304af0`](https://github.com/Insights/insights-js/commit/2304af092b4da4d5480f40f1fb8f748ce89e8c25) Thanks [@marandaneto](https://github.com/marandaneto)! - refactor: use `getFeatureFlagResult` instead of deprecated `getFeatureFlagPayload` internally
   (2026-03-02)
 
 ## 1.5.72
