@@ -202,7 +202,7 @@ export const testGetAllFlags = query({
         flagKeys: v.optional(v.array(v.string())),
     },
     handler: async (ctx, args) => {
-        const flags = await posthog.getAllFlags(ctx, {
+        const flags = await insights.getAllFlags(ctx, {
             distinctId: args.distinctId,
             groups: args.groups as Record<string, string> | undefined,
             personProperties: args.personProperties as Record<string, string> | undefined,
@@ -219,7 +219,7 @@ export const testGetAllFlags = query({
 export const flagDefinitionsStatus = query({
     args: {},
     handler: async (ctx) => {
-        const row = await ctx.runQuery(components.posthog.lib.getFlagDefinitions, {})
+        const row = await ctx.runQuery(components.insights.lib.getFlagDefinitions, {})
         if (!row) return null
         let flagKeys: string[] = []
         try {
@@ -239,7 +239,7 @@ export const flagDefinitionsStatus = query({
 
 // --- Remote feature flag evaluation wrappers ---
 //
-// These are action-context actions that hit PostHog's `/flags` endpoint via the client's
+// These are action-context actions that hit Insights's `/flags` endpoint via the client's
 // `evaluate*` methods. Use them when local eval isn't possible (no personal API key, experience
 // continuity flags, static cohorts, properties you don't have server-side).
 

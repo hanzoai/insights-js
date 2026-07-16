@@ -1,6 +1,6 @@
-# Groq + PostHog AI Examples
+# Groq + Insights AI Examples
 
-Track Groq API calls with PostHog via the OpenAI-compatible API.
+Track Groq API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

@@ -4,7 +4,7 @@ import { useFeatureFlag, useActiveFeatureFlags } from '@hanzo/insights-next'
 
 export default function SSRBootstrapPage() {
     // These values are available immediately on first render - no flicker.
-    // The PostHogProvider in layout.tsx has `bootstrapFlags` enabled, which
+    // The InsightsProvider in layout.tsx has `bootstrapFlags` enabled, which
     // evaluates flags server-side and passes them to the client via bootstrap.
     const activeFlags = useActiveFeatureFlags()
     const exampleFlag = useFeatureFlag('example-flag')
@@ -37,7 +37,7 @@ export default function SSRBootstrapPage() {
                     </ul>
                 ) : (
                     <p className="text-sm text-gray-500">
-                        No active flags. Create some in your PostHog project to see them here.
+                        No active flags. Create some in your Insights project to see them here.
                     </p>
                 )}
             </div>

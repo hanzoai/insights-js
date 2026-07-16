@@ -1,22 +1,22 @@
-/** Google Gemini image generation, tracked by PostHog via OpenTelemetry. */
+/** Google Gemini image generation, tracked by Insights via OpenTelemetry. */
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
+import { InsightsSpanProcessor } from '@hanzo/insights-ai/otel'
 import { GenAIInstrumentation } from '@traceloop/instrumentation-google-generativeai'
 import { GoogleGenAI } from '@google/genai'
 
 const sdk = new NodeSDK({
     resource: resourceFromAttributes({
         'service.name': 'example-gemini-app',
-        'posthog.distinct_id': 'example-user',
+        'insights.distinct_id': 'example-user',
         foo: 'bar',
         conversation_id: 'abc-123',
     }),
     spanProcessors: [
-        new PostHogSpanProcessor({
-            apiKey: process.env.POSTHOG_API_KEY!,
-            host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
+        new InsightsSpanProcessor({
+            apiKey: process.env.INSIGHTS_API_KEY!,
+            host: process.env.INSIGHTS_HOST || 'https://us.i.insights.com',
         }),
     ],
     instrumentations: [new GenAIInstrumentation()],

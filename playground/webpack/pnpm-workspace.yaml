@@ -3,7 +3,7 @@ onlyBuiltDependencies:
 pnpmfile: ../.pnpmfile.cjs
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-  - "@posthog/cli"
+  - "@insights/cli"
 
 blockExoticSubdeps: true
 trustPolicy: no-downgrade

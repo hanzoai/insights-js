@@ -1,6 +1,6 @@
-# Vercel AI SDK + PostHog AI Examples
+# Vercel AI SDK + Insights AI Examples
 
-Track Vercel AI SDK calls with PostHog across multiple providers.
+Track Vercel AI SDK calls with Insights across multiple providers.
 
 ## Setup
 

@@ -1,12 +1,12 @@
-/** OpenAI Agents SDK single agent with tools, tracked by PostHog. */
+/** OpenAI Agents SDK single agent with tools, tracked by Insights. */
 
-import { PostHog } from '@hanzo/insights-node'
+import { Insights } from '@hanzo/insights-node'
 import { instrument } from '@hanzo/insights-ai/openai-agents'
 import { Agent, run, tool } from '@openai/agents'
 import { z } from 'zod'
 
-const phClient = new PostHog(process.env.POSTHOG_API_KEY!, {
-  host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
+const phClient = new Insights(process.env.INSIGHTS_API_KEY!, {
+  host: process.env.INSIGHTS_HOST || 'https://us.i.insights.com',
 })
 
 const getWeather = tool({

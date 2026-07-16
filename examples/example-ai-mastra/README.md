@@ -1,6 +1,6 @@
-# Mastra + PostHog AI Examples
+# Mastra + Insights AI Examples
 
-Track Mastra agent runs with PostHog using manual instrumentation.
+Track Mastra agent runs with Insights using manual instrumentation.
 
 ## Setup
 
@@ -12,7 +12,7 @@ cp .env.example .env
 
 ## Examples
 
-- **workflow.ts** - Mastra agent with manual PostHog event capture
+- **workflow.ts** - Mastra agent with manual Insights event capture
 
 ## Run
 

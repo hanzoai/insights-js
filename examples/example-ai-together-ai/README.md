@@ -1,6 +1,6 @@
-# Together AI + PostHog AI Examples
+# Together AI + Insights AI Examples
 
-Track Together AI API calls with PostHog via the OpenAI-compatible API.
+Track Together AI API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

@@ -5,12 +5,12 @@ const demos = [
         title: 'Authentication',
         href: '/auth',
         description:
-            'Log in and out with posthog.identify() and posthog.reset(). Shows identity sync between client and server.',
+            'Log in and out with insights.identify() and insights.reset(). Shows identity sync between client and server.',
     },
     {
         title: 'Server-Side Flags',
         href: '/server-flags',
-        description: 'Evaluate feature flags in server components using getPostHog().',
+        description: 'Evaluate feature flags in server components using getInsights().',
     },
     {
         title: 'Client Hooks',
@@ -25,7 +25,7 @@ const demos = [
     {
         title: 'Event Capture',
         href: '/capture',
-        description: 'Capture custom events from client components with posthog.capture().',
+        description: 'Capture custom events from client components with insights.capture().',
     },
 ]
 
