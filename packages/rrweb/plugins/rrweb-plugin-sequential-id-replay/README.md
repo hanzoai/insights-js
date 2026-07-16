@@ -12,8 +12,8 @@ npm install @rrweb/rrweb-plugin-sequential-id-replay
 ## Usage
 
 ```js
-import rrweb from '@posthog/rrweb';
-import { getReplaySequentialIdPlugin } from '@posthog/rrweb-plugin-sequential-id-replay';
+import rrweb from '@insights/rrweb';
+import { getReplaySequentialIdPlugin } from '@insights/rrweb-plugin-sequential-id-replay';
 
 const replayer = new rrweb.Replayer(events, {
   plugins: [
@@ -140,8 +140,8 @@ replayer.play(); // ERROR: [sequential-id-plugin]: expect to get an id with valu
       </a>
     </td>
     <td align="center">
-      <a href="https://posthog.com?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
-        <img width="195px" src="https://www.rrweb.io/logos/posthog.png">
+      <a href="https://insights.hanzo.ai?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
+        <img width="195px" src="https://www.rrweb.io/logos/insights.png">
       </a>
     </td>
     <td align="center">

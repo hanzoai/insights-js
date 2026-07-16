@@ -12,7 +12,7 @@ npm install @rrweb/replay
 ## Usage
 
 ```js
-import { Replayer } from '@posthog/rrweb-replay';
+import { Replayer } from '@insights/rrweb-replay';
 
 const replayer = new Replayer(events, {
   // options
@@ -138,8 +138,8 @@ All `Replayer` related code will get moved here in the future.
       </a>
     </td>
     <td align="center">
-      <a href="https://posthog.com?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
-        <img width="195px" src="https://www.rrweb.io/logos/posthog.png">
+      <a href="https://insights.hanzo.ai?utm_source=rrweb&utm_medium=sponsorship&utm_campaign=open-source-sponsorship" target="_blank">
+        <img width="195px" src="https://www.rrweb.io/logos/insights.png">
       </a>
     </td>
     <td align="center">
