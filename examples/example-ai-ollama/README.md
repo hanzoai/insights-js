@@ -1,6 +1,6 @@
-# Ollama + PostHog AI Examples
+# Ollama + Insights AI Examples
 
-Track Ollama API calls with PostHog via the OpenAI-compatible API.
+Track Ollama API calls with Insights via the OpenAI-compatible API.
 
 ## Setup
 

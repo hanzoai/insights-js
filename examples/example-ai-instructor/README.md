@@ -1,6 +1,6 @@
-# Instructor + PostHog AI Examples
+# Instructor + Insights AI Examples
 
-Track Instructor structured extraction calls with PostHog.
+Track Instructor structured extraction calls with Insights.
 
 ## Setup
 
@@ -12,7 +12,7 @@ cp .env.example .env
 
 ## Examples
 
-- **extract.ts** - Extract structured data with Instructor and PostHog tracking
+- **extract.ts** - Extract structured data with Instructor and Insights tracking
 
 ## Run
 

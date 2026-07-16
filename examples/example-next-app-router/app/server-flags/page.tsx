@@ -1,18 +1,18 @@
 import Link from 'next/link'
-import { getPostHog } from '@hanzo/insights-next'
+import { getInsights } from '@hanzo/insights-next'
 
 export default async function ServerFlagsPage() {
-    const posthog = await getPostHog()
-    const allFlags = await posthog.getAllFlags()
-    const { distinctId, sessionId } = posthog.getContext() ?? {}
+    const insights = await getInsights()
+    const allFlags = await insights.getAllFlags()
+    const { distinctId, sessionId } = insights.getContext() ?? {}
 
-    posthog.capture({ event: 'server_flags_page_viewed' })
+    insights.capture({ event: 'server_flags_page_viewed' })
 
     return (
         <div>
             <h1 className="text-2xl font-bold mb-2">Server-Side Feature Flags</h1>
             <p className="text-gray-600 mb-6">
-                This page is a server component. It uses <code className="bg-gray-100 px-1 rounded">getPostHog</code>{' '}
+                This page is a server component. It uses <code className="bg-gray-100 px-1 rounded">getInsights</code>{' '}
                 from <code className="bg-gray-100 px-1 rounded">@hanzo/insights-next</code> to evaluate feature flags and
                 capture events server-side.
             </p>
@@ -26,7 +26,7 @@ export default async function ServerFlagsPage() {
                     Session ID: <code className="bg-gray-100 px-1 rounded">{sessionId ?? 'unknown'}</code>
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
-                    Identity is automatically read from the PostHog cookie set by posthog-js on the client. Try logging
+                    Identity is automatically read from the Insights cookie set by insights-js on the client. Try logging
                     in on the{' '}
                     <Link href="/auth" className="text-blue-600 underline">
                         Auth page
@@ -56,7 +56,7 @@ export default async function ServerFlagsPage() {
                     </table>
                 ) : (
                     <p className="text-sm text-gray-500">
-                        No feature flags found. Create some flags in your PostHog project to see them here.
+                        No feature flags found. Create some flags in your Insights project to see them here.
                     </p>
                 )}
             </div>

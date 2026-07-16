@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai'
 import { components } from '../_generated/api'
 import { action } from '../_generated/server'
 import { v } from 'convex/values'
-import { posthog } from '../posthog.js'
+import { insights } from '../insights.js'
 
 const supportAgent = new Agent(components.agent, {
     name: 'support-agent',
@@ -43,7 +43,7 @@ export const generate = action({
 
         const latency = (Date.now() - startTime) / 1000
 
-        await posthog.capture(ctx, {
+        await insights.capture(ctx, {
             distinctId: args.distinctId ?? 'anonymous',
             event: '$ai_generation',
             properties: {

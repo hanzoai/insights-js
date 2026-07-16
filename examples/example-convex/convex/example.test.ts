@@ -71,7 +71,7 @@ function firstBatchEvent(): Record<string, unknown> {
 
 async function finishScheduledFunctions(t: ReturnType<typeof initConvexTest>) {
     // Run only the Convex scheduler timer that was pending before this call. `runAllTimers()` also
-    // executes timers created by the scheduled action itself, such as PostHog request timeout/retry
+    // executes timers created by the scheduled action itself, such as Insights request timeout/retry
     // timers, which can make these tests race or hang under fake timers.
     await jest.runOnlyPendingTimersAsync()
     await t.finishInProgressScheduledFunctions()
@@ -101,12 +101,12 @@ describe('capture', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
-    test('sends event to PostHog API with correct distinct_id and event name', async () => {
+    test('sends event to Insights API with correct distinct_id and event name', async () => {
         global.fetch = mockFetch()
         const t = initConvexTest()
 
@@ -230,8 +230,8 @@ describe('identify', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -427,7 +427,7 @@ describe('captureException', () => {
         const event = firstBatchEvent()
         expect(event.event).toBe('$exception')
         const props = event.properties as Record<string, unknown>
-        // posthog-node v5 uses $exception_list instead of $exception_message
+        // insights-node v5 uses $exception_list instead of $exception_message
         const exceptionList = props.$exception_list as Array<{
             value: string
             type: string
@@ -551,23 +551,23 @@ function definitionsResponse(flags: FlagDefinition[]) {
 }
 
 async function loadDefinitions(t: ReturnType<typeof initConvexTest>) {
-    // Credentials are read from POSTHOG_PROJECT_TOKEN / POSTHOG_HOST / POSTHOG_PERSONAL_API_KEY env vars
+    // Credentials are read from INSIGHTS_PROJECT_TOKEN / INSIGHTS_HOST / INSIGHTS_PERSONAL_API_KEY env vars
     // inside the component action, so the call itself takes no args.
-    await t.action(components.posthog.lib.refreshFlagDefinitions, {})
+    await t.action(components.insights.lib.refreshFlagDefinitions, {})
 }
 
 describe('getFeatureFlag (local eval)', () => {
     beforeEach(() => {
-        process.env.POSTHOG_PROJECT_TOKEN = 'phc_test_key'
-        process.env.POSTHOG_PERSONAL_API_KEY = 'phx_test_personal_key'
-        process.env.POSTHOG_HOST = 'https://test.posthog.com'
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -695,9 +695,9 @@ describe('getFeatureFlag', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -776,9 +776,9 @@ describe('isFeatureEnabled', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -869,9 +869,9 @@ describe('getFeatureFlagPayload', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -943,9 +943,9 @@ describe('getFeatureFlagResult', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -1024,9 +1024,9 @@ describe('getAllFlags', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -1082,16 +1082,16 @@ describe('getAllFlagsAndPayloads', () => {
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
-        delete process.env.POSTHOG_FLAGS_RETRY_DELAY_MS_OVERRIDE
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
+        delete process.env.INSIGHTS_FLAGS_RETRY_DELAY_MS_OVERRIDE
         fetchCalls = []
         jest.useFakeTimers()
     })
 
-    // No credentials are passed to the action — they're env-driven (POSTHOG_PROJECT_TOKEN,
-    // POSTHOG_HOST, POSTHOG_PERSONAL_API_KEY) and configured in beforeEach.
+    // No credentials are passed to the action — they're env-driven (INSIGHTS_PROJECT_TOKEN,
+    // INSIGHTS_HOST, INSIGHTS_PERSONAL_API_KEY) and configured in beforeEach.
     const noArgs = {}
 
     /** Builds a fetch mock whose responses are picked per call from the supplied sequence. */
@@ -1120,7 +1120,7 @@ describe('getAllFlagsAndPayloads', () => {
         global.fetch = mockFetch(definitionsResponse([flagDef('flag-a')]))
         const t = initConvexTest()
 
-        await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)
+        await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)
 
         const definitionCalls = fetchCalls.filter((c) => c.url.includes('/flags/definitions'))
         expect(definitionCalls).toHaveLength(1)
@@ -1128,14 +1128,14 @@ describe('getAllFlagsAndPayloads', () => {
         expect(definitionCalls[0].url).toContain('send_cohorts')
     })
 
-    test('no-ops when POSTHOG_PERSONAL_API_KEY env var is missing', async () => {
+    test('no-ops when INSIGHTS_PERSONAL_API_KEY env var is missing', async () => {
         // Clearing the env var simulates a deployment where local evaluation isn't configured —
         // the refresh action returns a skip status rather than fetching.
-        delete process.env.POSTHOG_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
         global.fetch = mockFetch()
         const t = initConvexTest()
 
-        const result = (await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)) as { status: string }
+        const result = (await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)) as { status: string }
 
         expect(result.status).toBe('skipped')
         expect(fetchCalls.filter((c) => c.url.includes('/flags/definitions'))).toHaveLength(0)
@@ -1155,7 +1155,7 @@ describe('getAllFlagsAndPayloads', () => {
         ])
         const t = initConvexTest()
 
-        const result = (await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)) as {
+        const result = (await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)) as {
             status: string
         }
 
@@ -1169,13 +1169,13 @@ describe('getAllFlagsAndPayloads', () => {
         ])
         const t = initConvexTest()
 
-        const result = (await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)) as {
+        const result = (await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)) as {
             status: string
         }
 
         expect(result.status).toBe('empty')
         // Subsequent reads see the empty snapshot rather than null.
-        const row = await t.query(components.posthog.lib.getFlagDefinitions, {})
+        const row = await t.query(components.insights.lib.getFlagDefinitions, {})
         expect(row).not.toBeNull()
         expect(JSON.parse(row!.data)).toEqual({ flags: [], groupTypeMapping: {}, cohorts: {} })
     })
@@ -1184,18 +1184,18 @@ describe('getAllFlagsAndPayloads', () => {
         // Seed the cache with real defs.
         const t = initConvexTest()
         global.fetch = mockFetch(definitionsResponse([flagDef('seed')]))
-        await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)
+        await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)
 
-        // Now PostHog flaps cold-cache 503s. Cache is < 5min old so we keep what we have.
+        // Now Insights flaps cold-cache 503s. Cache is < 5min old so we keep what we have.
         global.fetch = sequencedFetch([
             { status: 503, body: 'Required data not found in cache.' },
         ])
-        const result = (await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)) as {
+        const result = (await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)) as {
             status: string
         }
 
         expect(result.status).toBe('stale')
-        const row = await t.query(components.posthog.lib.getFlagDefinitions, {})
+        const row = await t.query(components.insights.lib.getFlagDefinitions, {})
         expect(JSON.parse(row!.data).flags).toHaveLength(1)
     })
 
@@ -1206,7 +1206,7 @@ describe('getAllFlagsAndPayloads', () => {
         try {
             const t = initConvexTest()
             global.fetch = mockFetch(definitionsResponse([flagDef('seed')]))
-            await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)
+            await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)
 
             // Jump 6 minutes forward; the cached defs now count as stale.
             jest.setSystemTime(new Date(Date.now() + 6 * 60 * 1000))
@@ -1214,12 +1214,12 @@ describe('getAllFlagsAndPayloads', () => {
             global.fetch = sequencedFetch([
                 { status: 503, body: 'Required data not found in cache.' },
             ])
-            const result = (await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)) as {
+            const result = (await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)) as {
                 status: string
             }
 
             expect(result.status).toBe('empty')
-            const row = await t.query(components.posthog.lib.getFlagDefinitions, {})
+            const row = await t.query(components.insights.lib.getFlagDefinitions, {})
             expect(JSON.parse(row!.data).flags).toHaveLength(0)
         } finally {
             jest.useRealTimers()
@@ -1232,48 +1232,48 @@ describe('getAllFlagsAndPayloads', () => {
         global.fetch = mockFetch({
             '/flags/definitions': { flags: [flagDef('seed')], group_type_mapping: {}, cohorts: {} },
         })
-        await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)
+        await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)
 
-        // Now PostHog returns 304 — no body, just the not-modified status.
+        // Now Insights returns 304 — no body, just the not-modified status.
         global.fetch = sequencedFetch([{ status: 304 }])
-        const result = (await t.action(components.posthog.lib.refreshFlagDefinitions, noArgs)) as {
+        const result = (await t.action(components.insights.lib.refreshFlagDefinitions, noArgs)) as {
             status: string
         }
 
         expect(result.status).toBe('unchanged')
-        const row = await t.query(components.posthog.lib.getFlagDefinitions, {})
+        const row = await t.query(components.insights.lib.getFlagDefinitions, {})
         expect(JSON.parse(row!.data).flags).toHaveLength(1)
     })
 })
 
 describe('getFlagDefinitions query', () => {
     // The query exposes a `localEvalConfigured` flag based on whether the component sees
-    // `POSTHOG_PERSONAL_API_KEY` in its env. The client uses this to distinguish "not configured"
+    // `INSIGHTS_PERSONAL_API_KEY` in its env. The client uses this to distinguish "not configured"
     // (throw) from "configured but not warmed up" (undefined). These tests guard the query
     // surface that promise rests on.
     beforeEach(() => {
-        process.env.POSTHOG_PROJECT_TOKEN = 'phc_test_key'
-        process.env.POSTHOG_HOST = 'https://test.posthog.com'
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_PERSONAL_API_KEY
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_PERSONAL_API_KEY
+        delete process.env.INSIGHTS_HOST
     })
 
-    test('reports localEvalConfigured=false when POSTHOG_PERSONAL_API_KEY is unset', async () => {
+    test('reports localEvalConfigured=false when INSIGHTS_PERSONAL_API_KEY is unset', async () => {
         const t = initConvexTest()
-        const row = await t.query(components.posthog.lib.getFlagDefinitions, {})
+        const row = await t.query(components.insights.lib.getFlagDefinitions, {})
         expect(row.localEvalConfigured).toBe(false)
         expect(row.data).toBeNull()
         expect(row.fetchedAt).toBeNull()
     })
 
-    test('reports localEvalConfigured=true when POSTHOG_PERSONAL_API_KEY is set', async () => {
-        process.env.POSTHOG_PERSONAL_API_KEY = 'phx_test'
+    test('reports localEvalConfigured=true when INSIGHTS_PERSONAL_API_KEY is set', async () => {
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test'
         const t = initConvexTest()
-        const row = await t.query(components.posthog.lib.getFlagDefinitions, {})
+        const row = await t.query(components.insights.lib.getFlagDefinitions, {})
         expect(row.localEvalConfigured).toBe(true)
         expect(row.data).toBeNull()
     })
@@ -1281,7 +1281,7 @@ describe('getFlagDefinitions query', () => {
 
 // --- Remote feature flag evaluation tests ---
 //
-// These hit posthog-node's `evaluateFlags` under the hood, which posts to PostHog's `/flags`
+// These hit insights-node's `evaluateFlags` under the hood, which posts to Insights's `/flags`
 // endpoint with the user's distinctId + properties. Mocked at the fetch level.
 
 function flagsResponse(featureFlags: Record<string, unknown>, featureFlagPayloads: Record<string, unknown> = {}) {
@@ -1296,14 +1296,14 @@ function flagsResponse(featureFlags: Record<string, unknown>, featureFlagPayload
 
 describe('evaluateFlag (remote)', () => {
     beforeEach(() => {
-        process.env.POSTHOG_PROJECT_TOKEN = 'phc_test_key'
-        process.env.POSTHOG_HOST = 'https://test.posthog.com'
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -1311,7 +1311,7 @@ describe('evaluateFlag (remote)', () => {
         global.fetch = mockFetch(flagsResponse({ 'test-flag': 'variant-a' }))
         const t = initConvexTest()
 
-        const value = await t.action(components.posthog.lib.evaluateFlag, {
+        const value = await t.action(components.insights.lib.evaluateFlag, {
             key: 'test-flag',
             distinctId: 'user-123',
         })
@@ -1325,7 +1325,7 @@ describe('evaluateFlag (remote)', () => {
         global.fetch = mockFetch(flagsResponse({}))
         const t = initConvexTest()
 
-        const value = await t.action(components.posthog.lib.evaluateFlag, {
+        const value = await t.action(components.insights.lib.evaluateFlag, {
             key: 'missing',
             distinctId: 'user-123',
         })
@@ -1337,7 +1337,7 @@ describe('evaluateFlag (remote)', () => {
         global.fetch = mockFetch(flagsResponse({ 'test-flag': true }))
         const t = initConvexTest()
 
-        await t.action(components.posthog.lib.evaluateFlag, {
+        await t.action(components.insights.lib.evaluateFlag, {
             key: 'test-flag',
             distinctId: 'user-123',
             groups: { company: 'acme' },
@@ -1356,14 +1356,14 @@ describe('evaluateFlag (remote)', () => {
 
 describe('evaluateFlagPayload (remote)', () => {
     beforeEach(() => {
-        process.env.POSTHOG_PROJECT_TOKEN = 'phc_test_key'
-        process.env.POSTHOG_HOST = 'https://test.posthog.com'
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -1371,7 +1371,7 @@ describe('evaluateFlagPayload (remote)', () => {
         global.fetch = mockFetch(flagsResponse({ 'test-flag': true }, { 'test-flag': { config: 'value' } }))
         const t = initConvexTest()
 
-        const payload = await t.action(components.posthog.lib.evaluateFlagPayload, {
+        const payload = await t.action(components.insights.lib.evaluateFlagPayload, {
             key: 'test-flag',
             distinctId: 'user-123',
         })
@@ -1383,7 +1383,7 @@ describe('evaluateFlagPayload (remote)', () => {
         global.fetch = mockFetch(flagsResponse({ 'test-flag': true }))
         const t = initConvexTest()
 
-        const payload = await t.action(components.posthog.lib.evaluateFlagPayload, {
+        const payload = await t.action(components.insights.lib.evaluateFlagPayload, {
             key: 'test-flag',
             distinctId: 'user-123',
         })
@@ -1394,14 +1394,14 @@ describe('evaluateFlagPayload (remote)', () => {
 
 describe('evaluateAllFlags (remote)', () => {
     beforeEach(() => {
-        process.env.POSTHOG_PROJECT_TOKEN = 'phc_test_key'
-        process.env.POSTHOG_HOST = 'https://test.posthog.com'
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
         global.fetch = originalFetch
-        delete process.env.POSTHOG_PROJECT_TOKEN
-        delete process.env.POSTHOG_HOST
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
         fetchCalls = []
     })
 
@@ -1414,7 +1414,7 @@ describe('evaluateAllFlags (remote)', () => {
         )
         const t = initConvexTest()
 
-        const result = (await t.action(components.posthog.lib.evaluateAllFlags, {
+        const result = (await t.action(components.insights.lib.evaluateAllFlags, {
             distinctId: 'user-123',
         })) as { featureFlags: Record<string, unknown>; featureFlagPayloads: Record<string, unknown> }
 

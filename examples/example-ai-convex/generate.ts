@@ -1,14 +1,14 @@
 /**
- * Convex-style OpenTelemetry integration with PostHog.
+ * Convex-style OpenTelemetry integration with Insights.
  *
- * This example shows how to use the PostHog OTEL span processor with the
+ * This example shows how to use the Insights OTEL span processor with the
  * Vercel AI SDK, which is the pattern used in Convex actions.
  * In a real Convex app, this code runs inside a "use node" action.
  */
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
+import { InsightsSpanProcessor } from '@hanzo/insights-ai/otel'
 import { generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 
@@ -19,9 +19,9 @@ const sdk = new NodeSDK({
         conversation_id: 'abc-123',
     }),
     spanProcessors: [
-        new PostHogSpanProcessor({
-            apiKey: process.env.POSTHOG_API_KEY!,
-            host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
+        new InsightsSpanProcessor({
+            apiKey: process.env.INSIGHTS_API_KEY!,
+            host: process.env.INSIGHTS_HOST || 'https://us.i.insights.com',
         }),
     ],
 })
@@ -35,7 +35,7 @@ async function main() {
             isEnabled: true,
             functionId: 'example-convex-action',
             metadata: {
-                posthog_distinct_id: 'example-user',
+                insights_distinct_id: 'example-user',
             },
         },
     })

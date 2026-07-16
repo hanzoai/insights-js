@@ -1,6 +1,6 @@
-# Anthropic + PostHog AI Examples
+# Anthropic + Insights AI Examples
 
-Track Anthropic API calls with PostHog.
+Track Anthropic API calls with Insights.
 
 ## Setup
 

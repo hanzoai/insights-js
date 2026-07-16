@@ -1,30 +1,30 @@
 'use client'
 
-import { usePostHog } from '@hanzo/insights-next'
+import { useInsights } from '@hanzo/insights-next'
 import { useEffect, useState } from 'react'
 
 type ConsentState = 'pending' | 'granted' | 'denied'
 
 export function ConsentBanner() {
-    const posthog = usePostHog()
+    const insights = useInsights()
     const [consent, setConsent] = useState<ConsentState | null>(null)
 
     useEffect(() => {
-        setConsent(posthog.get_explicit_consent_status())
-    }, [posthog])
+        setConsent(insights.get_explicit_consent_status())
+    }, [insights])
 
     const accept = () => {
-        posthog.opt_in_capturing()
+        insights.opt_in_capturing()
         setConsent('granted')
     }
 
     const decline = () => {
-        posthog.opt_out_capturing()
+        insights.opt_out_capturing()
         setConsent('denied')
     }
 
     const reset = () => {
-        posthog.clear_opt_in_out_capturing()
+        insights.clear_opt_in_out_capturing()
         setConsent('pending')
     }
 

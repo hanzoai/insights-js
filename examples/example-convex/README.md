@@ -1,7 +1,7 @@
-# Example app — `@posthog/convex`
+# Example app — `@insights/convex`
 
 Exercises every method the component exposes — analytics, local feature flag eval, remote feature
-flag eval, and AI generation tracing — against a real PostHog project. Useful for verifying
+flag eval, and AI generation tracing — against a real Insights project. Useful for verifying
 changes to the component end-to-end and as a runnable reference for setup.
 
 ## Running it
@@ -19,19 +19,19 @@ In a second terminal:
 ```sh
 cd examples/example-convex
 npx convex dev
-npx convex env set POSTHOG_PROJECT_TOKEN phc_…             # project token
-npx convex env set POSTHOG_PERSONAL_API_KEY phs_…  # optional, enables local eval
-npx convex env set POSTHOG_HOST https://us.i.posthog.com   # optional, US default
+npx convex env set INSIGHTS_PROJECT_TOKEN phc_…             # project token
+npx convex env set INSIGHTS_PERSONAL_API_KEY phs_…  # optional, enables local eval
+npx convex env set INSIGHTS_HOST https://us.i.insights.com   # optional, US default
 ```
 
 ## What you'll see
 
-- **Sections 01–03** capture analytics events (verify them in your PostHog activity feed).
+- **Sections 01–03** capture analytics events (verify them in your Insights activity feed).
 - **Section 04** has two rows of buttons — local-eval methods (query context, reactive) and
   remote-eval methods (action context, per-call `/flags` request).
-- **Section 05** captures `$ai_generation` events through `@posthog/ai`, defaulting to
+- **Section 05** captures `$ai_generation` events through `@insights/ai`, defaulting to
   OpenTelemetry with manual capture as the alternative. See
-  [LLM analytics for Convex](https://posthog.com/docs/llm-analytics/installation/convex).
+  [LLM analytics for Convex](https://insights.hanzo.ai/docs/llm-analytics/installation/convex).
 - The right column shows the local evaluation cache state plus a live, reactive view of flag
-  values for the current Distinct ID — change a flag in PostHog and the row flashes when the cron
+  values for the current Distinct ID — change a flag in Insights and the row flashes when the cron
   picks it up.

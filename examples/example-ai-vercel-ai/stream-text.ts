@@ -1,8 +1,8 @@
-/** Vercel AI streamText, tracked by PostHog via OpenTelemetry. */
+/** Vercel AI streamText, tracked by Insights via OpenTelemetry. */
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
+import { InsightsSpanProcessor } from '@hanzo/insights-ai/otel'
 import { streamText } from 'ai'
 import { createOpenAI } from '@ai-sdk/openai'
 
@@ -13,9 +13,9 @@ const sdk = new NodeSDK({
         conversation_id: 'abc-123',
     }),
     spanProcessors: [
-        new PostHogSpanProcessor({
-            apiKey: process.env.POSTHOG_API_KEY!,
-            host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
+        new InsightsSpanProcessor({
+            apiKey: process.env.INSIGHTS_API_KEY!,
+            host: process.env.INSIGHTS_HOST || 'https://us.i.insights.com',
         }),
     ],
 })
@@ -30,7 +30,7 @@ async function main() {
             isEnabled: true,
             functionId: 'stream-text',
             metadata: {
-                posthog_distinct_id: 'example-user',
+                insights_distinct_id: 'example-user',
             },
         },
         prompt: 'Explain observability in three sentences.',

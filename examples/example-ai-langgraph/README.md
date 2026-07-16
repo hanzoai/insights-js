@@ -1,6 +1,6 @@
-# LangGraph + PostHog AI Examples
+# LangGraph + Insights AI Examples
 
-Track LangGraph agent LLM calls with PostHog.
+Track LangGraph agent LLM calls with Insights.
 
 ## Setup
 
@@ -12,7 +12,7 @@ cp .env.example .env
 
 ## Examples
 
-- **agent.ts** - LangGraph ReAct agent with PostHog callback handler
+- **agent.ts** - LangGraph ReAct agent with Insights callback handler
 
 ## Run
 

@@ -1,6 +1,6 @@
-# OpenAI + PostHog AI Examples
+# OpenAI + Insights AI Examples
 
-Track OpenAI API calls with PostHog.
+Track OpenAI API calls with Insights.
 
 ## Setup
 

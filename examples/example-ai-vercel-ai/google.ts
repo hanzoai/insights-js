@@ -1,8 +1,8 @@
-/** Vercel AI with Google backend, tracked by PostHog via OpenTelemetry. */
+/** Vercel AI with Google backend, tracked by Insights via OpenTelemetry. */
 
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { resourceFromAttributes } from '@opentelemetry/resources'
-import { PostHogSpanProcessor } from '@hanzo/insights-ai/otel'
+import { InsightsSpanProcessor } from '@hanzo/insights-ai/otel'
 import { generateText } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
@@ -13,9 +13,9 @@ const sdk = new NodeSDK({
         conversation_id: 'abc-123',
     }),
     spanProcessors: [
-        new PostHogSpanProcessor({
-            apiKey: process.env.POSTHOG_API_KEY!,
-            host: process.env.POSTHOG_HOST || 'https://us.i.posthog.com',
+        new InsightsSpanProcessor({
+            apiKey: process.env.INSIGHTS_API_KEY!,
+            host: process.env.INSIGHTS_HOST || 'https://us.i.insights.com',
         }),
     ],
 })
@@ -30,7 +30,7 @@ async function main() {
             isEnabled: true,
             functionId: 'google-generate',
             metadata: {
-                posthog_distinct_id: 'example-user',
+                insights_distinct_id: 'example-user',
             },
         },
         prompt: 'Explain observability in three sentences.',
