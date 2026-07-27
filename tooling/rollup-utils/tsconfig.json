@@ -3,7 +3,7 @@
         "outDir": "dist",
         "target": "es6",
         "module": "ES6",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,

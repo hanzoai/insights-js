@@ -2,6 +2,6 @@
     "compilerOptions": {
         "outDir": "dist",
         "module": "es6",
-        "moduleResolution": "node"
+        "moduleResolution": "bundler"
     }
 }
