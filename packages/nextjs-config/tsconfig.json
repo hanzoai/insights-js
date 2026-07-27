@@ -3,9 +3,15 @@
   "compilerOptions": {
     "incremental": false,
     "rootDir": "./src",
-    "baseUrl": "./src",
     "target": "ES6",
     "skipLibCheck": true,
-    "lib": ["DOM"]
+    "lib": [
+      "DOM"
+    ],
+    "paths": {
+      "*": [
+        "./src/*"
+      ]
+    }
   }
 }
