@@ -24,7 +24,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "downlevelIteration": true,
 
     // needed for vite
     /**
