@@ -10,7 +10,7 @@
         "allowSyntheticDefaultImports": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
-        "module": "CommonJS",
+        "module": "node16",
         "moduleResolution": "node16",
         "isolatedModules": true,
         "noImplicitReturns": true,
@@ -18,7 +18,6 @@
         "sourceMap": true,
         "inlineSources": true,
         "resolveJsonModule": true,
-        "downlevelIteration": true,
         "declaration": true,
         "jsx": "react-jsx",
         "jsxImportSource": "preact"
