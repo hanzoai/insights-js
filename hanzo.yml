@@ -1,0 +1,23 @@
+# Canonical CI/CD config for hanzoai/insights-js — read by the hanzoai/ci
+# reusable (.hanzo/workflows/cicd.yml) and by platform.hanzo.ai.
+#
+# A pnpm/turbo monorepo of npm packages (17 of them): each ships from a tag via
+# changesets, none builds an image, so no `images:` and no `deploy:`. The
+# .github/workflows lanes here are compliance/hygiene reporters, not this gate,
+# and stay where they are.
+#
+# `pnpm build` BEFORE `pnpm test:unit`: turbo's `build` task declares
+# dependsOn ^build, so it orders the graph correctly, while `test:unit` declares
+# no dependency at all — run alone it would test whatever dist/ happened to be
+# lying around, or nothing.
+#
+# `test:unit`, not `test`. turbo's `test` fans out to test:functional and
+# test:e2e as well, which drive real browsers; those belong on the compliance
+# lanes that already provision them, not on a build runner where they would go
+# red for want of a browser rather than for want of correct code.
+
+test:
+  - name: build
+    run: pnpm install --frozen-lockfile && pnpm build
+  - name: unit
+    run: pnpm test:unit
