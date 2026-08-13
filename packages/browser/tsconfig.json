@@ -2,6 +2,9 @@
     "compilerOptions": {
         "outDir": "./lib",
         "target": "ES5",
+        // ES5 has no iteration protocol, so `for (const x of aSet)` and spread
+        // over an iterable do not compile without this. The code uses both.
+        "downlevelIteration": true,
         "lib": ["dom", "dom.iterable", "esnext"],
         "allowJs": true,
         "checkJs": true,
@@ -10,8 +13,14 @@
         "allowSyntheticDefaultImports": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
-        "module": "node16",
-        "moduleResolution": "node16",
+        // This is bundled by rollup, not resolved by node. node16 judged every
+        // file CommonJS and refused each ESM-only import:
+        //   error TS1479: The current file is a CommonJS module whose imports
+        //   will produce 'require' calls; however, the referenced file is an
+        //   ECMAScript module.
+        // Same pair the workspace base uses.
+        "module": "esnext",
+        "moduleResolution": "bundler",
         "isolatedModules": true,
         "noImplicitReturns": true,
         "noUnusedParameters": true,
