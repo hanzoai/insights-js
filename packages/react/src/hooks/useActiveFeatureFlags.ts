@@ -4,7 +4,9 @@ import { InsightsContext } from '../context'
 export function useActiveFeatureFlags(): string[] {
     const { client, bootstrap } = useContext(InsightsContext)
 
-    const [featureFlags, setFeatureFlags] = useState<string[]>(() => client.featureFlags.getFlags())
+    // featureFlags is TreeShakeable, so a consumer that opts into tree shaking
+    // gets undefined here. The guard below already allows for that.
+    const [featureFlags, setFeatureFlags] = useState<string[]>(() => client.featureFlags?.getFlags() ?? [])
 
     useEffect(() => {
         return client.onFeatureFlags((flags) => {
