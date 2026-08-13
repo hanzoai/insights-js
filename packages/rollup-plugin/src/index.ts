@@ -28,7 +28,9 @@ interface ResolvedInsightsRollupPluginOptions {
     personalApiKey: string
     projectId: string
     host: string
-    cliBinaryPath: string
+    // Absent unless the caller pinned one. The binary is resolved where it is
+    // used, so a build that never uploads sourcemaps never needs it installed.
+    cliBinaryPath?: string
     logLevel: LogLevel
     sourcemaps: {
         enabled: boolean
@@ -72,7 +74,12 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
             async handler(options: OutputOptions, bundle: { [fileName: string]: OutputAsset | OutputChunk }) {
                 if (!insightsOptions.sourcemaps.enabled) return
                 const args = ['sourcemap', 'process']
-                const cliPath = insightsOptions.cliBinaryPath
+                const cliPath =
+                    insightsOptions.cliBinaryPath ??
+                    resolveBinaryPath('insights-cli', {
+                        path: process.env.PATH ?? '',
+                        cwd: process.cwd(),
+                    })
                 const chunks: { [fileName: string]: OutputChunk } = {}
                 const filePaths: string[] = []
                 const basePaths: string[] = []
@@ -141,22 +148,21 @@ export default function insightsRollupPlugin(userOptions: InsightsRollupPluginOp
 
 function resolveOptions(userOptions: InsightsRollupPluginOptions): ResolvedInsightsRollupPluginOptions {
     const projectId = userOptions.projectId ?? userOptions.envId
-    if (!projectId) {
-        throw new Error('projectId is required (envId is deprecated)')
-    } else if (!userOptions.personalApiKey) {
-        throw new Error('personalApiKey is required')
-    }
     const userSourcemaps = userOptions.sourcemaps ?? {}
+    // The credentials exist to upload sourcemaps. A build that has turned that
+    // off never sends anything, so demanding them there rejects a valid config.
+    if (userSourcemaps.enabled ?? true) {
+        if (!projectId) {
+            throw new Error('projectId is required (envId is deprecated)')
+        } else if (!userOptions.personalApiKey) {
+            throw new Error('personalApiKey is required')
+        }
+    }
     const insightsOptions: ResolvedInsightsRollupPluginOptions = {
         host: userOptions.host || 'https://insights.hanzo.ai',
         personalApiKey: userOptions.personalApiKey,
-        projectId,
-        cliBinaryPath:
-            userOptions.cliBinaryPath ??
-            resolveBinaryPath('insights-cli', {
-                path: process.env.PATH ?? '',
-                cwd: process.cwd(),
-            }),
+        projectId: projectId ?? '',
+        cliBinaryPath: userOptions.cliBinaryPath,
         logLevel: userOptions.logLevel ?? 'info',
         sourcemaps: {
             enabled: userSourcemaps.enabled ?? true,
