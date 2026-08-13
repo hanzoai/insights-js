@@ -25,7 +25,10 @@ export default defineNuxtPlugin({
     }
 
     if (autocaptureEnabled(insightsClientConfig)) {
-      nuxtApp.hook('vue:error', (error, info) => {
+      // vue:error calls back with (error, instance, info). Naming the second
+      // parameter info captured the component instance as the context — a
+      // whole Vue instance where a short string like 'setup function' belongs.
+      nuxtApp.hook('vue:error', (error, _instance, info) => {
         insights.captureException(error, { info })
       })
     }

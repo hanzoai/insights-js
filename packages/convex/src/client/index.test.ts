@@ -720,19 +720,37 @@ describe('identify callback', () => {
   })
 
   test('works with feature flag methods', async () => {
-    const component = { lib: { getFeatureFlag: 'getFeatureFlag_ref' } }
-    const insights = new Insights(component as never, {
-      apiKey: 'key',
-      identify: identifyReturning('auth-user'),
+    // getFeatureFlag evaluates locally against cached definitions, so the
+    // identify callback is consulted before evaluation rather than passed to a
+    // remote action.
+    const definitions = JSON.stringify({
+      flags: [
+        {
+          id: 1,
+          name: 'my-flag',
+          key: 'my-flag',
+          deleted: false,
+          active: true,
+          rollout_percentage: null,
+          ensure_experience_continuity: false,
+          experiment_set: [],
+          filters: { groups: [{ properties: [], rollout_percentage: 100 }] },
+        },
+      ],
+      groupTypeMapping: {},
+      cohorts: {},
     })
+    const component = { lib: { getFlagDefinitions: 'getFlagDefinitions_ref' } }
+    const identify = jest.fn(async () => ({ distinctId: 'auth-user' }))
+    const insights = new Insights(component as never, { apiKey: 'key', identify })
     const ctx = {
-      runAction: jest.fn(async (_ref: unknown, _args: Record<string, unknown>) => true),
+      runQuery: jest.fn(async () => ({ localEvalConfigured: true, data: definitions, fetchedAt: Date.now() })),
     }
 
-    await insights.getFeatureFlag(ctx as never, { key: 'my-flag' })
+    const value = await insights.getFeatureFlag(ctx as never, { key: 'my-flag' })
 
-    const [, args] = ctx.runAction.mock.calls[0]
-    expect(args.distinctId).toBe('auth-user')
+    expect(identify).toHaveBeenCalled()
+    expect(value).toBe(true)
   })
 
   test('explicit distinctId still works without identify callback', async () => {
