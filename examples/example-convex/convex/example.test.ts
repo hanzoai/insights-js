@@ -54,8 +54,12 @@ function mockFetch(responseByUrl?: Record<string, unknown>) {
     }) as unknown as typeof fetch
 }
 
+// Event ingest path, as built by insights-core (`${host}/v1/e`). Batches still post
+// `{ api_key, batch: [...] }`; only the path differs from the older `/batch/` route.
+const INGEST_PATH = '/v1/e'
+
 function batchCalls() {
-    return fetchCalls.filter((c) => c.url.includes('/batch'))
+    return fetchCalls.filter((c) => c.url.includes(INGEST_PATH))
 }
 
 function flagsCalls() {
@@ -78,25 +82,9 @@ async function finishScheduledFunctions(t: ReturnType<typeof initConvexTest>) {
 }
 
 describe('capture', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('sends event to Insights API with correct distinct_id and event name', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    const result = await t.mutation(api.example.testCapture, {
-      distinctId: 'user-123',
-      event: 'button_clicked',
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -208,24 +196,9 @@ describe('capture', () => {
 })
 
 describe('identify', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('sends $identify event', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    const result = await t.mutation(api.example.testIdentify, {
-      distinctId: 'user-123',
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -235,13 +208,9 @@ describe('identify', () => {
         fetchCalls = []
     })
 
-    const event = firstBatchEvent()
-    // insights-node puts properties into $set inside event.properties
-    const props = event.properties as Record<string, unknown>
-    const $set = props.$set as Record<string, unknown>
-    expect($set.name).toBe('Test User')
-    expect($set.email).toBe('test@example.com')
-  })
+    test('sends $identify event', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
 
         const result = await t.mutation(api.example.testIdentify, {
             distinctId: 'user-123',
@@ -259,26 +228,21 @@ describe('identify', () => {
         global.fetch = mockFetch()
         const t = initConvexTest()
 
-describe('groupIdentify', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
+        await t.mutation(api.example.testIdentify, {
+            distinctId: 'user-123',
+            properties: {
+                name: 'Test User',
+                email: 'test@example.com',
+            },
+        })
+        await finishScheduledFunctions(t)
 
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('sends $groupidentify event with group type and key', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    const result = await t.mutation(api.example.testGroupIdentify, {
-      groupType: 'company',
-      groupKey: 'acme',
+        const event = firstBatchEvent()
+        // insights-node puts properties into $set inside event.properties
+        const props = event.properties as Record<string, unknown>
+        const $set = props.$set as Record<string, unknown>
+        expect($set.name).toBe('Test User')
+        expect($set.email).toBe('test@example.com')
     })
 
     test('sends disableGeoip', async () => {
@@ -294,122 +258,144 @@ describe('groupIdentify', () => {
         const props = firstBatchEvent().properties as Record<string, unknown>
         expect(props.$geoip_disable).toBe(true)
     })
-    jest.runAllTimers()
-    await t.finishInProgressScheduledFunctions()
+})
 
-    const props = firstBatchEvent().properties as Record<string, unknown>
-    const groupSet = props.$group_set as Record<string, unknown>
-    expect(groupSet.industry).toBe('Technology')
-    expect(groupSet.size).toBe(100)
-  })
-
-  test('uses distinctId override when provided', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    await t.mutation(api.example.testGroupIdentify, {
-      groupType: 'company',
-      groupKey: 'acme',
-      distinctId: 'override-user',
+describe('groupIdentify', () => {
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
-    jest.runAllTimers()
-    await t.finishInProgressScheduledFunctions()
 
-    expect(firstBatchEvent().distinct_id).toBe('override-user')
-  })
+    afterEach(() => {
+        global.fetch = originalFetch
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
+        fetchCalls = []
+    })
+
+    test('sends $groupidentify event with group type and key', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
+
+        const result = await t.mutation(api.example.testGroupIdentify, {
+            groupType: 'company',
+            groupKey: 'acme',
+        })
+        expect(result).toEqual({ success: true })
+        await finishScheduledFunctions(t)
+
+        expect(batchCalls().length).toBeGreaterThanOrEqual(1)
+        const event = firstBatchEvent()
+        expect(event.event).toBe('$groupidentify')
+        const props = event.properties as Record<string, unknown>
+        expect(props.$group_type).toBe('company')
+        expect(props.$group_key).toBe('acme')
+    })
+
+    test('sends group properties via $group_set', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
+
+        await t.mutation(api.example.testGroupIdentify, {
+            groupType: 'company',
+            groupKey: 'acme',
+            properties: { industry: 'Technology', size: 100 },
+        })
+        await finishScheduledFunctions(t)
+
+        const props = firstBatchEvent().properties as Record<string, unknown>
+        const groupSet = props.$group_set as Record<string, unknown>
+        expect(groupSet.industry).toBe('Technology')
+        expect(groupSet.size).toBe(100)
+    })
+
+    test('falls back to a group-derived distinct_id when none is given', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
+
+        await t.mutation(api.example.testGroupIdentify, {
+            groupType: 'company',
+            groupKey: 'acme',
+        })
+        await finishScheduledFunctions(t)
+
+        expect(firstBatchEvent().distinct_id).toBe('$company_acme')
+    })
+
+    test('uses distinctId override when provided', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
+
+        await t.mutation(api.example.testGroupIdentify, {
+            groupType: 'company',
+            groupKey: 'acme',
+            distinctId: 'override-user',
+        })
+        await finishScheduledFunctions(t)
+
+        expect(firstBatchEvent().distinct_id).toBe('override-user')
+    })
 })
 
 describe('alias', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('sends $create_alias event', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    const result = await t.mutation(api.example.testAlias, {
-      distinctId: 'user-123',
-      alias: 'anon-456',
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
-    expect(result).toEqual({ success: true })
-    jest.runAllTimers()
-    await t.finishInProgressScheduledFunctions()
 
-    expect(batchCalls().length).toBeGreaterThanOrEqual(1)
-    const event = firstBatchEvent()
-    expect(event.event).toBe('$create_alias')
-    const props = event.properties as Record<string, unknown>
-    expect(props.distinct_id).toBe('user-123')
-    expect(props.alias).toBe('anon-456')
-  })
-
-  test('sends disableGeoip', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    await t.mutation(api.example.testAlias, {
-      distinctId: 'user-123',
-      alias: 'anon-456',
-      disableGeoip: true,
+    afterEach(() => {
+        global.fetch = originalFetch
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
+        fetchCalls = []
     })
-    jest.runAllTimers()
-    await t.finishInProgressScheduledFunctions()
 
-    const props = firstBatchEvent().properties as Record<string, unknown>
-    expect(props.$geoip_disable).toBe(true)
-  })
+    test('sends $create_alias event', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
+
+        const result = await t.mutation(api.example.testAlias, {
+            distinctId: 'user-123',
+            alias: 'anon-456',
+        })
+        expect(result).toEqual({ success: true })
+        await finishScheduledFunctions(t)
+
+        expect(batchCalls().length).toBeGreaterThanOrEqual(1)
+        const event = firstBatchEvent()
+        expect(event.event).toBe('$create_alias')
+        const props = event.properties as Record<string, unknown>
+        expect(props.distinct_id).toBe('user-123')
+        expect(props.alias).toBe('anon-456')
+    })
+
+    test('sends disableGeoip', async () => {
+        global.fetch = mockFetch()
+        const t = initConvexTest()
+
+        await t.mutation(api.example.testAlias, {
+            distinctId: 'user-123',
+            alias: 'anon-456',
+            disableGeoip: true,
+        })
+        await finishScheduledFunctions(t)
+
+        const props = firstBatchEvent().properties as Record<string, unknown>
+        expect(props.$geoip_disable).toBe(true)
+    })
 })
 
 describe('captureException', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('sends $exception event with Error object', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    const result = await t.mutation(api.example.testCaptureException, {
-      errorMessage: 'Something went wrong',
-      errorType: 'error',
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
-    expect(batchCalls().length).toBeGreaterThanOrEqual(1)
-    const event = firstBatchEvent()
-    expect(event.event).toBe('$exception')
-    const props = event.properties as Record<string, unknown>
-    // insights-node v5 uses $exception_list instead of $exception_message
-    const exceptionList = props.$exception_list as Array<{
-      value: string
-      type: string
-    }>
-    expect(exceptionList[0].value).toBe('Something went wrong')
-  })
-
-  test('sends $exception event with string error', async () => {
-    global.fetch = mockFetch()
-    const t = initConvexTest()
-
-    await t.mutation(api.example.testCaptureException, {
-      errorMessage: 'string error',
-      errorType: 'string',
+    afterEach(() => {
+        global.fetch = originalFetch
+        delete process.env.INSIGHTS_PROJECT_TOKEN
+        delete process.env.INSIGHTS_HOST
+        fetchCalls = []
     })
 
     test('sends $exception event with Error object', async () => {
@@ -671,26 +657,11 @@ describe('getFeatureFlag (local eval)', () => {
     })
 })
 
-describe('getFeatureFlag', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('returns flag value', async () => {
-    global.fetch = mockFetch(flagsResponse({ 'test-flag': 'variant-a' }))
-    const t = initConvexTest()
-
-    const result = await t.action(api.example.testGetFeatureFlag, {
-      distinctId: 'user-123',
-      flagKey: 'test-flag',
+describe('isFeatureEnabled (local eval)', () => {
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -752,26 +723,11 @@ describe('getFeatureFlag', () => {
     })
 })
 
-describe('isFeatureEnabled', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('returns true for enabled flag', async () => {
-    global.fetch = mockFetch(flagsResponse({ 'test-flag': true }))
-    const t = initConvexTest()
-
-    const result = await t.action(api.example.testIsFeatureEnabled, {
-      distinctId: 'user-123',
-      flagKey: 'test-flag',
+describe('getFeatureFlagPayload (local eval)', () => {
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -845,26 +801,11 @@ describe('isFeatureEnabled', () => {
     })
 })
 
-describe('getFeatureFlagPayload', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('returns payload for flag', async () => {
-    global.fetch = mockFetch(flagsResponse({ 'test-flag': true }, { 'test-flag': { key: 'value' } }))
-    const t = initConvexTest()
-
-    const result = await t.action(api.example.testGetFeatureFlagPayload, {
-      distinctId: 'user-123',
-      flagKey: 'test-flag',
+describe('getFeatureFlagResult (local eval)', () => {
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -919,26 +860,11 @@ describe('getFeatureFlagPayload', () => {
     })
 })
 
-describe('getFeatureFlagResult', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('returns full result with variant and payload', async () => {
-    global.fetch = mockFetch(flagsResponse({ 'test-flag': 'variant-a' }, { 'test-flag': { config: true } }))
-    const t = initConvexTest()
-
-    const result = await t.action(api.example.testGetFeatureFlagResult, {
-      distinctId: 'user-123',
-      flagKey: 'test-flag',
+describe('getAllFlags (local eval)', () => {
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -995,31 +921,11 @@ describe('getFeatureFlagResult', () => {
     })
 })
 
-describe('getAllFlags', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('returns all flags', async () => {
-    global.fetch = mockFetch(
-      flagsResponse({
-        'flag-a': true,
-        'flag-b': 'variant-1',
-        'flag-c': false,
-      })
-    )
-    const t = initConvexTest()
-
-    const result = await t.action(api.example.testGetAllFlags, {
-      distinctId: 'user-123',
+describe('getAllFlagsAndPayloads (local eval)', () => {
+    beforeEach(() => {
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
     })
 
     afterEach(() => {
@@ -1059,25 +965,16 @@ describe('getAllFlags', () => {
     })
 })
 
-describe('getAllFlagsAndPayloads', () => {
-  beforeEach(() => {
-    process.env.INSIGHTS_API_KEY = 'phc_test_key'
-    process.env.INSIGHTS_HOST = 'https://test.insights.com'
-  })
-
-  afterEach(() => {
-    global.fetch = originalFetch
-    delete process.env.INSIGHTS_API_KEY
-    delete process.env.INSIGHTS_HOST
-    fetchCalls = []
-  })
-
-  test('returns flags and payloads', async () => {
-    global.fetch = mockFetch(flagsResponse({ 'flag-a': true, 'flag-b': 'variant' }, { 'flag-a': { config: 'value' } }))
-    const t = initConvexTest()
-
-    const result = await t.action(api.example.testGetAllFlagsAndPayloads, {
-      distinctId: 'user-123',
+describe('refreshFlagDefinitions cron action', () => {
+    // The retry loop awaits `setTimeout`s — with the default jest fakeTimers config those never
+    // fire and the action hangs. Switch to real timers for this block and cut the backoff down
+    // to 1ms via the env override so the retry-heavy tests stay snappy.
+    beforeEach(() => {
+        jest.useRealTimers()
+        process.env.INSIGHTS_PROJECT_TOKEN = 'phc_test_key'
+        process.env.INSIGHTS_PERSONAL_API_KEY = 'phx_test_personal_key'
+        process.env.INSIGHTS_HOST = 'https://test.insights.com'
+        process.env.INSIGHTS_FLAGS_RETRY_DELAY_MS_OVERRIDE = '1'
     })
 
     afterEach(() => {
