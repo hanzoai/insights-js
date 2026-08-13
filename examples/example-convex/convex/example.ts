@@ -1,5 +1,6 @@
 import { insights } from './insights.js'
-import { action, mutation } from './_generated/server.js'
+import { action, mutation, query } from './_generated/server.js'
+import { components } from './_generated/api.js'
 import { v } from 'convex/values'
 
 // --- Fire-and-forget methods (mutations) ---
@@ -8,81 +9,81 @@ import { v } from 'convex/values'
 // user is not signed in.
 
 export const testCapture = mutation({
-  args: {
-    distinctId: v.optional(v.string()),
-    event: v.string(),
-    properties: v.optional(v.any()),
-    groups: v.optional(v.any()),
-    sendFeatureFlags: v.optional(v.boolean()),
-    timestamp: v.optional(v.string()),
-    uuid: v.optional(v.string()),
-    disableGeoip: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    await insights.capture(ctx, {
-      distinctId: args.distinctId,
-      event: args.event,
-      properties: args.properties,
-      groups: args.groups,
-      sendFeatureFlags: args.sendFeatureFlags,
-      timestamp: args.timestamp ? new Date(args.timestamp) : undefined,
-      uuid: args.uuid || undefined,
-      disableGeoip: args.disableGeoip,
-    })
-    return { success: true }
-  },
+    args: {
+        distinctId: v.optional(v.string()),
+        event: v.string(),
+        properties: v.optional(v.any()),
+        groups: v.optional(v.any()),
+        sendFeatureFlags: v.optional(v.boolean()),
+        timestamp: v.optional(v.string()),
+        uuid: v.optional(v.string()),
+        disableGeoip: v.optional(v.boolean()),
+    },
+    handler: async (ctx, args) => {
+        await insights.capture(ctx, {
+            distinctId: args.distinctId,
+            event: args.event,
+            properties: args.properties,
+            groups: args.groups,
+            sendFeatureFlags: args.sendFeatureFlags,
+            timestamp: args.timestamp ? new Date(args.timestamp) : undefined,
+            uuid: args.uuid || undefined,
+            disableGeoip: args.disableGeoip,
+        })
+        return { success: true }
+    },
 })
 
 export const testIdentify = mutation({
-  args: {
-    distinctId: v.optional(v.string()),
-    properties: v.optional(v.any()),
-    disableGeoip: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    await insights.identify(ctx, {
-      distinctId: args.distinctId,
-      properties: args.properties,
-      disableGeoip: args.disableGeoip,
-    })
-    return { success: true }
-  },
+    args: {
+        distinctId: v.optional(v.string()),
+        properties: v.optional(v.any()),
+        disableGeoip: v.optional(v.boolean()),
+    },
+    handler: async (ctx, args) => {
+        await insights.identify(ctx, {
+            distinctId: args.distinctId,
+            properties: args.properties,
+            disableGeoip: args.disableGeoip,
+        })
+        return { success: true }
+    },
 })
 
 export const testGroupIdentify = mutation({
-  args: {
-    groupType: v.string(),
-    groupKey: v.string(),
-    properties: v.optional(v.any()),
-    distinctId: v.optional(v.string()),
-    disableGeoip: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    await insights.groupIdentify(ctx, {
-      groupType: args.groupType,
-      groupKey: args.groupKey,
-      properties: args.properties,
-      distinctId: args.distinctId || undefined,
-      disableGeoip: args.disableGeoip,
-    })
-    return { success: true }
-  },
+    args: {
+        groupType: v.string(),
+        groupKey: v.string(),
+        properties: v.optional(v.any()),
+        distinctId: v.optional(v.string()),
+        disableGeoip: v.optional(v.boolean()),
+    },
+    handler: async (ctx, args) => {
+        await insights.groupIdentify(ctx, {
+            groupType: args.groupType,
+            groupKey: args.groupKey,
+            properties: args.properties,
+            distinctId: args.distinctId || undefined,
+            disableGeoip: args.disableGeoip,
+        })
+        return { success: true }
+    },
 })
 
 export const testAlias = mutation({
-  args: {
-    distinctId: v.optional(v.string()),
-    alias: v.string(),
-    disableGeoip: v.optional(v.boolean()),
-  },
-  handler: async (ctx, args) => {
-    await insights.alias(ctx, {
-      distinctId: args.distinctId,
-      alias: args.alias,
-      disableGeoip: args.disableGeoip,
-    })
-    return { success: true }
-  },
+    args: {
+        distinctId: v.optional(v.string()),
+        alias: v.string(),
+        disableGeoip: v.optional(v.boolean()),
+    },
+    handler: async (ctx, args) => {
+        await insights.alias(ctx, {
+            distinctId: args.distinctId,
+            alias: args.alias,
+            disableGeoip: args.disableGeoip,
+        })
+        return { success: true }
+    },
 })
 
 export const testCaptureException = mutation({
@@ -106,13 +107,22 @@ export const testCaptureException = mutation({
                 break
         }
 
-    await insights.captureException(ctx, {
-      error,
-      distinctId: args.distinctId || undefined,
-      additionalProperties: args.additionalProperties,
-    })
-    return { success: true }
-  },
+        await insights.captureException(ctx, {
+            error,
+            distinctId: args.distinctId || undefined,
+            additionalProperties: args.additionalProperties,
+        })
+        return { success: true }
+    },
+})
+
+export const testThrowError = mutation({
+    args: {
+        errorMessage: v.string(),
+    },
+    handler: async (_ctx, args) => {
+        throw new Error(args.errorMessage)
+    },
 })
 
 // --- Feature flag methods (actions) ---
@@ -140,56 +150,56 @@ function featureFlagOptions(args: {
     }
 }
 
-export const testGetFeatureFlag = action({
-  args: featureFlagArgs,
-  handler: async (ctx, args) => {
-    const value = await insights.getFeatureFlag(ctx, {
-      key: args.flagKey,
-      distinctId: args.distinctId,
-      ...featureFlagOptions(args),
-    })
-    return { flagKey: args.flagKey, value }
-  },
+export const testGetFeatureFlag = query({
+    args: featureFlagArgs,
+    handler: async (ctx, args) => {
+        const value = await insights.getFeatureFlag(ctx, {
+            key: args.flagKey,
+            distinctId: args.distinctId,
+            ...featureFlagOptions(args),
+        })
+        return { flagKey: args.flagKey, value: value ?? null }
+    },
 })
 
-export const testIsFeatureEnabled = action({
-  args: featureFlagArgs,
-  handler: async (ctx, args) => {
-    const enabled = await insights.isFeatureEnabled(ctx, {
-      key: args.flagKey,
-      distinctId: args.distinctId,
-      ...featureFlagOptions(args),
-    })
-    return { flagKey: args.flagKey, enabled }
-  },
+export const testIsFeatureEnabled = query({
+    args: featureFlagArgs,
+    handler: async (ctx, args) => {
+        const enabled = await insights.isFeatureEnabled(ctx, {
+            key: args.flagKey,
+            distinctId: args.distinctId,
+            ...featureFlagOptions(args),
+        })
+        return { flagKey: args.flagKey, enabled: enabled ?? null }
+    },
 })
 
-export const testGetFeatureFlagPayload = action({
-  args: {
-    ...featureFlagArgs,
-    matchValue: v.optional(v.union(v.boolean(), v.string())),
-  },
-  handler: async (ctx, args) => {
-    const payload = await insights.getFeatureFlagPayload(ctx, {
-      key: args.flagKey,
-      distinctId: args.distinctId,
-      matchValue: args.matchValue,
-      ...featureFlagOptions(args),
-    })
-    return { flagKey: args.flagKey, payload }
-  },
+export const testGetFeatureFlagPayload = query({
+    args: {
+        ...featureFlagArgs,
+        matchValue: v.optional(v.union(v.boolean(), v.string())),
+    },
+    handler: async (ctx, args) => {
+        const payload = await insights.getFeatureFlagPayload(ctx, {
+            key: args.flagKey,
+            distinctId: args.distinctId,
+            matchValue: args.matchValue,
+            ...featureFlagOptions(args),
+        })
+        return { flagKey: args.flagKey, payload }
+    },
 })
 
-export const testGetFeatureFlagResult = action({
-  args: featureFlagArgs,
-  handler: async (ctx, args) => {
-    const result = await insights.getFeatureFlagResult(ctx, {
-      key: args.flagKey,
-      distinctId: args.distinctId,
-      ...featureFlagOptions(args),
-    })
-    return { flagKey: args.flagKey, result }
-  },
+export const testGetFeatureFlagResult = query({
+    args: featureFlagArgs,
+    handler: async (ctx, args) => {
+        const result = await insights.getFeatureFlagResult(ctx, {
+            key: args.flagKey,
+            distinctId: args.distinctId,
+            ...featureFlagOptions(args),
+        })
+        return { flagKey: args.flagKey, result: result ?? null }
+    },
 })
 
 export const testGetAllFlags = query({
@@ -250,39 +260,85 @@ const remoteFlagArgs = {
     personProperties: v.optional(v.any()),
     groupProperties: v.optional(v.any()),
     disableGeoip: v.optional(v.boolean()),
-    flagKeys: v.optional(v.array(v.string())),
-  },
-  handler: async (ctx, args) => {
-    const flags = await insights.getAllFlags(ctx, {
-      distinctId: args.distinctId,
-      groups: args.groups as Record<string, string> | undefined,
-      personProperties: args.personProperties as Record<string, string> | undefined,
-      groupProperties: args.groupProperties as Record<string, Record<string, string>> | undefined,
-      disableGeoip: args.disableGeoip,
-      flagKeys: args.flagKeys,
-    })
-    return { flags }
-  },
+}
+
+function remoteFlagOptions(args: {
+    groups?: unknown
+    personProperties?: unknown
+    groupProperties?: unknown
+    disableGeoip?: boolean
+}) {
+    return {
+        groups: args.groups as Record<string, string> | undefined,
+        personProperties: args.personProperties as Record<string, unknown> | undefined,
+        groupProperties: args.groupProperties as Record<string, Record<string, unknown>> | undefined,
+        disableGeoip: args.disableGeoip,
+    }
+}
+
+export const testEvaluateFlag = action({
+    args: remoteFlagArgs,
+    handler: async (ctx, args) => {
+        const value = await insights.evaluateFlag(ctx, {
+            key: args.flagKey,
+            distinctId: args.distinctId,
+            ...remoteFlagOptions(args),
+        })
+        return { flagKey: args.flagKey, value }
+    },
 })
 
-export const testGetAllFlagsAndPayloads = action({
-  args: {
-    distinctId: v.optional(v.string()),
-    groups: v.optional(v.any()),
-    personProperties: v.optional(v.any()),
-    groupProperties: v.optional(v.any()),
-    disableGeoip: v.optional(v.boolean()),
-    flagKeys: v.optional(v.array(v.string())),
-  },
-  handler: async (ctx, args) => {
-    const result = await insights.getAllFlagsAndPayloads(ctx, {
-      distinctId: args.distinctId,
-      groups: args.groups as Record<string, string> | undefined,
-      personProperties: args.personProperties as Record<string, string> | undefined,
-      groupProperties: args.groupProperties as Record<string, Record<string, string>> | undefined,
-      disableGeoip: args.disableGeoip,
-      flagKeys: args.flagKeys,
-    })
-    return result
-  },
+export const testEvaluateFlagPayload = action({
+    args: remoteFlagArgs,
+    handler: async (ctx, args) => {
+        const payload = await insights.evaluateFlagPayload(ctx, {
+            key: args.flagKey,
+            distinctId: args.distinctId,
+            ...remoteFlagOptions(args),
+        })
+        return { flagKey: args.flagKey, payload }
+    },
+})
+
+export const testEvaluateAllFlags = action({
+    args: {
+        distinctId: v.optional(v.string()),
+        groups: v.optional(v.any()),
+        personProperties: v.optional(v.any()),
+        groupProperties: v.optional(v.any()),
+        disableGeoip: v.optional(v.boolean()),
+        flagKeys: v.optional(v.array(v.string())),
+    },
+    handler: async (ctx, args) => {
+        return await insights.evaluateAllFlags(ctx, {
+            distinctId: args.distinctId,
+            groups: args.groups as Record<string, string> | undefined,
+            personProperties: args.personProperties as Record<string, unknown> | undefined,
+            groupProperties: args.groupProperties as Record<string, Record<string, unknown>> | undefined,
+            disableGeoip: args.disableGeoip,
+            flagKeys: args.flagKeys,
+        })
+    },
+})
+
+export const testGetAllFlagsAndPayloads = query({
+    args: {
+        distinctId: v.optional(v.string()),
+        groups: v.optional(v.any()),
+        personProperties: v.optional(v.any()),
+        groupProperties: v.optional(v.any()),
+        disableGeoip: v.optional(v.boolean()),
+        flagKeys: v.optional(v.array(v.string())),
+    },
+    handler: async (ctx, args) => {
+        const result = await insights.getAllFlagsAndPayloads(ctx, {
+            distinctId: args.distinctId,
+            groups: args.groups as Record<string, string> | undefined,
+            personProperties: args.personProperties as Record<string, string> | undefined,
+            groupProperties: args.groupProperties as Record<string, Record<string, string>> | undefined,
+            disableGeoip: args.disableGeoip,
+            flagKeys: args.flagKeys,
+        })
+        return result
+    },
 })
