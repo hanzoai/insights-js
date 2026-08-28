@@ -7,7 +7,7 @@
     "generate": "tsx generate.ts"
   },
   "dependencies": {
-    "@hanzo/insights-node": "*",
+    "@hanzo/insights-node": "catalog:",
     "@hanzo/insights-ai": "*",
     "@ai-sdk/openai": "^1.0.0",
     "ai": "^4.0.0",

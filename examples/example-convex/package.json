@@ -1,27 +1,27 @@
 {
-    "name": "example-convex",
-    "version": "0.1.0",
-    "private": true,
-    "packageManager": "pnpm@10.23.0",
-    "scripts": {
-        "dev": "run-p -r 'dev:*'",
-        "dev:backend": "convex dev --typecheck-components",
-        "dev:frontend": "vite --clearScreen false",
-        "typecheck": "tsc --noEmit && tsc -p convex"
-    },
-    "dependencies": {
-        "@hanzo/convex": "*",
-        "@hanzo/font": "^1.8.1",
-        "convex": "^1.31.7",
-        "react": "^19.2.1",
-        "react-dom": "^19.2.1"
-    },
-    "devDependencies": {
-        "@types/react": "^19.2.14",
-        "@types/react-dom": "^19.2.3",
-        "@vitejs/plugin-react": "^6.0.1",
-        "npm-run-all2": "8.0.4",
-        "typescript": "^6.0.3",
-        "vite": "^8.0.12"
-    }
+  "name": "example-convex",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.23.0",
+  "scripts": {
+    "dev": "run-p -r 'dev:*'",
+    "dev:backend": "convex dev --typecheck-components",
+    "dev:frontend": "vite --clearScreen false",
+    "typecheck": "tsc --noEmit && tsc -p convex"
+  },
+  "dependencies": {
+    "@hanzo/convex": "*",
+    "@hanzo/font": "catalog:",
+    "convex": "^1.31.7",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "npm-run-all2": "8.0.4",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.12"
+  }
 }
