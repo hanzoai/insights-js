@@ -7,35 +7,10 @@ packages:
   - "!**/examples/**"
 
 catalog:
-  "@babel/core": ^7.27.1
-  "@babel/plugin-syntax-decorators": ^7.27.1
-  "@babel/plugin-transform-exponentiation-operator": ^7.27.1
-  "@babel/plugin-transform-nullish-coalescing-operator": ^7.27.1
-  "@babel/plugin-transform-react-jsx": ^7.27.1
-  "@babel/preset-env": ^7.27.1
-  "@babel/preset-react": ^7.27.1
-  "@babel/preset-typescript": ^7.27.1
-  "@rslib/core": 0.10.6
-  "@testing-library/dom": ^10.4.1
-  "@testing-library/jest-dom": ^6.9.1
-  "@testing-library/preact": ^3.2.4
-  "@testing-library/react": ^16.3.0
-  "@types/jest": ^29.5.14
-  "@types/react": ^19.2.7
-  jest: 29.7.0
-  jest-environment-jsdom: ^29.7.0
-  jest-environment-node: ^29.7.0
-  jest-expo: ^47.0.1
-  react: ^19.2.1
-  react-dom: ^19.2.1
-  react-test-renderer: ^19.2.1
-  rollup: ^4.53.3
-  ts-jest: 29.4.0
-  tslib: ^2.5.0
-  typescript: 5.8.2
-  vite: ^6.2.0
-  vite-plugin-dts: ^4.5.4
-  esbuild-plugin-umd-wrapper: ^3.0.0
+  '@hanzo/font': 1.9.2
+  '@hanzo/insights': 1.358.1
+  '@hanzo/insights-node': 6.0.0
+  '@hanzo/react': 1.0.2
 
 minimumReleaseAge: 10080
 

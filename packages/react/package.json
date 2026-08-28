@@ -35,7 +35,7 @@
   ],
   "peerDependencies": {
     "@types/react": ">=16.8.0",
-    "@hanzo/insights": ">=1.257.2",
+    "@hanzo/insights": ">=1.358.1",
     "react": ">=16.8.0"
   },
   "peerDependenciesMeta": {

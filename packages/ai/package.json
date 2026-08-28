@@ -68,7 +68,7 @@
     "@opentelemetry/exporter-trace-otlp-http": ">=0.200.0 <1.0.0",
     "@opentelemetry/sdk-trace-base": "^2.0.0",
     "@ai-sdk/provider": "^2.0.0 || ^3.0.0",
-    "@hanzo/insights-node": "^5.0.0"
+    "@hanzo/insights-node": ">=6.0.0"
   },
   "peerDependenciesMeta": {
     "@opentelemetry/api": {
