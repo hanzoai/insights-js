@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "hono": "^4.11.7",
-    "@hanzo/insights-node": "*"
+    "@hanzo/insights-node": "catalog:"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.2.3",

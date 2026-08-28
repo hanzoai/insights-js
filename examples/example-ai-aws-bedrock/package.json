@@ -7,7 +7,7 @@
     "chat": "tsx chat.ts"
   },
   "dependencies": {
-    "@hanzo/insights-node": "*",
+    "@hanzo/insights-node": "catalog:",
     "@hanzo/insights-ai": "*",
     "@aws-sdk/client-bedrock-runtime": "^3.0.0",
     "@opentelemetry/instrumentation-aws-sdk": "^0.48.0",

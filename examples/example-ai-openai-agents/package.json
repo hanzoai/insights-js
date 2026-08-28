@@ -8,7 +8,7 @@
     "multi-agent": "tsx --require dotenv/config multi-agent.ts"
   },
   "dependencies": {
-    "@hanzo/insights-node": "*",
+    "@hanzo/insights-node": "catalog:",
     "@hanzo/insights-ai": "*",
     "@openai/agents": "^0.8.0",
     "zod": "^4.0.0"
