@@ -30,18 +30,18 @@
     "test:unit": "node tests/vue-plugin.test.mjs"
   },
   "dependencies": {
-    "@nuxt/kit": ">=3.7.0",
+    "@nuxt/kit": "catalog:",
     "@hanzo/insights-node": "workspace:*",
     "@hanzo/insights-core": "workspace:*",
     "@hanzo/insights": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "nuxt": "^4.1.2",
-    "@nuxt/devtools": "^2.6.5",
-    "@nuxt/module-builder": "^1.0.2",
-    "@nuxt/schema": "^4.1.2",
-    "@nuxt/eslint-config": "^1.9.0",
-    "eslint": "^9.37.0"
+    "@types/node": "catalog:",
+    "nuxt": "catalog:",
+    "@nuxt/devtools": "catalog:",
+    "@nuxt/module-builder": "catalog:",
+    "@nuxt/schema": "catalog:",
+    "@nuxt/eslint-config": "catalog:",
+    "eslint": "catalog:"
   }
 }

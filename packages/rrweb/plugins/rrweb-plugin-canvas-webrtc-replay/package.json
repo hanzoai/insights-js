@@ -36,13 +36,13 @@
   "author": "justin@recordonce.com",
   "license": "MIT",
   "dependencies": {
-    "simple-peer-light": "^9.10.0"
+    "simple-peer-light": "catalog:"
   },
   "devDependencies": {
     "@hanzo/rrdom": "workspace:*",
     "@hanzo/rrweb": "workspace:*",
     "@hanzo/rrweb-snapshot": "workspace:*",
-    "@types/dom-mediacapture-transform": "^0.1.6",
+    "@types/dom-mediacapture-transform": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:"

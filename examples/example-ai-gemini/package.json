@@ -10,14 +10,14 @@
     "image": "tsx image-generation.ts"
   },
   "dependencies": {
-    "@hanzo/insights-ai": "*",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/resources": "^2.0.0",
-    "@traceloop/instrumentation-google-generativeai": "^0.26.0",
-    "@google/genai": "^1.43.0"
+    "@hanzo/insights-ai": "catalog:",
+    "@opentelemetry/sdk-node": "catalog:",
+    "@opentelemetry/resources": "catalog:",
+    "@traceloop/instrumentation-google-generativeai": "catalog:",
+    "@google/genai": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

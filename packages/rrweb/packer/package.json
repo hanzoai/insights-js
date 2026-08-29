@@ -62,11 +62,11 @@
   "devDependencies": {
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:",
-    "vitest": "^1.4.0",
+    "vitest": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {
-    "fflate": "^0.4.4",
+    "fflate": "catalog:",
     "@hanzo/rrweb-types": "workspace:*"
   },
   "browserslist": [

@@ -23,13 +23,13 @@
     "src"
   ],
   "peerDependencies": {
-    "webpack": "^5"
+    "webpack": ">=5"
   },
   "devDependencies": {
     "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
     "jest": "catalog:",
-    "webpack": "^5"
+    "webpack": "catalog:"
   },
   "scripts": {
     "clean": "rimraf dist",

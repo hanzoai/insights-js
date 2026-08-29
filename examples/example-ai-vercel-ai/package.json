@@ -12,17 +12,17 @@
     "google": "tsx google.ts"
   },
   "dependencies": {
-    "@hanzo/insights-ai": "*",
-    "ai": "^4.0.0",
-    "@ai-sdk/openai": "^1.0.0",
-    "@ai-sdk/anthropic": "^1.0.0",
-    "@ai-sdk/google": "^1.0.0",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/resources": "^2.0.0",
-    "zod": "^3.0.0"
+    "@hanzo/insights-ai": "catalog:",
+    "ai": "catalog:",
+    "@ai-sdk/openai": "catalog:",
+    "@ai-sdk/anthropic": "catalog:",
+    "@ai-sdk/google": "catalog:",
+    "@opentelemetry/sdk-node": "catalog:",
+    "@opentelemetry/resources": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

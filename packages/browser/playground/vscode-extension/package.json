@@ -1,29 +1,29 @@
 {
-    "name": "insights-vscode-playground",
-    "displayName": "Insights VS Code Playground",
-    "description": "A playground for testing Insights integration in a VS Code extension.",
-    "version": "0.0.1",
-    "publisher": "insights",
-    "engines": {
-        "vscode": "^1.74.0"
-    },
-    "activationEvents": [
-        "onCommand:insights.start"
-    ],
-    "main": "./src/extension.js",
-    "contributes": {
-        "commands": [
-            {
-                "command": "insights.start",
-                "title": "Start Insights Playground",
-                "category": "Insights"
-            }
-        ]
-    },
-    "devDependencies": {
-        "vscode": "*"
-    },
-    "dependencies": {
-        "dotenv": "^17.0.0"
-    }
+  "name": "insights-vscode-playground",
+  "displayName": "Insights VS Code Playground",
+  "description": "A playground for testing Insights integration in a VS Code extension.",
+  "version": "0.0.1",
+  "publisher": "insights",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "activationEvents": [
+    "onCommand:insights.start"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "insights.start",
+        "title": "Start Insights Playground",
+        "category": "Insights"
+      }
+    ]
+  },
+  "devDependencies": {
+    "vscode": "catalog:"
+  },
+  "dependencies": {
+    "dotenv": "catalog:"
+  }
 }

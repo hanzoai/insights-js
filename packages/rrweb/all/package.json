@@ -38,10 +38,10 @@
     "package.json"
   ],
   "devDependencies": {
-    "puppeteer": "^23.11.1",
+    "puppeteer": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:",
-    "vitest": "^1.4.0",
+    "vitest": "catalog:",
     "typescript": "catalog:"
   },
   "dependencies": {

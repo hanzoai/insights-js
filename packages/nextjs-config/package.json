@@ -42,7 +42,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "semver": "^7.7.2",
+    "semver": "catalog:",
     "@hanzo/insights-core": "workspace:*",
     "@hanzo/insights-webpack-plugin": "workspace:*"
   },
@@ -55,15 +55,15 @@
     "@hanzo/insights-tooling-rollup-utils": "workspace:*",
     "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
-    "@types/node": "^22.15.23",
-    "@types/semver": "^7.7.0",
+    "@types/node": "catalog:",
+    "@types/semver": "catalog:",
     "@types/jest": "catalog:",
     "jest": "catalog:",
-    "next": "^15.5.7",
+    "next": "catalog:",
     "ts-jest": "catalog:"
   },
   "peerDependencies": {
-    "next": ">12.1.0"
+    "next": ">=16.3.3"
   },
   "files": [
     "dist/"

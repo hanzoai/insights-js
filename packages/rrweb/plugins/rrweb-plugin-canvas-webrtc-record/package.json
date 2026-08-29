@@ -36,7 +36,7 @@
   "author": "justin@recordonce.com",
   "license": "MIT",
   "dependencies": {
-    "simple-peer-light": "^9.10.0"
+    "simple-peer-light": "catalog:"
   },
   "devDependencies": {
     "@hanzo/rrweb": "workspace:*",

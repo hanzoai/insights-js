@@ -8,14 +8,14 @@
   },
   "dependencies": {
     "@hanzo/insights-node": "catalog:",
-    "@hanzo/insights-ai": "*",
-    "@ai-sdk/openai": "^1.0.0",
-    "ai": "^4.0.0",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/resources": "^2.0.0"
+    "@hanzo/insights-ai": "catalog:",
+    "@ai-sdk/openai": "catalog:",
+    "ai": "catalog:",
+    "@opentelemetry/sdk-node": "catalog:",
+    "@opentelemetry/resources": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }
