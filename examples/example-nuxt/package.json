@@ -14,9 +14,9 @@
     "preview": "nuxt preview"
   },
   "dependencies": {
-    "nuxt": "^3.19.3",
-    "vue": "^3.5.22",
-    "vue-router": "^4.5.1",
-    "@hanzo/nuxt": "*"
+    "nuxt": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:",
+    "@hanzo/nuxt": "catalog:"
   }
 }

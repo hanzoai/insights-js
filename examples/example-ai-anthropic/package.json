@@ -8,14 +8,14 @@
     "chat:stream": "tsx streaming.ts"
   },
   "dependencies": {
-    "@hanzo/insights-ai": "*",
-    "@anthropic-ai/sdk": "^0.78.0",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/resources": "^2.0.0",
-    "@traceloop/instrumentation-anthropic": "^0.16.0"
+    "@hanzo/insights-ai": "catalog:",
+    "@anthropic-ai/sdk": "catalog:",
+    "@opentelemetry/sdk-node": "catalog:",
+    "@opentelemetry/resources": "catalog:",
+    "@traceloop/instrumentation-anthropic": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

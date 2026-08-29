@@ -43,14 +43,14 @@
   "devDependencies": {
     "@hanzo/insights-tooling-tsconfig-base": "workspace:*",
     "@rslib/core": "catalog:",
-    "@types/express": "^5.0.5",
+    "@types/express": "catalog:",
     "@types/jest": "catalog:",
-    "@types/node": "^20.0.0",
+    "@types/node": "catalog:",
     "jest": "catalog:",
-    "rxjs": "^7.8.0"
+    "rxjs": "catalog:"
   },
   "peerDependencies": {
-    "rxjs": "^7.0.0"
+    "rxjs": ">=7"
   },
   "peerDependenciesMeta": {
     "rxjs": {

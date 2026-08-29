@@ -11,15 +11,15 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "14.2.33",
+    "next": "catalog:",
     "@hanzo/insights": "catalog:",
     "@hanzo/react": "catalog:",
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@types/react": "18.3.16",
-    "@types/react-dom": "18.3.5",
-    "typescript": "4.9.5"
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
   }
 }

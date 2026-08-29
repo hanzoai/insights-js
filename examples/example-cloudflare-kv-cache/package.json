@@ -10,11 +10,11 @@
     "kv:create": "wrangler kv:namespace create INSIGHTS_CACHE"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251119.0",
-    "@tsconfig/recommended": "^1.0.13",
-    "@types/node": "^24.10.1",
-    "typescript": "^5.9.3",
-    "wrangler": "^4.49.0"
+    "@cloudflare/workers-types": "catalog:",
+    "@tsconfig/recommended": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
   },
   "dependencies": {
     "@hanzo/insights-node": "catalog:"

@@ -8,14 +8,14 @@
   },
   "dependencies": {
     "@hanzo/insights-node": "catalog:",
-    "@hanzo/insights-ai": "*",
-    "@aws-sdk/client-bedrock-runtime": "^3.0.0",
-    "@opentelemetry/instrumentation-aws-sdk": "^0.48.0",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/resources": "^2.0.0"
+    "@hanzo/insights-ai": "catalog:",
+    "@aws-sdk/client-bedrock-runtime": "catalog:",
+    "@opentelemetry/instrumentation-aws-sdk": "catalog:",
+    "@opentelemetry/sdk-node": "catalog:",
+    "@opentelemetry/resources": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }
