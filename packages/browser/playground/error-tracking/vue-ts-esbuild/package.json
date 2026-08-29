@@ -1,24 +1,24 @@
 {
-    "name": "vue-ts-esbuild",
-    "private": true,
-    "version": "0.0.0",
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "vue-tsc -b && vite build",
-        "upload": "insights-cli sourcemap upload --directory ./dist/assets",
-        "inject": "insights-cli sourcemap inject --directory ./dist/assets",
-        "preview": "vite preview"
-    },
-    "dependencies": {
-        "@hanzo/insights": "link:../../..",
-        "vue": "^3.5.13"
-    },
-    "devDependencies": {
-        "@vitejs/plugin-vue": "^5.2.1",
-        "@vue/tsconfig": "^0.7.0",
-        "typescript": "~5.7.2",
-        "vite": "^6.4.1",
-        "vue-tsc": "^2.2.4"
-    }
+  "name": "vue-ts-esbuild",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "upload": "insights-cli sourcemap upload --directory ./dist/assets",
+    "inject": "insights-cli sourcemap inject --directory ./dist/assets",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@hanzo/insights": "link:../../..",
+    "vue": "catalog:"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "catalog:",
+    "@vue/tsconfig": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vue-tsc": "catalog:"
+  }
 }

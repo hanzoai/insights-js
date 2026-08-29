@@ -7,17 +7,17 @@
     "agent": "tsx agent.ts"
   },
   "dependencies": {
-    "@hanzo/insights-ai": "*",
-    "@langchain/langgraph": "^0.2.0",
-    "@langchain/openai": "^0.3.0",
-    "@langchain/core": "^0.3.0",
-    "@opentelemetry/sdk-node": "^0.200.0",
-    "@opentelemetry/resources": "^2.0.0",
-    "@traceloop/instrumentation-langchain": "^0.16.0",
-    "zod": "^3.0.0"
+    "@hanzo/insights-ai": "catalog:",
+    "@langchain/langgraph": "catalog:",
+    "@langchain/openai": "catalog:",
+    "@langchain/core": "catalog:",
+    "@opentelemetry/sdk-node": "catalog:",
+    "@opentelemetry/resources": "catalog:",
+    "@traceloop/instrumentation-langchain": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

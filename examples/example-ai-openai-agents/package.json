@@ -9,13 +9,13 @@
   },
   "dependencies": {
     "@hanzo/insights-node": "catalog:",
-    "@hanzo/insights-ai": "*",
-    "@openai/agents": "^0.8.0",
-    "zod": "^4.0.0"
+    "@hanzo/insights-ai": "catalog:",
+    "@openai/agents": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
-    "dotenv": "^16.0.0",
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "dotenv": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
   }
 }

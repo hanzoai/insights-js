@@ -1,27 +1,27 @@
 {
-    "name": "next-ts-app",
-    "version": "0.1.0",
-    "private": true,
-    "scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "preview": "next start",
-        "lint": "next lint",
-        "inject": "insights-cli sourcemap inject --directory ./.next/static/chunks",
-        "upload": "insights-cli sourcemap upload --directory ./.next/static/chunks",
-        "build-insights": "cd ../../.. && NODE_ENV=dev pnpm i && pnpm run build",
-        "preinstall": "pnpm run build-insights"
-    },
-    "dependencies": {
-        "next": "^15.5.7",
-        "@hanzo/insights": "file:../../..",
-        "react": "^19.2.1",
-        "react-dom": "^19.2.1"
-    },
-    "devDependencies": {
-        "@types/node": "^20",
-        "@types/react": "^19",
-        "@types/react-dom": "^19",
-        "typescript": "^5"
-    }
+  "name": "next-ts-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "next start",
+    "lint": "next lint",
+    "inject": "insights-cli sourcemap inject --directory ./.next/static/chunks",
+    "upload": "insights-cli sourcemap upload --directory ./.next/static/chunks",
+    "build-insights": "cd ../../.. && NODE_ENV=dev pnpm i && pnpm run build",
+    "preinstall": "pnpm run build-insights"
+  },
+  "dependencies": {
+    "next": "catalog:",
+    "@hanzo/insights": "file:../../..",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
 }

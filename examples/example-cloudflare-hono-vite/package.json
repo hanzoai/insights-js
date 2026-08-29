@@ -9,13 +9,13 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings"
   },
   "dependencies": {
-    "hono": "^4.11.7",
+    "hono": "catalog:",
     "@hanzo/insights-node": "catalog:"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.2.3",
-    "@hanzo/rollup-plugin": "*",
-    "vite": "^6.3.5",
-    "wrangler": "^4.17.0"
+    "@cloudflare/vite-plugin": "catalog:",
+    "@hanzo/rollup-plugin": "catalog:",
+    "vite": "catalog:",
+    "wrangler": "catalog:"
   }
 }
