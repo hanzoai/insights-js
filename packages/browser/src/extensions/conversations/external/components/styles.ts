@@ -31,7 +31,7 @@ export const getStyles = (primaryColor: string, position: WidgetPosition = 'bott
             ...(isLeft ? { left: '20px' } : { right: '20px' }),
             zIndex: Z_INDEX_CONVERSATIONS,
             fontFamily:
-                '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif',
+                '-apple-system, BlinkMacSystemFont, "Zen", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif',
         },
         buttonContainer: {
             position: 'relative' as const,
