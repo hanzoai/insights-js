@@ -1,7 +1,6 @@
 :host {
     --ph-tour-font-family:
-        -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
     --ph-tour-background-color: #ffffff;
     --ph-tour-text-color: #1d1f27;
@@ -30,7 +29,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: var(--ph-tour-font-family);
+    font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .ph-tour-click-overlay {
@@ -180,7 +179,7 @@
 /* Inline code */
 .ph-tour-content code {
     padding: 2px 6px;
-    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-family: Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     font-size: 0.875em;
     background: rgba(0, 0, 0, 0.06);
     border-radius: 4px;
@@ -191,7 +190,7 @@
     padding: 12px;
     margin-bottom: 8px;
     overflow-x: auto;
-    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    font-family: Zen Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     font-size: 13px;
     line-height: 1.5;
     background: rgba(0, 0, 0, 0.04);
@@ -208,7 +207,7 @@
 /* Ensure syntax highlighting spans inherit monospace font */
 .ph-tour-content pre *,
 .ph-tour-content code * {
-    font-family: inherit;
+    font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* GitHub light syntax highlighting theme */
@@ -447,7 +446,7 @@
     border: 1px solid var(--ph-tour-border-color);
     border-radius: 6px;
     font-size: 14px;
-    font-family: var(--ph-tour-font-family);
+    font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--ph-tour-text-color);
     background: #ffffff;
     resize: vertical;
@@ -542,7 +541,7 @@
     background: var(--ph-tour-background-color);
     font-size: 13px;
     font-weight: 500;
-    font-family: var(--ph-tour-font-family);
+    font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--ph-tour-text-color);
     cursor: pointer;
     transition: all 0.15s ease;
@@ -588,7 +587,7 @@
     background: var(--ph-tour-background-color);
     border-bottom: 1px solid var(--ph-tour-border-color);
     box-shadow: var(--ph-tour-box-shadow);
-    font-family: var(--ph-tour-font-family);
+    font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Remove default link underline when banner is wrapped in an anchor */

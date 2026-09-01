@@ -1,8 +1,7 @@
 :host {
     /* Define CSS Variables with defaults */
     --ph-survey-font-family:
-        -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif,
-        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+        Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --ph-survey-box-padding: 20px 24px;
     --ph-survey-max-width: 300px;
     --ph-survey-z-index: 2147483645; /* Z_INDEX_SURVEYS from constants.ts */
@@ -49,7 +48,7 @@
 
     * {
         box-sizing: border-box;
-        font-family: var(--ph-survey-font-family);
+        font-family: Zen, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         color: var(--ph-survey-text-primary-color);
     }
 

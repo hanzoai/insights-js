@@ -374,13 +374,13 @@ describe('canActivateRepeatedly', () => {
 describe('getFontFamily', () => {
     it('should return the default font family with fallbacks when no font family is provided', () => {
         expect(getFontFamily()).toBe(
-            '-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
+            '-apple-system, BlinkMacSystemFont, "Zen", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
         )
     })
 
     it('should return the provided font family with fallbacks when a custom font family is provided', () => {
         expect(getFontFamily('Arial')).toBe(
-            'Arial, BlinkMacSystemFont, "Inter", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
+            'Arial, BlinkMacSystemFont, "Zen", "Segoe UI", "Roboto", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"'
         )
     })
 
