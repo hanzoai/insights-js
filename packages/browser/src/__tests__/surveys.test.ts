@@ -256,7 +256,7 @@ describe('surveys', () => {
             expect(data).toEqual(firstSurveys)
         })
         expect(instance._send_request).toHaveBeenCalledWith({
-            url: 'https://insights.hanzo.ai/api/surveys/?token=testtoken',
+            url: 'https://insights.hanzo.ai/v1/surveys/?token=testtoken',
             timeout: SURVEYS_REQUEST_TIMEOUT_MS,
             method: 'GET',
             callback: expect.any(Function),
@@ -302,7 +302,7 @@ describe('surveys', () => {
             expect(data).toEqual(firstSurveys)
         })
         expect(instance._send_request).toHaveBeenCalledWith({
-            url: 'https://insights.hanzo.ai/api/surveys/?token=testtoken',
+            url: 'https://insights.hanzo.ai/v1/surveys/?token=testtoken',
             timeout: SURVEYS_REQUEST_TIMEOUT_MS,
             method: 'GET',
             callback: expect.any(Function),

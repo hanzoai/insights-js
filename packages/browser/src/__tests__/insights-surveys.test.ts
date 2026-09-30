@@ -98,7 +98,7 @@ describe('insights-surveys', () => {
                     props: {},
                 },
                 requestRouter: {
-                    endpointFor: jest.fn().mockReturnValue('https://test.com/api/surveys'),
+                    endpointFor: jest.fn().mockReturnValue('https://test.com/v1/surveys'),
                 },
                 _send_request: jest.fn(),
                 get_property: jest.fn(),

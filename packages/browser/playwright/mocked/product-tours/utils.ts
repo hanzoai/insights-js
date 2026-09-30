@@ -76,7 +76,7 @@ export function createBannerStep(overrides: Partial<ProductTourStep> = {}): Prod
 }
 
 export function mockProductToursApi(page: Page, tours: ProductTour[]) {
-    return page.route('**/api/product_tours/**', async (route) => {
+    return page.route('**/v1/product_tours/**', async (route) => {
         await route.fulfill({
             json: { product_tours: tours },
         })
@@ -119,7 +119,7 @@ export async function startWithTours(
     const toursApiRoute = mockProductToursApi(page, tours)
 
     if (waitForApiResponse) {
-        const toursResponse = page.waitForResponse('**/api/product_tours/**')
+        const toursResponse = page.waitForResponse('**/v1/product_tours/**')
         await start(startOptions, page, context)
         await toursApiRoute
         await toursResponse

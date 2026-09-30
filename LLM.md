@@ -76,6 +76,15 @@ Set in `packages/browser/src/insights-core.ts` (`analyticsDefaultEndpoint`),
 `BASE_ENDPOINT`. The capture server serves ONLY these `/v1` paths (legacy removed,
 forward-only).
 
+### Product endpoints are `/v1/*` too
+
+Surveys, early access features, web experiments, product tours and the
+conversations widget call `/v1/surveys/`, `/v1/early_access_features/`,
+`/v1/web_experiments/`, `/v1/product_tours/` and `/v1/conversations/v1/widget/*`.
+insights-web serves them there and answers `/api/…` with 404.
+`packages/browser/src/__tests__/v1-paths.test.ts` fails on any `/api/` literal in
+browser or core source.
+
 Import specifiers are `@hanzo/insights` / `@hanzo/insights-node` — package names,
 not wire constants.
 

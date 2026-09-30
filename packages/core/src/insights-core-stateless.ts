@@ -858,7 +858,7 @@ export abstract class InsightsCoreStateless {
       return []
     }
 
-    const url = `${this.host}/api/surveys/?token=${this.apiKey}`
+    const url = `${this.host}/v1/surveys/?token=${this.apiKey}`
     const fetchOptions: InsightsFetchOptions = {
       method: 'GET',
       headers: { ...this.getCustomHeaders(), 'Content-Type': 'application/json' },

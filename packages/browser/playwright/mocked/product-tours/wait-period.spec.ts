@@ -162,7 +162,7 @@ test.describe('product tours - wait period', () => {
             },
         })
 
-        await page.route('**/api/product_tours/**', async (route) => {
+        await page.route('**/v1/product_tours/**', async (route) => {
             await route.fulfill({ json: { product_tours: [secondTour] } })
         })
 

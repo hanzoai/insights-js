@@ -98,7 +98,7 @@ test.describe('slim bundle + extension bundles (#3313)', () => {
         })
 
         // Mock the surveys endpoint
-        void context.route('**/api/surveys/*', (route) => {
+        void context.route('**/v1/surveys/*', (route) => {
             route.fulfill({
                 status: 200,
                 contentType: 'application/json',

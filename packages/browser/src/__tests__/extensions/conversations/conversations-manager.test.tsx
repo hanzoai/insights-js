@@ -274,7 +274,7 @@ describe('ConversationsManager', () => {
             expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
                     method: 'POST',
-                    url: expect.stringContaining('/api/conversations/v1/widget/restore'),
+                    url: expect.stringContaining('/v1/conversations/v1/widget/restore'),
                     data: expect.objectContaining({
                         restore_token: 'restore-token-1',
                         widget_session_id: 'test-widget-session-id',
@@ -490,7 +490,7 @@ describe('ConversationsManager', () => {
 
             expect(mockInsights._send_request).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    url: expect.stringContaining('/api/conversations/v1/widget/message'),
+                    url: expect.stringContaining('/v1/conversations/v1/widget/message'),
                     method: 'POST',
                     data: expect.objectContaining({
                         message: 'Hello!',
@@ -809,7 +809,7 @@ describe('ConversationsManager', () => {
                 expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'POST',
-                        url: expect.stringContaining('/api/conversations/v1/widget/message'),
+                        url: expect.stringContaining('/v1/conversations/v1/widget/message'),
                         data: expect.objectContaining({
                             widget_session_id: expect.any(String),
                             distinct_id: 'test-distinct-id',
@@ -843,7 +843,7 @@ describe('ConversationsManager', () => {
                 expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'GET',
-                        url: expect.stringContaining('/api/conversations/v1/widget/messages/ticket-123'),
+                        url: expect.stringContaining('/v1/conversations/v1/widget/messages/ticket-123'),
                         headers: {
                             'X-Conversations-Token': 'test-token',
                         },
@@ -953,7 +953,7 @@ describe('ConversationsManager', () => {
                 expect(mockInsights._send_request).toHaveBeenCalledWith(
                     expect.objectContaining({
                         method: 'POST',
-                        url: expect.stringContaining('/api/conversations/v1/widget/restore/request'),
+                        url: expect.stringContaining('/v1/conversations/v1/widget/restore/request'),
                         data: expect.objectContaining({
                             email: 'test@example.com',
                             request_url: window.location.href,

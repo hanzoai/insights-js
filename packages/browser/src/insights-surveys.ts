@@ -237,7 +237,7 @@ export class InsightsSurveys implements Extension {
         }
 
         this._instance._send_request({
-            url: this._instance.requestRouter.endpointFor('api', `/api/surveys/?token=${this._config.token}`),
+            url: this._instance.requestRouter.endpointFor('api', `/v1/surveys/?token=${this._config.token}`),
             method: 'GET',
             timeout: this._config.surveys_request_timeout_ms,
             callback: (response) => {

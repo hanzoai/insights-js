@@ -1167,7 +1167,7 @@ export class InsightsFeatureFlags implements Extension {
             this._instance._send_request({
                 url: this._instance.requestRouter.endpointFor(
                     'api',
-                    `/api/early_access_features/?token=${this._config.token}${stageParams}`
+                    `/v1/early_access_features/?token=${this._config.token}${stageParams}`
                 ),
                 method: 'GET',
                 callback: (response) => {

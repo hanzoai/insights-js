@@ -107,7 +107,7 @@ export class InsightsProductTours implements Extension {
         this._instance._send_request({
             url: this._instance.requestRouter.endpointFor(
                 'api',
-                `/api/product_tours/?token=${this._instance.config.token}`
+                `/v1/product_tours/?token=${this._instance.config.token}`
             ),
             method: 'GET',
             callback: (response) => {

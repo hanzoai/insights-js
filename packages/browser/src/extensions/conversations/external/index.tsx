@@ -32,8 +32,8 @@ const logger = createLogger('[ConversationsManager]')
 
 const WIDGET_CONTAINER_ID = 'ph-conversations-widget-container'
 const POLL_INTERVAL_MS = 5000 // 5 seconds
-const RESTORE_EXCHANGE_ENDPOINT = '/api/conversations/v1/widget/restore'
-const RESTORE_REQUEST_ENDPOINT = '/api/conversations/v1/widget/restore/request'
+const RESTORE_EXCHANGE_ENDPOINT = '/v1/conversations/v1/widget/restore'
+const RESTORE_REQUEST_ENDPOINT = '/v1/conversations/v1/widget/restore/request'
 
 // Singleton guard: only one ConversationsManager per page.
 // The toolbar's internal Insights instance is excluded from creating a manager
@@ -160,7 +160,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
             }
 
             this._insights._send_request({
-                url: this._insights.requestRouter.endpointFor('api', '/api/conversations/v1/widget/message'),
+                url: this._insights.requestRouter.endpointFor('api', '/v1/conversations/v1/widget/message'),
                 method: 'POST',
                 data: payload,
                 headers: {
@@ -261,7 +261,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
             this._insights._send_request({
                 url: this._insights.requestRouter.endpointFor(
                     'api',
-                    `/api/conversations/v1/widget/messages/${targetTicketId}?${formDataToQuery(queryParams)}`
+                    `/v1/conversations/v1/widget/messages/${targetTicketId}?${formDataToQuery(queryParams)}`
                 ),
                 method: 'GET',
                 headers: {
@@ -318,7 +318,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
             this._insights._send_request({
                 url: this._insights.requestRouter.endpointFor(
                     'api',
-                    `/api/conversations/v1/widget/messages/${targetTicketId}/read`
+                    `/v1/conversations/v1/widget/messages/${targetTicketId}/read`
                 ),
                 method: 'POST',
                 data,
@@ -1085,7 +1085,7 @@ export class ConversationsManager implements ConversationsManagerInterface {
             this._insights._send_request({
                 url: this._insights.requestRouter.endpointFor(
                     'api',
-                    `/api/conversations/v1/widget/tickets?${formDataToQuery(queryParams)}`
+                    `/v1/conversations/v1/widget/tickets?${formDataToQuery(queryParams)}`
                 ),
                 method: 'GET',
                 headers: {

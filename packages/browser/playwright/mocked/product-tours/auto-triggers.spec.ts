@@ -129,7 +129,7 @@ test.describe('product tours - auto triggers', () => {
         await expect(tourTooltip(page, 'deleted-tour')).not.toBeVisible()
 
         // Update the API to return no tours (simulating deletion)
-        await page.route('**/api/product_tours/**', async (route) => {
+        await page.route('**/v1/product_tours/**', async (route) => {
             await route.fulfill({ json: { product_tours: [] } })
         })
 

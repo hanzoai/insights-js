@@ -1393,7 +1393,7 @@ describe('featureflags', () => {
             })
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://insights.hanzo.ai/api/early_access_features/?token=random fake token',
+                url: 'https://insights.hanzo.ai/v1/early_access_features/?token=random fake token',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -1423,7 +1423,7 @@ describe('featureflags', () => {
             })
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://insights.hanzo.ai/api/early_access_features/?token=random fake token',
+                url: 'https://insights.hanzo.ai/v1/early_access_features/?token=random fake token',
                 method: 'GET',
                 callback: expect.any(Function),
             })
@@ -1457,7 +1457,7 @@ describe('featureflags', () => {
             )
 
             expect(instance._send_request).toHaveBeenCalledWith({
-                url: 'https://insights.hanzo.ai/api/early_access_features/?token=random fake token&stage=concept&stage=beta',
+                url: 'https://insights.hanzo.ai/v1/early_access_features/?token=random fake token&stage=concept&stage=beta',
                 method: 'GET',
                 callback: expect.any(Function),
             })
