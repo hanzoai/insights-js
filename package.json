@@ -33,7 +33,7 @@
     "@typescript-eslint/eslint-plugin": "catalog:",
     "@typescript-eslint/parser": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-@hanzo/insights": "link:tooling/eslint-plugin-insights",
+    "@hanzo/eslint-plugin-insights": "link:tooling/eslint-plugin-insights",
     "eslint-config-prettier": "catalog:",
     "eslint-plugin-compat": "catalog:",
     "eslint-plugin-jest": "catalog:",

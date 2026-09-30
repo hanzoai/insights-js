@@ -137,9 +137,6 @@ importers:
       eslint:
         specifier: 8.57.0
         version: 8.57.0
-      eslint-config-@hanzo/insights:
-        specifier: link:tooling/eslint-plugin-insights
-        version: link:tooling/eslint-plugin-insights
       eslint-config-prettier:
         specifier: ^8.10.2
         version: 8.10.2(eslint@8.57.0)
