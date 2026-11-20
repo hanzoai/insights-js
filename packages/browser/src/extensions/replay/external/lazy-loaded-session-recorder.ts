@@ -79,6 +79,12 @@ import {
     V2TriggerGroupStrategy,
     RecordingStrategyContext,
 } from './recording-strategies'
+import {
+    combineMaskTextSelectors,
+    isUxCaptureExcludedRoute,
+    maskInputValueBeforeCapture,
+    maskTextValueBeforeCapture,
+} from '../../../hanzo-telemetry'
 
 const BASE_ENDPOINT = '/v1/s'
 const DEFAULT_CANVAS_QUALITY = 0.4
@@ -1353,7 +1359,17 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             return
         }
 
+        // Pre-capture route exclusion enforced BEFORE buffering/compression/transmission
+        if (window?.location?.href && isUxCaptureExcludedRoute(window.location.href)) {
+            this._pauseRecording()
+            return
+        }
+
         if (rawEvent.type === EventType.Meta) {
+            if (isUxCaptureExcludedRoute(rawEvent.data.href)) {
+                this._pauseRecording()
+                return
+            }
             const href = this._maskUrl(rawEvent.data.href)
             this._lastHref = href
             if (!href) {
@@ -1914,6 +1930,28 @@ export class LazyLoadedSessionRecording implements LazyLoadedSessionRecordingInt
             sessionRecordingOptions.maskAllInputs = this._masking.maskAllInputs ?? true
             sessionRecordingOptions.maskTextSelector = this._masking.maskTextSelector ?? undefined
             sessionRecordingOptions.blockSelector = this._masking.blockSelector ?? undefined
+        }
+
+        // Enforce pre-capture privacy masking BEFORE serialization for sensitive elements & fields:
+        // input[type="password"], payment/card/cvv/iban/secret/api-key inputs,
+        // [data-hanzo-mask], [data-conversation-body], .conversation-body, [data-secret]
+        sessionRecordingOptions.maskTextSelector = combineMaskTextSelectors(sessionRecordingOptions.maskTextSelector)
+        const userMaskInputFn = sessionRecordingOptions.maskInputFn
+        const maskAllInputs = sessionRecordingOptions.maskAllInputs !== false
+        sessionRecordingOptions.maskInputFn = (text: string, element: HTMLElement) => {
+            const masked = maskInputValueBeforeCapture(text, element, maskAllInputs)
+            if (masked !== text) {
+                return masked
+            }
+            return userMaskInputFn ? userMaskInputFn(text, element) : text
+        }
+        const userMaskTextFn = sessionRecordingOptions.maskTextFn
+        sessionRecordingOptions.maskTextFn = (text: string, element: HTMLElement | null) => {
+            const masked = maskTextValueBeforeCapture(text, element)
+            if (masked !== text) {
+                return masked
+            }
+            return userMaskTextFn ? userMaskTextFn(text, element) : text
         }
 
         const rrwebRecord = getRRWebRecord()

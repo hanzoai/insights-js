@@ -84,6 +84,16 @@ import {
     safewrapClass,
 } from './utils'
 import { isLikelyBot } from './utils/blocked-uas'
+import {
+    AuthCallbackOutcomeInput,
+    buildAuthCallbackOutcome,
+    buildFunnelStepProperties,
+    CrossDomainIdentity,
+    decorateCrossDomainUrl,
+    enforceClientPaymentGuard,
+    extractCrossDomainIdentityFromUrl,
+    FunnelStepInput,
+} from './hanzo-telemetry'
 import { getEventProperties } from './utils/event-utils'
 import { assignableWindow, document, location, navigator, userAgent, window } from './utils/globals'
 import { logger } from './utils/logger'
@@ -206,6 +216,7 @@ export const defaultConfig = (defaults?: ConfigDefaults): InsightsConfig => ({
     ui_host: null,
     token: '',
     autocapture: true,
+    capture_heatmaps: true,
     cross_subdomain_cookie: isCrossDomainCookie(document?.location),
     persistence: 'localStorage+cookie', // up to 1.92.0 this was 'cookie'. It's easy to migrate as 'localStorage+cookie' will migrate data from cookie storage
     persistence_name: '',
@@ -625,6 +636,24 @@ export class Insights implements InsightsInterface {
         if (!startInCookielessMode) {
             this.sessionManager = new SessionIdManager(this)
             this.sessionPropsManager = new SessionPropsManager(this, this.sessionManager, this.persistence)
+        }
+
+        // Cross-domain identity stitching (hz_aid / hz_sid / visitor_id) from incoming handoff URL
+        if (window?.location?.href) {
+            const incomingIdentity = extractCrossDomainIdentityFromUrl(window.location.href)
+            if (incomingIdentity.hz_aid || incomingIdentity.hz_sid || incomingIdentity.visitor_id) {
+                const propsToRegister: Properties = {}
+                if (incomingIdentity.hz_aid) propsToRegister.hz_aid = incomingIdentity.hz_aid
+                if (incomingIdentity.hz_sid) propsToRegister.hz_sid = incomingIdentity.hz_sid
+                if (incomingIdentity.visitor_id) propsToRegister.visitor_id = incomingIdentity.visitor_id
+                this.register(propsToRegister)
+                if (
+                    incomingIdentity.visitor_id &&
+                    this.persistence.get_property(USER_STATE) !== USER_STATE_IDENTIFIED
+                ) {
+                    this.persistence.register({ distinct_id: incomingIdentity.visitor_id })
+                }
+            }
         }
 
         // Conditionally defer extension initialization based on config
@@ -3998,6 +4027,79 @@ export class Insights implements InsightsInterface {
             $ai_metric_name: metricName,
             $ai_metric_value: String(metricValue),
         })
+    }
+
+    /**
+     * Capture a funnel step adhering to the `{ hostname, route, release, device_class, outcome }` contract.
+     * Browser SDK enforces client-side payment guard so client redirects can never assert `confirmed_by: 'server'`.
+     */
+    captureFunnelStep(
+        eventName: EventName,
+        input: Omit<FunnelStepInput, 'hostname' | 'route'> & { hostname?: string; route?: string }
+    ): CaptureResult | undefined {
+        const props = buildFunnelStepProperties({
+            ...input,
+            hostname: input.hostname || window?.location?.hostname || 'unknown',
+            route: input.route || window?.location?.pathname || '/',
+            release: input.release ?? this.config.release,
+            viewportWidth: input.viewportWidth ?? window?.innerWidth,
+            userAgent: input.userAgent ?? userAgent,
+        })
+        const identity = this.getCrossDomainIdentity()
+        const guarded = enforceClientPaymentGuard(eventName, {
+            ...props,
+            ...(identity.hz_aid ? { hz_aid: identity.hz_aid } : {}),
+            ...(identity.hz_sid ? { hz_sid: identity.hz_sid } : {}),
+            ...(identity.visitor_id ? { visitor_id: identity.visitor_id } : {}),
+        })
+        return this.capture(eventName, guarded)
+    }
+
+    /**
+     * Route `/auth/callback` outcomes strictly to auth operational telemetry (`auth_callback_outcome`),
+     * never as UX heatmap or replay design tickets.
+     */
+    captureAuthCallbackOutcome(
+        input: Omit<AuthCallbackOutcomeInput, 'hostname'> & { hostname?: string }
+    ): CaptureResult | undefined {
+        const { event, properties } = buildAuthCallbackOutcome({
+            ...input,
+            hostname: input.hostname || window?.location?.hostname || 'unknown',
+            release: input.release ?? this.config.release,
+            viewportWidth: input.viewportWidth ?? window?.innerWidth,
+            userAgent: input.userAgent ?? userAgent,
+        })
+        return this.capture(event, properties)
+    }
+
+    /**
+     * Returns the canonical cross-domain stitching identity (`hz_aid`, `hz_sid`, `visitor_id`)
+     * for linking journeys across Hanzo properties.
+     */
+    getCrossDomainIdentity(): CrossDomainIdentity {
+        const persistedAid = this.get_property('hz_aid')
+        const persistedSid = this.get_property('hz_sid')
+        const persistedVisitorId = this.get_property('visitor_id')
+        const distinctId = this.get_distinct_id?.()
+        const sessionId = this.get_session_id?.()
+
+        const hz_aid = (isString(persistedAid) && persistedAid) || (isString(distinctId) && distinctId) || undefined
+        const hz_sid = (isString(persistedSid) && persistedSid) || (isString(sessionId) && sessionId) || undefined
+        const visitor_id = (isString(persistedVisitorId) && persistedVisitorId) || hz_aid
+
+        return {
+            ...(hz_aid ? { hz_aid } : {}),
+            ...(hz_sid ? { hz_sid } : {}),
+            ...(visitor_id ? { visitor_id } : {}),
+        }
+    }
+
+    /**
+     * Decorates outbound Hanzo ecosystem URLs (`hanzo.ai`, `hanzo.app`, `hanzo.bot`, `hanzo.team`,
+     * `platform.hanzo.ai`) with `hz_aid`, `hz_sid`, and `visitor_id`.
+     */
+    decorateCrossDomainUrl(targetUrl: string): string {
+        return decorateCrossDomainUrl(targetUrl, this.getCrossDomainIdentity())
     }
 
     private _checkLocalStorageForDebug(debugConfig: boolean | undefined) {

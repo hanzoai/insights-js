@@ -12,6 +12,7 @@ import { FlagVariant, RemoteConfig, SessionRecordingPersistedConfig, SessionReco
 import { isNullish, isBoolean, isString, isObject, isUndefined } from '@hanzo/insights-core'
 import { window } from '../../../utils/globals'
 import { logger } from '../../../utils/logger'
+import { DEFAULT_REPLAY_URL_BLOCKLIST } from '../../../hanzo-telemetry'
 
 export const DISABLED = 'disabled'
 export const SAMPLED = 'sampled'
@@ -180,7 +181,7 @@ const isEagerLoadedConfig = (x: ReplayConfigType | TriggerMatchingConfig): x is 
 
 export class URLTriggerMatching implements TriggerStatusMatching {
     _urlTriggers: SessionRecordingUrlTrigger[] = []
-    _urlBlocklist: SessionRecordingUrlTrigger[] = []
+    _urlBlocklist: SessionRecordingUrlTrigger[] = [...DEFAULT_REPLAY_URL_BLOCKLIST]
 
     private _compiledTriggerRegexes: Map<string, RegExp> = new Map()
     private _compiledBlocklistRegexes: Map<string, RegExp> = new Map()
@@ -195,6 +196,7 @@ export class URLTriggerMatching implements TriggerStatusMatching {
         groupId?: string
     ) {
         this._groupId = groupId
+        this._compileRegexCache()
     }
 
     onConfig(config: ReplayConfigType | TriggerMatchingConfig) {
@@ -204,12 +206,13 @@ export class URLTriggerMatching implements TriggerStatusMatching {
                     ? config.sessionRecording?.urlTriggers
                     : []
                 : config?.urlTriggers) || []
-        this._urlBlocklist =
+        const remoteBlocklist =
             (isEagerLoadedConfig(config)
                 ? isObject(config.sessionRecording)
                     ? config.sessionRecording?.urlBlocklist
                     : []
                 : config?.urlBlocklist) || []
+        this._urlBlocklist = [...DEFAULT_REPLAY_URL_BLOCKLIST, ...remoteBlocklist]
 
         this._compileRegexCache()
     }

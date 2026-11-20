@@ -1505,6 +1505,12 @@ export interface InsightsConfig {
     enable_heatmaps?: boolean
 
     /**
+     * Application release/build version attached to funnel, operational auth telemetry,
+     * and aggregate heatmap keys.
+     */
+    release?: string
+
+    /**
      * Determines whether to capture dead clicks.
      *
      * by default dead clicks are ignored on elements that match a `ph-no-capture` or `ph-no-deadclick` css class on the element or a parent

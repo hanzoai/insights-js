@@ -31,6 +31,7 @@ import {
     TriggerType,
 } from './external/triggerMatching'
 import type { Extension } from '../types'
+import { isUxCaptureExcludedRoute } from '../../hanzo-telemetry'
 
 const LOGGER_PREFIX = '[SessionRecording]'
 const logger = createLogger(LOGGER_PREFIX)
@@ -81,7 +82,8 @@ export class SessionRecording implements Extension {
         const enabled_server_side = !!this._instance.get_property(SESSION_RECORDING_REMOTE_CONFIG)?.enabled
         const enabled_client_side = !this._config.disable_session_recording
         const isDisabled = this._config.disable_session_recording || this._instance.consent.isOptedOut()
-        return window && enabled_server_side && enabled_client_side && !isDisabled
+        const isExcludedRoute = !!window?.location?.href && isUxCaptureExcludedRoute(window.location.href)
+        return window && enabled_server_side && enabled_client_side && !isDisabled && !isExcludedRoute
     }
 
     startIfEnabledOrStop(startReason?: SessionStartReason) {

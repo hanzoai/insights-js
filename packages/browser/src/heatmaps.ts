@@ -14,6 +14,13 @@ import { addEventListener } from './utils'
 import { maskQueryParams } from './utils/request-utils'
 import { PERSONAL_DATA_CAMPAIGN_PARAMS, MASKED } from './utils/event-utils'
 import type { Extension } from './extensions/types'
+import {
+    AggregateHeatmapKey,
+    buildAggregateHeatmapKey,
+    isSensitiveElement,
+    isUxCaptureExcludedRoute,
+    serializeAggregateHeatmapKey,
+} from './hanzo-telemetry'
 
 const DEFAULT_FLUSH_INTERVAL = 5000
 
@@ -64,6 +71,7 @@ export class Heatmaps implements Extension {
     _mouseMoveTimeout: ReturnType<typeof setTimeout> | undefined
 
     private _buffer: HeatmapEventBuffer
+    private _aggregateBuffer: Record<string, { key: AggregateHeatmapKey; count: number }> | undefined
     private _flushInterval: ReturnType<typeof setInterval> | null = null
     private _deadClicksCapture: DeadClicksAutocapture | undefined
     private _onClickHandler: ((e: Event) => void) | undefined
@@ -138,6 +146,12 @@ export class Heatmaps implements Extension {
         const buffer = this._buffer
         this._buffer = undefined
         return buffer
+    }
+
+    public getAndClearAggregateBuffer(): Array<{ key: AggregateHeatmapKey; count: number }> | undefined {
+        const agg = this._aggregateBuffer
+        this._aggregateBuffer = undefined
+        return agg ? Object.values(agg) : undefined
     }
 
     private _onDeadClick(click: DeadClickCandidate): void {
@@ -234,7 +248,37 @@ export class Heatmaps implements Extension {
             return
         }
 
+        if (window?.location?.href && isUxCaptureExcludedRoute(window.location.href)) {
+            return
+        }
+
+        const targetEl = getEventTarget(e)
+        if (isSensitiveElement(targetEl)) {
+            return
+        }
+
         const properties = this._getProperties(e, type)
+
+        // Record privacy-first aggregate heatmap bucket keyed by { hostname, route_template, release, viewport, control_id }
+        if (window?.location?.href) {
+            const aggKey = buildAggregateHeatmapKey({
+                hostname: window.location.hostname || 'localhost',
+                urlOrPath: window.location.href,
+                release: this._config.release,
+                viewportWidth: window.innerWidth,
+                userAgent: window.navigator?.userAgent,
+                element: targetEl,
+            })
+            if (aggKey) {
+                const serialized = serializeAggregateHeatmapKey(aggKey)
+                this._aggregateBuffer = this._aggregateBuffer || {}
+                if (this._aggregateBuffer[serialized]) {
+                    this._aggregateBuffer[serialized].count += 1
+                } else {
+                    this._aggregateBuffer[serialized] = { key: aggKey, count: 1 }
+                }
+            }
+        }
 
         if (this.rageclicks?.isRageClick(e.clientX, e.clientY, new Date().getTime())) {
             this._capture({
@@ -251,9 +295,16 @@ export class Heatmaps implements Extension {
             return
         }
 
+        if (window?.location?.href && isUxCaptureExcludedRoute(window.location.href)) {
+            return
+        }
+
         clearTimeout(this._mouseMoveTimeout)
 
         this._mouseMoveTimeout = setTimeout(() => {
+            if (window?.location?.href && isUxCaptureExcludedRoute(window.location.href)) {
+                return
+            }
             this._capture(this._getProperties(e as MouseEvent, 'mousemove'))
         }, 500)
     }
@@ -264,6 +315,9 @@ export class Heatmaps implements Extension {
         }
 
         const href = window.location.href
+        if (isUxCaptureExcludedRoute(href)) {
+            return
+        }
 
         // mask url query params
         const maskPersonalDataProperties = this._config.mask_personal_data_properties
@@ -285,12 +339,18 @@ export class Heatmaps implements Extension {
     }
 
     private _flush(): void {
-        if (!this._buffer || isEmptyObject(this._buffer)) {
+        const hasHeatmapData = this._buffer && !isEmptyObject(this._buffer)
+        const hasAggregateData = this._aggregateBuffer && !isEmptyObject(this._aggregateBuffer)
+        if (!hasHeatmapData && !hasAggregateData) {
             return
         }
 
+        const heatmapData = this.getAndClearBuffer()
+        const aggregateHeatmap = this.getAndClearAggregateBuffer()
+
         this.instance.capture('$$heatmap', {
-            $heatmap_data: this.getAndClearBuffer(),
+            ...(heatmapData ? { $heatmap_data: heatmapData } : {}),
+            ...(aggregateHeatmap ? { $aggregate_heatmap: aggregateHeatmap } : {}),
         })
     }
 }

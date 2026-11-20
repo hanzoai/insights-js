@@ -25,10 +25,12 @@ module.exports = {
         '^preact/jsx-runtime$': path.join(preactRoot, 'jsx-runtime/dist/jsxRuntime.js'),
         '^preact/test-utils$': path.join(preactRoot, 'test-utils/dist/testUtils.js'),
         '^@testing-library/preact$': path.join(testingLibraryPreactCjs, 'index.js'),
+        '^@/(.*)$': '<rootDir>/../core/src/$1',
+        '^@hanzo/insights-core$': '<rootDir>/../core/src/index.ts',
         '^@hanzo/insights-core/surveys$': '<rootDir>/../core/src/surveys/index.ts',
     },
     transform: {
-        '^.+\\.(js|jsx|ts|tsx|mjs)$': 'babel-jest',
+        '^.+\\.(js|jsx|ts|tsx|mjs)$': '<rootDir>/jest-esbuild-transform.cjs',
     },
     transformIgnorePatterns: ['/node_modules/(?!.*(query-selector-shadow-dom|@testing-library/preact|preact/))'],
 }
