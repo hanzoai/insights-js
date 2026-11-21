@@ -2,6 +2,8 @@
 
 # Hanzo Insights JS
 
+[![Open in Hanzo](https://hanzo.app/badges/open-in-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/insights-js&ref=main&action=open) [![Edit with Hanzo](https://hanzo.app/badges/edit-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/insights-js&ref=main&action=edit) [![Deploy with Hanzo](https://hanzo.app/badges/deploy-with-hanzo.svg)](https://hanzo.app/dev/open?repo=github.com/hanzoai/insights-js&ref=main&action=deploy)
+
 Hanzo Insights JS SDK — fork of [@hanzo/insights](https://github.com/hanzoai/@hanzo/insights).
 
 Provides analytics, feature flags, session replay, and A/B testing for web and Node.js applications connected to [Hanzo Insights](https://insights.hanzo.ai).
