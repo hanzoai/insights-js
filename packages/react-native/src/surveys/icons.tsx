@@ -36,7 +36,7 @@ const renderFallbackIcon = ({
   label: string
   fill?: unknown
   height: number
-}): JSX.Element => (
+}): React.JSX.Element => (
   <Text
     style={[
       styles.fallbackIcon,
@@ -67,7 +67,7 @@ const renderSvgIcon = ({
   viewBox: string
   pathProps: Record<string, unknown>
   fallback: string
-}): JSX.Element => {
+}): React.JSX.Element => {
   if (!Svg || !Path) {
     return renderFallbackIcon({
       label: fallback,
@@ -83,7 +83,7 @@ const renderSvgIcon = ({
   )
 }
 
-export const SatisfiedEmoji = (props: SvgProps): JSX.Element =>
+export const SatisfiedEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -95,7 +95,7 @@ export const SatisfiedEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const NeutralEmoji = (props: SvgProps): JSX.Element =>
+export const NeutralEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -107,7 +107,7 @@ export const NeutralEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const DissatisfiedEmoji = (props: SvgProps): JSX.Element =>
+export const DissatisfiedEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -119,7 +119,7 @@ export const DissatisfiedEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const VeryDissatisfiedEmoji = (props: SvgProps): JSX.Element =>
+export const VeryDissatisfiedEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -131,7 +131,7 @@ export const VeryDissatisfiedEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const VerySatisfiedEmoji = (props: SvgProps): JSX.Element =>
+export const VerySatisfiedEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -143,7 +143,7 @@ export const VerySatisfiedEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const ThumbsUpEmoji = (props: SvgProps): JSX.Element =>
+export const ThumbsUpEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -155,7 +155,7 @@ export const ThumbsUpEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const ThumbsDownEmoji = (props: SvgProps): JSX.Element =>
+export const ThumbsDownEmoji = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '48',
@@ -167,7 +167,7 @@ export const ThumbsDownEmoji = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const CheckSVG = (props: SvgProps): JSX.Element =>
+export const CheckSVG = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '16',
@@ -179,7 +179,7 @@ export const CheckSVG = (props: SvgProps): JSX.Element =>
     },
   })
 
-export const CancelSVG = (props: SvgProps): JSX.Element =>
+export const CancelSVG = (props: SvgProps): React.JSX.Element =>
   renderSvgIcon({
     props,
     height: '12',

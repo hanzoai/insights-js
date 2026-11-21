@@ -87,7 +87,7 @@ export type InsightsSurveyProviderProps = {
   children: React.ReactNode
 }
 
-export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): JSX.Element {
+export function InsightsSurveyProvider(props: InsightsSurveyProviderProps): React.JSX.Element {
   const insightsFromHook = useInsights()
   const insights = props.client ?? insightsFromHook
   const { seenSurveys, setSeenSurvey, setLastSeenSurveyDate } = useSurveyStorage()

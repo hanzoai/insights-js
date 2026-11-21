@@ -39,7 +39,7 @@ interface QuestionCommonProps {
 // (Submit button) at the bottom. The ScrollView has flexShrink: 1 so it
 // shrinks to fit when the parent modal is capped at its keyboard-aware
 // maxHeight, keeping Submit visible regardless of survey length.
-function QuestionLayout({ children, footer }: { children: ReactNode; footer: ReactNode }): JSX.Element {
+function QuestionLayout({ children, footer }: { children: ReactNode; footer: ReactNode }): React.JSX.Element {
   return (
     <View style={questionLayoutStyles.container}>
       <ScrollView
@@ -69,7 +69,7 @@ export function OpenTextQuestion({
   onSubmit,
 }: QuestionCommonProps & {
   onSubmit: (text: string) => void
-}): JSX.Element {
+}): React.JSX.Element {
   const [text, setText] = useState('')
 
   // Memoize validation error to avoid recalculating on every render
@@ -151,7 +151,7 @@ export function LinkQuestion({
   onSubmit,
 }: QuestionCommonProps & {
   onSubmit: (clicked: string) => void
-}): JSX.Element {
+}): React.JSX.Element {
   question = question as LinkSurveyQuestion
 
   return (
@@ -182,7 +182,7 @@ export function RatingQuestion({
   onSubmit,
 }: QuestionCommonProps & {
   onSubmit: (rating: number | null) => void
-}): JSX.Element {
+}): React.JSX.Element {
   //const starting = question.scale === 10 ? 0 : 1;
   const [rating, setRating] = useState<number | null>(null)
   question = question as RatingSurveyQuestion
@@ -287,7 +287,7 @@ export function RatingButton({
   active: boolean
   appearance: SurveyAppearanceTheme
   setActiveNumber: (num: number) => void
-}): JSX.Element {
+}): React.JSX.Element {
   const backgroundColor = active ? appearance.ratingButtonActiveColor : appearance.ratingButtonColor
   // Active state always auto-calculates for contrast; inactive uses inputTextColor override if provided
   const textColor = active
@@ -314,7 +314,7 @@ export function MultipleChoiceQuestion({
   onSubmit,
 }: QuestionCommonProps & {
   onSubmit: (choices: string | string[] | null) => void
-}): JSX.Element {
+}): React.JSX.Element {
   question = question as MultipleSurveyQuestion
   const isSingleChoice = question.type === SurveyQuestionType.SingleChoice
   const allowMultiple = question.type === SurveyQuestionType.MultipleChoice

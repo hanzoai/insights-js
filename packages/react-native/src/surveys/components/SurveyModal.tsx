@@ -24,7 +24,7 @@ const VIEWPORT_BUFFER = 0
 // Matches RN Modal's fade animation duration (Android only).
 const MODAL_FADE_DURATION_MS = 250
 
-export function SurveyModal(props: SurveyModalProps): JSX.Element | null {
+export function SurveyModal(props: SurveyModalProps): React.JSX.Element | null {
   const { survey, surveyLanguage, appearance, onShow, onClose: onCloseProp, androidKeyboardBehavior = 'height' } = props
   const [isSurveySent, setIsSurveySent] = useState(false)
   const [responses, setResponses] = useState<SurveyResponses>({})

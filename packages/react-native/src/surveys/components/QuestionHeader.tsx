@@ -19,7 +19,7 @@ export function QuestionHeader({
   description?: string | null
   descriptionContentType?: SurveyQuestionDescriptionContentType
   appearance: SurveyAppearanceTheme
-}): JSX.Element {
+}): React.JSX.Element {
   // Use textColor override if provided, otherwise auto-calculate from background
   const textColor = appearance.textColor ?? getContrastingTextColor(appearance.backgroundColor)
 

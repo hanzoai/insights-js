@@ -86,7 +86,7 @@ export function Questions({
   responses?: SurveyResponses
   onResponsesChange?: (responses: SurveyResponses) => void
   onSubmit: () => void
-}): JSX.Element {
+}): React.JSX.Element {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const surveyQuestions = useMemo(() => getDisplayOrderQuestions(survey), [survey])
   const insights = useInsights()
@@ -145,7 +145,7 @@ type GetQuestionComponentProps = {
   onSubmit: (res: string | string[] | number | null) => void
 }
 
-const getQuestionComponent = (props: GetQuestionComponentProps): JSX.Element => {
+const getQuestionComponent = (props: GetQuestionComponentProps): React.JSX.Element => {
   const questionComponents = {
     open: OpenTextQuestion,
     link: LinkQuestion,

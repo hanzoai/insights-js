@@ -26,7 +26,7 @@ export function ConfirmationMessage({
   onClose: () => void
   styleOverrides?: ViewStyle
   isModal: boolean
-}): JSX.Element {
+}): React.JSX.Element {
   const textColor = getContrastingTextColor(appearance.backgroundColor)
 
   return (

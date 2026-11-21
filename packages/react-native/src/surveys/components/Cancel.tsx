@@ -10,7 +10,7 @@ export function Cancel({
 }: {
   onPress: () => void
   appearance: SurveyAppearanceTheme
-}): JSX.Element {
+}): React.JSX.Element {
   return (
     <TouchableOpacity style={[styles.cancelBtnWrapper, { borderColor: appearance.borderColor }]} onPress={onPress}>
       <CancelSVG />

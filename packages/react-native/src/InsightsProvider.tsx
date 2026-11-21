@@ -35,7 +35,7 @@ function InsightsNavigationHook({
 }: {
   options?: InsightsAutocaptureOptions
   client?: Insights
-}): JSX.Element | null {
+}): React.JSX.Element | null {
   useNavigationTracker(options?.navigation, options?.navigationRef, client)
   return null
 }
@@ -108,7 +108,7 @@ export const InsightsProvider = ({
   autocapture,
   style,
   debug = false,
-}: InsightsProviderProps): JSX.Element | null => {
+}: InsightsProviderProps): React.JSX.Element | null => {
   if (!client && !apiKey) {
     throw new Error(
       'Either a Insights client or an apiKey is required. If you want to use the InsightsProvider without a client, please provide an apiKey and the options={ disabled: true }.'

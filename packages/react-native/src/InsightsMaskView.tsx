@@ -38,7 +38,7 @@ export interface InsightsMaskViewProps extends ViewProps {
  *
  * @public
  */
-export const InsightsMaskView = ({ children, ...viewProps }: InsightsMaskViewProps): JSX.Element => (
+export const InsightsMaskView = ({ children, ...viewProps }: InsightsMaskViewProps): React.JSX.Element => (
   <View {...viewProps} accessibilityLabel="ph-no-capture" importantForAccessibility="no">
     {children}
   </View>

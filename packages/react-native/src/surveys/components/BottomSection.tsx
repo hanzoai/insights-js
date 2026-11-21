@@ -17,7 +17,7 @@ export function BottomSection({
   onSubmit: () => void
   link?: string | null
   skipSubmitButton?: boolean
-}): JSX.Element {
+}): React.JSX.Element {
   if (skipSubmitButton) {
     return <></>
   }
