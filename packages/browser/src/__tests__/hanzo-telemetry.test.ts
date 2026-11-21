@@ -612,3 +612,71 @@ describe('Hanzo Telemetry Hardening (P0 #3 + Native DOM Replay & Aggregate Heatm
         })
     })
 })
+
+import {
+    captureAstSnapshot,
+    captureComponentStep,
+    captureScrollDepth,
+    detectRageClick,
+    trackScrollDepthMilestone,
+} from '../hanzo-telemetry'
+
+describe('component steps, AST, rage click, scroll depth', () => {
+    const ctx = { hostname: 'hanzo.ai', urlOrPath: '/orders/123456', release: 'r1', viewportWidth: 390 }
+
+    it('captures $component_step with required fields', () => {
+        const capture = jest.fn()
+        expect(captureComponentStep(capture, { ...ctx, step_index: 2, component_path: 'main>form', control_id: 'btn' })).toBe(true)
+        const [name, props] = capture.mock.calls[0] as [string, any]
+        expect(name).toBe('$component_step')
+        expect(props).toMatchObject({ step_index: 2, component_path: 'main>form', control_id: 'btn', action: 'click', release: 'r1', device_class: 'mobile' })
+        expect(props.route_template).toBeTruthy()
+        expect(props.hostname).toBeTruthy()
+    })
+
+    it('skips excluded routes', () => {
+        const capture = jest.fn()
+        expect(captureComponentStep(capture, { ...ctx, urlOrPath: '/auth/callback', step_index: 0, component_path: 'x' })).toBe(false)
+        expect(captureComponentStep(capture, { ...ctx, urlOrPath: '/pay/card/1', step_index: 0, component_path: 'x' })).toBe(false)
+        expect(captureAstSnapshot(capture, document.body, { ...ctx, urlOrPath: '/checkout/payment/1' })).toBe(false)
+        expect(capture).not.toHaveBeenCalled()
+    })
+
+    it('captures $ast_collected excluding masked containers', () => {
+        document.body.innerHTML = `<main data-component="home"><button data-control-id="go">Go</button>
+          <div data-hanzo-mask><button data-control-id="secret">S</button></div></main>`
+        const capture = jest.fn()
+        expect(captureAstSnapshot(capture, document.body, ctx)).toBe(true)
+        const [name, props] = capture.mock.calls[0] as [string, any]
+        expect(name).toBe('$ast_collected')
+        expect(props.controls.map((c: any) => c.control_id)).toContain('go')
+        expect(JSON.stringify(props)).not.toContain('secret')
+        expect(props.sections.length).toBeGreaterThan(0)
+        expect(props.release).toBe('r1')
+    })
+
+    it('detects rage clicks', () => {
+        const d = detectRageClick()
+        expect(d({ x: 10, y: 10, t: 0 })).toBe(false)
+        expect(d({ x: 12, y: 11, t: 200 })).toBe(false)
+        expect(d({ x: 11, y: 10, t: 400 })).toBe(true)
+        expect(d({ x: 11, y: 10, t: 5000 })).toBe(false)
+        const far = detectRageClick()
+        far({ x: 0, y: 0, t: 0 })
+        far({ x: 500, y: 0, t: 100 })
+        expect(far({ x: 0, y: 500, t: 200 })).toBe(false)
+    })
+
+    it('tracks scroll depth milestones once each', () => {
+        const t = trackScrollDepthMilestone()
+        expect(t(10)).toEqual([])
+        expect(t(30)).toEqual([25])
+        expect(t(80)).toEqual([50, 75])
+        expect(t(100)).toEqual([100])
+        expect(t(100)).toEqual([])
+        const capture = jest.fn()
+        expect(captureScrollDepth(capture, 50, ctx)).toBe(true)
+        expect(capture.mock.calls[0][0]).toBe('scroll_depth')
+        expect(captureScrollDepth(capture, 50, { ...ctx, urlOrPath: '/auth/callback' })).toBe(false)
+    })
+})

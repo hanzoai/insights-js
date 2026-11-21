@@ -746,3 +746,171 @@ export function buildAggregateHeatmapKey(input: {
 export function serializeAggregateHeatmapKey(key: AggregateHeatmapKey): string {
     return [key.hostname, key.route_template, key.release, key.viewport, key.control_id].join('|')
 }
+
+// ---------------------------------------------------------------------------
+// Component steps, AST snapshots, rage clicks, scroll depth
+// ---------------------------------------------------------------------------
+
+export type CaptureFn = (event: string, properties?: Properties) => unknown
+
+export const COMPONENT_STEP_EVENT = '$component_step' as const
+export const AST_COLLECTED_EVENT = '$ast_collected' as const
+export const SCROLL_DEPTH_EVENT = 'scroll_depth' as const
+export const SCROLL_DEPTH_MILESTONES = [25, 50, 75, 100] as const
+
+export interface TelemetryContext {
+    hostname?: string | null
+    urlOrPath: string
+    release?: string | null
+    viewportWidth?: number | null
+    userAgent?: string | null
+}
+
+function baseContext(ctx: TelemetryContext): Properties {
+    return {
+        hostname: normalizeHostname(ctx.hostname),
+        route_template: normalizeRouteTemplate(ctx.urlOrPath),
+        release: (ctx.release && ctx.release.trim()) || 'unknown',
+        device_class: classifyDeviceClass({ width: ctx.viewportWidth, userAgent: ctx.userAgent }),
+    }
+}
+
+export interface ComponentStepInput extends TelemetryContext {
+    step_index: number
+    component_path: string
+    control_id?: string | null
+    element?: Element | null
+    action?: string
+}
+
+export function buildComponentStepProperties(input: ComponentStepInput): Properties | null {
+    if (isUxCaptureExcludedRoute(input.urlOrPath) || (input.element && isSensitiveElement(input.element))) {
+        return null
+    }
+    const control_id =
+        (isString(input.control_id) && input.control_id.trim()) || resolveStableControlId(input.element) || null
+    return {
+        ...baseContext(input),
+        step_index: Math.max(0, Math.floor(input.step_index)),
+        component_path: String(input.component_path || '').slice(0, 240),
+        control_id: control_id ? control_id.slice(0, 160) : null,
+        action: input.action || 'click',
+    }
+}
+
+export function captureComponentStep(capture: CaptureFn, input: ComponentStepInput): boolean {
+    const props = buildComponentStepProperties(input)
+    if (!props) return false
+    capture(COMPONENT_STEP_EVENT, props)
+    return true
+}
+
+export interface AstControl {
+    control_id: string
+    component_path: string
+}
+export interface AstSection {
+    id: string
+    component_path: string
+}
+
+const AST_SECTION_SELECTOR = 'main, nav, header, footer, aside, section, [role="region"], [data-section], [data-component]'
+const AST_CONTROL_SELECTOR =
+    'button, a[href], [role="button"], [role="link"], [role="tab"], [data-control-id], [data-testid]'
+
+function isInsideMasked(el: Element): boolean {
+    let cur: Element | null = el
+    while (cur) {
+        if (isSensitiveElement(cur)) return true
+        cur = cur.parentElement
+    }
+    return false
+}
+
+function elementPath(el: Element, root: Element): string {
+    const parts: string[] = []
+    let cur: Element | null = el
+    while (cur && cur !== root && parts.length < 8) {
+        const named =
+            cur.getAttribute?.('data-component') || cur.getAttribute?.('data-section') || cur.getAttribute?.('role')
+        parts.unshift(named || (cur.tagName || '').toLowerCase())
+        cur = cur.parentElement
+    }
+    return parts.join('>')
+}
+
+export function collectAstSnapshot(root: Element, ctx: TelemetryContext): Properties | null {
+    if (isUxCaptureExcludedRoute(ctx.urlOrPath)) return null
+    const sections: AstSection[] = []
+    const controls: AstControl[] = []
+    root.querySelectorAll(AST_SECTION_SELECTOR).forEach((el) => {
+        if (isInsideMasked(el) || sections.length >= 100) return
+        const path = elementPath(el, root)
+        sections.push({ id: el.getAttribute('data-section') || el.getAttribute('data-component') || path, component_path: path })
+    })
+    root.querySelectorAll(AST_CONTROL_SELECTOR).forEach((el) => {
+        if (isInsideMasked(el) || controls.length >= 300) return
+        const control_id = resolveStableControlId(el)
+        if (control_id) controls.push({ control_id, component_path: elementPath(el, root) })
+    })
+    const { hostname, route_template, release, device_class } = baseContext(ctx)
+    return { hostname, route_template, release, device_class, sections, controls }
+}
+
+export function captureAstSnapshot(capture: CaptureFn, root: Element, ctx: TelemetryContext): boolean {
+    const props = collectAstSnapshot(root, ctx)
+    if (!props) return false
+    capture(AST_COLLECTED_EVENT, props)
+    return true
+}
+
+export interface RageClickOptions {
+    threshold?: number
+    windowMs?: number
+    radiusPx?: number
+}
+export interface ClickSample {
+    x: number
+    y: number
+    t: number
+}
+
+/** Returns a detector; call with each click, it returns true when a rage click burst is detected. */
+export function detectRageClick(options: RageClickOptions = {}): (click: ClickSample) => boolean {
+    const { threshold = 3, windowMs = 1000, radiusPx = 30 } = options
+    let clicks: ClickSample[] = []
+    return (click) => {
+        const last = clicks[clicks.length - 1]
+        if (last && (click.t - last.t > windowMs || Math.hypot(click.x - last.x, click.y - last.y) > radiusPx)) {
+            clicks = []
+        }
+        clicks.push(click)
+        if (clicks.length >= threshold && click.t - clicks[clicks.length - threshold].t <= windowMs) {
+            clicks = []
+            return true
+        }
+        return false
+    }
+}
+
+/** Returns a tracker; call with scroll percent (0-100), returns newly crossed milestones. */
+export function trackScrollDepthMilestone(): (percent: number) => number[] {
+    const seen = new Set<number>()
+    return (percent) => {
+        const crossed: number[] = []
+        for (const m of SCROLL_DEPTH_MILESTONES) {
+            if (percent >= m && !seen.has(m)) {
+                seen.add(m)
+                crossed.push(m)
+            }
+        }
+        return crossed
+    }
+}
+
+export function captureScrollDepth(capture: CaptureFn, milestone: number, ctx: TelemetryContext): boolean {
+    if (isUxCaptureExcludedRoute(ctx.urlOrPath)) return false
+    const { hostname, route_template, release, device_class } = baseContext(ctx)
+    capture(SCROLL_DEPTH_EVENT, { milestone, hostname, route_template, release, viewport: device_class })
+    return true
+}
