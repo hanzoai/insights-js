@@ -641,6 +641,10 @@ exports[`config snapshot for InsightsConfig 1`] = `
     "false",
     "true"
   ],
+  "release": [
+    "undefined",
+    "string"
+  ],
   "capture_dead_clicks": [
     "undefined",
     "false",
