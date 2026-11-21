@@ -320,6 +320,16 @@ overrides:
   '@hanzogui/z-index-stack': '8.3.1'
   node-forge: '^1.4.0'
 
+allowBuilds:
+  sharp: true
+  esbuild: true
+  '@parcel/watcher': false
+  core-js: false
+  msw: false
+  protobufjs: false
+  puppeteer: false
+  unrs-resolver: false
+
 onlyBuiltDependencies:
   - 'sharp'
 
